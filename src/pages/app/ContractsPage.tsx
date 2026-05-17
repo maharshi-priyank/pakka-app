@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileSignature } from 'lucide-react'
+import { Plus, FileSignature, Search, X, LayoutGrid, List } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useContracts } from '@/features/contracts/hooks/useContracts'
 import ContractCard, { ContractCardSkeleton } from '@/features/contracts/components/ContractCard'
+import ContractTable, { ContractTableSkeleton } from '@/features/contracts/components/ContractTable'
+import type { SortField, SortDir } from '@/features/contracts/components/ContractTable'
 import type { ContractStatus, Contract } from '@/features/contracts/schemas/contract.schema'
 import { STATUS_LABELS } from '@/features/contracts/schemas/contract.schema'
 
@@ -15,16 +17,73 @@ const STATUS_TABS: Array<{ value: ContractStatus | 'ALL'; label: string }> = [
   { value: 'DECLINED', label: 'Declined' },
 ]
 
+type ViewMode = 'table' | 'cards'
+const VIEW_KEY = 'pakka:contracts:view'
+function getStoredView(): ViewMode {
+  try { return (localStorage.getItem(VIEW_KEY) as ViewMode) ?? 'table' } catch { return 'table' }
+}
+
 export default function ContractsPage() {
   const navigate = useNavigate()
+
   const [statusFilter, setStatusFilter] = useState<ContractStatus | 'ALL'>('ALL')
+  const [search,       setSearch]       = useState('')
+  const [view,         setView]         = useState<ViewMode>(getStoredView)
+  const [sortBy,       setSortBy]       = useState<SortField>('createdAt')
+  const [sortDir,      setSortDir]      = useState<SortDir>('desc')
 
-  const { data, isLoading } = useContracts({ limit: 200 })
+  const searchRef = useRef<HTMLInputElement>(null)
 
-  const allContracts   = data?.items ?? []
-  const contracts      = statusFilter === 'ALL' ? allContracts : allContracts.filter(c => c.status === statusFilter)
-  const signedCount    = allContracts.filter(c => c.status === 'SIGNED').length
-  const awaitingCount  = allContracts.filter(c => c.status === 'SENT').length
+  const { data, isLoading } = useContracts({ limit: 500 })
+  const allContracts  = data?.items ?? []
+  const signedCount   = allContracts.filter(c => c.status === 'SIGNED').length
+  const awaitingCount = allContracts.filter(c => c.status === 'SENT').length
+
+  useEffect(() => { localStorage.setItem(VIEW_KEY, view) }, [view])
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); searchRef.current?.focus() }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
+  function handleSort(field: SortField) {
+    if (field === sortBy) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortBy(field); setSortDir('desc') }
+  }
+
+  const displayed = useMemo(() => {
+    let list = allContracts
+
+    if (statusFilter !== 'ALL') list = list.filter(c => c.status === statusFilter)
+
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      list = list.filter(c =>
+        c.title.toLowerCase().includes(q) ||
+        (c.client?.name      ?? '').toLowerCase().includes(q) ||
+        (c.client?.company   ?? '').toLowerCase().includes(q) ||
+        (c.proposal?.title   ?? '').toLowerCase().includes(q),
+      )
+    }
+
+    return [...list].sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1
+      const aAmt = ((a.content as Record<string, unknown>)?.totalAmount as number) ?? 0
+      const bAmt = ((b.content as Record<string, unknown>)?.totalAmount as number) ?? 0
+      switch (sortBy) {
+        case 'title':       return dir * a.title.localeCompare(b.title)
+        case 'totalAmount': return dir * (aAmt - bAmt)
+        case 'signedAt':    return dir * ((a.signedAt ?? '9999').localeCompare(b.signedAt ?? '9999'))
+        case 'createdAt':   return dir * a.createdAt.localeCompare(b.createdAt)
+        default:            return 0
+      }
+    })
+  }, [allContracts, statusFilter, search, sortBy, sortDir])
+
+  const hasSearch = search.trim().length > 0
 
   return (
     <div className="space-y-5 max-w-[1400px]">
@@ -33,7 +92,7 @@ export default function ContractsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-[17px] font-bold text-[#0D1117] dark:text-[#ECEEF3] tracking-tight">Contracts</h1>
-          {!isLoading && contracts.length > 0 && (
+          {!isLoading && allContracts.length > 0 && (
             <p className="text-[12px] text-[#9CA3AF] dark:text-[#545C74] mt-0.5">
               {signedCount} signed
               {awaitingCount > 0 && ` · ${awaitingCount} awaiting signature`}
@@ -46,27 +105,22 @@ export default function ContractsPage() {
         </button>
       </div>
 
-      {/* Status filter tabs */}
+      {/* Status tabs */}
       <div className="flex items-center gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
         {STATUS_TABS.map(tab => {
           const isActive = statusFilter === tab.value
-          const count = tab.value === 'ALL'
-            ? allContracts.length
-            : allContracts.filter(c => c.status === tab.value).length
-
+          const count = tab.value === 'ALL' ? allContracts.length : allContracts.filter(c => c.status === tab.value).length
           return (
             <button
               key={tab.value}
               onClick={() => setStatusFilter(tab.value)}
               className={cn(
                 'px-3.5 py-2.5 text-[12.5px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap flex items-center gap-1.5',
-                isActive
-                  ? 'border-[#6366F1] text-[#6366F1]'
-                  : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+                isActive ? 'border-[#6366F1] text-[#6366F1]' : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
               )}
             >
               {tab.label}
-              {typeof count === 'number' && count > 0 && (
+              {count > 0 && (
                 <span className={cn(
                   'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
                   isActive ? 'bg-[#EEF2FF] dark:bg-[#1E2040] text-[#6366F1]' : 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]',
@@ -79,31 +133,84 @@ export default function ContractsPage() {
         })}
       </div>
 
-      {/* Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {Array.from({ length: 6 }).map((_, i) => <ContractCardSkeleton key={i} />)}
+      {/* Toolbar */}
+      <div className="flex items-center gap-2.5">
+        <div className="relative flex-1 max-w-xs">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3] dark:text-[#545C74] pointer-events-none" />
+          <input
+            ref={searchRef}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by title, client, proposal…"
+            className={cn(
+              'w-full h-8 pl-8 pr-7 rounded-lg border text-[12.5px] outline-none transition-colors',
+              'bg-white dark:bg-[#13141A] border-[#E4E7EC] dark:border-[#26283A]',
+              'text-[#101828] dark:text-[#ECEEF3] placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]',
+              'focus:border-[#6366F1] dark:focus:border-[#6366F1]',
+            )}
+          />
+          {hasSearch && (
+            <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] transition-colors">
+              <X size={12} />
+            </button>
+          )}
         </div>
-      ) : contracts.length === 0 ? (
+        {hasSearch && !isLoading && (
+          <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74] shrink-0">
+            {displayed.length} result{displayed.length !== 1 ? 's' : ''}
+          </span>
+        )}
+        <div className="flex-1" />
+        <div className="flex items-center gap-0.5 p-0.5 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg border border-[#E4E7EC] dark:border-[#26283A]">
+          <button onClick={() => setView('table')} title="Table view" className={cn('w-7 h-7 rounded-md flex items-center justify-center transition-colors', view === 'table' ? 'bg-white dark:bg-[#13141A] text-[#6366F1] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]')}>
+            <List size={13} strokeWidth={2} />
+          </button>
+          <button onClick={() => setView('cards')} title="Card view" className={cn('w-7 h-7 rounded-md flex items-center justify-center transition-colors', view === 'cards' ? 'bg-white dark:bg-[#13141A] text-[#6366F1] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]')}>
+            <LayoutGrid size={13} strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      {isLoading ? (
+        view === 'table'
+          ? <ContractTableSkeleton />
+          : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => <ContractCardSkeleton key={i} />)}
+            </div>
+      ) : displayed.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="w-12 h-12 rounded-2xl bg-[#F5F6FA] dark:bg-[#21222D] flex items-center justify-center mb-4">
-            <FileSignature size={22} className="text-[#D0D5DD] dark:text-[#3D4258]" />
+            {hasSearch ? <Search size={20} className="text-[#D0D5DD] dark:text-[#3D4258]" /> : <FileSignature size={22} className="text-[#D0D5DD] dark:text-[#3D4258]" />}
           </div>
           <p className="text-[14px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
-            {statusFilter === 'ALL' ? 'No contracts yet' : `No ${STATUS_LABELS[statusFilter as ContractStatus]?.toLowerCase()} contracts`}
+            {hasSearch ? `No results for "${search}"` : statusFilter === 'ALL' ? 'No contracts yet' : `No ${STATUS_LABELS[statusFilter as ContractStatus]?.toLowerCase()} contracts`}
           </p>
           <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">
-            {statusFilter === 'ALL' ? 'Create a contract manually or generate one from an accepted proposal.' : 'Try a different filter.'}
+            {hasSearch ? 'Try a different search term.' : statusFilter === 'ALL' ? 'Create a contract manually or generate one from an accepted proposal.' : 'Try a different filter.'}
           </p>
-          {statusFilter === 'ALL' && (
+          {!hasSearch && statusFilter === 'ALL' && (
             <button onClick={() => navigate('/app/contracts/new')} className="btn-primary mt-4 text-[13px]">
               <Plus size={13} strokeWidth={2.5} /> New Contract
             </button>
           )}
+          {hasSearch && (
+            <button onClick={() => setSearch('')} className="mt-3 text-[12px] text-[#6366F1] font-semibold hover:text-[#4F46E5] transition-colors">
+              Clear search
+            </button>
+          )}
         </div>
+      ) : view === 'table' ? (
+        <ContractTable
+          contracts={displayed}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSort={handleSort}
+          onOpen={(c: Contract) => navigate(`/app/contracts/${c.id}`)}
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {contracts.map(c => (
+          {displayed.map(c => (
             <ContractCard key={c.id} contract={c} onClick={(c: Contract) => navigate(`/app/contracts/${c.id}`)} />
           ))}
         </div>

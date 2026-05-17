@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileText, IndianRupee, LayoutTemplate } from 'lucide-react'
+import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List } from 'lucide-react'
 import AIIcon from '@/features/ai/components/AIIcon'
 import AIProposalModal from '@/features/ai/components/AIProposalModal'
 import { cn } from '@/lib/utils'
 import { useProposals } from '@/features/proposals/hooks/useProposals'
 import { useCreateContractFromProposal } from '@/features/contracts/hooks/useContracts'
 import ProposalCard, { ProposalCardSkeleton } from '@/features/proposals/components/ProposalCard'
+import ProposalTable, { ProposalTableSkeleton } from '@/features/proposals/components/ProposalTable'
+import type { SortField, SortDir } from '@/features/proposals/components/ProposalTable'
 import TemplatePickerModal from '@/features/proposals/components/TemplatePickerModal'
 import TemplateCard from '@/features/proposals/components/TemplateCard'
 import SaveTemplateModal from '@/features/proposals/components/SaveTemplateModal'
@@ -27,35 +29,87 @@ const STATUS_TABS: Array<{ value: ActiveTab; label: string }> = [
   { value: 'TEMPLATES', label: 'Templates' },
 ]
 
+type ViewMode = 'table' | 'cards'
+const VIEW_KEY = 'pakka:proposals:view'
+function getStoredView(): ViewMode {
+  try { return (localStorage.getItem(VIEW_KEY) as ViewMode) ?? 'table' } catch { return 'table' }
+}
+
 export default function ProposalsPage() {
   const navigate = useNavigate()
-  const [activeTab,      setActiveTab]      = useState<ActiveTab>('ALL')
-  const [showAI,         setShowAI]         = useState(false)
+
+  const [activeTab,          setActiveTab]          = useState<ActiveTab>('ALL')
+  const [showAI,             setShowAI]             = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [saveTemplateFor,    setSaveTemplateFor]    = useState<Proposal | null>(null)
+  const [search,             setSearch]             = useState('')
+  const [view,               setView]               = useState<ViewMode>(getStoredView)
+  const [sortBy,             setSortBy]             = useState<SortField>('createdAt')
+  const [sortDir,            setSortDir]            = useState<SortDir>('desc')
+
+  const searchRef     = useRef<HTMLInputElement>(null)
   const convertMutation = useCreateContractFromProposal()
-  const statusFilter = activeTab === 'TEMPLATES' ? 'ALL' : activeTab as ProposalStatus | 'ALL'
+  const statusFilter  = activeTab === 'TEMPLATES' ? 'ALL' : activeTab as ProposalStatus | 'ALL'
+
+  const { data, isLoading } = useProposals({ limit: 500 })
+  const allProposals  = data?.items ?? []
+  const totalValue    = allProposals.reduce((sum, p) => sum + Number(p.totalAmount), 0)
+  const acceptedCount = allProposals.filter(p => p.status === 'ACCEPTED').length
+
+  useEffect(() => { localStorage.setItem(VIEW_KEY, view) }, [view])
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f' && activeTab !== 'TEMPLATES') {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [activeTab])
 
   async function handleConvertToContract(p: Proposal) {
     const contract = await convertMutation.mutateAsync(p.id)
     navigate(`/app/contracts/${contract.id}`)
   }
 
-  const { data, isLoading } = useProposals({ limit: 200 })
-
-  const allProposals  = data?.items ?? []
-  const proposals     = statusFilter === 'ALL' ? allProposals : allProposals.filter(p => p.status === statusFilter)
-
-  const totalValue    = allProposals.reduce((sum, p) => sum + Number(p.totalAmount), 0)
-  const acceptedCount = allProposals.filter(p => p.status === 'ACCEPTED').length
-
-  function openProposal(p: Proposal) {
-    navigate(`/app/proposals/${p.id}`)
+  function handleSort(field: SortField) {
+    if (field === sortBy) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortBy(field); setSortDir('desc') }
   }
 
-  function handleSaveAsTemplate(p: Proposal) {
-    setSaveTemplateFor(p)
-  }
+  const displayed = useMemo(() => {
+    let list = allProposals
+
+    if (statusFilter !== 'ALL') {
+      list = list.filter(p => p.status === statusFilter)
+    }
+
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      list = list.filter(p =>
+        p.title.toLowerCase().includes(q) ||
+        (p.client?.name    ?? '').toLowerCase().includes(q) ||
+        (p.client?.company ?? '').toLowerCase().includes(q) ||
+        (p.lead?.name      ?? '').toLowerCase().includes(q),
+      )
+    }
+
+    return [...list].sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1
+      switch (sortBy) {
+        case 'title':       return dir * a.title.localeCompare(b.title)
+        case 'totalAmount': return dir * (Number(a.totalAmount) - Number(b.totalAmount))
+        case 'validUntil':  return dir * ((a.validUntil ?? '9999').localeCompare(b.validUntil ?? '9999'))
+        case 'createdAt':   return dir * a.createdAt.localeCompare(b.createdAt)
+        default:            return 0
+      }
+    })
+  }, [allProposals, statusFilter, search, sortBy, sortDir])
+
+  const hasSearch     = search.trim().length > 0
+  const showContent   = activeTab !== 'TEMPLATES'
 
   return (
     <div className="space-y-5 max-w-[1400px]">
@@ -64,7 +118,7 @@ export default function ProposalsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-[17px] font-bold text-[#0D1117] dark:text-[#ECEEF3] tracking-tight">Proposals</h1>
-          {!isLoading && proposals.length > 0 && (
+          {!isLoading && allProposals.length > 0 && (
             <p className="text-[12px] text-[#9CA3AF] dark:text-[#545C74] mt-0.5 flex items-center gap-1">
               <IndianRupee size={10} />
               {totalValue.toLocaleString('en-IN')} in proposals
@@ -74,7 +128,6 @@ export default function ProposalsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* AI button */}
           <button
             onClick={() => setShowAI(true)}
             className={cn(
@@ -86,7 +139,6 @@ export default function ProposalsPage() {
             <AIIcon size={13} />
             Draft with AI
           </button>
-
           <button
             onClick={() => setShowTemplatePicker(true)}
             className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
@@ -94,18 +146,14 @@ export default function ProposalsPage() {
             <LayoutTemplate size={14} />
             From Template
           </button>
-
-          <button
-            onClick={() => navigate('/app/proposals/new')}
-            className="btn-primary"
-          >
+          <button onClick={() => navigate('/app/proposals/new')} className="btn-primary">
             <Plus size={14} strokeWidth={2.5} />
             New Proposal
           </button>
         </div>
       </div>
 
-      {/* Status filter tabs */}
+      {/* Status tabs */}
       <div className="flex items-center gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
         {STATUS_TABS.map(tab => {
           const isActive = activeTab === tab.value
@@ -141,43 +189,114 @@ export default function ProposalsPage() {
       </div>
 
       {/* Templates tab */}
-      {activeTab === 'TEMPLATES' && <TemplatesTab />}
+      {!showContent && <TemplatesTab />}
 
-      {/* Proposals grid */}
-      {activeTab !== 'TEMPLATES' && (
-        isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {Array.from({ length: 8 }).map((_, i) => <ProposalCardSkeleton key={i} />)}
-          </div>
-        ) : proposals.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#F5F6FA] dark:bg-[#21222D] flex items-center justify-center mb-4">
-              <FileText size={22} className="text-[#D0D5DD] dark:text-[#3D4258]" />
-            </div>
-            <p className="text-[14px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
-              {statusFilter === 'ALL' ? 'No proposals yet' : `No ${STATUS_LABELS[statusFilter as ProposalStatus]?.toLowerCase()} proposals`}
-            </p>
-            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">
-              {statusFilter === 'ALL' ? 'Create your first proposal to get started.' : 'Try a different status filter.'}
-            </p>
-            {statusFilter === 'ALL' && (
+      {/* Toolbar: search + view toggle (proposals tabs only) */}
+      {showContent && (
+        <div className="flex items-center gap-2.5">
+          <div className="relative flex-1 max-w-xs">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3] dark:text-[#545C74] pointer-events-none" />
+            <input
+              ref={searchRef}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search by title, client, lead…"
+              className={cn(
+                'w-full h-8 pl-8 pr-7 rounded-lg border text-[12.5px] outline-none transition-colors',
+                'bg-white dark:bg-[#13141A]',
+                'border-[#E4E7EC] dark:border-[#26283A]',
+                'text-[#101828] dark:text-[#ECEEF3]',
+                'placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]',
+                'focus:border-[#6366F1] dark:focus:border-[#6366F1]',
+              )}
+            />
+            {hasSearch && (
               <button
-                onClick={() => navigate('/app/proposals/new')}
-                className="btn-primary mt-4 text-[13px]"
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] dark:hover:text-[#C2C8D8] transition-colors"
               >
-                <Plus size={13} strokeWidth={2.5} /> New Proposal
+                <X size={12} />
               </button>
             )}
           </div>
+          {hasSearch && !isLoading && (
+            <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74] shrink-0">
+              {displayed.length} result{displayed.length !== 1 ? 's' : ''}
+            </span>
+          )}
+          <div className="flex-1" />
+          <div className="flex items-center gap-0.5 p-0.5 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg border border-[#E4E7EC] dark:border-[#26283A]">
+            <button
+              onClick={() => setView('table')}
+              title="Table view"
+              className={cn(
+                'w-7 h-7 rounded-md flex items-center justify-center transition-colors',
+                view === 'table' ? 'bg-white dark:bg-[#13141A] text-[#6366F1] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]',
+              )}
+            >
+              <List size={13} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => setView('cards')}
+              title="Card view"
+              className={cn(
+                'w-7 h-7 rounded-md flex items-center justify-center transition-colors',
+                view === 'cards' ? 'bg-white dark:bg-[#13141A] text-[#6366F1] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]',
+              )}
+            >
+              <LayoutGrid size={13} strokeWidth={2} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Proposals content */}
+      {showContent && (
+        isLoading ? (
+          view === 'table'
+            ? <ProposalTableSkeleton />
+            : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {Array.from({ length: 8 }).map((_, i) => <ProposalCardSkeleton key={i} />)}
+              </div>
+        ) : displayed.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#F5F6FA] dark:bg-[#21222D] flex items-center justify-center mb-4">
+              {hasSearch ? <Search size={20} className="text-[#D0D5DD] dark:text-[#3D4258]" /> : <FileText size={22} className="text-[#D0D5DD] dark:text-[#3D4258]" />}
+            </div>
+            <p className="text-[14px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
+              {hasSearch ? `No results for "${search}"` : statusFilter === 'ALL' ? 'No proposals yet' : `No ${STATUS_LABELS[statusFilter as ProposalStatus]?.toLowerCase()} proposals`}
+            </p>
+            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">
+              {hasSearch ? 'Try a different search term.' : statusFilter === 'ALL' ? 'Create your first proposal to get started.' : 'Try a different status filter.'}
+            </p>
+            {!hasSearch && statusFilter === 'ALL' && (
+              <button onClick={() => navigate('/app/proposals/new')} className="btn-primary mt-4 text-[13px]">
+                <Plus size={13} strokeWidth={2.5} /> New Proposal
+              </button>
+            )}
+            {hasSearch && (
+              <button onClick={() => setSearch('')} className="mt-3 text-[12px] text-[#6366F1] font-semibold hover:text-[#4F46E5] transition-colors">
+                Clear search
+              </button>
+            )}
+          </div>
+        ) : view === 'table' ? (
+          <ProposalTable
+            proposals={displayed}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            onSort={handleSort}
+            onOpen={p => navigate(`/app/proposals/${p.id}`)}
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {proposals.map(p => (
+            {displayed.map(p => (
               <ProposalCard
                 key={p.id}
                 proposal={p}
-                onClick={openProposal}
+                onClick={openP => navigate(`/app/proposals/${openP.id}`)}
                 onConvertToContract={handleConvertToContract}
-                onSaveAsTemplate={handleSaveAsTemplate}
+                onSaveAsTemplate={p => setSaveTemplateFor(p)}
               />
             ))}
           </div>
@@ -214,17 +333,12 @@ function TemplatesTab() {
 
   return (
     <div className="space-y-6">
-      {/* System templates */}
       <div>
         <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-3">Starter Templates</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {systemTemplates.map(t => (
-            <TemplateCard key={t.id} template={t} mode="manage" />
-          ))}
+          {systemTemplates.map(t => <TemplateCard key={t.id} template={t} mode="manage" />)}
         </div>
       </div>
-
-      {/* User templates */}
       <div>
         <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-3">Your Templates</p>
         {userTemplates.length === 0 ? (
@@ -235,9 +349,7 @@ function TemplatesTab() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {userTemplates.map(t => (
-              <TemplateCard key={t.id} template={t} mode="manage" />
-            ))}
+            {userTemplates.map(t => <TemplateCard key={t.id} template={t} mode="manage" />)}
           </div>
         )}
       </div>
