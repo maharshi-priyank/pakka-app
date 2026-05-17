@@ -1,13 +1,15 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ArrowUpRight, IndianRupee, CalendarDays, Tag, FilePlus } from 'lucide-react'
+import { ArrowUpRight, IndianRupee, CalendarDays, Tag, FilePlus, UserCheck, Building2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lead } from '../schemas/lead.schema'
 
 interface Props {
-  lead:           Lead
-  onClick:        (lead: Lead) => void
-  onNewProposal?: (lead: Lead) => void
+  lead:                Lead
+  onClick:             (lead: Lead) => void
+  onNewProposal?:      (lead: Lead) => void
+  onConvertToClient?:  (lead: Lead) => void
+  convertingLeadId?:   string | null
 }
 
 const AVATAR_COLORS = [
@@ -52,7 +54,7 @@ function timeAgo(iso: string) {
   return `${Math.floor(s / 86400)}d ago`
 }
 
-export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
+export default function LeadCard({ lead, onClick, onNewProposal, onConvertToClient, convertingLeadId }: Props) {
   const {
     attributes, listeners, setNodeRef,
     transform, transition, isDragging,
@@ -130,16 +132,35 @@ export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
         </div>
       )}
 
-      {/* New Proposal CTA */}
-      {onNewProposal && (
-        <div className="px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
-          <button
-            onClick={e => { e.stopPropagation(); onNewProposal(lead) }}
-            className="w-full flex items-center justify-center gap-1.5 text-[11.5px] font-semibold text-[#2563EB] dark:text-[#818CF8] bg-[#EFF6FF] dark:bg-[#1E2040] hover:bg-[#DBEAFE] dark:hover:bg-[#252A50] rounded-lg py-2 transition-colors"
-          >
-            <FilePlus size={12} strokeWidth={2.5} />
-            New Proposal
-          </button>
+      {/* Action CTAs */}
+      {(onNewProposal || onConvertToClient) && (
+        <div className="px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A] flex gap-2">
+          {onNewProposal && (
+            <button
+              onClick={e => { e.stopPropagation(); onNewProposal(lead) }}
+              className="flex-1 flex items-center justify-center gap-1.5 text-[11.5px] font-semibold text-[#2563EB] dark:text-[#818CF8] bg-[#EFF6FF] dark:bg-[#1E2040] hover:bg-[#DBEAFE] dark:hover:bg-[#252A50] rounded-lg py-2 transition-colors"
+            >
+              <FilePlus size={12} strokeWidth={2.5} />
+              Proposal
+            </button>
+          )}
+          {onConvertToClient && (
+            lead.clientId ? (
+              <div className="flex-1 flex items-center justify-center gap-1.5 text-[11.5px] font-semibold text-[#027A48] bg-[#ECFDF3] dark:bg-emerald-950/40 rounded-lg py-2">
+                <Building2 size={12} strokeWidth={2.5} />
+                Client
+              </div>
+            ) : (
+              <button
+                onClick={e => { e.stopPropagation(); onConvertToClient(lead) }}
+                disabled={convertingLeadId === lead.id}
+                className="flex-1 flex items-center justify-center gap-1.5 text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] bg-[#F2F4F7] dark:bg-[#21222D] hover:bg-[#E4E7EC] dark:hover:bg-[#2D2F3D] rounded-lg py-2 transition-colors disabled:opacity-50"
+              >
+                <UserCheck size={12} strokeWidth={2.5} />
+                {convertingLeadId === lead.id ? 'Converting…' : 'To Client'}
+              </button>
+            )
+          )}
         </div>
       )}
 

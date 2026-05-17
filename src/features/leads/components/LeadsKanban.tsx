@@ -12,7 +12,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
 import { cn } from '@/lib/utils'
 import { LEAD_STAGES, STAGE_LABELS, type Lead, type LeadStage } from '../schemas/lead.schema'
-import { useLeads, useUpdateLeadStage } from '../hooks/useLeads'
+import { useLeads, useUpdateLeadStage, useConvertLeadToClient } from '../hooks/useLeads'
 import LeadCard, { LeadCardSkeleton } from './LeadCard'
 import LeadDrawer from './LeadDrawer'
 
@@ -26,13 +26,15 @@ const COLUMN_ACCENTS: Record<LeadStage, { dot: string; count: string }> = {
 }
 
 interface ColumnProps {
-  stage:          LeadStage
-  leads:          Lead[]
-  onCardClick:    (lead: Lead) => void
-  onNewProposal?: (lead: Lead) => void
+  stage:               LeadStage
+  leads:               Lead[]
+  onCardClick:         (lead: Lead) => void
+  onNewProposal?:      (lead: Lead) => void
+  onConvertToClient?:  (lead: Lead) => void
+  convertingLeadId?:   string | null
 }
 
-function KanbanColumn({ stage, leads, onCardClick, onNewProposal }: ColumnProps) {
+function KanbanColumn({ stage, leads, onCardClick, onNewProposal, onConvertToClient, convertingLeadId }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: stage })
   const accent = COLUMN_ACCENTS[stage]
   const totalValue = leads.reduce((s, l) => s + (l.budget ? Number(l.budget) : 0), 0)
@@ -70,7 +72,14 @@ function KanbanColumn({ stage, leads, onCardClick, onNewProposal }: ColumnProps)
       >
         <SortableContext items={leads.map(l => l.id)} strategy={verticalListSortingStrategy}>
           {leads.map(lead => (
-            <LeadCard key={lead.id} lead={lead} onClick={onCardClick} onNewProposal={onNewProposal} />
+            <LeadCard
+              key={lead.id}
+              lead={lead}
+              onClick={onCardClick}
+              onNewProposal={onNewProposal}
+              onConvertToClient={onConvertToClient}
+              convertingLeadId={convertingLeadId}
+            />
           ))}
         </SortableContext>
         {leads.length === 0 && (
@@ -95,7 +104,12 @@ export default function LeadsKanban({ search, onNewProposal }: Props) {
   const [localLeads, setLocalLeads]     = useState<Lead[] | null>(null)
 
   const { data, isLoading } = useLeads({ limit: 200, search: search || undefined })
-  const updateStage = useUpdateLeadStage()
+  const updateStage    = useUpdateLeadStage()
+  const convertToClient = useConvertLeadToClient()
+
+  function handleConvertToClient(lead: Lead) {
+    convertToClient.mutate(lead.id)
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -186,6 +200,8 @@ export default function LeadsKanban({ search, onNewProposal }: Props) {
               leads={stageMap[stage]}
               onCardClick={setSelectedLead}
               onNewProposal={onNewProposal}
+              onConvertToClient={handleConvertToClient}
+              convertingLeadId={convertToClient.isPending ? convertToClient.variables : null}
             />
           ))}
         </div>

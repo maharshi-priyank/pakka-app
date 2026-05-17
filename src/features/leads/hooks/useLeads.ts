@@ -117,3 +117,19 @@ export function useDeleteLead() {
     onError: (err: Error) => toast.error(err.message || 'Failed to delete lead'),
   })
 }
+
+export function useConvertLeadToClient() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (leadId: string) => {
+      const { data } = await api.post(`/leads/${leadId}/convert-to-client`)
+      return data.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] })
+      qc.invalidateQueries({ queryKey: ['clients'] })
+      toast.success('Lead converted to client')
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to convert lead'),
+  })
+}

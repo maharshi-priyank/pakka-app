@@ -27,6 +27,7 @@ export type UpdateLeadInput = z.infer<typeof updateLeadSchema>
 export interface Lead {
   id:             string
   userId:         string
+  clientId:       string | null
   name:           string
   email:          string | null
   phone:          string | null
