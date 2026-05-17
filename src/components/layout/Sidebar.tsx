@@ -1,68 +1,105 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
-  Receipt, Building2, Settings, Zap,
+  Receipt, Building2, Settings, Zap, X, CalendarDays,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/app/dashboard' },
-  { icon: Users, label: 'Leads', href: '/app/leads' },
-  { icon: FileText, label: 'Proposals', href: '/app/proposals' },
-  { icon: PenLine, label: 'Contracts', href: '/app/contracts' },
-  { icon: Receipt, label: 'Invoices', href: '/app/invoices' },
-  { icon: Building2, label: 'Clients', href: '/app/clients' },
+  { icon: Users,           label: 'Leads',     href: '/app/leads' },
+  { icon: FileText,        label: 'Proposals',  href: '/app/proposals' },
+  { icon: PenLine,         label: 'Contracts',  href: '/app/contracts' },
+  { icon: Receipt,         label: 'Invoices',   href: '/app/invoices' },
+  { icon: Building2,       label: 'Clients',    href: '/app/clients' },
+  { icon: CalendarDays,    label: 'Meetings',   href: '/app/meetings' },
 ]
 
-export default function Sidebar() {
+interface Props {
+  onClose?: () => void
+}
+
+export default function Sidebar({ onClose }: Props) {
   return (
-    <aside className="w-56 bg-white border-r border-gray-100 flex flex-col shrink-0">
+    <aside className="w-[230px] shrink-0 bg-white border-r border-[#EAECF0] flex flex-col h-screen sticky top-0">
+
       {/* Logo */}
-      <div className="px-5 py-4 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <Zap size={14} className="text-white" />
+      <div className="h-[60px] flex items-center justify-between px-4 border-b border-[#EAECF0]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-[#6366F1] flex items-center justify-center shadow-sm">
+            <Zap size={14} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="font-black text-gray-950 text-lg tracking-tight">Pakka</span>
+          <span className="font-bold text-[#0D1117] text-[16px] tracking-tight">Pakka</span>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#F4F5F8] hover:text-[#344054] transition-colors"
+          >
+            <X size={15} strokeWidth={2} />
+          </button>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {navItems.map(({ icon: Icon, label, href }) => (
-          <NavLink
-            key={href}
-            to={href}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800',
-              )
-            }
-          >
-            <Icon size={16} />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
+      <div className="flex-1 py-3 px-2 overflow-y-auto">
+        <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#B0B7C3] px-3 mb-2 mt-1">
+          Menu
+        </p>
+        <nav className="space-y-0.5">
+          {navItems.map(({ icon: Icon, label, href }) => (
+            <NavLink
+              key={href}
+              to={href}
+              onClick={onClose}
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all duration-100',
+                  isActive
+                    ? 'bg-[#EEF2FF] text-[#4338CA] font-semibold'
+                    : 'text-[#667085] hover:text-[#344054] hover:bg-[#F4F5F8]',
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon
+                    size={16}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className={cn('shrink-0 transition-colors', isActive ? 'text-[#6366F1]' : 'text-[#9CA3AF]')}
+                  />
+                  <span>{label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
 
       {/* Settings at bottom */}
-      <div className="px-3 py-4 border-t border-gray-100">
+      <div className="border-t border-[#EAECF0] px-2 py-2">
         <NavLink
           to="/app/settings"
+          onClick={onClose}
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all duration-100',
               isActive
-                ? 'bg-indigo-50 text-indigo-700'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800',
+                ? 'bg-[#EEF2FF] text-[#4338CA] font-semibold'
+                : 'text-[#667085] hover:text-[#344054] hover:bg-[#F4F5F8]',
             )
           }
         >
-          <Settings size={16} />
-          Settings
+          {({ isActive }) => (
+            <>
+              <Settings
+                size={16}
+                strokeWidth={isActive ? 2.5 : 2}
+                className={cn('shrink-0 transition-colors', isActive ? 'text-[#6366F1]' : 'text-[#9CA3AF]')}
+              />
+              Settings
+            </>
+          )}
         </NavLink>
       </div>
     </aside>

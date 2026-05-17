@@ -1,0 +1,185 @@
+import { useState } from 'react'
+import { Volume2, VolumeX, Monitor, CheckCircle2, AlertCircle, Play } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import {
+  SOUND_OPTIONS, type SoundId,
+  getSound, saveSound,
+  getDesktopEnabled, saveDesktopEnabled,
+  getDesktopPermission, requestDesktopPermission,
+  playSound,
+} from '../hooks/useNotificationAlert'
+
+export default function NotificationsTab() {
+  const [selectedSound,  setSelectedSound]  = useState<SoundId>(() => getSound())
+  const [desktopEnabled, setDesktopEnabled] = useState(() => getDesktopEnabled())
+  const [permission,     setPermission]     = useState(() => getDesktopPermission())
+  const [previewingId,   setPreviewingId]   = useState<SoundId | null>(null)
+
+  function handleSoundSelect(id: SoundId) {
+    setSelectedSound(id)
+    saveSound(id)
+  }
+
+  async function previewSound(id: SoundId) {
+    setPreviewingId(id)
+    playSound(id)
+    setTimeout(() => setPreviewingId(null), 800)
+  }
+
+  async function handleDesktopToggle() {
+    const next = !desktopEnabled
+
+    if (next && permission !== 'granted') {
+      const granted = await requestDesktopPermission()
+      setPermission(getDesktopPermission())
+      if (!granted) return
+    }
+
+    setDesktopEnabled(next)
+    saveDesktopEnabled(next)
+  }
+
+  return (
+    <div className="space-y-7">
+
+      {/* ── Sound ─────────────────────────────────────────────────── */}
+      <section>
+        <div className="flex items-center gap-2 mb-1">
+          <Volume2 size={15} strokeWidth={2} className="text-[#344054]" />
+          <h3 className="text-[14px] font-bold text-[#101828]">Notification sound</h3>
+        </div>
+        <p className="text-[12.5px] text-[#667085] mb-4 ml-[23px]">
+          Plays when a new notification arrives (proposal opened, invoice paid, etc.)
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 ml-[23px]">
+          {SOUND_OPTIONS.map(opt => {
+            const isSelected  = selectedSound === opt.id
+            const isPreviewing = previewingId === opt.id
+            return (
+              <button
+                key={opt.id}
+                onClick={() => handleSoundSelect(opt.id)}
+                className={cn(
+                  'flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl border-2 text-left transition-all',
+                  isSelected
+                    ? 'border-[#2563EB] bg-[#EFF6FF]'
+                    : 'border-[#EAECF0] bg-white hover:border-[#C7D7FD] hover:bg-[#F9FAFB]',
+                )}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  {/* Selected indicator */}
+                  <div className={cn(
+                    'w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors',
+                    isSelected ? 'border-[#2563EB] bg-[#2563EB]' : 'border-[#D0D5DD]',
+                  )}>
+                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  </div>
+                  <div>
+                    <p className={cn(
+                      'text-[13px] font-semibold leading-none',
+                      isSelected ? 'text-[#2563EB]' : 'text-[#344054]',
+                    )}>
+                      {opt.label}
+                    </p>
+                    <p className="text-[11.5px] text-[#98A2B3] mt-0.5">{opt.description}</p>
+                  </div>
+                </div>
+
+                {/* Preview button (not for 'none') */}
+                {opt.id !== 'none' && (
+                  <button
+                    onClick={e => { e.stopPropagation(); previewSound(opt.id) }}
+                    title="Preview"
+                    className={cn(
+                      'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all',
+                      isPreviewing
+                        ? 'bg-[#2563EB] text-white scale-95'
+                        : 'bg-[#F2F4F7] text-[#667085] hover:bg-[#E4E7EC] hover:text-[#344054]',
+                    )}
+                  >
+                    <Play size={11} strokeWidth={2.5} className={isPreviewing ? 'animate-pulse' : ''} />
+                  </button>
+                )}
+
+                {opt.id === 'none' && (
+                  <VolumeX size={14} className="text-[#98A2B3] shrink-0" strokeWidth={2} />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      <div className="border-t border-[#EAECF0]" />
+
+      {/* ── Desktop notifications ──────────────────────────────────── */}
+      <section>
+        <div className="flex items-center gap-2 mb-1">
+          <Monitor size={15} strokeWidth={2} className="text-[#344054]" />
+          <h3 className="text-[14px] font-bold text-[#101828]">Desktop notifications</h3>
+        </div>
+        <p className="text-[12.5px] text-[#667085] mb-4 ml-[23px]">
+          Show a system notification even when this tab is in the background.
+        </p>
+
+        <div className="ml-[23px] space-y-3">
+          {/* Permission status banner */}
+          {permission === 'denied' && (
+            <div className="flex items-start gap-2.5 bg-[#FEF3F2] border border-[#FECDCA] rounded-xl px-4 py-3">
+              <AlertCircle size={14} className="text-[#D92D20] shrink-0 mt-0.5" strokeWidth={2} />
+              <div>
+                <p className="text-[12.5px] font-semibold text-[#D92D20]">Permission blocked</p>
+                <p className="text-[12px] text-[#912018] mt-0.5">
+                  Desktop notifications were denied. Open your browser site settings and allow notifications for this site.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {permission === 'granted' && desktopEnabled && (
+            <div className="flex items-center gap-2 text-[12px] text-[#027A48]">
+              <CheckCircle2 size={13} strokeWidth={2.5} />
+              Browser permission granted
+            </div>
+          )}
+
+          {/* Toggle row */}
+          <div className={cn(
+            'flex items-center justify-between px-4 py-4 bg-white border rounded-xl',
+            permission === 'denied' ? 'border-[#FECDCA] opacity-60' : 'border-[#EAECF0]',
+          )}>
+            <div>
+              <p className="text-[13px] font-semibold text-[#344054]">Enable desktop notifications</p>
+              <p className="text-[12px] text-[#98A2B3] mt-0.5">
+                {permission === 'default'
+                  ? 'Browser will ask for permission when you turn this on'
+                  : permission === 'granted'
+                  ? 'Notifications will appear in your OS notification centre'
+                  : 'Blocked in browser settings — cannot enable'}
+              </p>
+            </div>
+            <button
+              onClick={handleDesktopToggle}
+              disabled={permission === 'denied'}
+              className={cn(
+                'relative w-10 h-6 rounded-full transition-colors shrink-0',
+                desktopEnabled && permission === 'granted'
+                  ? 'bg-[#2563EB]'
+                  : 'bg-[#D0D5DD]',
+              )}
+              role="switch"
+              aria-checked={desktopEnabled}
+            >
+              <span className={cn(
+                'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform',
+                desktopEnabled && permission === 'granted' ? 'translate-x-4' : 'translate-x-0',
+              )} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  )
+}

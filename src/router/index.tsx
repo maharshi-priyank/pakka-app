@@ -53,6 +53,38 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  // ── Public proposal view (no auth required) ────────────────────────────────
+  {
+    path: '/p/:slug',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/public/ProposalViewPage')
+      return { Component }
+    },
+  },
+  // ── Public contract signing (no auth required) ─────────────────────────────
+  {
+    path: '/sign/:id',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/public/ContractSignPage')
+      return { Component }
+    },
+  },
+  // ── Public invoice view (no auth required) ─────────────────────────────────
+  {
+    path: '/invoice/:id',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/public/InvoiceViewPage')
+      return { Component }
+    },
+  },
+  // ── Client portal (no auth required) ───────────────────────────────────────
+  {
+    path: '/portal/:token',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/public/ClientPortalPage')
+      return { Component }
+    },
+  },
   {
     element: <ProtectedRoute />,
     children: [
@@ -81,9 +113,37 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: '/app/proposals/new',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ProposalEditorPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/app/proposals/:id',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ProposalEditorPage')
+              return { Component }
+            },
+          },
+          {
             path: '/app/contracts',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ContractsPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/app/contracts/new',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ContractEditorPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/app/contracts/:id',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ContractEditorPage')
               return { Component }
             },
           },
@@ -95,9 +155,30 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: '/app/invoices/new',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/InvoiceEditorPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/app/invoices/:id',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/InvoiceEditorPage')
+              return { Component }
+            },
+          },
+          {
             path: '/app/clients',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ClientsPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/app/meetings',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/MeetingsPage')
               return { Component }
             },
           },

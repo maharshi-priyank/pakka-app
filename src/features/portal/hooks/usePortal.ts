@@ -1,0 +1,105 @@
+import { useQuery, useMutation } from '@tanstack/react-query'
+import axios from 'axios'
+
+const publicApi = axios.create({
+  baseURL: import.meta.env.VITE_API_URL as string,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+export interface PortalProposal {
+  id:          string
+  title:       string
+  status:      string
+  slug:        string
+  totalAmount: string
+  gstAmount:   string
+  validUntil:  string | null
+  acceptedAt:  string | null
+  createdAt:   string
+}
+
+export interface PortalContract {
+  id:       string
+  title:    string
+  status:   string
+  signedAt: string | null
+  createdAt: string
+}
+
+export interface PortalInvoice {
+  id:            string
+  invoiceNumber: string
+  status:        string
+  total:         string
+  dueDate:       string | null
+  paidAt:        string | null
+  createdAt:     string
+}
+
+export interface PortalData {
+  client: {
+    id:      string
+    name:    string
+    email:   string | null
+    company: string | null
+  }
+  freelancer: {
+    businessName: string | null
+    logoUrl:      string | null
+  }
+  proposals: PortalProposal[]
+  contracts: PortalContract[]
+  invoices:  PortalInvoice[]
+}
+
+export function usePortalData(token: string) {
+  return useQuery({
+    queryKey: ['portal', token],
+    queryFn:  async () => {
+      const { data } = await publicApi.get<{ data: PortalData }>(`/portal/${token}`)
+      return data.data
+    },
+    retry: false,
+  })
+}
+
+export function useCreateInvoiceOrder(token: string) {
+  return useMutation({
+    mutationFn: async (invoiceId: string) => {
+      const { data } = await publicApi.post<{ data: { orderId: string; amount: number; currency: string; keyId: string } }>(
+        `/portal/${token}/invoices/${invoiceId}/create-order`,
+      )
+      return data.data
+    },
+  })
+}
+
+export function usePortalAcceptProposal() {
+  return useMutation({
+    mutationFn: async (slug: string) => {
+      const { data } = await publicApi.post<{ data: { status: string } }>(`/proposals/view/${slug}/accept`)
+      return data.data
+    },
+  })
+}
+
+export function usePortalDeclineProposal() {
+  return useMutation({
+    mutationFn: async (slug: string) => {
+      const { data } = await publicApi.post<{ data: { status: string } }>(`/proposals/view/${slug}/decline`)
+      return data.data
+    },
+  })
+}
+
+export function usePortalSignContract() {
+  return useMutation({
+    mutationFn: async ({ id, otp }: { id: string; otp: string }) => {
+      const { data } = await publicApi.post<{ data: { status: string; signedAt: string } }>(
+        `/contracts/sign/${id}`,
+        { otp },
+      )
+      return data.data
+    },
+  })
+}
