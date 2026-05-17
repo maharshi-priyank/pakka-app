@@ -134,7 +134,7 @@ export default function BusinessTab() {
               Accept card, UPI, and net banking payments directly on invoices.
             </p>
           </div>
-          {profile?.['razorpayAccountId'] ? (
+          {(profile as unknown as Record<string, unknown>)?.['razorpayAccountId'] ? (
             <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[#027A48] bg-[#ECFDF3] px-3 py-1.5 rounded-full">
               <Check size={12} strokeWidth={2.5} /> Connected
             </span>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -34,8 +34,8 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const displayInvoice = saved ?? invoice
 
   const {
-    register, control, handleSubmit, watch, setValue,
-    formState: { errors, isDirty },
+    register, control, handleSubmit, watch,
+    formState: { errors },
   } = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: invoice

@@ -60,7 +60,7 @@ export default function AIProposalModal({ onClose }: Props) {
           scopeItems:   data.scopeItems.map(s => ({ title: s })),
           deliverables: data.deliverables.map(d => ({ item: d })),
           exclusions:   data.exclusions,
-          lineItems:    data.lineItems,
+          lineItems:    data.lineItems as { description: string; qty: number; rate: number; gstRate?: 0 | 5 | 12 | 18 | 28 }[],
           paymentSchedule,
           pricingNotes: data.pricingNotes,
           terms:        data.terms,

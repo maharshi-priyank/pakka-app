@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
 import AIModal, { type AIModalPhase } from './AIModal'
 import LeadReviewPanel from './LeadReviewPanel'
 import { useExtractLead, type ExtractedLead } from '../hooks/useAIExtract'
@@ -41,8 +40,8 @@ export default function AILeadModal({ onClose }: Props) {
         phone:   data.phone   || undefined,
         company: data.company || undefined,
         service: data.service || undefined,
-        budget:  data.budget  ? Number(data.budget) : undefined,
-        source:  data.source  || undefined,
+        budget:  data.budget  ? data.budget : undefined,
+        source:  (data.source || undefined) as 'linkedin' | 'instagram' | 'referral' | 'website' | 'cold_outreach' | 'other' | undefined,
         notes:   data.notes   || undefined,
       })
       toast.success('Lead created from AI extraction')

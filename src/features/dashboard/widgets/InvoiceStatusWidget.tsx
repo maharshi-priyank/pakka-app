@@ -1,5 +1,5 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
-import { cn, formatCurrency } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { useInvoices } from '@/features/invoices/hooks/useInvoices'
 import { FileText } from 'lucide-react'
 
@@ -69,7 +69,7 @@ export default function InvoiceStatusWidget() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number, _name: string, props: { payload?: { label: string } }) => [value, props.payload?.label ?? '']}
+                  formatter={(value) => [value, '']}
                   contentStyle={{ border: '1px solid #EAECF0', borderRadius: 8, fontSize: 12 }}
                 />
               </PieChart>
@@ -84,9 +84,8 @@ export default function InvoiceStatusWidget() {
           {/* Legend */}
           <div className="flex-1 w-full space-y-2">
             {STATUS_CONFIG.map(s => {
-              const count  = items.filter(i => i.status === s.key).length
-              const amount = items.filter(i => i.status === s.key).reduce((sum, i) => sum + Number(i.total), 0)
-              const pct    = total > 0 ? Math.round((count / total) * 100) : 0
+              const count = items.filter(i => i.status === s.key).length
+              const pct   = total > 0 ? Math.round((count / total) * 100) : 0
               return (
                 <div key={s.key} className="flex items-center gap-2.5">
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} />

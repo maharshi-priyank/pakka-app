@@ -212,7 +212,7 @@ function ClientSelector({
   const ref = useRef<HTMLDivElement>(null)
 
   const { data } = useClients(search.length > 1 ? search : undefined)
-  const clients  = data?.items ?? []
+  const clients  = data?.clients ?? []
 
   useEffect(() => {
     function handle(e: MouseEvent) {
@@ -265,7 +265,7 @@ function ClientSelector({
       {/* Dropdown */}
       {open && clients.length > 0 && (
         <div className="absolute z-10 top-[calc(100%+4px)] left-0 right-0 bg-white border border-[#E8EBF2] rounded-xl shadow-lg overflow-hidden">
-          {clients.slice(0, 5).map(c => (
+          {clients.slice(0, 5).map((c: { id: string; name: string; email: string | null; company: string | null }) => (
             <button
               key={c.id}
               onClick={() => pick(c)}

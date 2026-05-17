@@ -1,3 +1,4 @@
+import React from 'react'
 import { TrendingUp } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
@@ -5,8 +6,8 @@ import {
 import { cn, formatCurrency } from '@/lib/utils'
 import { useRevenueChart } from '../hooks/useDashboard'
 
-function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded', className)} />
+function Skeleton({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded', className)} style={style} />
 }
 
 export default function RevenueChartWidget() {
@@ -48,7 +49,7 @@ export default function RevenueChartWidget() {
               <YAxis hide />
               <Tooltip
                 cursor={{ fill: '#F4F5F8', radius: 6 }}
-                formatter={(value: number) => [formatCurrency(value), 'Revenue']}
+                formatter={(value) => [formatCurrency(value as number), 'Revenue']}
                 contentStyle={{ border: '1px solid #EAECF0', borderRadius: 10, fontSize: 12, color: '#101828' }}
               />
               <Bar dataKey="revenue" radius={[5, 5, 0, 0]}>

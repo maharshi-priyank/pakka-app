@@ -28,8 +28,8 @@ export const STATUS_BADGE_CLASS: Record<InvoiceStatus, string> = {
 
 export const lineItemSchema = z.object({
   description: z.string().min(1, 'Description required'),
-  qty:         z.number({ invalid_type_error: 'Required' }).min(0),
-  rate:        z.number({ invalid_type_error: 'Required' }).min(0),
+  qty:         z.number({ message: 'Required' }).min(0),
+  rate:        z.number({ message: 'Required' }).min(0),
   gstRate:     z.number().min(0).max(28),
 })
 

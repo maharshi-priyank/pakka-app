@@ -44,7 +44,7 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
 
   const c = (contract?.content ?? {}) as Record<string, unknown>
 
-  const { register, control, handleSubmit, formState: { errors, isDirty } } = useForm<CreateContractInput>({
+  const { register, control, handleSubmit, watch, setValue, formState: { errors, isDirty } } = useForm<CreateContractInput>({
     resolver: zodResolver(createContractSchema),
     defaultValues: {
       title:      contract?.title ?? '',
@@ -76,8 +76,11 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
 
   const scopeArray      = useFieldArray({ control, name: 'content.scopeItems' })
   const deliverablesArr = useFieldArray({ control, name: 'content.deliverables' })
-  const exclusionsArr   = useFieldArray({ control, name: 'content.exclusions' })
   const paymentArr      = useFieldArray({ control, name: 'content.paymentSchedule' })
+
+  const exclusions = (watch('content.exclusions') ?? []) as string[]
+  function addExclusion() { setValue('content.exclusions' as never, [...exclusions, ''] as never) }
+  function removeExclusion(i: number) { setValue('content.exclusions' as never, exclusions.filter((_, j) => j !== i) as never) }
   const clausesArr      = useFieldArray({ control, name: 'content.clauses' })
 
   const onSave = useCallback(async (data: CreateContractInput) => {
@@ -283,19 +286,19 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
                 title="Exclusions"
                 description="What is NOT included — protects both parties"
                 icon={<XCircle size={13} className="text-[#D92D20]" />}
-                onAdd={() => exclusionsArr.append('')}
-                isEmpty={exclusionsArr.fields.length === 0}
+                onAdd={addExclusion}
+                isEmpty={exclusions.length === 0}
                 emptyText="List exclusions"
               >
-                {exclusionsArr.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-3 flex items-center gap-2">
+                {exclusions.map((_, idx) => (
+                  <div key={idx} className="card p-3 flex items-center gap-2">
                     <XCircle size={13} className="text-[#D92D20] shrink-0" />
                     <input
-                      {...register(`content.exclusions.${idx}`)}
+                      {...register(`content.exclusions.${idx}` as never)}
                       className="form-input flex-1 text-[13px]"
                       placeholder="e.g. Content writing / copywriting"
                     />
-                    <RemoveBtn onClick={() => exclusionsArr.remove(idx)} />
+                    <RemoveBtn onClick={() => removeExclusion(idx)} />
                   </div>
                 ))}
               </CFieldArray>

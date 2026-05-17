@@ -64,7 +64,7 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
 
   const c = (proposal?.content ?? defaultTemplate?.content ?? {}) as Record<string, unknown>
 
-  const { register, control, handleSubmit, watch, formState: { errors, isDirty } } = useForm<CreateProposalInput>({
+  const { register, control, handleSubmit, watch, setValue, formState: { errors, isDirty } } = useForm<CreateProposalInput>({
     resolver: zodResolver(createProposalSchema),
     defaultValues: {
       title:      proposal?.title ?? defaultTemplate?.name ?? '',
@@ -94,10 +94,13 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
   const lineItemsArray  = useFieldArray({ control, name: 'content.lineItems' })
   const milestonesArray = useFieldArray({ control, name: 'content.milestones' })
   const deliverablesArray    = useFieldArray({ control, name: 'content.deliverables' })
-  const exclusionsArray      = useFieldArray({ control, name: 'content.exclusions' })
   const paymentScheduleArray = useFieldArray({ control, name: 'content.paymentSchedule' })
   const caseStudiesArray     = useFieldArray({ control, name: 'content.caseStudies' })
   const faqArray             = useFieldArray({ control, name: 'content.faq' })
+
+  const exclusions = (watch('content.exclusions') ?? []) as string[]
+  function addExclusion() { setValue('content.exclusions' as never, [...exclusions, ''] as never) }
+  function removeExclusion(i: number) { setValue('content.exclusions' as never, exclusions.filter((_, j) => j !== i) as never) }
 
   const watchedLineItems = watch('content.lineItems') ?? []
   const watchedGstType   = watch('content.gstType') ?? 'IGST'
@@ -328,19 +331,19 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
                 title="Exclusions"
                 description="What is NOT included — prevents scope creep"
                 icon={<XCircle size={13} className="text-[#D92D20]" />}
-                onAdd={() => exclusionsArray.append('')}
-                isEmpty={exclusionsArray.fields.length === 0}
+                onAdd={addExclusion}
+                isEmpty={exclusions.length === 0}
                 emptyText="List what's out of scope"
               >
-                {exclusionsArray.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-3 flex items-center gap-2">
+                {exclusions.map((_, idx) => (
+                  <div key={idx} className="card p-3 flex items-center gap-2">
                     <XCircle size={13} className="text-[#D92D20] shrink-0" />
                     <input
-                      {...register(`content.exclusions.${idx}`)}
+                      {...register(`content.exclusions.${idx}` as never)}
                       className="form-input flex-1 text-[13px]"
                       placeholder="e.g. Content writing / copywriting"
                     />
-                    <RemoveBtn onClick={() => exclusionsArray.remove(idx)} />
+                    <RemoveBtn onClick={() => removeExclusion(idx)} />
                   </div>
                 ))}
               </FieldArraySection>

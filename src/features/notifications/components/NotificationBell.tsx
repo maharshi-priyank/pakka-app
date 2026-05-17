@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { useNotifications, useUnreadCount, useMarkRead, useMarkAllRead, type AppNotification } from '../hooks/useNotifications'
 import {
-  useNotificationAlert, getMuted, setMuted, requestDesktopPermission, getSound,
+  useNotificationAlert, setMuted, requestDesktopPermission, getSound,
 } from '../hooks/useNotificationAlert'
 
 function timeAgo(date: string): string {
