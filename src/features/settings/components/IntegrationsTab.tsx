@@ -38,25 +38,25 @@ export default function IntegrationsTab() {
     <div className="space-y-4">
       <div>
         <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Integrations</h3>
-        <p className="text-[13px] text-[#667085] mt-0.5">Connect third-party services to enhance your workflow.</p>
+        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Connect third-party services to enhance your workflow.</p>
       </div>
 
       {/* Google Calendar card */}
       <div className="card p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[#ECFDF3] flex items-center justify-center shrink-0">
-              <CalendarDays size={18} className="text-[#027A48]" />
+            <div className="w-10 h-10 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/40 flex items-center justify-center shrink-0">
+              <CalendarDays size={18} className="text-[#027A48] dark:text-[#34D399]" />
             </div>
             <div>
               <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Google Calendar</p>
-              <p className="text-[12px] text-[#667085] mt-0.5 max-w-sm">
+              <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5 max-w-sm">
                 Auto-generate Google Meet links and send calendar invites to clients when scheduling calls from leads or client drawers.
               </p>
               {isConnected && (
                 <div className="flex items-center gap-1.5 mt-2">
-                  <CheckCircle2 size={13} className="text-[#027A48]" />
-                  <span className="text-[12px] font-semibold text-[#027A48]">Connected</span>
+                  <CheckCircle2 size={13} className="text-[#027A48] dark:text-[#34D399]" />
+                  <span className="text-[12px] font-semibold text-[#027A48] dark:text-[#34D399]">Connected</span>
                 </div>
               )}
             </div>
@@ -79,7 +79,7 @@ export default function IntegrationsTab() {
                   <button
                     onClick={() => { disconnect.mutate(); setConfirmDisconnect(false) }}
                     disabled={disconnect.isPending}
-                    className="px-3 py-1.5 rounded-lg bg-[#FEF3F2] text-[#D92D20] text-[12px] font-semibold hover:bg-[#FEE2E2] transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                    className="px-3 py-1.5 rounded-lg bg-[#FEF3F2] dark:bg-red-950/40 text-[#D92D20] dark:text-red-400 text-[12px] font-semibold hover:bg-[#FEE2E2] dark:hover:bg-red-950/60 transition-colors disabled:opacity-50 flex items-center gap-1.5"
                   >
                     {disconnect.isPending ? <Loader2 size={12} className="animate-spin" /> : <AlertCircle size={12} />}
                     Confirm disconnect
@@ -88,7 +88,7 @@ export default function IntegrationsTab() {
               ) : (
                 <button
                   onClick={() => setConfirmDisconnect(true)}
-                  className="px-3 py-1.5 rounded-lg border border-[#EAECF0] text-[12px] font-semibold text-[#667085] hover:bg-[#F9FAFB] hover:text-[#344054] transition-colors"
+                  className="px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
                 >
                   Disconnect
                 </button>
