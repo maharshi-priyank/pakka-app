@@ -36,8 +36,7 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
   const [copied, setCopied]             = useState(false)
   const [scheduleOpen, setScheduleOpen] = useState(false)
 
-  const appUrl     = (import.meta.env.VITE_API_URL as string).replace('/api/v1', '')
-  const portalUrl  = client?.portalToken ? `${appUrl}/portal/${client.portalToken}` : null
+  const portalUrl  = client?.portalToken ? `${window.location.origin}/portal/${client.portalToken}` : null
 
   function copyPortalLink() {
     if (!portalUrl) return

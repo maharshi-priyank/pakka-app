@@ -148,8 +148,7 @@ export default function ClientPage() {
   const { data: client, isLoading } = useClient(id!)
   const regenerate = useRegeneratePortalToken()
 
-  const appUrl    = (import.meta.env.VITE_API_URL as string).replace('/api/v1', '')
-  const portalUrl = client?.portalToken ? `${appUrl}/portal/${client.portalToken}` : null
+  const portalUrl = client?.portalToken ? `${window.location.origin}/portal/${client.portalToken}` : null
 
   const totalInvoiced    = (client?.invoices ?? []).reduce((s, i) => s + parseFloat(i.total), 0)
   const totalPaid        = (client?.invoices ?? []).filter(i => i.status === 'PAID').reduce((s, i) => s + parseFloat(i.total), 0)
