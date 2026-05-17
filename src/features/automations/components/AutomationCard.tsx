@@ -18,7 +18,7 @@ const ACTION_LABEL: Record<string, string> = {
 export default function AutomationCard({ rule, onToggle, loading }: Props) {
   return (
     <div className={cn(
-      'flex items-start gap-4 px-5 py-4 hover:bg-[#FAFBFF] transition-colors',
+      'flex items-start gap-4 px-5 py-4 hover:bg-[#FAFBFF] dark:hover:bg-[#1A1B23] transition-colors',
       !rule.isActive && 'opacity-60',
     )}>
       {/* Toggle */}
@@ -29,7 +29,7 @@ export default function AutomationCard({ rule, onToggle, loading }: Props) {
         onClick={() => onToggle(rule.id, !rule.isActive)}
         className={cn(
           'relative mt-0.5 inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200',
-          rule.isActive ? 'bg-[#2563EB]' : 'bg-[#D0D5DD]',
+          rule.isActive ? 'bg-[#2563EB]' : 'bg-[#D0D5DD] dark:bg-[#3D4258]',
           loading && 'opacity-50 cursor-not-allowed',
         )}
       >
@@ -42,24 +42,24 @@ export default function AutomationCard({ rule, onToggle, loading }: Props) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-[13.5px] font-semibold text-[#101828]">{rule.name}</p>
-          <span className="text-[11px] font-medium text-[#667085] bg-[#F2F4F7] px-2 py-0.5 rounded-full">
+          <p className="text-[13.5px] font-semibold text-[#101828] dark:text-[#ECEEF3]">{rule.name}</p>
+          <span className="text-[11px] font-medium text-[#667085] dark:text-[#8B92A8] bg-[#F2F4F7] dark:bg-[#21222D] px-2 py-0.5 rounded-full">
             {ACTION_LABEL[rule.actionType] ?? rule.actionType}
           </span>
         </div>
         {rule.description && (
-          <p className="text-[12px] text-[#667085] mt-0.5 leading-relaxed">{rule.description}</p>
+          <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5 leading-relaxed">{rule.description}</p>
         )}
         <div className="flex items-center gap-3 mt-1.5">
           {rule.lastRunAt ? (
-            <span className="text-[11px] text-[#98A2B3]">
+            <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">
               Last ran {formatRelativeTime(rule.lastRunAt)}
             </span>
           ) : (
-            <span className="text-[11px] text-[#98A2B3]">Never ran</span>
+            <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Never ran</span>
           )}
           {rule.runCount > 0 && (
-            <span className="text-[11px] text-[#98A2B3]">· {rule.runCount} run{rule.runCount !== 1 ? 's' : ''}</span>
+            <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">· {rule.runCount} run{rule.runCount !== 1 ? 's' : ''}</span>
           )}
         </div>
       </div>

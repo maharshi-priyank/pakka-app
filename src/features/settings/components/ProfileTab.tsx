@@ -119,7 +119,7 @@ export default function ProfileTab() {
         <div className="flex items-center gap-5">
           {/* Avatar */}
           <div className="relative shrink-0">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#EFF6FF] flex items-center justify-center border border-[#EAECF0]">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#EFF6FF] dark:bg-[#1E2040] flex items-center justify-center border border-[#EAECF0] dark:border-[#26283A]">
               {logoPreview ? (
                 <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
               ) : (
@@ -130,7 +130,7 @@ export default function ProfileTab() {
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-[#2563EB] rounded-full flex items-center justify-center border-2 border-white shadow-sm hover:bg-[#1D4ED8] transition-colors"
+              className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-[#2563EB] rounded-full flex items-center justify-center border-2 border-white dark:border-[#13141A] shadow-sm hover:bg-[#1D4ED8] transition-colors"
             >
               {uploading
                 ? <Loader2 size={12} className="text-white animate-spin" />
@@ -143,7 +143,7 @@ export default function ProfileTab() {
             <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">
               {profile?.businessName ?? profile?.name ?? 'Your Business'}
             </p>
-            <p className="text-[12px] text-[#667085] mt-0.5">{profile?.email}</p>
+            <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">{profile?.email}</p>
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -153,7 +153,7 @@ export default function ProfileTab() {
               <Upload size={12} strokeWidth={2.5} />
               {uploading ? 'Uploading…' : 'Upload logo'}
             </button>
-            <p className="text-[11px] text-[#98A2B3] mt-0.5">PNG, JPG up to 2 MB. Appears on proposals and invoices.</p>
+            <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">PNG, JPG up to 2 MB. Appears on proposals and invoices.</p>
           </div>
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
@@ -161,7 +161,7 @@ export default function ProfileTab() {
 
       {/* Personal info */}
       <div className="card p-6 space-y-5">
-        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7]">
+        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <User size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Personal Details</h3>
         </div>
@@ -171,14 +171,14 @@ export default function ProfileTab() {
             <input {...register('name')} placeholder="Maharshi Vaghela" className={cn('form-input w-full', errors.name && 'border-red-400')} />
           </Field>
           <Field label="Email">
-            <input value={profile?.email ?? ''} disabled className="form-input w-full opacity-60 cursor-not-allowed bg-[#F9FAFB]" />
+            <input value={profile?.email ?? ''} disabled className="form-input w-full opacity-60 cursor-not-allowed bg-[#F9FAFB] dark:bg-[#1A1B23]" />
           </Field>
         </div>
       </div>
 
       {/* Business info */}
       <div className="card p-6 space-y-5">
-        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7]">
+        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <Building2 size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Business Details</h3>
         </div>
@@ -200,10 +200,10 @@ export default function ProfileTab() {
 
       {/* Tax info */}
       <div className="card p-6 space-y-5">
-        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7]">
+        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <Receipt size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Tax & Compliance</h3>
-          <span className="ml-auto text-[11px] text-[#98A2B3]">Appears on invoices</span>
+          <span className="ml-auto text-[11px] text-[#98A2B3] dark:text-[#545C74]">Appears on invoices</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -245,7 +245,7 @@ export default function ProfileTab() {
           className={cn(
             'flex items-center gap-2 px-5 py-2 rounded-lg text-[13px] font-semibold transition-colors',
             saving || !isDirty
-              ? 'bg-[#F2F4F7] text-[#98A2B3] cursor-not-allowed'
+              ? 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3] dark:text-[#545C74] cursor-not-allowed'
               : 'bg-[#2563EB] text-white hover:bg-[#1D4ED8]',
           )}
         >
