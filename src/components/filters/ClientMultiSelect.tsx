@@ -14,7 +14,7 @@ export default function ClientMultiSelect({ selected, onChange }: Props) {
   const ref = useRef<HTMLDivElement>(null)
 
   const { data } = useClients(search || undefined)
-  const clients  = data?.items ?? []
+  const clients  = data?.clients ?? []
 
   useEffect(() => {
     function handle(e: MouseEvent) {
