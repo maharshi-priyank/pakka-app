@@ -74,7 +74,7 @@ export default function ScheduleCallModal({
   const { data: leadsData }   = useLeads({ search: contactSearch, limit: 5 })
   const { data: clientsData } = useClients(contactSearch)
 
-  const leads   = leadsData?.leads ?? []
+  const leads   = leadsData?.items ?? []
   const clients = (clientsData as any)?.clients ?? clientsData ?? []
   const filteredClients = Array.isArray(clients) ? clients.slice(0, 5) : []
 
