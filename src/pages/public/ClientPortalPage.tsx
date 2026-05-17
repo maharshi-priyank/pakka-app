@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { FileText, FileSignature, Receipt, AlertTriangle } from 'lucide-react'
+import { FileText, FileSignature, Receipt, AlertTriangle, Video, CalendarDays, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { usePortalData, type PortalProposal, type PortalContract, type PortalInvoice } from '@/features/portal/hooks/usePortal'
+import { usePortalData, type PortalProposal, type PortalContract, type PortalInvoice, type PortalMeeting } from '@/features/portal/hooks/usePortal'
 import PortalProposalCard from '@/features/portal/components/PortalProposalCard'
 import PortalContractCard from '@/features/portal/components/PortalContractCard'
 import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
 
 const APP_URL = (import.meta.env.VITE_API_URL as string).replace('/api/v1', '')
 
-type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices'
+type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] rounded-lg', className)} />
@@ -29,6 +29,7 @@ export default function ClientPortalPage() {
   const activeProposals = proposals ?? data?.proposals ?? []
   const activeContracts = contracts ?? data?.contracts ?? []
   const activeInvoices  = invoices  ?? data?.invoices  ?? []
+  const activeMeetings  = data?.meetings ?? []
 
   function handleProposalStatusChange(id: string, status: string) {
     setProposals((data?.proposals ?? []).map(p => p.id === id ? { ...p, status } : p))
@@ -40,11 +41,14 @@ export default function ClientPortalPage() {
     setInvoices((data?.invoices ?? []).map(i => i.id === id ? { ...i, status } : i))
   }
 
+  const upcomingMeetings = activeMeetings.filter(m => m.status === 'SCHEDULED' && new Date(m.scheduledAt) >= new Date())
+
   const TABS: { key: Tab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; count: number }[] = [
     { key: 'overview',   label: 'Overview',  icon: FileText,      count: 0 },
     { key: 'proposals',  label: 'Proposals', icon: FileText,      count: activeProposals.length },
     { key: 'contracts',  label: 'Contracts', icon: FileSignature, count: activeContracts.length },
     { key: 'invoices',   label: 'Invoices',  icon: Receipt,       count: activeInvoices.length },
+    { key: 'meetings',   label: 'Meetings',  icon: Video,         count: upcomingMeetings.length },
   ]
 
   if (isError) {
@@ -114,9 +118,10 @@ export default function ClientPortalPage() {
         {!isLoading && (
           <div className="flex flex-wrap gap-2">
             {[
-              { label: 'Proposals', count: activeProposals.length, color: 'bg-[#EEF2FF] text-[#4338CA]' },
-              { label: 'Contracts', count: activeContracts.length, color: 'bg-[#F4F3FF] text-[#5925DC]' },
-              { label: 'Invoices',  count: activeInvoices.length,  color: 'bg-[#ECFDF3] text-[#027A48]' },
+              { label: 'Proposals', count: activeProposals.length,   color: 'bg-[#EEF2FF] text-[#4338CA]' },
+              { label: 'Contracts', count: activeContracts.length,   color: 'bg-[#F4F3FF] text-[#5925DC]' },
+              { label: 'Invoices',  count: activeInvoices.length,    color: 'bg-[#ECFDF3] text-[#027A48]' },
+              { label: 'Meetings',  count: upcomingMeetings.length,  color: 'bg-[#FFF1F3] text-[#C01048]' },
             ].map(({ label, count, color }) => (
               <span key={label} className={cn('text-[12px] font-semibold px-3 py-1 rounded-full', color)}>
                 {count} {label}
@@ -161,10 +166,13 @@ export default function ClientPortalPage() {
             {/* Overview — latest from each */}
             {tab === 'overview' && (
               <div className="space-y-5">
-                {activeProposals.length === 0 && activeContracts.length === 0 && activeInvoices.length === 0 ? (
+                {activeProposals.length === 0 && activeContracts.length === 0 && activeInvoices.length === 0 && upcomingMeetings.length === 0 ? (
                   <EmptyState label="No documents shared yet" />
                 ) : (
                   <>
+                    {upcomingMeetings.slice(0, 2).map(m => (
+                      <PortalMeetingCard key={m.id} meeting={m} />
+                    ))}
                     {activeProposals.slice(0, 2).map(p => (
                       <PortalProposalCard key={p.id} proposal={p} appUrl={APP_URL} onStatusChange={handleProposalStatusChange} />
                     ))}
@@ -216,6 +224,15 @@ export default function ClientPortalPage() {
                 ))}
               </div>
             )}
+
+            {tab === 'meetings' && (
+              <div className="space-y-3">
+                {activeMeetings.length === 0
+                  ? <EmptyState label="No meetings scheduled yet" />
+                  : activeMeetings.map(m => <PortalMeetingCard key={m.id} meeting={m} />)
+                }
+              </div>
+            )}
           </>
         )}
 
@@ -230,6 +247,63 @@ function EmptyState({ label }: { label: string }) {
   return (
     <div className="bg-white rounded-2xl border border-[#EAECF0] p-10 text-center">
       <p className="text-[13px] text-[#98A2B3]">{label}</p>
+    </div>
+  )
+}
+
+function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
+  const date    = new Date(meeting.scheduledAt)
+  const isUpcoming = meeting.status === 'SCHEDULED' && date >= new Date()
+  const isPast     = meeting.status === 'COMPLETED' || (meeting.status === 'SCHEDULED' && date < new Date())
+
+  const dateStr = date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  const timeStr = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+  const durationLabel = meeting.durationMins >= 60
+    ? `${meeting.durationMins / 60}h`
+    : `${meeting.durationMins}m`
+
+  return (
+    <div className="bg-white rounded-2xl border border-[#EAECF0] p-4 sm:p-5">
+      <div className="flex items-start gap-3">
+        <div className={cn(
+          'w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0',
+          isUpcoming ? 'bg-[#EEF2FF]' : 'bg-[#F2F4F7]',
+        )}>
+          <Video size={16} className={isUpcoming ? 'text-[#6366F1]' : 'text-[#98A2B3]'} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[14px] font-semibold text-[#101828] truncate">{meeting.title}</p>
+            <span className={cn(
+              'text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0',
+              isUpcoming ? 'bg-[#EEF2FF] text-[#4338CA]'
+                : meeting.status === 'COMPLETED' ? 'bg-[#ECFDF3] text-[#027A48]'
+                : 'bg-[#F2F4F7] text-[#667085]',
+            )}>
+              {isUpcoming ? 'Upcoming' : meeting.status === 'COMPLETED' ? 'Completed' : 'Scheduled'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
+            <span className="flex items-center gap-1 text-[12px] text-[#667085]">
+              <CalendarDays size={11} /> {dateStr} · {timeStr}
+            </span>
+            <span className="text-[11px] text-[#98A2B3] bg-[#F2F4F7] px-2 py-0.5 rounded-full">{durationLabel}</span>
+          </div>
+          {meeting.agenda && (
+            <p className="text-[12px] text-[#667085] mt-1.5 line-clamp-2">{meeting.agenda}</p>
+          )}
+        </div>
+      </div>
+      {isUpcoming && meeting.meetLink && (
+        <a
+          href={meeting.meetLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#4F46E5] transition-colors"
+        >
+          <Video size={12} /> Join Meeting <ExternalLink size={10} />
+        </a>
+      )}
     </div>
   )
 }

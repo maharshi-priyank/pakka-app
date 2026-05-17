@@ -3,7 +3,7 @@ import { useLeads } from '@/features/leads/hooks/useLeads'
 import { Users } from 'lucide-react'
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded', className)} />
+  return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
 }
 
 const STAGES = [
@@ -21,12 +21,12 @@ export default function LeadFunnelWidget() {
 
   return (
     <div className="card overflow-hidden h-full hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
         <div>
-          <h2 className="text-[14px] font-bold text-[#101828]">Lead Pipeline</h2>
-          <p className="text-[12px] text-[#98A2B3] mt-0.5">{items.length} total lead{items.length !== 1 ? 's' : ''}</p>
+          <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Lead Pipeline</h2>
+          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{items.length} total lead{items.length !== 1 ? 's' : ''}</p>
         </div>
-        <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center">
           <Users size={14} className="text-[#6366F1]" strokeWidth={2} />
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function LeadFunnelWidget() {
               )} style={{ background: stage.bg, color: stage.textColor }}>
                 {stage.label}
               </div>
-              <div className="flex-1 h-6 bg-[#F4F5F8] rounded-lg overflow-hidden">
+              <div className="flex-1 h-6 bg-[#F4F5F8] dark:bg-[#21222D] rounded-lg overflow-hidden">
                 <div
                   className="h-full rounded-lg flex items-center justify-end pr-2 transition-all duration-500"
                   style={{
@@ -54,7 +54,7 @@ export default function LeadFunnelWidget() {
               </div>
               {isLoading
                 ? <Skeleton className="h-4 w-4 rounded" />
-                : <span className="text-[13px] font-bold text-[#344054] w-6 text-right shrink-0">{count}</span>
+                : <span className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8] w-6 text-right shrink-0">{count}</span>
               }
             </div>
           )

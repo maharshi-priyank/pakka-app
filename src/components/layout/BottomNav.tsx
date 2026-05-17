@@ -37,7 +37,8 @@ export default function BottomNav() {
   return (
     <>
       {/* ── Bottom tab bar ─────────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-[#EAECF0] flex items-stretch"
+      <nav
+        className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white dark:bg-[#13141A] border-t border-[#EAECF0] dark:border-[#26283A] flex items-stretch transition-colors"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {PRIMARY_TABS.map(({ icon: Icon, label, href }) => (
@@ -47,7 +48,7 @@ export default function BottomNav() {
             className={({ isActive }) =>
               cn(
                 'flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-semibold transition-colors',
-                isActive ? 'text-[#6366F1]' : 'text-[#98A2B3]',
+                isActive ? 'text-[#6366F1] dark:text-[#818CF8]' : 'text-[#98A2B3] dark:text-[#545C74]',
               )
             }
           >
@@ -55,7 +56,7 @@ export default function BottomNav() {
               <>
                 <div className={cn(
                   'w-9 h-7 rounded-xl flex items-center justify-center transition-colors',
-                  isActive ? 'bg-[#EEF2FF]' : '',
+                  isActive ? 'bg-[#EEF2FF] dark:bg-[#1E2040]' : '',
                 )}>
                   <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                 </div>
@@ -70,12 +71,12 @@ export default function BottomNav() {
           onClick={() => setMoreOpen(true)}
           className={cn(
             'flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-semibold transition-colors',
-            moreOpen ? 'text-[#6366F1]' : 'text-[#98A2B3]',
+            moreOpen ? 'text-[#6366F1] dark:text-[#818CF8]' : 'text-[#98A2B3] dark:text-[#545C74]',
           )}
         >
           <div className={cn(
             'w-9 h-7 rounded-xl flex items-center justify-center transition-colors',
-            moreOpen ? 'bg-[#EEF2FF]' : '',
+            moreOpen ? 'bg-[#EEF2FF] dark:bg-[#1E2040]' : '',
           )}>
             <MoreHorizontal size={18} strokeWidth={2} />
           </div>
@@ -88,20 +89,21 @@ export default function BottomNav() {
         <>
           {/* Backdrop */}
           <div
-            className="lg:hidden fixed inset-0 z-40 bg-black/30 anim-fade"
+            className="lg:hidden fixed inset-0 z-40 bg-black/30 dark:bg-black/50 anim-fade"
             onClick={() => setMoreOpen(false)}
           />
           {/* Sheet */}
-          <div className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white rounded-t-2xl shadow-2xl anim-slide-up"
+          <div
+            className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white dark:bg-[#13141A] rounded-t-2xl shadow-2xl anim-slide-up"
             style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}
           >
             {/* Handle */}
             <div className="flex items-center justify-between px-5 pt-4 pb-2">
-              <div className="w-10 h-1 rounded-full bg-[#E4E7EC] mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
-              <span className="text-[13px] font-bold text-[#101828]">More</span>
+              <div className="w-10 h-1 rounded-full bg-[#E4E7EC] dark:bg-[#26283A] mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
+              <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">More</span>
               <button
                 onClick={() => setMoreOpen(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#F4F5F8]"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"
               >
                 <X size={15} strokeWidth={2} />
               </button>
@@ -113,26 +115,26 @@ export default function BottomNav() {
                   <button
                     key={href}
                     onClick={() => goTo(href)}
-                    className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-[#F4F5F8] transition-colors text-left"
+                    className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors text-left"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-[#F4F5F8] flex items-center justify-center shrink-0">
-                      <Icon size={17} className="text-[#344054]" strokeWidth={2} />
+                    <div className="w-9 h-9 rounded-xl bg-[#F4F5F8] dark:bg-[#21222D] flex items-center justify-center shrink-0">
+                      <Icon size={17} className="text-[#344054] dark:text-[#C2C8D8]" strokeWidth={2} />
                     </div>
-                    <span className="text-[14px] font-semibold text-[#344054]">{label}</span>
+                    <span className="text-[14px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{label}</span>
                   </button>
                 ))}
               </div>
 
-              <div className="my-2 border-t border-[#F2F4F7]" />
+              <div className="my-2 border-t border-[#F2F4F7] dark:border-[#26283A]" />
 
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-50 transition-colors text-left"
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-left"
               >
-                <div className="w-9 h-9 rounded-xl bg-[#FEF3F2] flex items-center justify-center shrink-0">
-                  <LogOut size={17} className="text-[#D92D20]" strokeWidth={2} />
+                <div className="w-9 h-9 rounded-xl bg-[#FEF3F2] dark:bg-red-950/40 flex items-center justify-center shrink-0">
+                  <LogOut size={17} className="text-[#D92D20] dark:text-red-400" strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-semibold text-[#D92D20]">Sign out</span>
+                <span className="text-[14px] font-semibold text-[#D92D20] dark:text-red-400">Sign out</span>
               </button>
             </div>
           </div>

@@ -48,37 +48,37 @@ export default function SaveTemplateModal({ open, onClose, proposalId, defaultNa
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={onClose} />
       <div className="relative z-10 w-full max-w-sm mx-4 card overflow-hidden anim-modal-in">
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#F1F3F8]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#F1F3F8] dark:border-[#26283A]">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#EEF2FF] flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center">
               <LayoutTemplate size={13} className="text-[#6366F1]" />
             </div>
-            <h2 className="text-[14px] font-bold text-[#0D1117]">Save as Template</h2>
+            <h2 className="text-[14px] font-bold text-[#0D1117] dark:text-[#ECEEF3]">Save as Template</h2>
           </div>
-          <button onClick={onClose} className="text-[#98A2B3] hover:text-[#344054] transition-colors">
+          <button onClick={onClose} className="text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
             <X size={16} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="px-5 py-4 space-y-3.5">
           <div>
-            <label className="block text-[12px] font-semibold text-[#344054] mb-1.5">Template name *</label>
+            <label className="block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1.5">Template name *</label>
             <input
               {...register('name', { required: 'Name is required' })}
-              className="w-full h-9 px-3 rounded-lg border border-[#D0D5DD] text-[13px] text-[#101828] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all"
+              className="w-full h-9 px-3 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] text-[#101828] dark:text-[#ECEEF3] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]"
               placeholder="e.g. Website Redesign"
             />
             {errors.name && <p className="text-[11px] text-[#D92D20] mt-1">{errors.name.message}</p>}
           </div>
 
           <div>
-            <label className="block text-[12px] font-semibold text-[#344054] mb-1.5">
-              Category <span className="text-[#98A2B3] font-normal">(optional)</span>
+            <label className="block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1.5">
+              Category <span className="text-[#98A2B3] dark:text-[#545C74] font-normal">(optional)</span>
             </label>
             <input
               {...register('category')}
               list="category-suggestions"
-              className="w-full h-9 px-3 rounded-lg border border-[#D0D5DD] text-[13px] text-[#101828] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all"
+              className="w-full h-9 px-3 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] text-[#101828] dark:text-[#ECEEF3] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]"
               placeholder="e.g. Web Design"
             />
             <datalist id="category-suggestions">
@@ -87,13 +87,13 @@ export default function SaveTemplateModal({ open, onClose, proposalId, defaultNa
           </div>
 
           <div>
-            <label className="block text-[12px] font-semibold text-[#344054] mb-1.5">
-              Description <span className="text-[#98A2B3] font-normal">(optional)</span>
+            <label className="block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1.5">
+              Description <span className="text-[#98A2B3] dark:text-[#545C74] font-normal">(optional)</span>
             </label>
             <textarea
               {...register('description')}
               rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-[#D0D5DD] text-[13px] text-[#101828] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] text-[#101828] dark:text-[#ECEEF3] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all resize-none placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]"
               placeholder="Short description for this template"
             />
           </div>
@@ -102,7 +102,7 @@ export default function SaveTemplateModal({ open, onClose, proposalId, defaultNa
             <button
               type="button"
               onClick={onClose}
-              className="h-8 px-3.5 rounded-lg border border-[#D0D5DD] text-[12.5px] font-semibold text-[#344054] hover:bg-[#F9FAFB] transition-colors"
+              className="h-8 px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
             >
               Cancel
             </button>

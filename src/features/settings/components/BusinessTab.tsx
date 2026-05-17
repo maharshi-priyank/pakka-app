@@ -75,8 +75,8 @@ export default function BusinessTab() {
       {/* Bank details */}
       <div className="card p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7]">
-          <Landmark size={14} className="text-[#667085]" strokeWidth={2} />
-          <h3 className="text-[13px] font-bold text-[#344054]">Bank Account</h3>
+          <Landmark size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Bank Account</h3>
           <span className="ml-auto text-[11px] text-[#98A2B3]">Appears on invoices</span>
         </div>
 
@@ -111,8 +111,8 @@ export default function BusinessTab() {
       {/* UPI */}
       <div className="card p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7]">
-          <Smartphone size={14} className="text-[#667085]" strokeWidth={2} />
-          <h3 className="text-[13px] font-bold text-[#344054]">UPI</h3>
+          <Smartphone size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">UPI</h3>
           <span className="ml-auto text-[11px] text-[#98A2B3]">Shown as payment option on invoices</span>
         </div>
 
@@ -124,12 +124,12 @@ export default function BusinessTab() {
       {/* Razorpay (placeholder) */}
       <div className="card p-6">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] mb-4">
-          <CreditCard size={14} className="text-[#667085]" strokeWidth={2} />
-          <h3 className="text-[13px] font-bold text-[#344054]">Razorpay</h3>
+          <CreditCard size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Razorpay</h3>
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[13px] font-semibold text-[#344054]">Online payment collection</p>
+            <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Online payment collection</p>
             <p className="text-[12px] text-[#98A2B3] mt-0.5">
               Accept card, UPI, and net banking payments directly on invoices.
             </p>
@@ -153,7 +153,7 @@ export default function BusinessTab() {
       {/* Brand info card */}
       <div className="card p-4 flex items-start gap-3 bg-[#F8F9FC]">
         <Building2 size={15} className="text-[#667085] mt-0.5 shrink-0" />
-        <p className="text-[12px] text-[#667085]">
+        <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">
           Bank account and UPI details are printed on every invoice you send. Keep them accurate so clients can pay you directly.
         </p>
       </div>
@@ -191,7 +191,7 @@ function Field({ label, error, hint, required, children }: {
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-[12.5px] font-semibold text-[#344054]">
+      <label className="block text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {children}

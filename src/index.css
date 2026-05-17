@@ -1,5 +1,66 @@
 @import "tailwindcss";
 
+/* ─── Dark-mode variant ──────────────────────────────────────────────────────
+   Enables dark: utilities when .dark is on <html>.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Design tokens ──────────────────────────────────────────────────────────
+   Light defaults; .dark overrides below.
+*/
+:root {
+  --bg-app:       #F4F5F8;
+  --bg-surface:   #FFFFFF;
+  --bg-surface-2: #F9FAFB;
+  --bg-surface-3: #F2F4F7;
+  --border:       #EAECF0;
+  --border-2:     #D0D5DD;
+  --text-1:       #101828;
+  --text-2:       #344054;
+  --text-3:       #667085;
+  --text-4:       #98A2B3;
+  --accent:       #6366F1;
+  --accent-hover: #4F46E5;
+  --accent-bg:    #EEF2FF;
+  --accent-text:  #4338CA;
+  --scrollbar:    #E4E7EC;
+  --scrollbar-h:  #D0D5DD;
+}
+
+.dark {
+  --bg-app:       #0C0D10;
+  --bg-surface:   #13141A;
+  --bg-surface-2: #1A1B23;
+  --bg-surface-3: #21222D;
+  --border:       #26283A;
+  --border-2:     #333649;
+  --text-1:       #ECEEF3;
+  --text-2:       #C2C8D8;
+  --text-3:       #8B92A8;
+  --text-4:       #545C74;
+  --accent:       #818CF8;
+  --accent-hover: #6366F1;
+  --accent-bg:    #1E2040;
+  --accent-text:  #A5B4FC;
+  --scrollbar:    #26283A;
+  --scrollbar-h:  #333649;
+}
+
+/* ─── View Transition — circular ripple ──────────────────────────────────────*/
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
 
@@ -7,13 +68,19 @@
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
-    background-color: #F4F5F8;
-    color: #374151;
+    background-color: var(--bg-app);
+    color: var(--text-2);
     font-size: 14px;
     line-height: 1.5;
+    transition: background-color 0.15s, color 0.15s;
   }
 }
 
@@ -21,10 +88,14 @@
 
   /* ─── Cards ──────────────────────────────────────────────────────────────── */
   .card {
-    background: #fff;
+    background: var(--bg-surface);
     border-radius: 14px;
-    border: 1px solid #EAECF0;
+    border: 1px solid var(--border);
     box-shadow: 0 1px 4px rgba(16,24,40,0.05);
+  }
+
+  .dark .card {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
   }
 
   /* ─── Status badges ──────────────────────────────────────────────────────── */
@@ -41,7 +112,6 @@
     letter-spacing: 0.01em;
   }
 
-  /* dot before content */
   .badge::before {
     content: '';
     display: inline-block;
@@ -60,11 +130,11 @@
   .badge-warning { background: #FFFAEB; color: #B54708; }
   .badge-warning::before { background: #F79009; }
 
-  .badge-neutral { background: #F2F4F7; color: #344054; }
-  .badge-neutral::before { background: #98A2B3; }
+  .badge-neutral { background: var(--bg-surface-3); color: var(--text-2); }
+  .badge-neutral::before { background: var(--text-4); }
 
-  .badge-indigo  { background: #EEF2FF; color: #4338CA; }
-  .badge-indigo::before { background: #6366F1; }
+  .badge-indigo  { background: var(--accent-bg); color: var(--accent-text); }
+  .badge-indigo::before { background: var(--accent); }
 
   .badge-blue    { background: #EFF8FF; color: #175CD3; }
   .badge-blue::before { background: #2E90FA; }
@@ -73,8 +143,8 @@
   .data-table { width: 100%; border-collapse: collapse; }
 
   .data-table thead tr {
-    background: #FAFAFA;
-    border-bottom: 1px solid #F2F4F7;
+    background: var(--bg-surface-2);
+    border-bottom: 1px solid var(--border);
   }
 
   .data-table th {
@@ -83,7 +153,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #98A2B3;
+    color: var(--text-4);
     white-space: nowrap;
     text-align: left;
   }
@@ -91,21 +161,21 @@
   .data-table td {
     padding: 13px 16px;
     font-size: 13.5px;
-    color: #344054;
-    border-bottom: 1px solid #F2F4F7;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border);
     vertical-align: middle;
   }
 
   .data-table tbody tr:last-child td { border-bottom: none; }
   .data-table tbody tr { transition: background 0.1s; }
-  .data-table tbody tr:hover td { background: #FAFBFF; }
+  .data-table tbody tr:hover td { background: var(--bg-surface-2); }
 
   /* ─── Form inputs ────────────────────────────────────────────────────────── */
   .form-label {
     display: block;
     font-size: 12px;
     font-weight: 600;
-    color: #344054;
+    color: var(--text-2);
     margin-bottom: 5px;
   }
 
@@ -115,12 +185,12 @@
     padding: 0 11px;
     font-size: 13.5px;
     font-family: inherit;
-    color: #101828;
-    background: #fff;
-    border: 1px solid #D0D5DD;
+    color: var(--text-1);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-2);
     border-radius: 10px;
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
     box-shadow: 0 1px 2px rgba(16,24,40,0.04);
   }
 
@@ -136,12 +206,12 @@
   }
 
   .form-input:focus {
-    border-color: #6366F1;
-    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 0 0 3px rgba(99,102,241,0.12);
-    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 0 0 3px rgba(99,102,241,0.15);
+    background: var(--bg-surface);
   }
 
-  .form-input::placeholder { color: #D0D5DD; }
+  .form-input::placeholder { color: var(--text-4); }
   .form-error { font-size: 11.5px; color: #F04438; margin-top: 4px; }
 
   /* ─── Buttons ────────────────────────────────────────────────────────────── */
@@ -155,8 +225,8 @@
     font-weight: 600;
     font-family: inherit;
     color: #fff;
-    background: #6366F1;
-    border: 1px solid #6366F1;
+    background: var(--accent);
+    border: 1px solid var(--accent);
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.15s, box-shadow 0.15s;
@@ -164,8 +234,8 @@
     box-shadow: 0 1px 3px rgba(99,102,241,0.2);
   }
   .btn-primary:hover:not(:disabled) {
-    background: #4F46E5;
-    border-color: #4F46E5;
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
     box-shadow: 0 2px 8px rgba(99,102,241,0.25);
   }
   .btn-primary:focus-visible {
@@ -183,33 +253,29 @@
     font-size: 13.5px;
     font-weight: 600;
     font-family: inherit;
-    color: #344054;
-    background: #fff;
-    border: 1px solid #D0D5DD;
+    color: var(--text-2);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-2);
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.15s, box-shadow 0.15s;
     white-space: nowrap;
     box-shadow: 0 1px 2px rgba(16,24,40,0.04);
   }
-  .btn-secondary:hover { background: #F9FAFB; border-color: #C4C9D4; }
+  .btn-secondary:hover { background: var(--bg-surface-2); border-color: var(--border); }
 
   /* ─── Scrollbar ──────────────────────────────────────────────────────────── */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #E4E7EC; border-radius: 9999px; }
-  ::-webkit-scrollbar-thumb:hover { background: #D0D5DD; }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-h); }
 
   /* ─── Mobile utilities ───────────────────────────────────────────────────── */
   .scrollbar-none { scrollbar-width: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
 }
 
-/* ─── Keyframe animations ────────────────────────────────────────────────────
-
-   These are intentionally outside @layer so they're always available
-   and can be referenced by Tailwind utilities below.
-*/
+/* ─── Keyframe animations ────────────────────────────────────────────────────*/
 
 @keyframes pakka-page-enter {
   from { opacity: 0; transform: translateY(10px); }

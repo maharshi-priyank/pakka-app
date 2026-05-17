@@ -36,6 +36,16 @@ export interface PortalInvoice {
   createdAt:     string
 }
 
+export interface PortalMeeting {
+  id:           string
+  title:        string
+  agenda:       string | null
+  scheduledAt:  string
+  durationMins: number
+  meetLink:     string | null
+  status:       string
+}
+
 export interface PortalData {
   client: {
     id:      string
@@ -50,6 +60,7 @@ export interface PortalData {
   proposals: PortalProposal[]
   contracts: PortalContract[]
   invoices:  PortalInvoice[]
+  meetings:  PortalMeeting[]
 }
 
 export function usePortalData(token: string) {

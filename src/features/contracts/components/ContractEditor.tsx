@@ -124,7 +124,7 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
     <div className="flex flex-col h-full">
 
       {/* Tab nav */}
-      <div className="flex items-center gap-0.5 px-6 pt-4 border-b border-[#EAECF0] bg-white">
+      <div className="flex items-center gap-0.5 px-6 pt-4 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A]">
         {TABS.map(tab => {
           const Icon     = tab.icon
           const isActive = activeTab === tab.id
@@ -136,7 +136,7 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
                 'flex items-center gap-1.5 px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap',
                 isActive
                   ? 'border-[#2563EB] text-[#2563EB]'
-                  : 'border-transparent text-[#667085] hover:text-[#344054]',
+                  : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
               )}
             >
               <Icon size={13} strokeWidth={isActive ? 2.5 : 1.8} />
@@ -153,7 +153,7 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto bg-[#F5F6FA]">
+      <div className="flex-1 overflow-y-auto bg-[#F5F6FA] dark:bg-[#0C0D10]">
         <form id="contract-form" onSubmit={handleSubmit(onSave)} className="max-w-2xl mx-auto px-6 py-6 space-y-5">
 
           {/* ══ PARTIES ════════════════════════════════════════════════════════ */}
@@ -423,7 +423,7 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-[#EAECF0] bg-white flex items-center justify-between gap-3 shrink-0">
+      <div className="px-6 py-4 border-t border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] flex items-center justify-between gap-3 shrink-0">
         <button type="button" onClick={onDiscard} className="btn-secondary text-[13px]">
           {isDirty ? 'Discard changes' : 'Close'}
         </button>
@@ -492,8 +492,8 @@ function CSection({ title, description, children }: {
   return (
     <div className="card p-5 space-y-4">
       <div>
-        <p className="text-[13px] font-bold text-[#101828]">{title}</p>
-        {description && <p className="text-[11.5px] text-[#98A2B3] mt-0.5">{description}</p>}
+        <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
+        {description && <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{description}</p>}
       </div>
       {children}
     </div>
@@ -508,10 +508,10 @@ function CFieldArray({ title, description, icon, onAdd, isEmpty, emptyText, chil
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {icon && <div className="w-6 h-6 rounded-lg bg-[#F5F6FA] flex items-center justify-center">{icon}</div>}
+          {icon && <div className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] flex items-center justify-center">{icon}</div>}
           <div>
-            <p className="text-[13px] font-bold text-[#101828]">{title}</p>
-            {description && <p className="text-[11px] text-[#98A2B3]">{description}</p>}
+            <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
+            {description && <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">{description}</p>}
           </div>
         </div>
         <button type="button" onClick={onAdd} className="btn-secondary text-[12px] px-3 h-8 flex items-center gap-1.5">
@@ -519,8 +519,8 @@ function CFieldArray({ title, description, icon, onAdd, isEmpty, emptyText, chil
         </button>
       </div>
       {isEmpty ? (
-        <div className="text-center py-8 border-2 border-dashed border-[#EAECF0] rounded-xl bg-white">
-          <p className="text-[12px] text-[#98A2B3]">{emptyText}</p>
+        <div className="text-center py-8 border-2 border-dashed border-[#EAECF0] dark:border-[#3D4258] rounded-xl bg-white dark:bg-transparent">
+          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">{emptyText}</p>
         </div>
       ) : (
         <div className="space-y-2">{children}</div>

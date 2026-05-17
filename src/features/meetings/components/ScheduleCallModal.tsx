@@ -1,17 +1,30 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { X, Video, AlertTriangle, Loader2 } from 'lucide-react'
+import { X, Video, AlertTriangle, Loader2, UserRound, Building2, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCreateMeeting, type CreateMeetingDto } from '../hooks/useMeetings'
 import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useLeads } from '@/features/leads/hooks/useLeads'
+import { useClients } from '@/features/clients/hooks/useClients'
+import { cn } from '@/lib/utils'
 
 interface Props {
-  open:         boolean
-  onClose:      () => void
+  open:          boolean
+  onClose:       () => void
   defaultTitle?: string
-  leadId?:      string
-  clientId?:    string
-  onSuccess?:   (meetLink: string | null) => void
+  leadId?:       string
+  leadName?:     string
+  clientId?:     string
+  clientName?:   string
+  onSuccess?:    (meetLink: string | null) => void
+}
+
+type ContactType = 'lead' | 'client'
+interface SelectedContact {
+  id:      string
+  name:    string
+  sub?:    string
+  type:    ContactType
 }
 
 const DURATION_OPTIONS = [
@@ -33,16 +46,46 @@ function nextHalfHourStr() {
   return d.toTimeString().slice(0, 5)
 }
 
-export default function ScheduleCallModal({ open, onClose, defaultTitle = '', leadId, clientId, onSuccess }: Props) {
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+}
+
+const inputCls = 'w-full h-9 px-3 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] text-[#101828] dark:text-[#ECEEF3] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]'
+const labelCls = 'block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1.5'
+
+export default function ScheduleCallModal({
+  open, onClose, defaultTitle = '',
+  leadId: propLeadId, leadName: propLeadName,
+  clientId: propClientId, clientName: propClientName,
+  onSuccess,
+}: Props) {
   const { data: profile } = useProfile()
   const createMeeting     = useCreateMeeting()
 
+  const [contact,       setContact]       = useState<SelectedContact | null>(null)
+  const [contactSearch, setContactSearch] = useState('')
+  const [dropdownOpen,  setDropdownOpen]  = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const [guestInput,  setGuestInput]  = useState('')
+  const [guestEmails, setGuestEmails] = useState<string[]>([])
+  const [guestError,  setGuestError]  = useState('')
+
+  const { data: leadsData }   = useLeads({ search: contactSearch, limit: 5 })
+  const { data: clientsData } = useClients(contactSearch)
+
+  const leads   = leadsData?.leads ?? []
+  const clients = (clientsData as any)?.clients ?? clientsData ?? []
+  const filteredClients = Array.isArray(clients) ? clients.slice(0, 5) : []
+
+  const hasResults = leads.length > 0 || filteredClients.length > 0
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm<{
-    title:       string
-    date:        string
-    time:        string
+    title:        string
+    date:         string
+    time:         string
     durationMins: number
-    agenda:      string
+    agenda:       string
   }>({
     defaultValues: {
       title:        defaultTitle,
@@ -54,14 +97,60 @@ export default function ScheduleCallModal({ open, onClose, defaultTitle = '', le
   })
 
   useEffect(() => {
-    if (open) reset({
-      title:        defaultTitle,
-      date:         todayDateStr(),
-      time:         nextHalfHourStr(),
-      durationMins: 30,
-      agenda:       '',
-    })
-  }, [open, defaultTitle, reset])
+    if (!open) return
+    reset({ title: defaultTitle, date: todayDateStr(), time: nextHalfHourStr(), durationMins: 30, agenda: '' })
+    setContactSearch('')
+    setDropdownOpen(false)
+    setGuestEmails([])
+    setGuestInput('')
+    setGuestError('')
+
+    if (propLeadId && propLeadName) {
+      setContact({ id: propLeadId, name: propLeadName, type: 'lead' })
+    } else if (propClientId && propClientName) {
+      setContact({ id: propClientId, name: propClientName, type: 'client' })
+    } else {
+      setContact(null)
+    }
+  }, [open, defaultTitle, propLeadId, propLeadName, propClientId, propClientName, reset])
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  function selectContact(item: SelectedContact) {
+    setContact(item)
+    setContactSearch('')
+    setDropdownOpen(false)
+  }
+
+  function clearContact() {
+    setContact(null)
+    setContactSearch('')
+  }
+
+  function addGuestEmail(raw: string) {
+    const email = raw.trim().replace(/,$/, '')
+    if (!email) return
+    if (!isValidEmail(email)) { setGuestError('Enter a valid email address'); return }
+    if (guestEmails.includes(email)) { setGuestError('Already added'); return }
+    setGuestEmails(prev => [...prev, email])
+    setGuestInput('')
+    setGuestError('')
+  }
+
+  function onGuestKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addGuestEmail(guestInput) }
+    if (e.key === 'Backspace' && guestInput === '' && guestEmails.length > 0) {
+      setGuestEmails(prev => prev.slice(0, -1))
+    }
+  }
 
   function onSubmit(values: { title: string; date: string; time: string; durationMins: number; agenda: string }) {
     const scheduledAt = new Date(`${values.date}T${values.time}:00`).toISOString()
@@ -70,44 +159,44 @@ export default function ScheduleCallModal({ open, onClose, defaultTitle = '', le
       scheduledAt,
       durationMins: Number(values.durationMins),
       agenda:       values.agenda || undefined,
-      leadId:       leadId   || undefined,
-      clientId:     clientId || undefined,
+      leadId:       contact?.type === 'lead'   ? contact.id : undefined,
+      clientId:     contact?.type === 'client' ? contact.id : undefined,
+      guestEmails:  guestEmails.length > 0 ? guestEmails : undefined,
     }
     createMeeting.mutate(dto, {
-      onSuccess: (meeting) => {
-        onSuccess?.(meeting.meetLink)
-        onClose()
-      },
+      onSuccess: (meeting) => { onSuccess?.(meeting.meetLink); onClose() },
     })
   }
 
   if (!open) return null
 
+  const isLocked = !!(propLeadId || propClientId)
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg mx-4 card overflow-hidden anim-modal-in">
+      <div className="relative z-10 w-full max-w-lg mx-4 card overflow-hidden anim-modal-in max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#F1F3F8]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#F1F3F8] dark:border-[#26283A] sticky top-0 bg-white dark:bg-[#13141A] z-10">
           <div>
-            <h2 className="text-[15px] font-bold text-[#0D1117]">Schedule a Call</h2>
-            <p className="text-[12px] text-[#8A94A6] mt-0.5">
+            <h2 className="text-[15px] font-bold text-[#0D1117] dark:text-[#ECEEF3]">Schedule a Call</h2>
+            <p className="text-[12px] text-[#8A94A6] dark:text-[#545C74] mt-0.5">
               {profile?.googleCalendarConnected
                 ? 'A Google Calendar invite with Meet link will be sent.'
                 : 'Connect Google Calendar to auto-generate a Meet link.'}
             </p>
           </div>
-          <button onClick={onClose} className="text-[#98A2B3] hover:text-[#344054] transition-colors ml-4">
+          <button onClick={onClose} className="text-[#98A2B3] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors ml-4">
             <X size={18} />
           </button>
         </div>
 
         {/* Google Calendar not connected banner */}
         {profile && !profile.googleCalendarConnected && (
-          <div className="mx-6 mt-4 flex items-start gap-2.5 bg-[#FFFAEB] border border-[#FEF0C7] rounded-xl px-4 py-3">
+          <div className="mx-6 mt-4 flex items-start gap-2.5 bg-[#FFFAEB] dark:bg-amber-950/30 border border-[#FEF0C7] dark:border-amber-800/40 rounded-xl px-4 py-3">
             <AlertTriangle size={14} className="text-[#B54708] shrink-0 mt-0.5" />
-            <p className="text-[12px] text-[#B54708]">
+            <p className="text-[12px] text-[#B54708] dark:text-amber-400">
               <Link to="/app/settings?tab=integrations" className="font-semibold underline" onClick={onClose}>
                 Connect Google Calendar
               </Link>{' '}
@@ -120,43 +209,146 @@ export default function ScheduleCallModal({ open, onClose, defaultTitle = '', le
 
           {/* Title */}
           <div>
-            <label className="block text-[12px] font-semibold text-[#344054] mb-1.5">Title *</label>
+            <label className={labelCls}>Title *</label>
             <input
               {...register('title', { required: 'Title is required' })}
-              className="w-full h-9 px-3 rounded-lg border border-[#D0D5DD] text-[13px] text-[#101828] bg-white focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all"
+              className={inputCls}
               placeholder="Discovery call with..."
             />
             {errors.title && <p className="text-[11px] text-[#D92D20] mt-1">{errors.title.message}</p>}
           </div>
 
+          {/* Unified contact selector */}
+          <div>
+            <label className={labelCls}>
+              Contact <span className="text-[#98A2B3] dark:text-[#545C74] font-normal">(optional)</span>
+            </label>
+
+            {contact ? (
+              <div className="flex items-center gap-2 h-9 pl-3 pr-2 rounded-lg border border-[#6366F1]/40 bg-[#EEF2FF] dark:bg-[#1E2040] dark:border-[#6366F1]/30">
+                <div className={cn(
+                  'w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0',
+                  contact.type === 'lead' ? 'bg-[#6366F1]' : 'bg-[#059669]',
+                )}>
+                  {contact.type === 'lead'
+                    ? <UserRound size={10} className="text-white" />
+                    : <Building2 size={10} className="text-white" />}
+                </div>
+                <span className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] flex-1 truncate">{contact.name}</span>
+                <span className={cn(
+                  'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
+                  contact.type === 'lead'
+                    ? 'bg-[#6366F1]/15 text-[#4338CA] dark:text-[#A5B4FC]'
+                    : 'bg-[#059669]/15 text-[#065F46] dark:text-[#34D399]',
+                )}>
+                  {contact.type === 'lead' ? 'Lead' : 'Client'}
+                </span>
+                {!isLocked && (
+                  <button type="button" onClick={clearContact} className="text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] ml-1 flex-shrink-0">
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="relative" ref={dropdownRef}>
+                <input
+                  value={contactSearch}
+                  onChange={e => { setContactSearch(e.target.value); setDropdownOpen(true) }}
+                  onFocus={() => setDropdownOpen(true)}
+                  placeholder="Search leads or clients..."
+                  className={inputCls}
+                />
+
+                {dropdownOpen && (contactSearch.length > 0 ? hasResults : true) && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1A1B23] border border-[#EAECF0] dark:border-[#26283A] rounded-xl shadow-lg z-20 overflow-hidden max-h-52 overflow-y-auto">
+
+                    {leads.length > 0 && (
+                      <>
+                        <div className="px-3 py-1.5 bg-[#F9FAFB] dark:bg-[#21222D] border-b border-[#F2F4F7] dark:border-[#26283A]">
+                          <span className="text-[10px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Leads</span>
+                        </div>
+                        {leads.map((lead: any) => (
+                          <button
+                            key={lead.id}
+                            type="button"
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] text-left transition-colors"
+                            onMouseDown={() => selectContact({ id: lead.id, name: lead.name, sub: lead.company, type: 'lead' })}
+                          >
+                            <div className="w-6 h-6 rounded-full bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center flex-shrink-0">
+                              <span className="text-[10px] font-bold text-[#6366F1]">{lead.name.charAt(0)}</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[12px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">{lead.name}</p>
+                              {lead.company && <p className="text-[11px] text-[#667085] dark:text-[#8B92A8] truncate">{lead.company}</p>}
+                            </div>
+                            <span className="text-[10px] font-semibold text-[#6366F1] bg-[#EEF2FF] dark:bg-[#1E2040] px-1.5 py-0.5 rounded-full flex-shrink-0">Lead</span>
+                          </button>
+                        ))}
+                      </>
+                    )}
+
+                    {filteredClients.length > 0 && (
+                      <>
+                        <div className="px-3 py-1.5 bg-[#F9FAFB] dark:bg-[#21222D] border-b border-[#F2F4F7] dark:border-[#26283A]">
+                          <span className="text-[10px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Clients</span>
+                        </div>
+                        {filteredClients.map((client: any) => (
+                          <button
+                            key={client.id}
+                            type="button"
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] text-left transition-colors"
+                            onMouseDown={() => selectContact({ id: client.id, name: client.name, sub: client.company, type: 'client' })}
+                          >
+                            <div className="w-6 h-6 rounded-full bg-[#ECFDF3] dark:bg-emerald-950/40 flex items-center justify-center flex-shrink-0">
+                              <span className="text-[10px] font-bold text-[#027A48] dark:text-[#34D399]">{client.name.charAt(0)}</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[12px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">{client.name}</p>
+                              {client.company && <p className="text-[11px] text-[#667085] dark:text-[#8B92A8] truncate">{client.company}</p>}
+                            </div>
+                            <span className="text-[10px] font-semibold text-[#059669] dark:text-[#34D399] bg-[#ECFDF3] dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-full flex-shrink-0">Client</span>
+                          </button>
+                        ))}
+                      </>
+                    )}
+
+                    {contactSearch.length > 0 && !hasResults && (
+                      <div className="px-4 py-3 text-[12px] text-[#98A2B3] dark:text-[#545C74]">No leads or clients found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Date + Time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[12px] font-semibold text-[#344054] mb-1.5">Date *</label>
+              <label className={labelCls}>Date *</label>
               <input
                 type="date"
                 {...register('date', { required: 'Date is required' })}
                 min={todayDateStr()}
-                className="w-full h-9 px-3 rounded-lg border border-[#D0D5DD] text-[13px] text-[#101828] bg-white focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all"
+                className={inputCls}
               />
             </div>
             <div>
-              <label className="block text-[12px] font-semibold text-[#344054] mb-1.5">Time *</label>
+              <label className={labelCls}>Time *</label>
               <input
                 type="time"
                 step="900"
                 {...register('time', { required: 'Time is required' })}
-                className="w-full h-9 px-3 rounded-lg border border-[#D0D5DD] text-[13px] text-[#101828] bg-white focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all"
+                className={inputCls}
               />
             </div>
           </div>
 
           {/* Duration */}
           <div>
-            <label className="block text-[12px] font-semibold text-[#344054] mb-1.5">Duration</label>
+            <label className={labelCls}>Duration</label>
             <select
               {...register('durationMins')}
-              className="w-full h-9 px-3 rounded-lg border border-[#D0D5DD] text-[13px] text-[#101828] bg-white focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all"
+              className={inputCls}
             >
               {DURATION_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -164,13 +356,50 @@ export default function ScheduleCallModal({ open, onClose, defaultTitle = '', le
             </select>
           </div>
 
+          {/* Guest emails */}
+          <div>
+            <label className={labelCls}>
+              Guests <span className="text-[#98A2B3] dark:text-[#545C74] font-normal">(optional)</span>
+            </label>
+            <div className={cn(
+              'min-h-9 flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 rounded-lg border bg-white dark:bg-[#21222D] transition-all',
+              guestError
+                ? 'border-[#D92D20]'
+                : 'border-[#D0D5DD] dark:border-[#3D4258] focus-within:ring-2 focus-within:ring-[#6366F1]/30 focus-within:border-[#6366F1]',
+            )}>
+              {guestEmails.map(email => (
+                <span key={email} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F4F3FF] dark:bg-[#1E1A3A] text-[11px] font-medium text-[#5925DC] dark:text-[#A78BFA]">
+                  {email}
+                  <button type="button" onClick={() => setGuestEmails(prev => prev.filter(e => e !== email))} className="text-[#7C3AED]/60 hover:text-[#5925DC] dark:hover:text-[#A78BFA]">
+                    <X size={10} />
+                  </button>
+                </span>
+              ))}
+              <input
+                value={guestInput}
+                onChange={e => { setGuestInput(e.target.value); setGuestError('') }}
+                onKeyDown={onGuestKeyDown}
+                onBlur={() => { if (guestInput.trim()) addGuestEmail(guestInput) }}
+                placeholder={guestEmails.length === 0 ? 'Add email, press Enter…' : ''}
+                className="flex-1 min-w-[140px] text-[13px] text-[#101828] dark:text-[#ECEEF3] bg-transparent outline-none placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]"
+              />
+              {guestInput.trim() && (
+                <button type="button" onClick={() => addGuestEmail(guestInput)} className="flex-shrink-0 text-[#6366F1] hover:text-[#4338CA]">
+                  <Plus size={14} />
+                </button>
+              )}
+            </div>
+            {guestError && <p className="text-[11px] text-[#D92D20] mt-1">{guestError}</p>}
+            <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-1">Press Enter or comma after each email</p>
+          </div>
+
           {/* Agenda */}
           <div>
-            <label className="block text-[12px] font-semibold text-[#344054] mb-1.5">Agenda <span className="text-[#98A2B3] font-normal">(optional)</span></label>
+            <label className={labelCls}>Agenda <span className="text-[#98A2B3] dark:text-[#545C74] font-normal">(optional)</span></label>
             <textarea
               {...register('agenda')}
               rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-[#D0D5DD] text-[13px] text-[#101828] bg-white focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] text-[#101828] dark:text-[#ECEEF3] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-all resize-none placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]"
               placeholder="Topics to cover..."
             />
           </div>
@@ -184,7 +413,7 @@ export default function ScheduleCallModal({ open, onClose, defaultTitle = '', le
             <button
               type="button"
               onClick={onClose}
-              className="h-9 px-4 rounded-lg border border-[#D0D5DD] text-[13px] font-semibold text-[#344054] hover:bg-[#F9FAFB] transition-colors"
+              className="h-9 px-4 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
             >
               Cancel
             </button>

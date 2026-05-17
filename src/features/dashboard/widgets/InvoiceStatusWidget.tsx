@@ -4,7 +4,7 @@ import { useInvoices } from '@/features/invoices/hooks/useInvoices'
 import { FileText } from 'lucide-react'
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded', className)} />
+  return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
 }
 
 const STATUS_CONFIG = [
@@ -28,13 +28,13 @@ export default function InvoiceStatusWidget() {
 
   return (
     <div className="card overflow-hidden h-full hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
         <div>
-          <h2 className="text-[14px] font-bold text-[#101828]">Invoice Status</h2>
-          <p className="text-[12px] text-[#98A2B3] mt-0.5">{total} total invoice{total !== 1 ? 's' : ''}</p>
+          <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Invoice Status</h2>
+          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{total} total invoice{total !== 1 ? 's' : ''}</p>
         </div>
-        <div className="w-8 h-8 rounded-xl bg-[#FFFAEB] flex items-center justify-center">
-          <FileText size={14} className="text-[#B54708]" strokeWidth={2} />
+        <div className="w-8 h-8 rounded-xl bg-[#FFFAEB] dark:bg-amber-950/30 flex items-center justify-center">
+          <FileText size={14} className="text-[#B54708] dark:text-amber-400" strokeWidth={2} />
         </div>
       </div>
 
@@ -48,7 +48,7 @@ export default function InvoiceStatusWidget() {
       ) : total === 0 ? (
         <div className="flex flex-col items-center justify-center py-10">
           <FileText size={28} className="text-[#D0D5DD] mb-2" />
-          <p className="text-[13px] text-[#98A2B3]">No invoices yet</p>
+          <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74]">No invoices yet</p>
         </div>
       ) : (
         <div className="flex flex-col sm:flex-row items-center gap-4 px-5 py-4">
@@ -76,8 +76,8 @@ export default function InvoiceStatusWidget() {
             </ResponsiveContainer>
             {/* Center label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <p className="text-[16px] font-extrabold text-[#101828] leading-none">{total}</p>
-              <p className="text-[9px] text-[#98A2B3] mt-0.5 font-medium">TOTAL</p>
+              <p className="text-[16px] font-extrabold text-[#101828] dark:text-[#ECEEF3] leading-none">{total}</p>
+              <p className="text-[9px] text-[#98A2B3] dark:text-[#545C74] mt-0.5 font-medium">TOTAL</p>
             </div>
           </div>
 
@@ -89,9 +89,9 @@ export default function InvoiceStatusWidget() {
               return (
                 <div key={s.key} className="flex items-center gap-2.5">
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} />
-                  <span className="text-[12px] text-[#667085] flex-1">{s.label}</span>
-                  <span className="text-[12px] font-semibold text-[#344054]">{count}</span>
-                  <span className="text-[10px] text-[#98A2B3] w-8 text-right">{pct}%</span>
+                  <span className="text-[12px] text-[#667085] dark:text-[#8B92A8] flex-1">{s.label}</span>
+                  <span className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{count}</span>
+                  <span className="text-[10px] text-[#98A2B3] dark:text-[#545C74] w-8 text-right">{pct}%</span>
                 </div>
               )
             })}

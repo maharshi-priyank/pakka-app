@@ -27,9 +27,9 @@ export default function LeadsPage() {
       {/* Page header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-[17px] font-bold text-[#0D1117] tracking-tight">Leads</h1>
+          <h1 className="text-[17px] font-bold text-[#0D1117] dark:text-[#ECEEF3] tracking-tight">Leads</h1>
           {pipelineValue !== null && pipelineValue > 0 && (
-            <p className={cn('text-[12px] text-[#9CA3AF] mt-0.5 flex items-center gap-1')}>
+            <p className={cn('text-[12px] text-[#9CA3AF] dark:text-[#545C74] mt-0.5 flex items-center gap-1')}>
               <IndianRupee size={10} />
               {pipelineValue.toLocaleString('en-IN')} in pipeline
             </p>
@@ -45,9 +45,9 @@ export default function LeadsPage() {
               onChange={e => setSearch(e.target.value)}
               placeholder="Search leads…"
               className={cn(
-                'h-9 pl-8 pr-3 text-[13px] bg-white border border-[#E8EBF2] rounded-lg outline-none',
-                'focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 transition-all w-[180px]',
-                'placeholder:text-[#C9CDD4]',
+                'h-9 pl-8 pr-3 text-[13px] bg-white dark:bg-[#21222D] text-[#101828] dark:text-[#ECEEF3] border border-[#E8EBF2] dark:border-[#3D4258] rounded-lg outline-none',
+                'focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 transition-all w-[180px]',
+                'placeholder:text-[#C9CDD4] dark:placeholder:text-[#545C74]',
               )}
             />
           </div>

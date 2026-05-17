@@ -3,7 +3,7 @@ import { useProposals } from '@/features/proposals/hooks/useProposals'
 import { ThumbsUp } from 'lucide-react'
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded', className)} />
+  return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
 }
 
 function RingChart({ percent, size = 88 }: { percent: number; size?: number }) {
@@ -16,7 +16,8 @@ function RingChart({ percent, size = 88 }: { percent: number; size?: number }) {
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <circle
         cx={size / 2} cy={size / 2} r={radius}
-        fill="none" stroke="#EEF2FF" strokeWidth={strokeWidth}
+        fill="none" strokeWidth={strokeWidth}
+        className="stroke-[#EEF2FF] dark:stroke-[#26283A]"
       />
       <circle
         cx={size / 2} cy={size / 2} r={radius}
@@ -32,7 +33,8 @@ function RingChart({ percent, size = 88 }: { percent: number; size?: number }) {
       <text
         x={size / 2} y={size / 2 + 1}
         textAnchor="middle" dominantBaseline="middle"
-        fontSize="15" fontWeight="800" fill="#101828"
+        fontSize="15" fontWeight="800"
+        className="fill-[#101828] dark:fill-[#ECEEF3]"
         fontFamily="'Plus Jakarta Sans', sans-serif"
       >
         {percent}%
@@ -52,7 +54,7 @@ export default function WinRateWidget() {
   return (
     <div className="card p-5 h-full hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF]">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] dark:bg-[#1E2040]">
           <ThumbsUp size={18} className="text-[#6366F1]" strokeWidth={2} />
         </div>
       </div>
@@ -64,8 +66,8 @@ export default function WinRateWidget() {
       ) : (
         <div className="flex flex-col items-center">
           <RingChart percent={percent} />
-          <p className="text-[12px] text-[#667085] font-medium mt-2">Win rate</p>
-          <p className="text-[11px] text-[#98A2B3] mt-0.5">
+          <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] font-medium mt-2">Win rate</p>
+          <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">
             {decided > 0
               ? `${accepted} won · ${declined} lost`
               : 'No resolved proposals yet'}

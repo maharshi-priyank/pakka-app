@@ -32,6 +32,7 @@ export interface CreateMeetingDto {
   agenda?:      string
   leadId?:      string
   clientId?:    string
+  guestEmails?: string[]
 }
 
 export interface UpdateMeetingDto extends Partial<CreateMeetingDto> {}

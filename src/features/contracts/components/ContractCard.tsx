@@ -34,7 +34,7 @@ export default function ContractCard({ contract, onClick }: Props) {
   return (
     <div
       onClick={() => onClick(contract)}
-      className="bg-white rounded-xl border border-[#EAECF0] shadow-sm cursor-pointer hover:shadow-md hover:border-[#D0D5DD] transition-all duration-150"
+      className="bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm cursor-pointer hover:shadow-md hover:border-[#D0D5DD] dark:hover:border-[#333649] transition-all duration-150"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 px-3.5 pt-3.5 pb-3">
@@ -46,8 +46,8 @@ export default function ContractCard({ contract, onClick }: Props) {
             {clientName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-bold text-[#101828] truncate leading-snug">{contract.title}</p>
-            <p className="text-[11px] text-[#98A2B3] truncate leading-snug">{clientName}</p>
+            <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate leading-snug">{contract.title}</p>
+            <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] truncate leading-snug">{clientName}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -56,7 +56,7 @@ export default function ContractCard({ contract, onClick }: Props) {
           </span>
           <button
             onClick={e => { e.stopPropagation(); onClick(contract) }}
-            className="w-6 h-6 rounded-lg bg-[#F5F6FA] hover:bg-[#EFF6FF] flex items-center justify-center text-[#98A2B3] hover:text-[#2563EB] transition-colors"
+            className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:text-[#2563EB] transition-colors"
           >
             <ArrowUpRight size={11} strokeWidth={2.5} />
           </button>
@@ -65,9 +65,9 @@ export default function ContractCard({ contract, onClick }: Props) {
 
       {/* Total */}
       {totalAmount !== undefined && totalAmount > 0 && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Contract value</span>
-          <span className="flex items-center gap-0.5 text-[13px] font-extrabold text-[#101828]">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Contract value</span>
+          <span className="flex items-center gap-0.5 text-[13px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">
             <IndianRupee size={10} strokeWidth={3} />
             {totalAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
           </span>
@@ -76,9 +76,9 @@ export default function ContractCard({ contract, onClick }: Props) {
 
       {/* Linked proposal */}
       {contract.proposal && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Proposal</span>
-          <span className="text-[11.5px] font-medium text-[#344054] truncate max-w-[160px]">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Proposal</span>
+          <span className="text-[11.5px] font-medium text-[#344054] dark:text-[#C2C8D8] truncate max-w-[160px]">
             {contract.proposal.title}
           </span>
         </div>
@@ -86,9 +86,9 @@ export default function ContractCard({ contract, onClick }: Props) {
 
       {/* Signed date */}
       {contract.signedAt && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Signed</span>
-          <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#027A48] bg-[#ECFDF3] px-1.5 py-0.5 rounded-md">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Signed</span>
+          <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#027A48] bg-[#ECFDF3] dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-md">
             <CheckCircle2 size={9} strokeWidth={2.5} />
             {formatDate(contract.signedAt)}
           </span>
@@ -96,9 +96,9 @@ export default function ContractCard({ contract, onClick }: Props) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border-t border-[#F2F4F7] bg-[#FAFAFA] rounded-b-xl">
-        <span className="text-[10px] text-[#98A2B3]">{formatDate(contract.createdAt)}</span>
-        <span className="flex items-center gap-1 text-[10px] font-medium text-[#667085]">
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border-t border-[#F2F4F7] dark:border-[#26283A] bg-[#FAFAFA] dark:bg-[#1A1B23] rounded-b-xl">
+        <span className="text-[10px] text-[#98A2B3] dark:text-[#545C74]">{formatDate(contract.createdAt)}</span>
+        <span className="flex items-center gap-1 text-[10px] font-medium text-[#667085] dark:text-[#8B92A8]">
           {contract.status === 'SIGNED'
             ? <><CheckCircle2 size={8} strokeWidth={2} className="text-[#12B76A]" /> Signed</>
             : contract.status === 'SENT'
@@ -113,24 +113,24 @@ export default function ContractCard({ contract, onClick }: Props) {
 
 export function ContractCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-[#EAECF0] p-3.5 animate-pulse space-y-3">
+    <div className="bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] p-3.5 animate-pulse space-y-3">
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-full bg-[#F2F4F7]" />
+        <div className="w-8 h-8 rounded-full bg-[#F2F4F7] dark:bg-[#21222D]" />
         <div className="flex-1 space-y-1.5">
-          <div className="h-3 bg-[#F2F4F7] rounded w-3/4" />
-          <div className="h-2.5 bg-[#F2F4F7] rounded w-1/2" />
+          <div className="h-3 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-3/4" />
+          <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-1/2" />
         </div>
-        <div className="h-5 w-12 bg-[#F2F4F7] rounded-full" />
+        <div className="h-5 w-12 bg-[#F2F4F7] dark:bg-[#21222D] rounded-full" />
       </div>
-      <div className="h-px bg-[#F2F4F7]" />
+      <div className="h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
       <div className="flex justify-between">
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-16" />
-        <div className="h-3 bg-[#F2F4F7] rounded w-20" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-16" />
+        <div className="h-3 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-20" />
       </div>
-      <div className="h-px bg-[#F2F4F7]" />
+      <div className="h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
       <div className="flex justify-between">
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-12" />
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-24" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-12" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-24" />
       </div>
     </div>
   )

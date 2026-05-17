@@ -9,7 +9,7 @@ export default function AppShell() {
   const { pathname } = useLocation()
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F4F5F8]">
+    <div className="flex h-screen overflow-hidden bg-[#F4F5F8] dark:bg-[#0C0D10] transition-colors">
 
       {/* ── Desktop sidebar (lg+) ──────────────────────────────── */}
       <div className="hidden lg:block">

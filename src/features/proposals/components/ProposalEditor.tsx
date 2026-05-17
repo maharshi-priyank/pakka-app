@@ -157,7 +157,7 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
     <div className="flex flex-col h-full">
 
       {/* ── Tab nav ── */}
-      <div className="flex items-center gap-0.5 px-6 pt-4 border-b border-[#EAECF0] bg-white overflow-x-auto">
+      <div className="flex items-center gap-0.5 px-6 pt-4 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] overflow-x-auto">
         {TABS.map(tab => {
           const Icon     = tab.icon
           const isActive = activeTab === tab.id
@@ -169,7 +169,7 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
                 'flex items-center gap-1.5 px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap',
                 isActive
                   ? 'border-[#2563EB] text-[#2563EB]'
-                  : 'border-transparent text-[#667085] hover:text-[#344054]',
+                  : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
               )}
             >
               <Icon size={13} strokeWidth={isActive ? 2.5 : 1.8} />
@@ -181,20 +181,20 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
         <div className="flex-1" />
 
         {watchedLineItems.length > 0 && (
-          <div className="flex items-center gap-1 text-[12px] text-[#667085] bg-[#F9FAFB] border border-[#EAECF0] rounded-lg px-3 py-1.5 mr-2 shrink-0">
+          <div className="flex items-center gap-1 text-[12px] text-[#667085] dark:text-[#8B92A8] bg-[#F9FAFB] dark:bg-[#21222D] border border-[#EAECF0] dark:border-[#3D4258] rounded-lg px-3 py-1.5 mr-2 shrink-0">
             <IndianRupee size={10} strokeWidth={2.5} />
-            <span className="font-extrabold text-[#101828]">
+            <span className="font-extrabold text-[#101828] dark:text-[#ECEEF3]">
               {total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
             </span>
             {gstAmount > 0 && (
-              <span className="text-[#98A2B3]">+ GST {gstAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+              <span className="text-[#98A2B3] dark:text-[#545C74]">+ GST {gstAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
             )}
           </div>
         )}
       </div>
 
       {/* ── Scrollable content ── */}
-      <div className="flex-1 overflow-y-auto bg-[#F5F6FA]">
+      <div className="flex-1 overflow-y-auto bg-[#F5F6FA] dark:bg-[#0C0D10]">
         <form id="proposal-form" onSubmit={handleSubmit(onSave)} className="max-w-2xl mx-auto px-6 py-6 space-y-5">
 
           {/* ══ COVER ══════════════════════════════════════════════════════════ */}
@@ -416,10 +416,10 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
                           />
                         </div>
                       </div>
-                      <div className="flex items-center justify-end gap-3 text-[11px] text-[#667085] pt-1">
-                        <span>Line: <span className="font-semibold text-[#344054]">₹{lineTotal.toLocaleString('en-IN')}</span></span>
+                      <div className="flex items-center justify-end gap-3 text-[11px] text-[#667085] dark:text-[#8B92A8] pt-1">
+                        <span>Line: <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">₹{lineTotal.toLocaleString('en-IN')}</span></span>
                         {lineGst > 0 && (
-                          <span>+ GST: <span className="font-semibold text-[#344054]">₹{lineGst.toLocaleString('en-IN')}</span></span>
+                          <span>+ GST: <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">₹{lineGst.toLocaleString('en-IN')}</span></span>
                         )}
                       </div>
                     </div>
@@ -428,20 +428,20 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
 
                 {/* Totals */}
                 {lineItemsArray.fields.length > 0 && (
-                  <div className="card p-4 bg-[#FAFAFA] space-y-2">
-                    <div className="flex justify-between text-[12px] text-[#667085]">
+                  <div className="card p-4 bg-[#FAFAFA] dark:bg-[#1A1B23] space-y-2">
+                    <div className="flex justify-between text-[12px] text-[#667085] dark:text-[#8B92A8]">
                       <span>Subtotal</span>
-                      <span className="font-medium text-[#344054]">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      <span className="font-medium text-[#344054] dark:text-[#C2C8D8]">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
                     {gstAmount > 0 && (
-                      <div className="flex justify-between text-[12px] text-[#667085]">
+                      <div className="flex justify-between text-[12px] text-[#667085] dark:text-[#8B92A8]">
                         <span>{watchedGstType === 'CGST_SGST' ? 'CGST + SGST' : 'IGST'}</span>
-                        <span className="font-medium text-[#344054]">₹{gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        <span className="font-medium text-[#344054] dark:text-[#C2C8D8]">₹{gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                       </div>
                     )}
-                    <div className="flex justify-between pt-2 border-t border-[#EAECF0]">
-                      <span className="text-[13px] font-bold text-[#101828]">Total</span>
-                      <span className="flex items-center gap-0.5 text-[15px] font-extrabold text-[#101828]">
+                    <div className="flex justify-between pt-2 border-t border-[#EAECF0] dark:border-[#26283A]">
+                      <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Total</span>
+                      <span className="flex items-center gap-0.5 text-[15px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">
                         <IndianRupee size={11} strokeWidth={3} />
                         {total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </span>
@@ -522,7 +522,7 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
                       <span className="text-[10px] font-bold text-[#2563EB]">{idx + 1}</span>
                     </div>
                     {idx < milestonesArray.fields.length - 1 && (
-                      <div className="w-px h-4 bg-[#EAECF0] mt-1" />
+                      <div className="w-px h-4 bg-[#EAECF0] dark:bg-[#26283A] mt-1" />
                     )}
                   </div>
                   <div className="flex-1 space-y-2">
@@ -643,7 +643,7 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
       </div>
 
       {/* ── Footer actions ── */}
-      <div className="px-6 py-4 border-t border-[#EAECF0] bg-white flex items-center justify-between gap-3 shrink-0">
+      <div className="px-6 py-4 border-t border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] flex items-center justify-between gap-3 shrink-0">
         <button type="button" onClick={onDiscard} className="btn-secondary text-[13px]">
           {isDirty ? 'Discard changes' : 'Close'}
         </button>
@@ -708,8 +708,8 @@ function Section({ title, description, children }: {
   return (
     <div className="card p-5 space-y-4">
       <div>
-        <p className="text-[13px] font-bold text-[#101828]">{title}</p>
-        {description && <p className="text-[11.5px] text-[#98A2B3] mt-0.5">{description}</p>}
+        <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
+        {description && <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{description}</p>}
       </div>
       {children}
     </div>
@@ -726,13 +726,13 @@ function FieldArraySection({ title, description, icon, onAdd, isEmpty, emptyText
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {icon && (
-            <div className="w-6 h-6 rounded-lg bg-[#F5F6FA] flex items-center justify-center">
+            <div className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] flex items-center justify-center">
               {icon}
             </div>
           )}
           <div>
-            <p className="text-[13px] font-bold text-[#101828]">{title}</p>
-            {description && <p className="text-[11px] text-[#98A2B3]">{description}</p>}
+            <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
+            {description && <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">{description}</p>}
           </div>
         </div>
         <button
@@ -745,8 +745,8 @@ function FieldArraySection({ title, description, icon, onAdd, isEmpty, emptyText
       </div>
 
       {isEmpty ? (
-        <div className="text-center py-8 border-2 border-dashed border-[#EAECF0] rounded-xl bg-white">
-          <p className="text-[12px] text-[#98A2B3]">{emptyText}</p>
+        <div className="text-center py-8 border-2 border-dashed border-[#EAECF0] dark:border-[#3D4258] rounded-xl bg-white dark:bg-transparent">
+          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">{emptyText}</p>
         </div>
       ) : (
         <div className="space-y-2">{children}</div>
