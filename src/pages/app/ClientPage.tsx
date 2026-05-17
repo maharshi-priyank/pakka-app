@@ -166,12 +166,14 @@ export default function ClientPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const leads = client?.leads ?? []
+
   const TABS: { key: Tab; label: string; count: number }[] = client ? [
     { key: 'proposals', label: 'Proposals', count: client.proposals.length },
     { key: 'contracts', label: 'Contracts', count: client.contracts.length },
     { key: 'invoices',  label: 'Invoices',  count: client.invoices.length  },
-    { key: 'leads',     label: 'Leads',     count: client.leads.length     },
-    { key: 'timeline',  label: 'Timeline',  count: client.proposals.length + client.contracts.length + client.invoices.length + client.leads.length },
+    { key: 'leads',     label: 'Leads',     count: leads.length            },
+    { key: 'timeline',  label: 'Timeline',  count: client.proposals.length + client.contracts.length + client.invoices.length + leads.length },
   ] : []
 
   return (
@@ -245,7 +247,7 @@ export default function ClientPage() {
             />
             <StatCard
               icon={Users} label="Linked Leads"
-              value={String(client.leads.length)}
+              value={String(leads.length)}
               color="text-indigo-600 dark:text-indigo-400"
               bg="bg-[#EEF2FF] dark:bg-[#1E2040]"
             />
@@ -345,11 +347,11 @@ export default function ClientPage() {
 
             {activeTab === 'leads' && (
               <MiniTable
-                empty={client.leads.length === 0}
+                empty={leads.length === 0}
                 emptyMsg="No linked leads"
                 headers={['Name', 'Stage', 'Budget', 'Source', 'Added']}
               >
-                {client.leads.map(l => (
+                {leads.map(l => (
                   <tr key={l.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2A] transition-colors">
                     <td className="px-4 py-3 text-[12.5px] font-semibold text-[#101828] dark:text-[#ECEEF3]">{l.name}</td>
                     <td className="px-4 py-3"><StatusBadge status={l.stage} /></td>
@@ -491,7 +493,7 @@ function TimelineTab({ client }: { client: ClientData }) {
     ...client.proposals.map(p => ({ id: p.id, type: 'proposal' as const, title: p.title, status: p.status, date: p.createdAt, amount: p.totalAmount })),
     ...client.contracts.map(c => ({ id: c.id, type: 'contract' as const, title: c.title, status: c.status, date: c.createdAt })),
     ...client.invoices.map(i  => ({ id: i.id, type: 'invoice'  as const, title: i.invoiceNumber, status: i.status, date: i.createdAt, amount: i.total })),
-    ...client.leads.map(l    => ({ id: l.id, type: 'lead'     as const, title: l.name, status: l.stage, date: l.createdAt })),
+    ...(client.leads ?? []).map(l => ({ id: l.id, type: 'lead' as const, title: l.name, status: l.stage, date: l.createdAt })),
   ].sort((a, b) => b.date.localeCompare(a.date))
 
   if (items.length === 0) {
