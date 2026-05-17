@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Sparkles, LayoutTemplate, FileText } from 'lucide-react'
+import { X, LayoutTemplate, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lead } from '../schemas/lead.schema'
 import AIIcon from '@/features/ai/components/AIIcon'
