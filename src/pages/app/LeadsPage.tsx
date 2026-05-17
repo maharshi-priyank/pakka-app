@@ -1,15 +1,38 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { Plus, Search, X, IndianRupee, LayoutGrid, List } from 'lucide-react'
+import { Plus, Search, X, IndianRupee, LayoutGrid, List, SlidersHorizontal, Check } from 'lucide-react'
 import AIIcon from '@/features/ai/components/AIIcon'
 import { LeadsKanban, AddLeadModal } from '@/features/leads'
 import { useLeads } from '@/features/leads'
 import { cn } from '@/lib/utils'
 import type { Lead } from '@/features/leads/schemas/lead.schema'
+import { LEAD_STAGES, LEAD_SOURCES, STAGE_LABELS } from '@/features/leads/schemas/lead.schema'
+import type { LeadStage } from '@/features/leads/schemas/lead.schema'
 import AILeadModal from '@/features/ai/components/AILeadModal'
 import LeadProposalPickerModal from '@/features/leads/components/LeadProposalPickerModal'
 import LeadTable, { LeadTableSkeleton } from '@/features/leads/components/LeadTable'
 import type { SortField, SortDir } from '@/features/leads/components/LeadTable'
 import LeadDrawer from '@/features/leads/components/LeadDrawer'
+import FilterPanel, { FilterSection } from '@/components/filters/FilterPanel'
+import AmountRangeFilter from '@/components/filters/AmountRangeFilter'
+
+const SOURCE_LABELS: Record<string, string> = {
+  instagram:     'Instagram',
+  referral:      'Referral',
+  website:       'Website',
+  linkedin:      'LinkedIn',
+  cold_outreach: 'Cold outreach',
+  other:         'Other',
+}
+
+interface LeadFilters {
+  stages:    LeadStage[]
+  sources:   string[]
+  budgetMin: string
+  budgetMax: string
+  followUp:  'overdue' | 'this_week' | 'unset' | ''
+}
+
+const EMPTY_FILTERS: LeadFilters = { stages: [], sources: [], budgetMin: '', budgetMax: '', followUp: '' }
 
 type ViewMode = 'kanban' | 'table'
 const VIEW_KEY = 'pakka:leads:view'
@@ -26,6 +49,8 @@ export default function LeadsPage() {
   const [showAI,          setShowAI]          = useState(false)
   const [proposalForLead, setProposalForLead] = useState<Lead | null>(null)
   const [drawerLead,      setDrawerLead]      = useState<Lead | null>(null)
+  const [filterOpen,      setFilterOpen]      = useState(false)
+  const [filters,         setFilters]         = useState<LeadFilters>(EMPTY_FILTERS)
 
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -61,6 +86,37 @@ export default function LeadsPage() {
       )
     }
 
+    // Stage and source filters only apply in table view
+    if (view === 'table') {
+      if (filters.stages.length > 0) {
+        list = list.filter(l => filters.stages.includes(l.stage))
+      }
+      if (filters.sources.length > 0) {
+        list = list.filter(l => l.source && filters.sources.includes(l.source))
+      }
+      if (filters.followUp === 'overdue') {
+        list = list.filter(l => l.followUpAt && new Date(l.followUpAt) < new Date())
+      } else if (filters.followUp === 'this_week') {
+        const now   = new Date()
+        const start = new Date(now); start.setHours(0, 0, 0, 0)
+        const end   = new Date(now); end.setDate(end.getDate() + (6 - end.getDay())); end.setHours(23, 59, 59, 999)
+        list = list.filter(l => {
+          if (!l.followUpAt) return false
+          const d = new Date(l.followUpAt)
+          return d >= start && d <= end
+        })
+      } else if (filters.followUp === 'unset') {
+        list = list.filter(l => !l.followUpAt)
+      }
+    }
+
+    if (filters.budgetMin) {
+      list = list.filter(l => Number(l.budget ?? 0) >= Number(filters.budgetMin))
+    }
+    if (filters.budgetMax) {
+      list = list.filter(l => Number(l.budget ?? 0) <= Number(filters.budgetMax))
+    }
+
     return [...list].sort((a, b) => {
       const dir = sortDir === 'asc' ? 1 : -1
       switch (sortBy) {
@@ -71,9 +127,35 @@ export default function LeadsPage() {
         default:           return 0
       }
     })
-  }, [allLeads, search, sortBy, sortDir])
+  }, [allLeads, search, view, filters, sortBy, sortDir])
 
   const hasSearch = search.trim().length > 0
+
+  const activeCount = (filters.stages.length > 0 ? 1 : 0)
+    + (filters.sources.length > 0 ? 1 : 0)
+    + (filters.budgetMin || filters.budgetMax ? 1 : 0)
+    + (filters.followUp ? 1 : 0)
+
+  const followUpLabels: Record<string, string> = {
+    overdue:   'Overdue',
+    this_week: 'This week',
+    unset:     'Not set',
+  }
+
+  const chips = [
+    ...(filters.stages.length > 0
+      ? [{ key: 'stages', label: `Stage: ${filters.stages.length === 1 ? STAGE_LABELS[filters.stages[0]] : `${filters.stages.length} stages`}`, onRemove: () => setFilters(f => ({ ...f, stages: [] })) }]
+      : []),
+    ...(filters.sources.length > 0
+      ? [{ key: 'sources', label: `Source: ${filters.sources.length === 1 ? SOURCE_LABELS[filters.sources[0]] : `${filters.sources.length} sources`}`, onRemove: () => setFilters(f => ({ ...f, sources: [] })) }]
+      : []),
+    ...(filters.budgetMin || filters.budgetMax
+      ? [{ key: 'budget', label: `Budget: ₹${filters.budgetMin || '0'} – ₹${filters.budgetMax || '∞'}`, onRemove: () => setFilters(f => ({ ...f, budgetMin: '', budgetMax: '' })) }]
+      : []),
+    ...(filters.followUp
+      ? [{ key: 'followup', label: `Follow-up: ${followUpLabels[filters.followUp]}`, onRemove: () => setFilters(f => ({ ...f, followUp: '' })) }]
+      : []),
+  ]
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -113,6 +195,27 @@ export default function LeadsPage() {
             )}
           </div>
 
+          {/* Filter button — only visible in table view */}
+          {view === 'table' && (
+            <button
+              onClick={() => setFilterOpen(v => !v)}
+              className={cn(
+                'flex items-center gap-1.5 h-9 px-2.5 rounded-lg border text-[12px] font-medium transition-colors',
+                activeCount > 0
+                  ? 'border-[#6366F1] bg-[#EEF2FF] dark:bg-[#1E2040] text-[#6366F1]'
+                  : 'border-[#E8EBF2] dark:border-[#3D4258] text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] hover:border-[#D0D5DD]',
+              )}
+            >
+              <SlidersHorizontal size={12} />
+              Filters
+              {activeCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-[#6366F1] text-white text-[9px] font-bold flex items-center justify-center">
+                  {activeCount}
+                </span>
+              )}
+            </button>
+          )}
+
           {/* View toggle */}
           <div className="flex items-center gap-0.5 p-0.5 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg border border-[#E4E7EC] dark:border-[#26283A]">
             <button
@@ -150,6 +253,54 @@ export default function LeadsPage() {
           </button>
         </div>
       </div>
+
+      {/* Filter panel — table view only */}
+      {view === 'table' && (
+        <FilterPanel open={filterOpen} onClear={() => setFilters(EMPTY_FILTERS)} chips={chips}>
+          <FilterSection label="Stage">
+            <MultiCheckFilter
+              options={LEAD_STAGES.map(s => ({ value: s, label: STAGE_LABELS[s] }))}
+              selected={filters.stages}
+              onChange={vals => setFilters(f => ({ ...f, stages: vals as LeadStage[] }))}
+            />
+          </FilterSection>
+          <FilterSection label="Source">
+            <MultiCheckFilter
+              options={LEAD_SOURCES.map(s => ({ value: s, label: SOURCE_LABELS[s] ?? s }))}
+              selected={filters.sources}
+              onChange={vals => setFilters(f => ({ ...f, sources: vals }))}
+            />
+          </FilterSection>
+          <FilterSection label="Budget">
+            <AmountRangeFilter
+              min={filters.budgetMin}
+              max={filters.budgetMax}
+              onMin={v => setFilters(f => ({ ...f, budgetMin: v }))}
+              onMax={v => setFilters(f => ({ ...f, budgetMax: v }))}
+            />
+          </FilterSection>
+          <FilterSection label="Follow-up">
+            <div className="flex flex-col gap-1">
+              {(['', 'overdue', 'this_week', 'unset'] as const).map(val => (
+                <label key={val} className="flex items-center gap-2 cursor-pointer group">
+                  <div className={cn(
+                    'w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors',
+                    filters.followUp === val
+                      ? 'bg-[#6366F1] border-[#6366F1]'
+                      : 'border-[#D0D5DD] dark:border-[#3D4258] group-hover:border-[#6366F1]',
+                  )}>
+                    {filters.followUp === val && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  </div>
+                  <input type="radio" className="sr-only" checked={filters.followUp === val} onChange={() => setFilters(f => ({ ...f, followUp: val }))} />
+                  <span className="text-[12px] text-[#344054] dark:text-[#C2C8D8]">
+                    {val === '' ? 'Any' : val === 'overdue' ? 'Overdue' : val === 'this_week' ? 'This week' : 'Not set'}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </FilterSection>
+        </FilterPanel>
+      )}
 
       {/* Table view */}
       {view === 'table' && (
@@ -208,6 +359,43 @@ export default function LeadsPage() {
           onClose={() => setDrawerLead(null)}
         />
       )}
+    </div>
+  )
+}
+
+function MultiCheckFilter({
+  options,
+  selected,
+  onChange,
+}: {
+  options:  { value: string; label: string }[]
+  selected: string[]
+  onChange: (vals: string[]) => void
+}) {
+  function toggle(val: string) {
+    onChange(selected.includes(val) ? selected.filter(v => v !== val) : [...selected, val])
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      {options.map(opt => {
+        const isOn = selected.includes(opt.value)
+        return (
+          <button
+            key={opt.value}
+            onClick={() => toggle(opt.value)}
+            className="flex items-center gap-2 text-left group"
+          >
+            <div className={cn(
+              'w-3.5 h-3.5 rounded flex items-center justify-center border shrink-0 transition-colors',
+              isOn ? 'bg-[#6366F1] border-[#6366F1]' : 'border-[#D0D5DD] dark:border-[#3D4258] group-hover:border-[#6366F1]',
+            )}>
+              {isOn && <Check size={8} strokeWidth={3} className="text-white" />}
+            </div>
+            <span className="text-[12px] text-[#344054] dark:text-[#C2C8D8]">{opt.label}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }

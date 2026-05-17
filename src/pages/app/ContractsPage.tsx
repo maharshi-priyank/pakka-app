@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileSignature, Search, X, LayoutGrid, List } from 'lucide-react'
+import { Plus, FileSignature, Search, X, LayoutGrid, List, SlidersHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useContracts } from '@/features/contracts/hooks/useContracts'
 import ContractCard, { ContractCardSkeleton } from '@/features/contracts/components/ContractCard'
@@ -8,6 +8,10 @@ import ContractTable, { ContractTableSkeleton } from '@/features/contracts/compo
 import type { SortField, SortDir } from '@/features/contracts/components/ContractTable'
 import type { ContractStatus, Contract } from '@/features/contracts/schemas/contract.schema'
 import { STATUS_LABELS } from '@/features/contracts/schemas/contract.schema'
+import FilterPanel, { FilterSection } from '@/components/filters/FilterPanel'
+import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
+import DateRangeFilter from '@/components/filters/DateRangeFilter'
+import AmountRangeFilter from '@/components/filters/AmountRangeFilter'
 
 const STATUS_TABS: Array<{ value: ContractStatus | 'ALL'; label: string }> = [
   { value: 'ALL',      label: 'All' },
@@ -16,6 +20,16 @@ const STATUS_TABS: Array<{ value: ContractStatus | 'ALL'; label: string }> = [
   { value: 'SIGNED',   label: 'Signed' },
   { value: 'DECLINED', label: 'Declined' },
 ]
+
+interface ContractFilters {
+  clientIds:  string[]
+  dateFrom:   string
+  dateTo:     string
+  amountMin:  string
+  amountMax:  string
+}
+
+const EMPTY_FILTERS: ContractFilters = { clientIds: [], dateFrom: '', dateTo: '', amountMin: '', amountMax: '' }
 
 type ViewMode = 'table' | 'cards'
 const VIEW_KEY = 'pakka:contracts:view'
@@ -31,6 +45,8 @@ export default function ContractsPage() {
   const [view,         setView]         = useState<ViewMode>(getStoredView)
   const [sortBy,       setSortBy]       = useState<SortField>('createdAt')
   const [sortDir,      setSortDir]      = useState<SortDir>('desc')
+  const [filterOpen,   setFilterOpen]   = useState(false)
+  const [filters,      setFilters]      = useState<ContractFilters>(EMPTY_FILTERS)
 
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -69,6 +85,30 @@ export default function ContractsPage() {
       )
     }
 
+    if (filters.clientIds.length > 0) {
+      list = list.filter(c => c.clientId && filters.clientIds.includes(c.clientId))
+    }
+    if (filters.dateFrom) {
+      list = list.filter(c => c.createdAt.slice(0, 10) >= filters.dateFrom)
+    }
+    if (filters.dateTo) {
+      list = list.filter(c => c.createdAt.slice(0, 10) <= filters.dateTo)
+    }
+    if (filters.amountMin) {
+      const min = Number(filters.amountMin)
+      list = list.filter(c => {
+        const amt = ((c.content as Record<string, unknown>)?.totalAmount as number) ?? 0
+        return amt >= min
+      })
+    }
+    if (filters.amountMax) {
+      const max = Number(filters.amountMax)
+      list = list.filter(c => {
+        const amt = ((c.content as Record<string, unknown>)?.totalAmount as number) ?? 0
+        return amt <= max
+      })
+    }
+
     return [...list].sort((a, b) => {
       const dir = sortDir === 'asc' ? 1 : -1
       const aAmt = ((a.content as Record<string, unknown>)?.totalAmount as number) ?? 0
@@ -81,9 +121,24 @@ export default function ContractsPage() {
         default:            return 0
       }
     })
-  }, [allContracts, statusFilter, search, sortBy, sortDir])
+  }, [allContracts, statusFilter, search, filters, sortBy, sortDir])
 
-  const hasSearch = search.trim().length > 0
+  const hasSearch  = search.trim().length > 0
+  const activeCount = (filters.clientIds.length > 0 ? 1 : 0)
+    + (filters.dateFrom || filters.dateTo ? 1 : 0)
+    + (filters.amountMin || filters.amountMax ? 1 : 0)
+
+  const chips = [
+    ...(filters.clientIds.length > 0
+      ? [{ key: 'clients', label: `Client: ${filters.clientIds.length === 1 ? 'selected' : `${filters.clientIds.length} selected`}`, onRemove: () => setFilters(f => ({ ...f, clientIds: [] })) }]
+      : []),
+    ...(filters.dateFrom || filters.dateTo
+      ? [{ key: 'date', label: `Created: ${filters.dateFrom || '…'} – ${filters.dateTo || '…'}`, onRemove: () => setFilters(f => ({ ...f, dateFrom: '', dateTo: '' })) }]
+      : []),
+    ...(filters.amountMin || filters.amountMax
+      ? [{ key: 'amount', label: `Amount: ₹${filters.amountMin || '0'} – ₹${filters.amountMax || '∞'}`, onRemove: () => setFilters(f => ({ ...f, amountMin: '', amountMax: '' })) }]
+      : []),
+  ]
 
   return (
     <div className="space-y-5 max-w-[1400px]">
@@ -150,11 +205,30 @@ export default function ContractsPage() {
             )}
           />
           {hasSearch && (
-            <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] transition-colors">
+            <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] dark:hover:text-[#C2C8D8] transition-colors">
               <X size={12} />
             </button>
           )}
         </div>
+
+        <button
+          onClick={() => setFilterOpen(v => !v)}
+          className={cn(
+            'flex items-center gap-1.5 h-8 px-2.5 rounded-lg border text-[12px] font-medium transition-colors',
+            activeCount > 0
+              ? 'border-[#6366F1] bg-[#EEF2FF] dark:bg-[#1E2040] text-[#6366F1]'
+              : 'border-[#E4E7EC] dark:border-[#26283A] text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#13141A] hover:border-[#D0D5DD]',
+          )}
+        >
+          <SlidersHorizontal size={12} />
+          Filters
+          {activeCount > 0 && (
+            <span className="w-4 h-4 rounded-full bg-[#6366F1] text-white text-[9px] font-bold flex items-center justify-center">
+              {activeCount}
+            </span>
+          )}
+        </button>
+
         {hasSearch && !isLoading && (
           <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74] shrink-0">
             {displayed.length} result{displayed.length !== 1 ? 's' : ''}
@@ -170,6 +244,33 @@ export default function ContractsPage() {
           </button>
         </div>
       </div>
+
+      {/* Filter panel */}
+      <FilterPanel open={filterOpen} onClear={() => setFilters(EMPTY_FILTERS)} chips={chips}>
+        <FilterSection label="Client">
+          <ClientMultiSelect
+            selected={filters.clientIds}
+            onChange={ids => setFilters(f => ({ ...f, clientIds: ids }))}
+          />
+        </FilterSection>
+        <FilterSection label="Created">
+          <DateRangeFilter
+            label="Created"
+            from={filters.dateFrom}
+            to={filters.dateTo}
+            onFrom={v => setFilters(f => ({ ...f, dateFrom: v }))}
+            onTo={v => setFilters(f => ({ ...f, dateTo: v }))}
+          />
+        </FilterSection>
+        <FilterSection label="Amount">
+          <AmountRangeFilter
+            min={filters.amountMin}
+            max={filters.amountMax}
+            onMin={v => setFilters(f => ({ ...f, amountMin: v }))}
+            onMax={v => setFilters(f => ({ ...f, amountMax: v }))}
+          />
+        </FilterSection>
+      </FilterPanel>
 
       {/* Content */}
       {isLoading ? (

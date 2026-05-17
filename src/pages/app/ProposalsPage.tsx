@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List } from 'lucide-react'
+import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List, SlidersHorizontal } from 'lucide-react'
 import AIIcon from '@/features/ai/components/AIIcon'
 import AIProposalModal from '@/features/ai/components/AIProposalModal'
 import { cn } from '@/lib/utils'
@@ -16,6 +16,10 @@ import { useProposalTemplates } from '@/features/proposals/hooks/useProposalTemp
 import type { ProposalStatus } from '@/features/proposals/schemas/proposal.schema'
 import { STATUS_LABELS } from '@/features/proposals/schemas/proposal.schema'
 import type { Proposal } from '@/features/proposals/schemas/proposal.schema'
+import FilterPanel, { FilterSection } from '@/components/filters/FilterPanel'
+import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
+import DateRangeFilter from '@/components/filters/DateRangeFilter'
+import AmountRangeFilter from '@/components/filters/AmountRangeFilter'
 
 type ActiveTab = ProposalStatus | 'ALL' | 'TEMPLATES'
 
@@ -28,6 +32,16 @@ const STATUS_TABS: Array<{ value: ActiveTab; label: string }> = [
   { value: 'DECLINED',  label: 'Declined' },
   { value: 'TEMPLATES', label: 'Templates' },
 ]
+
+interface ProposalFilters {
+  clientIds:  string[]
+  dateFrom:   string
+  dateTo:     string
+  amountMin:  string
+  amountMax:  string
+}
+
+const EMPTY_FILTERS: ProposalFilters = { clientIds: [], dateFrom: '', dateTo: '', amountMin: '', amountMax: '' }
 
 type ViewMode = 'table' | 'cards'
 const VIEW_KEY = 'pakka:proposals:view'
@@ -46,6 +60,8 @@ export default function ProposalsPage() {
   const [view,               setView]               = useState<ViewMode>(getStoredView)
   const [sortBy,             setSortBy]             = useState<SortField>('createdAt')
   const [sortDir,            setSortDir]            = useState<SortDir>('desc')
+  const [filterOpen,         setFilterOpen]         = useState(false)
+  const [filters,            setFilters]            = useState<ProposalFilters>(EMPTY_FILTERS)
 
   const searchRef     = useRef<HTMLInputElement>(null)
   const convertMutation = useCreateContractFromProposal()
@@ -82,9 +98,7 @@ export default function ProposalsPage() {
   const displayed = useMemo(() => {
     let list = allProposals
 
-    if (statusFilter !== 'ALL') {
-      list = list.filter(p => p.status === statusFilter)
-    }
+    if (statusFilter !== 'ALL') list = list.filter(p => p.status === statusFilter)
 
     if (search.trim()) {
       const q = search.trim().toLowerCase()
@@ -94,6 +108,22 @@ export default function ProposalsPage() {
         (p.client?.company ?? '').toLowerCase().includes(q) ||
         (p.lead?.name      ?? '').toLowerCase().includes(q),
       )
+    }
+
+    if (filters.clientIds.length > 0) {
+      list = list.filter(p => p.clientId && filters.clientIds.includes(p.clientId))
+    }
+    if (filters.dateFrom) {
+      list = list.filter(p => p.createdAt.slice(0, 10) >= filters.dateFrom)
+    }
+    if (filters.dateTo) {
+      list = list.filter(p => p.createdAt.slice(0, 10) <= filters.dateTo)
+    }
+    if (filters.amountMin) {
+      list = list.filter(p => Number(p.totalAmount) >= Number(filters.amountMin))
+    }
+    if (filters.amountMax) {
+      list = list.filter(p => Number(p.totalAmount) <= Number(filters.amountMax))
     }
 
     return [...list].sort((a, b) => {
@@ -106,10 +136,26 @@ export default function ProposalsPage() {
         default:            return 0
       }
     })
-  }, [allProposals, statusFilter, search, sortBy, sortDir])
+  }, [allProposals, statusFilter, search, filters, sortBy, sortDir])
 
-  const hasSearch     = search.trim().length > 0
-  const showContent   = activeTab !== 'TEMPLATES'
+  const hasSearch  = search.trim().length > 0
+  const showContent = activeTab !== 'TEMPLATES'
+
+  const activeCount = (filters.clientIds.length > 0 ? 1 : 0)
+    + (filters.dateFrom || filters.dateTo ? 1 : 0)
+    + (filters.amountMin || filters.amountMax ? 1 : 0)
+
+  const chips = [
+    ...(filters.clientIds.length > 0
+      ? [{ key: 'clients', label: `Client: ${filters.clientIds.length === 1 ? 'selected' : `${filters.clientIds.length} selected`}`, onRemove: () => setFilters(f => ({ ...f, clientIds: [] })) }]
+      : []),
+    ...(filters.dateFrom || filters.dateTo
+      ? [{ key: 'date', label: `Created: ${filters.dateFrom || '…'} – ${filters.dateTo || '…'}`, onRemove: () => setFilters(f => ({ ...f, dateFrom: '', dateTo: '' })) }]
+      : []),
+    ...(filters.amountMin || filters.amountMax
+      ? [{ key: 'amount', label: `Amount: ₹${filters.amountMin || '0'} – ₹${filters.amountMax || '∞'}`, onRemove: () => setFilters(f => ({ ...f, amountMin: '', amountMax: '' })) }]
+      : []),
+  ]
 
   return (
     <div className="space-y-5 max-w-[1400px]">
@@ -169,9 +215,7 @@ export default function ProposalsPage() {
               onClick={() => setActiveTab(tab.value)}
               className={cn(
                 'px-3.5 py-2.5 text-[12.5px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap flex items-center gap-1.5',
-                isActive
-                  ? 'border-[#6366F1] text-[#6366F1]'
-                  : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+                isActive ? 'border-[#6366F1] text-[#6366F1]' : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
               )}
             >
               {tab.label}
@@ -191,7 +235,7 @@ export default function ProposalsPage() {
       {/* Templates tab */}
       {!showContent && <TemplatesTab />}
 
-      {/* Toolbar: search + view toggle (proposals tabs only) */}
+      {/* Toolbar: search + filter + view toggle (proposals tabs only) */}
       {showContent && (
         <div className="flex items-center gap-2.5">
           <div className="relative flex-1 max-w-xs">
@@ -203,22 +247,36 @@ export default function ProposalsPage() {
               placeholder="Search by title, client, lead…"
               className={cn(
                 'w-full h-8 pl-8 pr-7 rounded-lg border text-[12.5px] outline-none transition-colors',
-                'bg-white dark:bg-[#13141A]',
-                'border-[#E4E7EC] dark:border-[#26283A]',
-                'text-[#101828] dark:text-[#ECEEF3]',
-                'placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]',
+                'bg-white dark:bg-[#13141A] border-[#E4E7EC] dark:border-[#26283A]',
+                'text-[#101828] dark:text-[#ECEEF3] placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]',
                 'focus:border-[#6366F1] dark:focus:border-[#6366F1]',
               )}
             />
             {hasSearch && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] dark:hover:text-[#C2C8D8] transition-colors"
-              >
+              <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085] dark:hover:text-[#C2C8D8] transition-colors">
                 <X size={12} />
               </button>
             )}
           </div>
+
+          <button
+            onClick={() => setFilterOpen(v => !v)}
+            className={cn(
+              'flex items-center gap-1.5 h-8 px-2.5 rounded-lg border text-[12px] font-medium transition-colors',
+              activeCount > 0
+                ? 'border-[#6366F1] bg-[#EEF2FF] dark:bg-[#1E2040] text-[#6366F1]'
+                : 'border-[#E4E7EC] dark:border-[#26283A] text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#13141A] hover:border-[#D0D5DD]',
+            )}
+          >
+            <SlidersHorizontal size={12} />
+            Filters
+            {activeCount > 0 && (
+              <span className="w-4 h-4 rounded-full bg-[#6366F1] text-white text-[9px] font-bold flex items-center justify-center">
+                {activeCount}
+              </span>
+            )}
+          </button>
+
           {hasSearch && !isLoading && (
             <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74] shrink-0">
               {displayed.length} result{displayed.length !== 1 ? 's' : ''}
@@ -226,28 +284,43 @@ export default function ProposalsPage() {
           )}
           <div className="flex-1" />
           <div className="flex items-center gap-0.5 p-0.5 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg border border-[#E4E7EC] dark:border-[#26283A]">
-            <button
-              onClick={() => setView('table')}
-              title="Table view"
-              className={cn(
-                'w-7 h-7 rounded-md flex items-center justify-center transition-colors',
-                view === 'table' ? 'bg-white dark:bg-[#13141A] text-[#6366F1] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]',
-              )}
-            >
+            <button onClick={() => setView('table')} title="Table view" className={cn('w-7 h-7 rounded-md flex items-center justify-center transition-colors', view === 'table' ? 'bg-white dark:bg-[#13141A] text-[#6366F1] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]')}>
               <List size={13} strokeWidth={2} />
             </button>
-            <button
-              onClick={() => setView('cards')}
-              title="Card view"
-              className={cn(
-                'w-7 h-7 rounded-md flex items-center justify-center transition-colors',
-                view === 'cards' ? 'bg-white dark:bg-[#13141A] text-[#6366F1] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]',
-              )}
-            >
+            <button onClick={() => setView('cards')} title="Card view" className={cn('w-7 h-7 rounded-md flex items-center justify-center transition-colors', view === 'cards' ? 'bg-white dark:bg-[#13141A] text-[#6366F1] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]')}>
               <LayoutGrid size={13} strokeWidth={2} />
             </button>
           </div>
         </div>
+      )}
+
+      {/* Filter panel */}
+      {showContent && (
+        <FilterPanel open={filterOpen} onClear={() => setFilters(EMPTY_FILTERS)} chips={chips}>
+          <FilterSection label="Client">
+            <ClientMultiSelect
+              selected={filters.clientIds}
+              onChange={ids => setFilters(f => ({ ...f, clientIds: ids }))}
+            />
+          </FilterSection>
+          <FilterSection label="Created">
+            <DateRangeFilter
+              label="Created"
+              from={filters.dateFrom}
+              to={filters.dateTo}
+              onFrom={v => setFilters(f => ({ ...f, dateFrom: v }))}
+              onTo={v => setFilters(f => ({ ...f, dateTo: v }))}
+            />
+          </FilterSection>
+          <FilterSection label="Amount">
+            <AmountRangeFilter
+              min={filters.amountMin}
+              max={filters.amountMax}
+              onMin={v => setFilters(f => ({ ...f, amountMin: v }))}
+              onMax={v => setFilters(f => ({ ...f, amountMax: v }))}
+            />
+          </FilterSection>
+        </FilterPanel>
       )}
 
       {/* Proposals content */}
