@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -62,6 +62,18 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
   const updateMutation = useUpdateProposal()
   const sendMutation   = useSendProposal()
   const { data: leadsData } = useLeads({ limit: 100 })
+
+  // Re-sync leadId after async leads data loads — the <select> can't pick a value
+  // that doesn't exist as an <option> yet, so the initial defaultValues binding is lost.
+  const leadSynced = useRef(false)
+  useEffect(() => {
+    if (leadSynced.current || !leadsData?.items?.length) return
+    const targetLeadId = proposal?.leadId ?? defaultLead?.id
+    if (targetLeadId) {
+      setValue('leadId', targetLeadId)
+      leadSynced.current = true
+    }
+  }, [leadsData?.items?.length])
 
   const isEdit      = !!proposal
   const isSaving    = createMutation.isPending || updateMutation.isPending
