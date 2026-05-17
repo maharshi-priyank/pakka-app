@@ -3,6 +3,7 @@ import {
   Bell, CheckCircle2, Eye, ThumbsUp, FileSignature, UserPlus, BellOff,
   Volume2, VolumeX,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useNotifications, useUnreadCount, useMarkRead, useMarkAllRead, type AppNotification } from '../hooks/useNotifications'
 import {
   useNotificationAlert, setMuted, requestDesktopPermission, getSound,
@@ -20,25 +21,26 @@ function timeAgo(date: string): string {
   return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
 }
 
-const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
-  'invoice.paid':       { icon: CheckCircle2,   color: '#027A48', bg: '#ECFDF3' },
-  'proposal.opened':    { icon: Eye,            color: '#6366F1', bg: '#EEF2FF' },
-  'proposal.accepted':  { icon: ThumbsUp,       color: '#027A48', bg: '#ECFDF3' },
-  'contract.signed':    { icon: FileSignature,  color: '#7C3AED', bg: '#F5F3FF' },
-  'lead.created':       { icon: UserPlus,       color: '#D97706', bg: '#FFFBEB' },
+const TYPE_CONFIG: Record<string, { icon: React.ElementType; iconColor: string; bg: string }> = {
+  'invoice.paid':       { icon: CheckCircle2,   iconColor: 'text-[#027A48] dark:text-[#34D399]',  bg: 'bg-[#ECFDF3] dark:bg-emerald-950/50' },
+  'proposal.opened':    { icon: Eye,            iconColor: 'text-[#6366F1]',                       bg: 'bg-[#EEF2FF] dark:bg-[#1E2040]'       },
+  'proposal.accepted':  { icon: ThumbsUp,       iconColor: 'text-[#027A48] dark:text-[#34D399]',  bg: 'bg-[#ECFDF3] dark:bg-emerald-950/50' },
+  'contract.signed':    { icon: FileSignature,  iconColor: 'text-[#7C3AED] dark:text-[#A78BFA]',  bg: 'bg-[#F5F3FF] dark:bg-violet-950/40'  },
+  'lead.created':       { icon: UserPlus,       iconColor: 'text-[#D97706] dark:text-amber-400',  bg: 'bg-[#FFFBEB] dark:bg-amber-950/30'   },
 }
 
-const DEFAULT_CONFIG = { icon: Bell, color: '#6B7280', bg: '#F3F4F6' }
+const DEFAULT_CONFIG = {
+  icon: Bell,
+  iconColor: 'text-[#6B7280] dark:text-[#8B92A8]',
+  bg: 'bg-[#F3F4F6] dark:bg-[#21222D]',
+}
 
 function NotifIcon({ type }: { type: string }) {
   const cfg = TYPE_CONFIG[type] ?? DEFAULT_CONFIG
   const Icon = cfg.icon
   return (
-    <div
-      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-      style={{ background: cfg.bg }}
-    >
-      <Icon size={14} style={{ color: cfg.color }} strokeWidth={2} />
+    <div className={cn('w-9 h-9 rounded-full flex items-center justify-center shrink-0', cfg.bg)}>
+      <Icon size={14} className={cfg.iconColor} strokeWidth={2} />
     </div>
   )
 }
@@ -48,16 +50,20 @@ function NotifRow({ n, onRead }: { n: AppNotification; onRead: (id: string) => v
   return (
     <button
       onClick={() => !n.read && onRead(n.id)}
-      className={`w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-[#F9FAFB] transition-colors ${!n.read ? 'bg-[#EEF2FF]/50' : ''}`}
+      className={cn(
+        'w-full flex items-start gap-3 px-4 py-3 text-left transition-colors',
+        'hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23]',
+        !n.read && 'bg-[#EEF2FF]/50 dark:bg-[#1E2040]/40',
+      )}
     >
       <NotifIcon type={n.type} />
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-[#101828] leading-tight">{n.title}</p>
-        <p className="text-[12px] text-[#667085] leading-snug mt-0.5">{n.body}</p>
-        <p className="text-[11px] text-[#98A2B3] mt-1">{time}</p>
+        <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] leading-tight">{n.title}</p>
+        <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] leading-snug mt-0.5">{n.body}</p>
+        <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-1">{time}</p>
       </div>
       {!n.read && (
-        <span className="w-2 h-2 rounded-full bg-[#6366F1] mt-1 shrink-0" />
+        <span className="w-2 h-2 rounded-full bg-[#6366F1] mt-1.5 shrink-0" />
       )}
     </button>
   )
@@ -73,21 +79,18 @@ export default function NotificationBell() {
   const markRead    = useMarkRead()
   const markAllRead = useMarkAllRead()
 
-  // Sound + desktop alerts
   useNotificationAlert(notifications)
 
-  // Request desktop notification permission once when bell is first opened
   useEffect(() => {
     if (open) requestDesktopPermission()
   }, [open])
 
   function toggleMute() {
     const next = !muted
-    setMuted(next)           // saves 'none' or 'chime' to localStorage
+    setMuted(next)
     setMutedState(next)
   }
 
-  // Close on outside click
   useEffect(() => {
     function handle(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -103,7 +106,7 @@ export default function NotificationBell() {
       {/* Bell button */}
       <button
         onClick={() => setOpen(v => !v)}
-        className="relative w-9 h-9 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#F5F6FA] hover:text-[#344054] transition-colors"
+        className="relative w-9 h-9 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
         aria-label="Notifications"
       >
         <Bell size={16} strokeWidth={1.8} />
@@ -118,11 +121,11 @@ export default function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-[calc(100%+8px)] w-[360px] bg-white border border-[#EAECF0] rounded-xl shadow-lg z-50 overflow-hidden">
+        <div className="absolute right-0 top-[calc(100%+8px)] w-[360px] bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-2xl shadow-xl dark:shadow-black/40 z-50 overflow-hidden">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#F2F4F7]">
-            <span className="text-[13px] font-bold text-[#101828]">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
+            <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">
               Notifications
               {unreadCount > 0 && (
                 <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#6366F1] text-white text-[10px] font-bold">
@@ -131,11 +134,10 @@ export default function NotificationBell() {
               )}
             </span>
             <div className="flex items-center gap-2">
-              {/* Mute toggle */}
               <button
                 onClick={toggleMute}
                 title={muted ? 'Unmute notifications' : 'Mute notifications'}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#F5F6FA] hover:text-[#344054] transition-colors"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
               >
                 {muted
                   ? <VolumeX size={13} strokeWidth={2} />
@@ -157,14 +159,14 @@ export default function NotificationBell() {
           <div className="max-h-[400px] overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4">
-                <BellOff size={28} className="text-[#D0D5DD] mb-3" strokeWidth={1.5} />
-                <p className="text-[13px] font-medium text-[#667085]">No notifications yet</p>
-                <p className="text-[12px] text-[#98A2B3] mt-0.5 text-center">
+                <BellOff size={28} className="text-[#D0D5DD] dark:text-[#3D4258] mb-3" strokeWidth={1.5} />
+                <p className="text-[13px] font-medium text-[#667085] dark:text-[#8B92A8]">No notifications yet</p>
+                <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5 text-center">
                   Activity on your proposals, contracts, and invoices will appear here.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-[#F2F4F7]">
+              <div className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
                 {notifications.map(n => (
                   <NotifRow
                     key={n.id}
