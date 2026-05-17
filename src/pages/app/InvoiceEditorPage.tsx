@@ -26,27 +26,27 @@ export default function InvoiceEditorPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-60px)] max-w-full -mx-6 -my-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] bg-white shrink-0">
+      <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] shrink-0">
         <button
           onClick={() => navigate('/app/invoices')}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] hover:bg-[#F5F6FA] hover:text-[#344054] transition-colors"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
         >
           <ArrowLeft size={14} strokeWidth={2} />
         </button>
-        <span className="text-[12px] text-[#98A2B3]">Invoices</span>
-        <span className="text-[12px] text-[#D0D5DD]">/</span>
-        <span className="text-[12px] font-medium text-[#344054]">
+        <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Invoices</span>
+        <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
+        <span className="text-[12px] font-medium text-[#344054] dark:text-[#C2C8D8]">
           {isNew ? 'New invoice' : (invoice?.invoiceNumber ?? 'Edit invoice')}
         </span>
         {!isNew && invoice && (
           <>
-            <span className="text-[12px] text-[#D0D5DD]">·</span>
+            <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">·</span>
             <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-              invoice.status === 'DRAFT'    ? 'bg-[#F2F4F7] text-[#667085]'  :
-              invoice.status === 'SENT'     ? 'bg-[#EFF6FF] text-[#2563EB]'  :
-              invoice.status === 'PAID'     ? 'bg-[#ECFDF3] text-[#027A48]'  :
-              invoice.status === 'OVERDUE'  ? 'bg-[#FEF3F2] text-[#D92D20]'  :
-              'bg-[#F2F4F7] text-[#667085]'
+              invoice.status === 'DRAFT'    ? 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]'  :
+              invoice.status === 'SENT'     ? 'bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-[#60A5FA]'  :
+              invoice.status === 'PAID'     ? 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399]'  :
+              invoice.status === 'OVERDUE'  ? 'bg-[#FEF3F2] dark:bg-red-950/40 text-[#D92D20] dark:text-red-400'  :
+              'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]'
             }`}>
               {invoice.status}
             </span>

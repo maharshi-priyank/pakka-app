@@ -27,6 +27,12 @@ interface Props {
   isCreating: boolean
 }
 
+const inputCls = cn(
+  'px-3 py-2 text-[13px] text-[#344054] dark:text-[#ECEEF3] bg-[#FAFAFA] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-lg',
+  'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 focus:bg-white dark:focus:bg-[#1A1B23]',
+  'transition-all placeholder:text-[#C9CDD4] dark:placeholder:text-[#545C74]',
+)
+
 // ─── Editable tag list ────────────────────────────────────────────────────────
 
 function TagList({
@@ -51,7 +57,7 @@ function TagList({
         {items.map((item, i) => (
           <span
             key={i}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#F5F6FA] rounded-lg text-[12px] text-[#344054] font-medium"
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg text-[12px] text-[#344054] dark:text-[#C2C8D8] font-medium"
           >
             {item}
             <button
@@ -70,15 +76,15 @@ function TagList({
           onKeyDown={e => e.key === 'Enter' && add()}
           placeholder={placeholder}
           className={cn(
-            'flex-1 px-2.5 py-1.5 text-[12px] bg-[#FAFAFA] border border-[#E8EBF2] rounded-lg',
-            'outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-50 focus:bg-white',
-            'placeholder:text-[#D0D5DD] transition-all',
+            'flex-1 px-2.5 py-1.5 text-[12px] text-[#344054] dark:text-[#ECEEF3] bg-[#FAFAFA] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-lg',
+            'outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 focus:bg-white dark:focus:bg-[#1A1B23]',
+            'placeholder:text-[#D0D5DD] dark:placeholder:text-[#545C74] transition-all',
           )}
         />
         <button
           onClick={add}
           disabled={!draft.trim()}
-          className="px-2.5 py-1.5 rounded-lg bg-[#F5F6FA] hover:bg-indigo-50 text-[#667085] hover:text-indigo-600 transition-colors disabled:opacity-40"
+          className="px-2.5 py-1.5 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-[#667085] dark:text-[#8B92A8] hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-40"
         >
           <Plus size={12} strokeWidth={2.5} />
         </button>
@@ -115,30 +121,30 @@ function LineItemsTable({
   return (
     <div className="space-y-2">
       {hasZeroRates && (
-        <div className="flex items-center gap-1.5 text-[11.5px] text-[#B54708] bg-[#FFFAEB] px-3 py-1.5 rounded-lg">
+        <div className="flex items-center gap-1.5 text-[11.5px] text-[#B54708] bg-[#FFFAEB] dark:bg-amber-950/30 dark:text-amber-400 px-3 py-1.5 rounded-lg">
           <AlertCircle size={11} strokeWidth={2} />
           Fill in the rates below — AI doesn't know your pricing
         </div>
       )}
-      <div className="border border-[#E8EBF2] rounded-xl overflow-hidden">
+      <div className="border border-[#E8EBF2] dark:border-[#3D4258] rounded-xl overflow-hidden">
         <table className="w-full text-[12px]">
           <thead>
-            <tr className="bg-[#F9FAFB] border-b border-[#E8EBF2]">
-              <th className="text-left px-3 py-2 text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wide">Description</th>
-              <th className="text-center px-2 py-2 text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wide w-14">Qty</th>
-              <th className="text-right px-3 py-2 text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wide w-28">Rate (₹)</th>
-              <th className="text-center px-2 py-2 text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wide w-20">GST %</th>
+            <tr className="bg-[#F9FAFB] dark:bg-[#1A1B23] border-b border-[#E8EBF2] dark:border-[#3D4258]">
+              <th className="text-left px-3 py-2 text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Description</th>
+              <th className="text-center px-2 py-2 text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide w-14">Qty</th>
+              <th className="text-right px-3 py-2 text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide w-28">Rate (₹)</th>
+              <th className="text-center px-2 py-2 text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide w-20">GST %</th>
               <th className="w-8" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#F2F4F7]">
+          <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
             {items.map((item, i) => (
               <tr key={i} className="group">
                 <td className="px-3 py-2">
                   <input
                     value={item.description}
                     onChange={e => update(i, 'description', e.target.value)}
-                    className="w-full text-[12.5px] text-[#344054] bg-transparent outline-none focus:bg-indigo-50/30 rounded px-1 -ml-1"
+                    className="w-full text-[12.5px] text-[#344054] dark:text-[#C2C8D8] bg-transparent outline-none focus:bg-indigo-50/30 dark:focus:bg-indigo-950/20 rounded px-1 -ml-1"
                     placeholder="Description"
                   />
                 </td>
@@ -148,21 +154,21 @@ function LineItemsTable({
                     value={item.qty}
                     onChange={e => update(i, 'qty', e.target.value)}
                     min={1}
-                    className="w-12 text-[12.5px] text-[#344054] bg-transparent outline-none focus:bg-indigo-50/30 rounded text-center"
+                    className="w-12 text-[12.5px] text-[#344054] dark:text-[#C2C8D8] bg-transparent outline-none focus:bg-indigo-50/30 dark:focus:bg-indigo-950/20 rounded text-center"
                   />
                 </td>
                 <td className="px-3 py-2">
                   <div className={cn(
                     'flex items-center gap-1 rounded-lg px-2 py-1 transition-colors',
-                    item.rate === 0 ? 'bg-amber-50 border border-amber-200' : 'bg-transparent',
+                    item.rate === 0 ? 'bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40' : 'bg-transparent',
                   )}>
-                    <IndianRupee size={10} className={item.rate === 0 ? 'text-amber-500' : 'text-[#98A2B3]'} />
+                    <IndianRupee size={10} className={item.rate === 0 ? 'text-amber-500' : 'text-[#98A2B3] dark:text-[#545C74]'} />
                     <input
                       type="number"
                       value={item.rate || ''}
                       onChange={e => update(i, 'rate', e.target.value)}
                       placeholder="0"
-                      className="w-full text-[12.5px] text-[#344054] bg-transparent outline-none text-right"
+                      className="w-full text-[12.5px] text-[#344054] dark:text-[#C2C8D8] bg-transparent outline-none text-right"
                     />
                   </div>
                 </td>
@@ -170,7 +176,7 @@ function LineItemsTable({
                   <select
                     value={item.gstRate}
                     onChange={e => update(i, 'gstRate', e.target.value)}
-                    className="text-[12px] text-[#344054] bg-transparent outline-none"
+                    className="text-[12px] text-[#344054] dark:text-[#C2C8D8] bg-transparent outline-none"
                   >
                     {[0, 5, 12, 18, 28].map(r => <option key={r}>{r}</option>)}
                   </select>
@@ -178,7 +184,7 @@ function LineItemsTable({
                 <td className="px-2 py-2 text-center">
                   <button
                     onClick={() => remove(i)}
-                    className="text-[#D0D5DD] hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                    className="text-[#D0D5DD] dark:text-[#3D4258] hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                   >
                     <X size={12} strokeWidth={2} />
                   </button>
@@ -189,7 +195,7 @@ function LineItemsTable({
         </table>
         <button
           onClick={addRow}
-          className="w-full py-2 text-[12px] text-[#98A2B3] hover:text-indigo-600 hover:bg-indigo-50/40 flex items-center justify-center gap-1.5 transition-colors"
+          className="w-full py-2 text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20 flex items-center justify-center gap-1.5 transition-colors"
         >
           <Plus size={11} strokeWidth={2.5} /> Add line item
         </button>
@@ -222,7 +228,7 @@ function ClientSelector({
     return () => document.removeEventListener('mousedown', handle)
   }, [])
 
-  function pick(c: { id: string; name: string; email: string | null }) {
+  function pick(c: { id: string; name: string; email: string | null; company: string | null }) {
     const entry = { id: c.id, name: c.name, email: c.email ?? '' }
     setPicked(entry)
     setSearch(c.name)
@@ -246,9 +252,9 @@ function ClientSelector({
             onFocus={() => setOpen(true)}
             placeholder={suggested.name ? `Suggested: ${suggested.name}` : 'Search existing clients…'}
             className={cn(
-              'w-full px-3 py-2 text-[13px] bg-[#FAFAFA] border border-[#E8EBF2] rounded-lg',
-              'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 focus:bg-white',
-              'placeholder:text-[#C9CDD4] transition-all',
+              'w-full px-3 py-2 text-[13px] text-[#344054] dark:text-[#ECEEF3] bg-[#FAFAFA] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-lg',
+              'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 focus:bg-white dark:focus:bg-[#1A1B23]',
+              'placeholder:text-[#C9CDD4] dark:placeholder:text-[#545C74] transition-all',
             )}
           />
           {picked && (
@@ -264,24 +270,24 @@ function ClientSelector({
 
       {/* Dropdown */}
       {open && clients.length > 0 && (
-        <div className="absolute z-10 top-[calc(100%+4px)] left-0 right-0 bg-white border border-[#E8EBF2] rounded-xl shadow-lg overflow-hidden">
+        <div className="absolute z-10 top-[calc(100%+4px)] left-0 right-0 bg-white dark:bg-[#1A1B23] border border-[#E8EBF2] dark:border-[#26283A] rounded-xl shadow-lg overflow-hidden">
           {clients.slice(0, 5).map((c: { id: string; name: string; email: string | null; company: string | null }) => (
             <button
               key={c.id}
               onClick={() => pick(c)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#F5F6FA] transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] transition-colors"
             >
-              <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-[11px] font-bold shrink-0">
+              <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-[11px] font-bold shrink-0">
                 {c.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-[13px] font-semibold text-[#344054]">{c.name}</p>
-                {c.company && <p className="text-[11px] text-[#98A2B3]">{c.company}</p>}
+                <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{c.name}</p>
+                {c.company && <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">{c.company}</p>}
               </div>
             </button>
           ))}
           {clients.length === 0 && search.length > 1 && (
-            <div className="px-3 py-3 text-[12px] text-[#98A2B3] text-center">
+            <div className="px-3 py-3 text-[12px] text-[#98A2B3] dark:text-[#545C74] text-center">
               No existing client found — a new one will be linked by name
             </div>
           )}
@@ -289,12 +295,12 @@ function ClientSelector({
       )}
 
       {picked && (
-        <p className="text-[11.5px] text-[#027A48] mt-1 flex items-center gap-1">
+        <p className="text-[11.5px] text-[#027A48] dark:text-[#34D399] mt-1 flex items-center gap-1">
           <Check size={11} strokeWidth={2.5} /> Linked to existing client
         </p>
       )}
       {!picked && suggested.name && (
-        <p className="text-[11.5px] text-[#98A2B3] mt-1">
+        <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-1">
           AI suggested "{suggested.name}" — search above to link to an existing client
         </p>
       )}
@@ -324,9 +330,9 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
     confidence >= 0.5 ? 'Medium confidence' :
     'Low confidence — review carefully'
   const confidenceColor =
-    confidence >= 0.8 ? 'text-[#027A48] bg-[#ECFDF3]' :
-    confidence >= 0.5 ? 'text-[#B54708] bg-[#FFFAEB]' :
-    'text-[#B42318] bg-[#FEF3F2]'
+    confidence >= 0.8 ? 'text-[#027A48] bg-[#ECFDF3] dark:bg-emerald-950/40 dark:text-[#34D399]' :
+    confidence >= 0.5 ? 'text-[#B54708] bg-[#FFFAEB] dark:bg-amber-950/30 dark:text-amber-400' :
+    'text-[#B42318] bg-[#FEF3F2] dark:bg-red-950/40 dark:text-red-400'
 
   function handleConfirm() {
     onConfirm({
@@ -346,7 +352,7 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
   }
 
   const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h3 className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-2">{children}</h3>
+    <h3 className="text-[11px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-2">{children}</h3>
   )
 
   return (
@@ -357,7 +363,7 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
           {confidence >= 0.8 ? <Check size={11} strokeWidth={2.5} /> : <AlertCircle size={11} strokeWidth={2.5} />}
           {confidenceLabel}
         </span>
-        <span className="text-[11px] text-[#98A2B3]">All fields are editable</span>
+        <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">All fields are editable</span>
       </div>
 
       <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
@@ -369,8 +375,8 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
             value={title}
             onChange={e => setTitle(e.target.value)}
             className={cn(
-              'w-full px-3 py-2.5 text-[14px] font-semibold text-[#101828] bg-[#FAFAFA] border border-[#E8EBF2] rounded-xl',
-              'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 focus:bg-white transition-all',
+              'w-full px-3 py-2.5 text-[14px] font-semibold text-[#101828] dark:text-[#ECEEF3] bg-[#FAFAFA] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-xl',
+              'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 focus:bg-white dark:focus:bg-[#1A1B23] transition-all',
             )}
           />
         </div>
@@ -413,7 +419,7 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
           <SectionTitle>Payment Schedule</SectionTitle>
           <div className="flex flex-wrap gap-2">
             {paymentSchedule.map((ms, i) => (
-              <div key={i} className="flex items-center gap-2 px-3 py-2 bg-[#F5F6FA] rounded-lg border border-[#E8EBF2]">
+              <div key={i} className="flex items-center gap-2 px-3 py-2 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg border border-[#E8EBF2] dark:border-[#3D4258]">
                 <input
                   value={ms.percentage}
                   onChange={e => {
@@ -422,12 +428,12 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
                     )
                     setPay(updated)
                   }}
-                  className="w-9 text-[13px] font-bold text-[#344054] bg-transparent outline-none text-center"
+                  className="w-9 text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8] bg-transparent outline-none text-center"
                   type="number"
                   min={0}
                   max={100}
                 />
-                <span className="text-[12px] text-[#98A2B3]">%</span>
+                <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">%</span>
                 <input
                   value={ms.milestone}
                   onChange={e => {
@@ -436,11 +442,11 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
                     )
                     setPay(updated)
                   }}
-                  className="text-[12px] text-[#344054] bg-transparent outline-none min-w-[120px]"
+                  className="text-[12px] text-[#344054] dark:text-[#C2C8D8] bg-transparent outline-none min-w-[120px]"
                 />
                 <button
                   onClick={() => setPay(paymentSchedule.filter((_, j) => j !== i))}
-                  className="text-[#D0D5DD] hover:text-red-400 transition-colors"
+                  className="text-[#D0D5DD] dark:text-[#3D4258] hover:text-red-400 transition-colors"
                 >
                   <X size={11} strokeWidth={2} />
                 </button>
@@ -448,7 +454,7 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
             ))}
             <button
               onClick={() => setPay([...paymentSchedule, { milestone: 'New milestone', percentage: 0 }])}
-              className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dashed border-[#D0D5DD] text-[12px] text-[#98A2B3] hover:border-indigo-300 hover:text-indigo-500 transition-colors"
+              className="flex items-center gap-1 px-3 py-2 rounded-lg border border-dashed border-[#D0D5DD] dark:border-[#3D4258] text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
             >
               <Plus size={11} strokeWidth={2.5} /> Add
             </button>
@@ -463,10 +469,7 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
               value={pricingNotes}
               onChange={e => setPricing(e.target.value)}
               rows={2}
-              className={cn(
-                'w-full px-3 py-2 text-[12.5px] text-[#344054] bg-[#FAFAFA] border border-[#E8EBF2] rounded-lg',
-                'outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-50 resize-none transition-all',
-              )}
+              className={cn(inputCls, 'w-full resize-none')}
             />
           </div>
           <div>
@@ -475,10 +478,7 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
               value={terms}
               onChange={e => setTerms(e.target.value)}
               rows={2}
-              className={cn(
-                'w-full px-3 py-2 text-[12.5px] text-[#344054] bg-[#FAFAFA] border border-[#E8EBF2] rounded-lg',
-                'outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-50 resize-none transition-all',
-              )}
+              className={cn(inputCls, 'w-full resize-none')}
             />
           </div>
         </div>
@@ -490,19 +490,16 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
             type="date"
             value={validUntil}
             onChange={e => setValidity(e.target.value)}
-            className={cn(
-              'px-3 py-2 text-[13px] text-[#344054] bg-[#FAFAFA] border border-[#E8EBF2] rounded-lg',
-              'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 transition-all',
-            )}
+            className={inputCls}
           />
         </div>
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#F2F4F7]">
+      <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#F2F4F7] dark:border-[#26283A]">
         <button
           onClick={onReset}
-          className="flex items-center gap-1.5 text-[13px] text-[#667085] hover:text-[#344054] font-medium transition-colors"
+          className="flex items-center gap-1.5 text-[13px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] font-medium transition-colors"
         >
           <RotateCcw size={13} strokeWidth={2} />
           Try again
@@ -514,7 +511,7 @@ export default function ProposalReviewPanel({ extracted, onConfirm, onReset, isC
             'flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all',
             title.trim() && !isCreating
               ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-500 hover:to-violet-500 shadow-sm'
-              : 'bg-[#F2F4F7] text-[#98A2B3] cursor-not-allowed',
+              : 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3] dark:text-[#545C74] cursor-not-allowed',
           )}
         >
           <AIIcon size={13} />

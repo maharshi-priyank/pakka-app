@@ -139,7 +139,7 @@ function SortableWidget({
             <button
               {...listeners}
               {...attributes}
-              className="absolute top-2 left-2 z-20 w-7 h-7 rounded-lg bg-white/90 shadow-sm border border-[#EAECF0] flex items-center justify-center text-[#667085] hover:text-[#344054] cursor-grab active:cursor-grabbing touch-none"
+              className="absolute top-2 left-2 z-20 w-7 h-7 rounded-lg bg-white/90 dark:bg-[#1A1B23]/90 shadow-sm border border-[#EAECF0] dark:border-[#3D4258] flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] cursor-grab active:cursor-grabbing touch-none"
               title="Drag to reorder"
             >
               <GripVertical size={13} strokeWidth={2} />
@@ -148,7 +148,7 @@ function SortableWidget({
             {/* Remove */}
             <button
               onClick={() => onRemove(id)}
-              className="absolute top-2 right-2 z-20 w-7 h-7 rounded-lg bg-white/90 shadow-sm border border-[#EAECF0] flex items-center justify-center text-[#98A2B3] hover:text-[#D92D20] hover:bg-[#FEF3F2] hover:border-[#FECDC9] transition-colors"
+              className="absolute top-2 right-2 z-20 w-7 h-7 rounded-lg bg-white/90 dark:bg-[#1A1B23]/90 shadow-sm border border-[#EAECF0] dark:border-[#3D4258] flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:text-[#D92D20] hover:bg-[#FEF3F2] dark:hover:bg-red-950/40 hover:border-[#FECDC9] dark:hover:border-red-800/40 transition-colors"
               title="Hide widget"
             >
               <X size={12} strokeWidth={2.5} />
@@ -158,7 +158,7 @@ function SortableWidget({
             {canResize && (
               <button
                 onClick={handleResize}
-                className="absolute bottom-2 right-2 z-20 w-7 h-7 rounded-lg bg-white/90 shadow-sm border border-[#EAECF0] flex items-center justify-center text-[#667085] hover:text-[#6366F1] hover:bg-[#EEF2FF] hover:border-[#C7D2FE] transition-colors"
+                className="absolute bottom-2 right-2 z-20 w-7 h-7 rounded-lg bg-white/90 dark:bg-[#1A1B23]/90 shadow-sm border border-[#EAECF0] dark:border-[#3D4258] flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:text-[#6366F1] hover:bg-[#EEF2FF] dark:hover:bg-[#1E2040] hover:border-[#C7D2FE] transition-colors"
                 title={isExpanded ? 'Shrink widget' : 'Expand widget'}
               >
                 {isExpanded
@@ -195,16 +195,16 @@ function AddWidgetPanel({
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] anim-fade" onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 lg:top-0 lg:right-0 lg:left-auto lg:bottom-0 z-50 w-full lg:w-[340px] bg-white lg:shadow-2xl flex flex-col rounded-t-2xl lg:rounded-none max-h-[80vh] lg:max-h-none anim-slide-up lg:anim-slide-right">
+      <div className="fixed bottom-0 left-0 right-0 lg:top-0 lg:right-0 lg:left-auto lg:bottom-0 z-50 w-full lg:w-[340px] bg-white dark:bg-[#13141A] lg:shadow-2xl flex flex-col rounded-t-2xl lg:rounded-none max-h-[80vh] lg:max-h-none anim-slide-up lg:anim-slide-right">
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#EAECF0]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#EAECF0] dark:border-[#26283A]">
           <div>
-            <h2 className="text-[15px] font-bold text-[#101828]">Add Widget</h2>
-            <p className="text-[12px] text-[#98A2B3] mt-0.5">{hiddenMeta.length} widget{hiddenMeta.length !== 1 ? 's' : ''} available</p>
+            <h2 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Add Widget</h2>
+            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{hiddenMeta.length} widget{hiddenMeta.length !== 1 ? 's' : ''} available</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-[#98A2B3] hover:bg-[#F4F5F8] hover:text-[#344054] transition-colors"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
           >
             <X size={15} strokeWidth={2} />
           </button>
@@ -216,21 +216,21 @@ function AddWidgetPanel({
               <div className="w-12 h-12 rounded-2xl bg-[#ECFDF3] flex items-center justify-center mb-3">
                 <Check size={20} className="text-[#027A48]" strokeWidth={2.5} />
               </div>
-              <p className="text-[14px] font-semibold text-[#344054]">All widgets are visible</p>
-              <p className="text-[12px] text-[#98A2B3] mt-1">Remove a widget first to add it back here</p>
+              <p className="text-[14px] font-semibold text-[#344054] dark:text-[#C2C8D8]">All widgets are visible</p>
+              <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">Remove a widget first to add it back here</p>
             </div>
           ) : hiddenMeta.map(widget => (
             <button
               key={widget.id}
               onClick={() => onAdd(widget.id)}
-              className="w-full flex items-start gap-3 p-3.5 rounded-xl border border-[#EAECF0] bg-white hover:border-[#C7D2FE] hover:bg-[#F5F3FF] transition-all text-left group"
+              className="w-full flex items-start gap-3 p-3.5 rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#1A1B23] hover:border-[#C7D2FE] dark:hover:border-[#6366F1]/40 hover:bg-[#F5F3FF] dark:hover:bg-[#1E2040] transition-all text-left group"
             >
               <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-[#6366F1] transition-colors">
                 <Plus size={14} className="text-[#6366F1] group-hover:text-white transition-colors" strokeWidth={2.5} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-[#344054]">{widget.name}</p>
-                <p className="text-[11.5px] text-[#98A2B3] mt-0.5 leading-snug">{widget.description}</p>
+                <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{widget.name}</p>
+                <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5 leading-snug">{widget.description}</p>
               </div>
             </button>
           ))}
@@ -309,8 +309,8 @@ export default function DashboardPage() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-[17px] font-bold text-[#0D1117] tracking-tight">Dashboard</h1>
-          <p className="text-[12px] text-[#9CA3AF] mt-0.5">Here's what's happening with your business</p>
+          <h1 className="text-[17px] font-bold text-[#0D1117] dark:text-[#ECEEF3] tracking-tight">Dashboard</h1>
+          <p className="text-[12px] text-[#9CA3AF] dark:text-[#545C74] mt-0.5">Here's what's happening with your business</p>
         </div>
         <div className="flex items-center gap-2">
           {editMode && hidden.length > 0 && (
@@ -331,7 +331,7 @@ export default function DashboardPage() {
               'flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold rounded-lg transition-colors border',
               editMode
                 ? 'text-white bg-[#6366F1] border-[#6366F1] hover:bg-[#4F46E5]'
-                : 'text-[#667085] bg-white border-[#EAECF0] hover:bg-[#F4F5F8] hover:text-[#344054] shadow-sm',
+                : 'text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] border-[#EAECF0] dark:border-[#3D4258] hover:bg-[#F4F5F8] dark:hover:bg-[#26283A] hover:text-[#344054] dark:hover:text-[#C2C8D8] shadow-sm',
             )}
           >
             {editMode

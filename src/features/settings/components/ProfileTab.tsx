@@ -28,7 +28,7 @@ const BUSINESS_TYPES = [
 ]
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded', className)} />
+  return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
 }
 
 export default function ProfileTab() {
@@ -140,7 +140,7 @@ export default function ProfileTab() {
 
           {/* Info */}
           <div>
-            <p className="text-[14px] font-bold text-[#101828]">
+            <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">
               {profile?.businessName ?? profile?.name ?? 'Your Business'}
             </p>
             <p className="text-[12px] text-[#667085] mt-0.5">{profile?.email}</p>
@@ -162,8 +162,8 @@ export default function ProfileTab() {
       {/* Personal info */}
       <div className="card p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7]">
-          <User size={14} className="text-[#667085]" strokeWidth={2} />
-          <h3 className="text-[13px] font-bold text-[#344054]">Personal Details</h3>
+          <User size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Personal Details</h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -179,8 +179,8 @@ export default function ProfileTab() {
       {/* Business info */}
       <div className="card p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7]">
-          <Building2 size={14} className="text-[#667085]" strokeWidth={2} />
-          <h3 className="text-[13px] font-bold text-[#344054]">Business Details</h3>
+          <Building2 size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Business Details</h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -201,8 +201,8 @@ export default function ProfileTab() {
       {/* Tax info */}
       <div className="card p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7]">
-          <Receipt size={14} className="text-[#667085]" strokeWidth={2} />
-          <h3 className="text-[13px] font-bold text-[#344054]">Tax & Compliance</h3>
+          <Receipt size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Tax & Compliance</h3>
           <span className="ml-auto text-[11px] text-[#98A2B3]">Appears on invoices</span>
         </div>
 
@@ -267,7 +267,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-[12.5px] font-semibold text-[#344054]">
+      <label className="block text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {children}

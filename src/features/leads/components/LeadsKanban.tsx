@@ -18,11 +18,11 @@ import LeadDrawer from './LeadDrawer'
 
 // Column accent colors — left border + count badge
 const COLUMN_ACCENTS: Record<LeadStage, { dot: string; count: string }> = {
-  ENQUIRY:       { dot: 'bg-[#667085]',  count: 'bg-[#F2F4F7] text-[#667085]'  },
-  PROPOSAL_SENT: { dot: 'bg-[#2563EB]',  count: 'bg-[#EFF6FF] text-[#175CD3]'  },
-  NEGOTIATING:   { dot: 'bg-[#F79009]',  count: 'bg-[#FFFAEB] text-[#B54708]'  },
-  WON:           { dot: 'bg-[#12B76A]',  count: 'bg-[#ECFDF3] text-[#027A48]'  },
-  LOST:          { dot: 'bg-[#F04438]',  count: 'bg-[#FEF3F2] text-[#D92D20]'  },
+  ENQUIRY:       { dot: 'bg-[#667085]',  count: 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]'  },
+  PROPOSAL_SENT: { dot: 'bg-[#2563EB]',  count: 'bg-[#EFF6FF] dark:bg-[#1E2040] text-[#175CD3] dark:text-[#818CF8]'  },
+  NEGOTIATING:   { dot: 'bg-[#F79009]',  count: 'bg-[#FFFAEB] dark:bg-amber-950/40 text-[#B54708]'  },
+  WON:           { dot: 'bg-[#12B76A]',  count: 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48]'  },
+  LOST:          { dot: 'bg-[#F04438]',  count: 'bg-[#FEF3F2] dark:bg-red-950/40 text-[#D92D20]'  },
 }
 
 interface ColumnProps {
@@ -43,13 +43,13 @@ function KanbanColumn({ stage, leads, onCardClick, onNewProposal }: ColumnProps)
       <div className="flex items-center justify-between mb-2.5 px-1">
         <div className="flex items-center gap-2">
           <span className={cn('w-2 h-2 rounded-full shrink-0', accent.dot)} />
-          <span className="text-[13px] font-bold text-[#101828]">{STAGE_LABELS[stage]}</span>
+          <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">{STAGE_LABELS[stage]}</span>
           <span className={cn('text-[11px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center', accent.count)}>
             {leads.length}
           </span>
         </div>
         {totalValue > 0 && (
-          <span className="text-[11px] font-semibold text-[#667085]">
+          <span className="text-[11px] font-semibold text-[#667085] dark:text-[#8B92A8]">
             ₹{totalValue >= 100000
               ? `${(totalValue / 100000).toFixed(1)}L`
               : `${(totalValue / 1000).toFixed(0)}k`
@@ -64,8 +64,8 @@ function KanbanColumn({ stage, leads, onCardClick, onNewProposal }: ColumnProps)
         className={cn(
           'flex-1 min-h-[200px] rounded-xl p-2 space-y-2.5 transition-all duration-150',
           isOver
-            ? 'bg-[#EFF6FF] ring-2 ring-[#2563EB]/30'
-            : 'bg-[#F5F6FA]',
+            ? 'bg-[#EFF6FF] dark:bg-[#1E2040] ring-2 ring-[#2563EB]/30'
+            : 'bg-[#F5F6FA] dark:bg-[#1A1B23]',
         )}
       >
         <SortableContext items={leads.map(l => l.id)} strategy={verticalListSortingStrategy}>
@@ -75,8 +75,8 @@ function KanbanColumn({ stage, leads, onCardClick, onNewProposal }: ColumnProps)
         </SortableContext>
         {leads.length === 0 && (
           <div className="flex flex-col items-center justify-center h-24 gap-1">
-            <p className="text-[12px] text-[#D0D5DD] font-medium">No leads here</p>
-            <p className="text-[10px] text-[#D0D5DD]">Drag to move</p>
+            <p className="text-[12px] text-[#D0D5DD] dark:text-[#333649] font-medium">No leads here</p>
+            <p className="text-[10px] text-[#D0D5DD] dark:text-[#333649]">Drag to move</p>
           </div>
         )}
       </div>
@@ -157,10 +157,10 @@ export default function LeadsKanban({ search, onNewProposal }: Props) {
         {LEAD_STAGES.map(stage => (
           <div key={stage} className="w-[260px] shrink-0">
             <div className="flex items-center gap-2 mb-2.5 px-1">
-              <div className="w-2 h-2 rounded-full bg-[#E4E7EC]" />
-              <div className="h-3.5 bg-[#F2F4F7] rounded w-24 animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-[#E4E7EC] dark:bg-[#26283A]" />
+              <div className="h-3.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-24 animate-pulse" />
             </div>
-            <div className="bg-[#F5F6FA] rounded-xl p-2 space-y-2.5">
+            <div className="bg-[#F5F6FA] dark:bg-[#1A1B23] rounded-xl p-2 space-y-2.5">
               {[1, 2].map(i => <LeadCardSkeleton key={i} />)}
             </div>
           </div>

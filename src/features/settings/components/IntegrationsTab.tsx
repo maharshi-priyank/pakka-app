@@ -37,7 +37,7 @@ export default function IntegrationsTab() {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-[15px] font-bold text-[#101828]">Integrations</h3>
+        <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Integrations</h3>
         <p className="text-[13px] text-[#667085] mt-0.5">Connect third-party services to enhance your workflow.</p>
       </div>
 
@@ -49,7 +49,7 @@ export default function IntegrationsTab() {
               <CalendarDays size={18} className="text-[#027A48]" />
             </div>
             <div>
-              <p className="text-[14px] font-bold text-[#101828]">Google Calendar</p>
+              <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Google Calendar</p>
               <p className="text-[12px] text-[#667085] mt-0.5 max-w-sm">
                 Auto-generate Google Meet links and send calendar invites to clients when scheduling calls from leads or client drawers.
               </p>
@@ -72,7 +72,7 @@ export default function IntegrationsTab() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setConfirmDisconnect(false)}
-                    className="text-[12px] text-[#667085] hover:text-[#344054] transition-colors"
+                    className="text-[12px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
                   >
                     Cancel
                   </button>

@@ -73,8 +73,8 @@ export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
       {...listeners}
       onClick={() => onClick(lead)}
       className={cn(
-        'bg-white rounded-xl border border-[#EAECF0] shadow-sm cursor-pointer select-none',
-        'hover:shadow-md hover:border-[#D0D5DD] transition-all duration-150',
+        'bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm cursor-pointer select-none',
+        'hover:shadow-md hover:border-[#D0D5DD] dark:hover:border-[#333649] transition-all duration-150',
         isDragging && 'shadow-xl ring-2 ring-[#2563EB]/20 rotate-1',
       )}
     >
@@ -88,15 +88,15 @@ export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
             {lead.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-bold text-[#101828] truncate leading-snug">{lead.name}</p>
+            <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate leading-snug">{lead.name}</p>
             {lead.company && (
-              <p className="text-[11px] text-[#98A2B3] truncate leading-snug">{lead.company}</p>
+              <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] truncate leading-snug">{lead.company}</p>
             )}
           </div>
         </div>
         <button
           onClick={e => { e.stopPropagation(); onClick(lead) }}
-          className="w-6 h-6 rounded-lg bg-[#F5F6FA] hover:bg-[#EFF6FF] flex items-center justify-center shrink-0 text-[#98A2B3] hover:text-[#2563EB] transition-colors mt-0.5"
+          className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center shrink-0 text-[#98A2B3] dark:text-[#545C74] hover:text-[#2563EB] transition-colors mt-0.5"
         >
           <ArrowUpRight size={11} strokeWidth={2.5} />
         </button>
@@ -104,16 +104,16 @@ export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
 
       {/* Divider rows */}
       {lead.service && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Service</span>
-          <span className="text-[11.5px] font-medium text-[#344054] text-right truncate">{lead.service}</span>
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Service</span>
+          <span className="text-[11.5px] font-medium text-[#344054] dark:text-[#C2C8D8] text-right truncate">{lead.service}</span>
         </div>
       )}
 
       {lead.budget && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Budget</span>
-          <span className="flex items-center gap-0.5 text-[13px] font-extrabold text-[#101828]">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Budget</span>
+          <span className="flex items-center gap-0.5 text-[13px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">
             <IndianRupee size={10} strokeWidth={3} />
             {Number(lead.budget).toLocaleString('en-IN')}
           </span>
@@ -121,9 +121,9 @@ export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
       )}
 
       {lead.followUpAt && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Follow-up</span>
-          <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#D92D20] bg-[#FEF3F2] px-1.5 py-0.5 rounded-md">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Follow-up</span>
+          <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#D92D20] bg-[#FEF3F2] dark:bg-red-950/40 px-1.5 py-0.5 rounded-md">
             <CalendarDays size={9} strokeWidth={2.5} />
             {relativeDay(lead.followUpAt)}
           </span>
@@ -132,10 +132,10 @@ export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
 
       {/* New Proposal CTA */}
       {onNewProposal && (
-        <div className="px-3.5 py-2 border-t border-[#F2F4F7]">
+        <div className="px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
           <button
             onClick={e => { e.stopPropagation(); onNewProposal(lead) }}
-            className="w-full flex items-center justify-center gap-1.5 text-[11.5px] font-semibold text-[#2563EB] bg-[#EFF6FF] hover:bg-[#DBEAFE] rounded-lg py-2 transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 text-[11.5px] font-semibold text-[#2563EB] dark:text-[#818CF8] bg-[#EFF6FF] dark:bg-[#1E2040] hover:bg-[#DBEAFE] dark:hover:bg-[#252A50] rounded-lg py-2 transition-colors"
           >
             <FilePlus size={12} strokeWidth={2.5} />
             New Proposal
@@ -144,12 +144,12 @@ export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border-t border-[#F2F4F7] bg-[#FAFAFA] rounded-b-xl">
-        <span className="text-[10px] text-[#98A2B3]">
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border-t border-[#F2F4F7] dark:border-[#26283A] bg-[#FAFAFA] dark:bg-[#1A1B23] rounded-b-xl">
+        <span className="text-[10px] text-[#98A2B3] dark:text-[#545C74]">
           Active {timeAgo(lead.lastActivityAt)}
         </span>
         {lead.source && (
-          <span className="flex items-center gap-1 text-[10px] font-medium text-[#667085] bg-white border border-[#EAECF0] px-1.5 py-0.5 rounded-md">
+          <span className="flex items-center gap-1 text-[10px] font-medium text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] border border-[#EAECF0] dark:border-[#26283A] px-1.5 py-0.5 rounded-md">
             <Tag size={8} strokeWidth={2} />
             {SOURCE_LABELS[lead.source] ?? lead.source}
           </span>
@@ -161,23 +161,23 @@ export default function LeadCard({ lead, onClick, onNewProposal }: Props) {
 
 export function LeadCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-[#EAECF0] p-3.5 animate-pulse space-y-3">
+    <div className="bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] p-3.5 animate-pulse space-y-3">
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-full bg-[#F2F4F7]" />
+        <div className="w-8 h-8 rounded-full bg-[#F2F4F7] dark:bg-[#21222D]" />
         <div className="flex-1 space-y-1.5">
-          <div className="h-3 bg-[#F2F4F7] rounded w-3/4" />
-          <div className="h-2.5 bg-[#F2F4F7] rounded w-1/2" />
+          <div className="h-3 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-3/4" />
+          <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-1/2" />
         </div>
       </div>
-      <div className="h-px bg-[#F2F4F7]" />
+      <div className="h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
       <div className="flex justify-between">
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-12" />
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-20" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-12" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-20" />
       </div>
-      <div className="h-px bg-[#F2F4F7]" />
+      <div className="h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
       <div className="flex justify-between">
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-10" />
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-16" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-10" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-16" />
       </div>
     </div>
   )

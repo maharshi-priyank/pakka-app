@@ -38,7 +38,7 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
   return (
     <div
       onClick={() => onClick(invoice)}
-      className="bg-white rounded-xl border border-[#EAECF0] shadow-sm cursor-pointer hover:shadow-md hover:border-[#D0D5DD] transition-all duration-150"
+      className="bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm cursor-pointer hover:shadow-md hover:border-[#D0D5DD] dark:hover:border-[#333649] transition-all duration-150"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 px-3.5 pt-3.5 pb-3">
@@ -50,10 +50,10 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
             {clientName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-bold text-[#101828] truncate leading-snug">
+            <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate leading-snug">
               {invoice.invoiceNumber}
             </p>
-            <p className="text-[11px] text-[#98A2B3] truncate leading-snug">{clientName}</p>
+            <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] truncate leading-snug">{clientName}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -62,7 +62,7 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
           </span>
           <button
             onClick={e => { e.stopPropagation(); onClick(invoice) }}
-            className="w-6 h-6 rounded-lg bg-[#F5F6FA] hover:bg-[#EFF6FF] flex items-center justify-center text-[#98A2B3] hover:text-[#2563EB] transition-colors"
+            className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:text-[#2563EB] transition-colors"
           >
             <ArrowUpRight size={11} strokeWidth={2.5} />
           </button>
@@ -70,11 +70,11 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
       </div>
 
       {/* Total */}
-      <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7]">
-        <span className="text-[11px] text-[#98A2B3] shrink-0">Total</span>
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+        <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Total</span>
         <span className={cn(
           'flex items-center gap-0.5 text-[14px] font-extrabold',
-          isPaid ? 'text-[#027A48]' : isOverdue ? 'text-[#D92D20]' : 'text-[#101828]',
+          isPaid ? 'text-[#027A48]' : isOverdue ? 'text-[#D92D20]' : 'text-[#101828] dark:text-[#ECEEF3]',
         )}>
           <IndianRupee size={10} strokeWidth={3} />
           {fmt(Number(invoice.total))}
@@ -83,19 +83,19 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
 
       {/* GST */}
       {Number(invoice.gstAmount) > 0 && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">GST ({invoice.gstType === 'IGST' ? 'IGST' : 'CGST+SGST'})</span>
-          <span className="text-[11.5px] font-medium text-[#667085]">₹{fmt(Number(invoice.gstAmount))}</span>
+        <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">GST ({invoice.gstType === 'IGST' ? 'IGST' : 'CGST+SGST'})</span>
+          <span className="text-[11.5px] font-medium text-[#667085] dark:text-[#8B92A8]">₹{fmt(Number(invoice.gstAmount))}</span>
         </div>
       )}
 
       {/* Due date */}
       {invoice.dueDate && !isPaid && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Due</span>
+        <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Due</span>
           <span className={cn(
             'text-[11.5px] font-semibold',
-            isOverdue ? 'text-[#D92D20]' : 'text-[#344054]',
+            isOverdue ? 'text-[#D92D20]' : 'text-[#344054] dark:text-[#C2C8D8]',
           )}>
             {formatDate(invoice.dueDate)}
           </span>
@@ -104,9 +104,9 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
 
       {/* Paid date */}
       {isPaid && invoice.paidAt && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Paid</span>
-          <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#027A48] bg-[#ECFDF3] px-1.5 py-0.5 rounded-md">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Paid</span>
+          <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#027A48] bg-[#ECFDF3] dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-md">
             <CheckCircle2 size={9} strokeWidth={2.5} />
             {formatDate(invoice.paidAt)}
           </span>
@@ -115,18 +115,18 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
 
       {/* Linked contract */}
       {invoice.contract && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7]">
-          <span className="text-[11px] text-[#98A2B3] shrink-0">Contract</span>
-          <span className="text-[11.5px] font-medium text-[#344054] truncate max-w-[150px]">
+        <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7] dark:border-[#26283A]">
+          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Contract</span>
+          <span className="text-[11.5px] font-medium text-[#344054] dark:text-[#C2C8D8] truncate max-w-[150px]">
             {invoice.contract.title}
           </span>
         </div>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border-t border-[#F2F4F7] bg-[#FAFAFA] rounded-b-xl">
-        <span className="text-[10px] text-[#98A2B3]">{formatDate(invoice.createdAt)}</span>
-        <span className="flex items-center gap-1 text-[10px] font-medium text-[#667085]">
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border-t border-[#F2F4F7] dark:border-[#26283A] bg-[#FAFAFA] dark:bg-[#1A1B23] rounded-b-xl">
+        <span className="text-[10px] text-[#98A2B3] dark:text-[#545C74]">{formatDate(invoice.createdAt)}</span>
+        <span className="flex items-center gap-1 text-[10px] font-medium text-[#667085] dark:text-[#8B92A8]">
           {isPaid
             ? <><CheckCircle2 size={8} strokeWidth={2} className="text-[#12B76A]" /> Paid</>
             : isOverdue
@@ -141,24 +141,24 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
 
 export function InvoiceCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-[#EAECF0] p-3.5 animate-pulse space-y-3">
+    <div className="bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] p-3.5 animate-pulse space-y-3">
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-full bg-[#F2F4F7]" />
+        <div className="w-8 h-8 rounded-full bg-[#F2F4F7] dark:bg-[#21222D]" />
         <div className="flex-1 space-y-1.5">
-          <div className="h-3 bg-[#F2F4F7] rounded w-3/4" />
-          <div className="h-2.5 bg-[#F2F4F7] rounded w-1/2" />
+          <div className="h-3 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-3/4" />
+          <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-1/2" />
         </div>
-        <div className="h-5 w-12 bg-[#F2F4F7] rounded-full" />
+        <div className="h-5 w-12 bg-[#F2F4F7] dark:bg-[#21222D] rounded-full" />
       </div>
-      <div className="h-px bg-[#F2F4F7]" />
+      <div className="h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
       <div className="flex justify-between">
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-16" />
-        <div className="h-3.5 bg-[#F2F4F7] rounded w-20" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-16" />
+        <div className="h-3.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-20" />
       </div>
-      <div className="h-px bg-[#F2F4F7]" />
+      <div className="h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
       <div className="flex justify-between">
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-12" />
-        <div className="h-2.5 bg-[#F2F4F7] rounded w-24" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-12" />
+        <div className="h-2.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-24" />
       </div>
     </div>
   )

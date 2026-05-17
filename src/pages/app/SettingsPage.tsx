@@ -31,11 +31,11 @@ export default function SettingsPage() {
     <div className="max-w-[860px] space-y-5">
 
       <div>
-        <h1 className="text-[22px] font-extrabold text-[#101828] tracking-tight">Settings</h1>
-        <p className="text-[13px] text-[#667085] mt-0.5">Manage your automations, profile, and business details.</p>
+        <h1 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Settings</h1>
+        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Manage your automations, profile, and business details.</p>
       </div>
 
-      <div className="flex gap-1 border-b border-[#EAECF0] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
+      <div className="flex gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
         {TABS.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
@@ -44,7 +44,7 @@ export default function SettingsPage() {
               'flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold border-b-2 -mb-px transition-colors',
               activeTab === key
                 ? 'border-[#6366F1] text-[#6366F1]'
-                : 'border-transparent text-[#667085] hover:text-[#344054]',
+                : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
             )}
           >
             <Icon size={14} strokeWidth={2.5} />

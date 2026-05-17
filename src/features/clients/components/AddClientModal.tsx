@@ -41,11 +41,11 @@ export default function AddClientModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] p-4 anim-fade">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg anim-modal-in">
+      <div className="bg-white dark:bg-[#13141A] rounded-2xl shadow-xl w-full max-w-lg anim-modal-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EAECF0]">
-          <h2 className="text-[15px] font-bold text-[#101828]">Add Client</h2>
-          <button onClick={onClose} className="text-[#98A2B3] hover:text-[#344054] transition-colors">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EAECF0] dark:border-[#26283A]">
+          <h2 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Add Client</h2>
+          <button onClick={onClose} className="text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -81,7 +81,7 @@ export default function AddClientModal({ onClose }: Props) {
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] font-semibold text-[#344054] hover:bg-[#F9FAFB] rounded-lg transition-colors">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] rounded-lg transition-colors">
               Cancel
             </button>
             <button
@@ -102,7 +102,7 @@ export default function AddClientModal({ onClose }: Props) {
 function Field({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-[12.5px] font-semibold text-[#344054]">
+      <label className="block text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {children}

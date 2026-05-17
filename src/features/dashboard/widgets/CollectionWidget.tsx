@@ -3,7 +3,7 @@ import { cn, formatCurrency } from '@/lib/utils'
 import { useInvoices } from '@/features/invoices/hooks/useInvoices'
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded', className)} />
+  return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
 }
 
 export default function CollectionWidget() {
@@ -20,17 +20,17 @@ export default function CollectionWidget() {
   return (
     <div className="card p-5 h-full hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-4">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#F0FDF4]">
-          <Wallet size={18} className="text-[#16A34A]" strokeWidth={2} />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#F0FDF4] dark:bg-emerald-950/40">
+          <Wallet size={18} className="text-[#16A34A] dark:text-[#34D399]" strokeWidth={2} />
         </div>
       </div>
       {isLoading
         ? <Skeleton className="h-8 w-28 mb-2" />
-        : <p className="text-[26px] font-extrabold text-[#101828] leading-none tracking-tight">
+        : <p className="text-[26px] font-extrabold text-[#101828] dark:text-[#ECEEF3] leading-none tracking-tight">
             {formatCurrency(total)}
           </p>
       }
-      <p className="text-[12px] text-[#667085] font-medium mt-2">Pending collection</p>
+      <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] font-medium mt-2">Pending collection</p>
 
       {isLoading ? (
         <Skeleton className="h-2 w-full mt-3 rounded-full" />
@@ -46,7 +46,7 @@ export default function CollectionWidget() {
             )}
           </div>
           <div className="flex items-center gap-3 mt-2">
-            <span className="flex items-center gap-1 text-[11px] text-[#667085]">
+            <span className="flex items-center gap-1 text-[11px] text-[#667085] dark:text-[#8B92A8]">
               <span className="w-2 h-2 rounded-full bg-[#6366F1] shrink-0" />
               <IndianRupee size={9} />{formatCurrency(sentAmount).replace('₹', '')} sent
             </span>
@@ -59,7 +59,7 @@ export default function CollectionWidget() {
           </div>
         </>
       ) : (
-        <p className="text-[11px] text-[#98A2B3] mt-1">No pending collections</p>
+        <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-1">No pending collections</p>
       )}
     </div>
   )

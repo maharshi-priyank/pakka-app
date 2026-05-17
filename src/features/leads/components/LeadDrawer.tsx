@@ -28,11 +28,11 @@ const SOURCE_LABELS: Record<string, string> = {
 }
 
 const AVATAR_COLORS = [
-  'bg-indigo-100 text-indigo-600',
-  'bg-emerald-100 text-emerald-700',
-  'bg-amber-100 text-amber-700',
-  'bg-rose-100 text-rose-600',
-  'bg-violet-100 text-violet-700',
+  'bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400',
+  'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400',
+  'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400',
+  'bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400',
+  'bg-violet-100 dark:bg-violet-950/40 text-violet-700 dark:text-violet-400',
 ]
 
 function avatarColor(name: string) {
@@ -104,18 +104,18 @@ export default function LeadDrawer({ lead, onClose }: Props) {
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[460px] bg-white shadow-xl flex flex-col anim-slide-right">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[460px] bg-white dark:bg-[#13141A] shadow-xl flex flex-col anim-slide-right">
 
         {/* Header */}
-        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-[#F1F3F8]">
+        <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-[#F1F3F8] dark:border-[#26283A]">
           <div className="flex items-center gap-3">
             <div className={cn('w-10 h-10 rounded-full flex items-center justify-center text-[14px] font-bold shrink-0', avatarColor(lead.name))}>
               {lead.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-[16px] font-bold text-[#0D1117] leading-snug">{lead.name}</p>
+              <p className="text-[16px] font-bold text-[#0D1117] dark:text-[#ECEEF3] leading-snug">{lead.name}</p>
               {lead.company && (
-                <p className="text-[12px] text-[#9CA3AF] flex items-center gap-1 mt-0.5">
+                <p className="text-[12px] text-[#9CA3AF] dark:text-[#545C74] flex items-center gap-1 mt-0.5">
                   <Building2 size={10} /> {lead.company}
                 </p>
               )}
@@ -123,14 +123,14 @@ export default function LeadDrawer({ lead, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9CA3AF] hover:bg-[#F4F6FB] transition-colors mt-0.5"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9CA3AF] dark:text-[#545C74] hover:bg-[#F4F6FB] dark:hover:bg-[#21222D] transition-colors mt-0.5"
           >
             <X size={15} />
           </button>
         </div>
 
         {/* Stage selector */}
-        <div className="px-6 py-3 border-b border-[#F1F3F8] flex items-center gap-2 overflow-x-auto">
+        <div className="px-6 py-3 border-b border-[#F1F3F8] dark:border-[#26283A] flex items-center gap-2 overflow-x-auto">
           {LEAD_STAGES.map(s => (
             <button
               key={s}
@@ -140,7 +140,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
                 'px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all border',
                 s === lead.stage
                   ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-[#F3F4F6] text-[#6B7280] border-transparent hover:bg-[#E5E7EB]',
+                  : 'bg-[#F3F4F6] dark:bg-[#21222D] text-[#6B7280] dark:text-[#8B92A8] border-transparent hover:bg-[#E5E7EB] dark:hover:bg-[#26283A]',
               )}
             >
               {STAGE_LABELS[s]}
@@ -154,27 +154,27 @@ export default function LeadDrawer({ lead, onClose }: Props) {
           {/* Quick info pills */}
           <div className="flex flex-wrap gap-2">
             {lead.email && (
-              <a href={`mailto:${lead.email}`} className="flex items-center gap-1.5 text-[12px] text-[#374151] bg-[#F8FAFC] border border-[#E8EBF2] rounded-lg px-3 py-1.5 hover:bg-[#F1F3F8] transition-colors">
-                <Mail size={11} className="text-[#9CA3AF]" /> {lead.email}
+              <a href={`mailto:${lead.email}`} className="flex items-center gap-1.5 text-[12px] text-[#374151] dark:text-[#C2C8D8] bg-[#F8FAFC] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-lg px-3 py-1.5 hover:bg-[#F1F3F8] dark:hover:bg-[#26283A] transition-colors">
+                <Mail size={11} className="text-[#9CA3AF] dark:text-[#545C74]" /> {lead.email}
               </a>
             )}
             {lead.phone && (
-              <a href={`tel:${lead.phone}`} className="flex items-center gap-1.5 text-[12px] text-[#374151] bg-[#F8FAFC] border border-[#E8EBF2] rounded-lg px-3 py-1.5 hover:bg-[#F1F3F8] transition-colors">
-                <Phone size={11} className="text-[#9CA3AF]" /> {lead.phone}
+              <a href={`tel:${lead.phone}`} className="flex items-center gap-1.5 text-[12px] text-[#374151] dark:text-[#C2C8D8] bg-[#F8FAFC] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-lg px-3 py-1.5 hover:bg-[#F1F3F8] dark:hover:bg-[#26283A] transition-colors">
+                <Phone size={11} className="text-[#9CA3AF] dark:text-[#545C74]" /> {lead.phone}
               </a>
             )}
             {lead.budget && (
-              <span className="flex items-center gap-1 text-[12px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-1.5">
+              <span className="flex items-center gap-1 text-[12px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/40 rounded-lg px-3 py-1.5">
                 <IndianRupee size={10} /> {Number(lead.budget).toLocaleString('en-IN')}
               </span>
             )}
             {lead.source && (
-              <span className="flex items-center gap-1 text-[12px] text-[#6B7280] bg-[#F3F4F6] border border-[#E8EBF2] rounded-lg px-3 py-1.5">
+              <span className="flex items-center gap-1 text-[12px] text-[#6B7280] dark:text-[#8B92A8] bg-[#F3F4F6] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-lg px-3 py-1.5">
                 <Tag size={10} /> {SOURCE_LABELS[lead.source] ?? lead.source}
               </span>
             )}
             {lead.followUpAt && (
-              <span className="flex items-center gap-1 text-[12px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-1.5">
+              <span className="flex items-center gap-1 text-[12px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-800/40 rounded-lg px-3 py-1.5">
                 <Calendar size={10} />
                 Follow-up {new Date(lead.followUpAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
               </span>
@@ -184,19 +184,19 @@ export default function LeadDrawer({ lead, onClose }: Props) {
           {/* Service */}
           {lead.service && !isEditing && (
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9CA3AF] mb-1">Service</p>
-              <p className="text-[13.5px] text-[#374151]">{lead.service}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9CA3AF] dark:text-[#545C74] mb-1">Service</p>
+              <p className="text-[13.5px] text-[#374151] dark:text-[#C2C8D8]">{lead.service}</p>
             </div>
           )}
 
           {/* Notes section */}
           {!isEditing && (
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9CA3AF] mb-2">Notes</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9CA3AF] dark:text-[#545C74] mb-2">Notes</p>
               {lead.notes ? (
-                <p className="text-[13.5px] text-[#374151] whitespace-pre-wrap leading-relaxed">{lead.notes}</p>
+                <p className="text-[13.5px] text-[#374151] dark:text-[#C2C8D8] whitespace-pre-wrap leading-relaxed">{lead.notes}</p>
               ) : (
-                <p className="text-[13px] text-[#C9CDD4] italic">No notes yet. Click Edit to add some.</p>
+                <p className="text-[13px] text-[#C9CDD4] dark:text-[#3D4258] italic">No notes yet. Click Edit to add some.</p>
               )}
             </div>
           )}
@@ -269,14 +269,14 @@ export default function LeadDrawer({ lead, onClose }: Props) {
           )}
 
           {/* Activity footer */}
-          <div className="flex items-center gap-1.5 text-[11px] text-[#C9CDD4] pt-2">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#C9CDD4] dark:text-[#3D4258] pt-2">
             <Clock size={10} />
             Last activity {formatRelativeTime(lead.lastActivityAt)} · Added {formatRelativeTime(lead.createdAt)}
           </div>
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-[#F1F3F8] flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-[#F1F3F8] dark:border-[#26283A] flex items-center justify-between">
           {confirmDelete ? (
             <div className="flex items-center gap-2">
               <p className="text-[12px] text-red-500 font-medium">Delete this lead?</p>
@@ -296,7 +296,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
             <>
               <button
                 onClick={() => setConfirmDelete(true)}
-                className="flex items-center gap-1.5 text-[12px] font-medium text-[#9CA3AF] hover:text-red-500 transition-colors"
+                className="flex items-center gap-1.5 text-[12px] font-medium text-[#9CA3AF] dark:text-[#545C74] hover:text-red-500 transition-colors"
               >
                 <Trash2 size={13} /> Delete
               </button>
@@ -304,7 +304,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
                 <>
                   <button
                     onClick={() => setScheduleOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] text-[12px] font-semibold text-[#344054] hover:bg-[#F4F5F8] transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"
                   >
                     <Video size={12} /> Schedule Call
                   </button>
@@ -322,6 +322,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
         open={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
         leadId={lead.id}
+        leadName={lead.name}
         defaultTitle={`Discovery call with ${lead.name}`}
       />
     </>

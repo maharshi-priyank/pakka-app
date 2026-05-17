@@ -63,9 +63,9 @@ export default function ProposalsPage() {
       {/* Page header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[17px] font-bold text-[#0D1117] tracking-tight">Proposals</h1>
+          <h1 className="text-[17px] font-bold text-[#0D1117] dark:text-[#ECEEF3] tracking-tight">Proposals</h1>
           {!isLoading && proposals.length > 0 && (
-            <p className="text-[12px] text-[#9CA3AF] mt-0.5 flex items-center gap-1">
+            <p className="text-[12px] text-[#9CA3AF] dark:text-[#545C74] mt-0.5 flex items-center gap-1">
               <IndianRupee size={10} />
               {totalValue.toLocaleString('en-IN')} in proposals
               {acceptedCount > 0 && ` · ${acceptedCount} accepted`}
@@ -89,7 +89,7 @@ export default function ProposalsPage() {
 
           <button
             onClick={() => setShowTemplatePicker(true)}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-[#D0D5DD] text-[13px] font-semibold text-[#344054] hover:bg-[#F9FAFB] transition-colors"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
           >
             <LayoutTemplate size={14} />
             From Template
@@ -106,7 +106,7 @@ export default function ProposalsPage() {
       </div>
 
       {/* Status filter tabs */}
-      <div className="flex items-center gap-1 border-b border-[#EAECF0] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
+      <div className="flex items-center gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
         {STATUS_TABS.map(tab => {
           const isActive = activeTab === tab.value
           const count = tab.value === 'TEMPLATES'
@@ -123,14 +123,14 @@ export default function ProposalsPage() {
                 'px-3.5 py-2.5 text-[12.5px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap flex items-center gap-1.5',
                 isActive
                   ? 'border-[#6366F1] text-[#6366F1]'
-                  : 'border-transparent text-[#667085] hover:text-[#344054]',
+                  : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
               )}
             >
               {tab.label}
               {typeof count === 'number' && count > 0 && (
                 <span className={cn(
                   'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                  isActive ? 'bg-[#EEF2FF] text-[#6366F1]' : 'bg-[#F2F4F7] text-[#667085]',
+                  isActive ? 'bg-[#EEF2FF] dark:bg-[#1E2040] text-[#6366F1]' : 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]',
                 )}>
                   {count}
                 </span>
@@ -151,13 +151,13 @@ export default function ProposalsPage() {
           </div>
         ) : proposals.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#F5F6FA] flex items-center justify-center mb-4">
-              <FileText size={22} className="text-[#D0D5DD]" />
+            <div className="w-12 h-12 rounded-2xl bg-[#F5F6FA] dark:bg-[#21222D] flex items-center justify-center mb-4">
+              <FileText size={22} className="text-[#D0D5DD] dark:text-[#3D4258]" />
             </div>
-            <p className="text-[14px] font-semibold text-[#344054]">
+            <p className="text-[14px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
               {statusFilter === 'ALL' ? 'No proposals yet' : `No ${STATUS_LABELS[statusFilter as ProposalStatus]?.toLowerCase()} proposals`}
             </p>
-            <p className="text-[12px] text-[#98A2B3] mt-1">
+            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">
               {statusFilter === 'ALL' ? 'Create your first proposal to get started.' : 'Try a different status filter.'}
             </p>
             {statusFilter === 'ALL' && (

@@ -5,9 +5,9 @@ import { useMeetings, useCompleteMeeting, useCancelMeeting, type Meeting, type M
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 
 const STATUS_COLORS: Record<MeetingStatus, string> = {
-  SCHEDULED:  'bg-[#EFF6FF] text-[#2563EB]',
-  COMPLETED:  'bg-[#ECFDF3] text-[#027A48]',
-  CANCELLED:  'bg-[#F2F4F7] text-[#667085]',
+  SCHEDULED:  'bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-[#60A5FA]',
+  COMPLETED:  'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399]',
+  CANCELLED:  'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]',
 }
 
 const TABS: { key: MeetingStatus | 'all'; label: string }[] = [
@@ -30,18 +30,18 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
   const contact  = meeting.client?.name ?? meeting.lead?.name ?? null
 
   return (
-    <div className="flex items-center gap-4 px-5 py-4 hover:bg-[#FAFBFF] transition-colors">
-      <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] flex items-center justify-center shrink-0">
-        <CalendarDays size={16} className="text-[#2563EB]" />
+    <div className="flex items-center gap-4 px-5 py-4 hover:bg-[#FAFBFF] dark:hover:bg-[#1A1B23] transition-colors">
+      <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] dark:bg-blue-950/40 flex items-center justify-center shrink-0">
+        <CalendarDays size={16} className="text-[#2563EB] dark:text-[#60A5FA]" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-[#101828] truncate">{meeting.title}</p>
+        <p className="text-[14px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">{meeting.title}</p>
         <div className="flex items-center gap-2 mt-0.5">
-          <p className="text-[12px] text-[#667085]">{formatDateTime(meeting.scheduledAt)}</p>
+          <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">{formatDateTime(meeting.scheduledAt)}</p>
           {contact && (
-            <><span className="text-[#D0D5DD]">·</span><p className="text-[12px] text-[#98A2B3] truncate">{contact}</p></>
+            <><span className="text-[#D0D5DD] dark:text-[#3D4258]">·</span><p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] truncate">{contact}</p></>
           )}
-          <><span className="text-[#D0D5DD]">·</span><p className="text-[12px] text-[#98A2B3]">{meeting.durationMins} min</p></>
+          <><span className="text-[#D0D5DD] dark:text-[#3D4258]">·</span><p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">{meeting.durationMins} min</p></>
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">
@@ -53,7 +53,7 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
             href={meeting.meetLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#ECFDF3] text-[#027A48] text-[11px] font-semibold hover:bg-[#D1FAE5] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399] text-[11px] font-semibold hover:bg-[#D1FAE5] dark:hover:bg-emerald-900/40 transition-colors"
           >
             <Video size={10} /> Join <ExternalLink size={9} />
           </a>
@@ -64,7 +64,7 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
               onClick={() => complete.mutate(meeting.id)}
               disabled={complete.isPending}
               title="Mark completed"
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#ECFDF3] hover:text-[#027A48] transition-colors disabled:opacity-50"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#ECFDF3] dark:hover:bg-emerald-950/40 hover:text-[#027A48] dark:hover:text-[#34D399] transition-colors disabled:opacity-50"
             >
               {complete.isPending ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
             </button>
@@ -72,7 +72,7 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
               onClick={() => cancel.mutate(meeting.id)}
               disabled={cancel.isPending}
               title="Cancel meeting"
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#FEF3F2] hover:text-[#D92D20] transition-colors disabled:opacity-50"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#FEF3F2] dark:hover:bg-red-950/40 hover:text-[#D92D20] transition-colors disabled:opacity-50"
             >
               {cancel.isPending ? <Loader2 size={13} className="animate-spin" /> : <XCircle size={13} />}
             </button>
@@ -94,8 +94,8 @@ export default function MeetingsPage() {
     <div className="max-w-[860px] space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-extrabold text-[#101828] tracking-tight">Meetings</h1>
-          <p className="text-[13px] text-[#667085] mt-0.5">Schedule and manage your calls with leads and clients.</p>
+          <h1 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Meetings</h1>
+          <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Schedule and manage your calls with leads and clients.</p>
         </div>
         <button
           onClick={() => setScheduleOpen(true)}
@@ -106,7 +106,7 @@ export default function MeetingsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-[#EAECF0] -mx-4 px-4 lg:mx-0 lg:px-0 overflow-x-auto scrollbar-none">
+      <div className="flex gap-1 border-b border-[#EAECF0] dark:border-[#26283A] -mx-4 px-4 lg:mx-0 lg:px-0 overflow-x-auto scrollbar-none">
         {TABS.map(({ key, label }) => (
           <button
             key={key}
@@ -115,7 +115,7 @@ export default function MeetingsPage() {
               'px-4 py-2.5 text-[13px] font-semibold border-b-2 -mb-px transition-colors whitespace-nowrap',
               activeTab === key
                 ? 'border-[#6366F1] text-[#6366F1]'
-                : 'border-transparent text-[#667085] hover:text-[#344054]',
+                : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
             )}
           >
             {label}
@@ -126,21 +126,21 @@ export default function MeetingsPage() {
       <div className="card overflow-hidden">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[#F2F4F7] last:border-0">
-              <div className="w-10 h-10 rounded-xl bg-[#F2F4F7] animate-pulse" />
+            <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A] last:border-0">
+              <div className="w-10 h-10 rounded-xl bg-[#F2F4F7] dark:bg-[#21222D] animate-pulse" />
               <div className="flex-1 space-y-2">
-                <div className="h-3 w-48 bg-[#F2F4F7] rounded animate-pulse" />
-                <div className="h-3 w-32 bg-[#F2F4F7] rounded animate-pulse" />
+                <div className="h-3 w-48 bg-[#F2F4F7] dark:bg-[#21222D] rounded animate-pulse" />
+                <div className="h-3 w-32 bg-[#F2F4F7] dark:bg-[#21222D] rounded animate-pulse" />
               </div>
             </div>
           ))
         ) : meetings.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <CalendarDays size={36} className="text-[#D0D5DD] mb-3" strokeWidth={1.5} />
-            <p className="text-[14px] font-semibold text-[#667085]">
+            <CalendarDays size={36} className="text-[#D0D5DD] dark:text-[#3D4258] mb-3" strokeWidth={1.5} />
+            <p className="text-[14px] font-semibold text-[#667085] dark:text-[#8B92A8]">
               {activeTab === 'SCHEDULED' ? 'No upcoming calls' : 'No meetings found'}
             </p>
-            <p className="text-[12px] text-[#98A2B3] mt-1">
+            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">
               {activeTab === 'SCHEDULED'
                 ? 'Schedule a call from a lead or client drawer, or use the button above.'
                 : 'Try a different filter.'}
@@ -155,7 +155,7 @@ export default function MeetingsPage() {
             )}
           </div>
         ) : (
-          <div className="divide-y divide-[#F2F4F7]">
+          <div className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
             {meetings.map(m => <MeetingRow key={m.id} meeting={m} />)}
           </div>
         )}

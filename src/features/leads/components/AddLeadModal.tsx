@@ -55,14 +55,14 @@ export default function AddLeadModal({ open, onClose }: Props) {
       {/* Modal */}
       <div className="relative z-10 w-full max-w-lg mx-4 card overflow-hidden anim-modal-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#F1F3F8]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#F1F3F8] dark:border-[#26283A]">
           <div>
-            <h2 className="text-[15px] font-bold text-[#0D1117]">Add Lead</h2>
-            <p className="text-[12px] text-[#9CA3AF] mt-0.5">New enquiry or potential client</p>
+            <h2 className="text-[15px] font-bold text-[#0D1117] dark:text-[#ECEEF3]">Add Lead</h2>
+            <p className="text-[12px] text-[#9CA3AF] dark:text-[#545C74] mt-0.5">New enquiry or potential client</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9CA3AF] hover:bg-[#F4F6FB] hover:text-[#374151] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9CA3AF] dark:text-[#545C74] hover:bg-[#F4F6FB] dark:hover:bg-[#21222D] hover:text-[#374151] dark:hover:text-[#C2C8D8] transition-colors"
           >
             <X size={15} />
           </button>

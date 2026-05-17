@@ -131,7 +131,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           {displayInvoice && (
             <div className="flex items-center gap-2">
               <FileText size={14} className="text-[#2563EB]" />
-              <span className="text-[13px] font-bold text-[#344054]">{displayInvoice.invoiceNumber}</span>
+              <span className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">{displayInvoice.invoiceNumber}</span>
               <span className={cn(
                 'text-[10px] font-bold px-2 py-0.5 rounded-full ml-1',
                 displayInvoice.status === 'PAID'    ? 'bg-[#ECFDF3] text-[#027A48]' :
@@ -145,9 +145,9 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           )}
 
           {/* Line items */}
-          <div className="bg-white rounded-xl border border-[#EAECF0] shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#F2F4F7]">
-              <h3 className="text-[14px] font-bold text-[#101828]">Line items</h3>
+          <div className="bg-white dark:bg-[#1A1B23] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
+              <h3 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Line items</h3>
             </div>
 
             <div className="px-5 py-4 space-y-3">
@@ -208,11 +208,11 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
                       )}
                     </div>
                     {(lineTotal > 0) && (
-                      <p className="text-[11px] text-[#98A2B3] text-right pr-10">
+                      <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] text-right pr-10">
                         ₹{fmt(lineTotal)}
-                        {lineGst > 0 && <span className="ml-1 text-[#667085]">+ ₹{fmt(lineGst)} GST</span>}
+                        {lineGst > 0 && <span className="ml-1 text-[#667085] dark:text-[#8B92A8]">+ ₹{fmt(lineGst)} GST</span>}
                         {' = '}
-                        <span className="font-semibold text-[#344054]">₹{fmt(lineTotal + lineGst)}</span>
+                        <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">₹{fmt(lineTotal + lineGst)}</span>
                       </p>
                     )}
                     {errors.lineItems?.[idx]?.description && (
@@ -234,26 +234,26 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
             </div>
 
             {/* Totals */}
-            <div className="bg-[#FAFAFA] border-t border-[#F2F4F7] px-5 py-4 space-y-2">
+            <div className="bg-[#FAFAFA] dark:bg-[#21222D] border-t border-[#F2F4F7] dark:border-[#26283A] px-5 py-4 space-y-2">
               <div className="flex justify-between text-[13px]">
-                <span className="text-[#667085]">Subtotal</span>
-                <span className="font-semibold text-[#344054]">₹{fmt(subtotal)}</span>
+                <span className="text-[#667085] dark:text-[#8B92A8]">Subtotal</span>
+                <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">₹{fmt(subtotal)}</span>
               </div>
               {gstType !== 'EXEMPT' && (
                 <div className="flex justify-between text-[13px]">
-                  <span className="text-[#667085]">{gstType === 'IGST' ? 'IGST' : 'CGST + SGST'}</span>
-                  <span className="font-semibold text-[#344054]">₹{fmt(gstAmount)}</span>
+                  <span className="text-[#667085] dark:text-[#8B92A8]">{gstType === 'IGST' ? 'IGST' : 'CGST + SGST'}</span>
+                  <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">₹{fmt(gstAmount)}</span>
                 </div>
               )}
               {tdsAmount > 0 && (
                 <div className="flex justify-between text-[13px]">
-                  <span className="text-[#667085]">TDS ({tdsRate}%)</span>
+                  <span className="text-[#667085] dark:text-[#8B92A8]">TDS ({tdsRate}%)</span>
                   <span className="font-semibold text-[#D92D20]">−₹{fmt(tdsAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between pt-2 border-t border-[#EAECF0]">
-                <span className="text-[15px] font-bold text-[#101828]">Total</span>
-                <span className="flex items-center gap-0.5 text-[18px] font-extrabold text-[#101828]">
+              <div className="flex justify-between pt-2 border-t border-[#EAECF0] dark:border-[#3D4258]">
+                <span className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Total</span>
+                <span className="flex items-center gap-0.5 text-[18px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">
                   <IndianRupee size={13} strokeWidth={3} />{fmt(total)}
                 </span>
               </div>
@@ -306,7 +306,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
       </div>
 
       {/* Action bar */}
-      <div className="shrink-0 border-t border-[#EAECF0] bg-white px-6 py-3 flex items-center justify-between gap-3">
+      <div className="shrink-0 border-t border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] px-6 py-3 flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={onDiscard}

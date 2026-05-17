@@ -11,14 +11,14 @@ interface Props {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Web Design': 'bg-[#EFF6FF] text-[#2563EB]',
-  'Branding':   'bg-[#F5F3FF] text-[#5925DC]',
-  'Marketing':  'bg-[#ECFDF3] text-[#027A48]',
+  'Web Design': 'bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-[#60A5FA]',
+  'Branding':   'bg-[#F5F3FF] dark:bg-violet-950/40 text-[#5925DC] dark:text-[#A78BFA]',
+  'Marketing':  'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399]',
 }
 
 function getCategoryStyle(category: string | null) {
-  if (!category) return 'bg-[#F2F4F7] text-[#667085]'
-  return CATEGORY_COLORS[category] ?? 'bg-[#F2F4F7] text-[#667085]'
+  if (!category) return 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]'
+  return CATEGORY_COLORS[category] ?? 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]'
 }
 
 function fmt(v: number) {
@@ -52,21 +52,21 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
         <input
           value={editName}
           onChange={e => setEditName(e.target.value)}
-          className="w-full h-8 px-2.5 rounded-lg border border-[#D0D5DD] text-[13px] font-semibold text-[#101828] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1]"
+          className="w-full h-8 px-2.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1]"
           placeholder="Template name"
           autoFocus
         />
         <input
           value={editCategory}
           onChange={e => setEditCategory(e.target.value)}
-          className="w-full h-8 px-2.5 rounded-lg border border-[#D0D5DD] text-[12px] text-[#344054] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1]"
+          className="w-full h-8 px-2.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[12px] text-[#344054] dark:text-[#C2C8D8] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1]"
           placeholder="Category (e.g. Web Design)"
         />
         <textarea
           value={editDesc}
           onChange={e => setEditDesc(e.target.value)}
           rows={2}
-          className="w-full px-2.5 py-1.5 rounded-lg border border-[#D0D5DD] text-[12px] text-[#344054] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] resize-none"
+          className="w-full px-2.5 py-1.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[12px] text-[#344054] dark:text-[#C2C8D8] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] resize-none"
           placeholder="Short description (optional)"
         />
         <div className="flex items-center gap-2">
@@ -80,7 +80,7 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
           </button>
           <button
             onClick={() => setEditing(false)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#EAECF0] text-[12px] font-semibold text-[#667085] hover:bg-[#F9FAFB] transition-colors"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
           >
             <X size={11} /> Cancel
           </button>
@@ -99,20 +99,20 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
     >
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
-        <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center shrink-0">
           <LayoutTemplate size={14} className="text-[#6366F1]" />
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {template.isSystem ? (
-            <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-[#FFFAEB] text-[#B54708]">System</span>
+            <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-[#FFFAEB] dark:bg-amber-950/30 text-[#B54708] dark:text-amber-400">System</span>
           ) : template.usageCount > 0 ? (
-            <span className="text-[10.5px] text-[#98A2B3]">Used {template.usageCount}×</span>
+            <span className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74]">Used {template.usageCount}×</span>
           ) : null}
           {mode === 'manage' && !template.isSystem && (
             <>
               <button
                 onClick={e => { e.stopPropagation(); setEditing(true) }}
-                className="w-6 h-6 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#F5F6FA] hover:text-[#344054] transition-colors"
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
                 title="Edit template"
               >
                 <Pencil size={11} />
@@ -128,7 +128,7 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
                   </button>
                   <button
                     onClick={e => { e.stopPropagation(); setConfirmDelete(false) }}
-                    className="text-[10.5px] font-semibold text-[#667085] hover:underline"
+                    className="text-[10.5px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:underline"
                   >
                     Cancel
                   </button>
@@ -136,7 +136,7 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
               ) : (
                 <button
                   onClick={e => { e.stopPropagation(); setConfirmDelete(true) }}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#FEF3F2] hover:text-[#D92D20] transition-colors"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#FEF3F2] dark:hover:bg-red-950/40 hover:text-[#D92D20] transition-colors"
                   title="Delete template"
                 >
                   <Trash2 size={11} />
@@ -149,9 +149,9 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
 
       {/* Body */}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-bold text-[#101828] leading-tight">{template.name}</p>
+        <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] leading-tight">{template.name}</p>
         {template.description && (
-          <p className="text-[11.5px] text-[#667085] mt-0.5 line-clamp-2">{template.description}</p>
+          <p className="text-[11.5px] text-[#667085] dark:text-[#8B92A8] mt-0.5 line-clamp-2">{template.description}</p>
         )}
       </div>
 
@@ -164,7 +164,7 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
             </span>
           )}
         </div>
-        <span className="text-[12px] font-bold text-[#344054]">{fmt(template.totalAmount)}</span>
+        <span className="text-[12px] font-bold text-[#344054] dark:text-[#C2C8D8]">{fmt(template.totalAmount)}</span>
       </div>
 
       {mode === 'pick' && (

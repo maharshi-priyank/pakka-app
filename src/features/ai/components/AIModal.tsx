@@ -122,30 +122,30 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
       {/* Modal */}
       <div
         className={cn(
-          'relative bg-white rounded-2xl shadow-2xl w-full transition-all duration-300 anim-modal-in',
+          'relative bg-white dark:bg-[#13141A] rounded-2xl shadow-2xl w-full transition-all duration-300 anim-modal-in',
           phase === 'review' ? 'max-w-3xl' : 'max-w-[580px]',
         )}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#F2F4F7]">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
               <AIIcon size={13} className="text-white" />
             </div>
             <div>
-              <h2 className="text-[14px] font-bold text-[#101828] leading-none">{cfg.title}</h2>
+              <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3] leading-none">{cfg.title}</h2>
               {phase === 'input' && (
-                <p className="text-[11.5px] text-[#98A2B3] mt-0.5">{cfg.subtitle}</p>
+                <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{cfg.subtitle}</p>
               )}
               {phase === 'review' && (
-                <p className="text-[11.5px] text-[#98A2B3] mt-0.5">Review and edit before saving</p>
+                <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Review and edit before saving</p>
               )}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#F5F6FA] hover:text-[#344054] transition-colors"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
           >
             <X size={15} strokeWidth={2} />
           </button>
@@ -164,10 +164,10 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
               className={cn(
                 'relative border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all',
                 dragOver
-                  ? 'border-indigo-400 bg-indigo-50/60'
+                  ? 'border-indigo-400 bg-indigo-50/60 dark:bg-indigo-950/20'
                   : image
-                  ? 'border-indigo-300 bg-indigo-50/40'
-                  : 'border-[#E8EBF2] hover:border-indigo-300 hover:bg-[#F9FAFB]',
+                  ? 'border-indigo-300 bg-indigo-50/40 dark:bg-indigo-950/10'
+                  : 'border-[#E8EBF2] dark:border-[#3D4258] hover:border-indigo-300 hover:bg-[#F9FAFB] dark:hover:border-indigo-600/50 dark:hover:bg-[#1A1B23]',
               )}
             >
               <input
@@ -180,7 +180,7 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
               {image ? (
                 <div className="flex items-center justify-center gap-2.5">
                   <ImageIcon size={16} className="text-indigo-500" strokeWidth={1.8} />
-                  <span className="text-[13px] font-medium text-[#344054]">{image.name}</span>
+                  <span className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8]">{image.name}</span>
                   <button
                     onClick={e => { e.stopPropagation(); setImage(null) }}
                     className="text-[11px] text-red-400 hover:text-red-600 font-medium ml-1"
@@ -190,18 +190,18 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
                 </div>
               ) : (
                 <div>
-                  <Upload size={18} className="text-[#D0D5DD] mx-auto mb-2" strokeWidth={1.5} />
-                  <p className="text-[13px] font-medium text-[#344054]">Drop a screenshot here</p>
-                  <p className="text-[11.5px] text-[#98A2B3] mt-0.5">WhatsApp, email, any image — or click to browse</p>
+                  <Upload size={18} className="text-[#D0D5DD] dark:text-[#3D4258] mx-auto mb-2" strokeWidth={1.5} />
+                  <p className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8]">Drop a screenshot here</p>
+                  <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">WhatsApp, email, any image — or click to browse</p>
                 </div>
               )}
             </div>
 
             {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-[#F2F4F7]" />
-              <span className="text-[11px] text-[#98A2B3] font-medium">or type below</span>
-              <div className="flex-1 h-px bg-[#F2F4F7]" />
+              <div className="flex-1 h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
+              <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] font-medium">or type below</span>
+              <div className="flex-1 h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
             </div>
 
             {/* Text area */}
@@ -211,16 +211,16 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
               placeholder={cfg.textPlaceholder}
               rows={6}
               className={cn(
-                'w-full px-4 py-3 text-[13px] text-[#344054] bg-[#FAFAFA] border border-[#E8EBF2] rounded-xl',
-                'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 focus:bg-white',
-                'placeholder:text-[#C9CDD4] resize-none transition-all leading-relaxed',
+                'w-full px-4 py-3 text-[13px] text-[#344054] dark:text-[#ECEEF3] bg-[#FAFAFA] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-xl',
+                'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 focus:bg-white dark:focus:bg-[#1A1B23]',
+                'placeholder:text-[#C9CDD4] dark:placeholder:text-[#545C74] resize-none transition-all leading-relaxed',
               )}
             />
 
             {/* Pricing context (proposals only) */}
             {cfg.showPricingContext && (
               <div>
-                <label className="block text-[11.5px] font-semibold text-[#667085] mb-1.5 uppercase tracking-wide">
+                <label className="block text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] mb-1.5 uppercase tracking-wide">
                   Your pricing context <span className="font-normal normal-case">(optional)</span>
                 </label>
                 <input
@@ -228,9 +228,9 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
                   onChange={e => setPricingCtx(e.target.value)}
                   placeholder='e.g. "I charge ₹800/hr" or "website projects start at ₹50k"'
                   className={cn(
-                    'w-full px-3 py-2.5 text-[13px] bg-[#FAFAFA] border border-[#E8EBF2] rounded-lg',
-                    'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 focus:bg-white',
-                    'placeholder:text-[#C9CDD4] transition-all',
+                    'w-full px-3 py-2.5 text-[13px] text-[#344054] dark:text-[#ECEEF3] bg-[#FAFAFA] dark:bg-[#21222D] border border-[#E8EBF2] dark:border-[#3D4258] rounded-lg',
+                    'outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 dark:focus:ring-indigo-900/30 focus:bg-white dark:focus:bg-[#1A1B23]',
+                    'placeholder:text-[#C9CDD4] dark:placeholder:text-[#545C74] transition-all',
                   )}
                 />
               </div>
@@ -243,8 +243,8 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
                   key={ex}
                   onClick={() => setTextState(ex.slice(1, -1))}
                   className={cn(
-                    'flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#E8EBF2]',
-                    'text-[11.5px] text-[#667085] hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/50',
+                    'flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#E8EBF2] dark:border-[#3D4258]',
+                    'text-[11.5px] text-[#667085] dark:text-[#8B92A8] hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20',
                     'transition-all',
                   )}
                 >
@@ -258,7 +258,7 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
             <div className="flex items-center justify-between pt-1">
               <button
                 onClick={onClose}
-                className="text-[13px] text-[#667085] hover:text-[#344054] font-medium transition-colors"
+                className="text-[13px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -269,7 +269,7 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
                   'flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all',
                   canExtract
                     ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-500 hover:to-violet-500 shadow-sm hover:shadow-indigo-200 hover:shadow-md'
-                    : 'bg-[#F2F4F7] text-[#98A2B3] cursor-not-allowed',
+                    : 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3] dark:text-[#545C74] cursor-not-allowed',
                 )}
               >
                 <AIIcon size={13} />
@@ -291,10 +291,10 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
               </div>
             </div>
             <div className="text-center">
-              <p className="text-[15px] font-bold text-[#101828]">
+              <p className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">
                 {EXTRACT_STATUS[extractStatus]}
               </p>
-              <p className="text-[12.5px] text-[#98A2B3] mt-1">Gemini AI is reading your input</p>
+              <p className="text-[12.5px] text-[#98A2B3] dark:text-[#545C74] mt-1">Gemini AI is reading your input</p>
             </div>
             {/* Dots */}
             <div className="flex gap-1.5">
