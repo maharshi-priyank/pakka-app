@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { X, FileText, FileSignature, Receipt, Building2, Mail, Phone, MapPin, Hash, Link2, RotateCcw, Copy, CheckCheck, Video } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { X, FileText, FileSignature, Receipt, Building2, Mail, Phone, MapPin, Hash, Link2, RotateCcw, Copy, CheckCheck, Video, ExternalLink } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { useClient, useRegeneratePortalToken } from '../hooks/useClients'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
@@ -29,6 +30,7 @@ function Skeleton({ className }: { className?: string }) {
 }
 
 export default function ClientDrawer({ clientId, onClose }: Props) {
+  const navigate  = useNavigate()
   const { data: client, isLoading } = useClient(clientId)
   const regenerate = useRegeneratePortalToken()
   const [copied, setCopied]             = useState(false)
@@ -67,6 +69,12 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
             </div>
           )}
           <div className="flex items-center gap-2 ml-4">
+            <button
+              onClick={() => { onClose(); navigate(`/app/clients/${clientId}`) }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"
+            >
+              <ExternalLink size={12} /> Full page
+            </button>
             <button
               onClick={() => setScheduleOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"

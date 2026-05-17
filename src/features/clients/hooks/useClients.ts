@@ -25,6 +25,7 @@ export interface ClientDetail extends Client {
   proposals: { id: string; title: string; status: string; totalAmount: string; createdAt: string }[]
   contracts: { id: string; title: string; status: string; createdAt: string }[]
   invoices:  { id: string; invoiceNumber: string; status: string; total: string; dueDate: string | null; createdAt: string }[]
+  leads:     { id: string; name: string; stage: string; budget: string | null; source: string | null; createdAt: string }[]
 }
 
 interface ClientsResponse {
