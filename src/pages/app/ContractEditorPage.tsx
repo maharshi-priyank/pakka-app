@@ -19,8 +19,8 @@ export default function ContractEditorPage() {
 
   async function handleGenerateInvoice() {
     if (!contract) return
-    const invoice = await generateInvoiceMutation.mutateAsync(contract.id)
-    navigate(`/app/invoices/${invoice.id}`)
+    const invoices = await generateInvoiceMutation.mutateAsync(contract.id)
+    navigate(`/app/invoices/${invoices[0].id}`)
   }
 
   if (!isNew && isLoading) {

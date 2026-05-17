@@ -46,10 +46,13 @@ export function useCreateInvoiceFromContract() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (contractId: string) => {
-      const { data } = await api.post<{ data: Invoice }>(`/invoices/from-contract/${contractId}`)
+      const { data } = await api.post<{ data: Invoice[] }>(`/invoices/from-contract/${contractId}`)
       return data.data
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: KEYS.all() }); toast.success('Invoice created from contract') },
+    onSuccess: (invoices) => {
+      qc.invalidateQueries({ queryKey: KEYS.all() })
+      toast.success(invoices.length > 1 ? `${invoices.length} milestone invoices created` : 'Invoice created from contract')
+    },
     onError: (err: Error) => toast.error(err.message || 'Failed to create invoice'),
   })
 }

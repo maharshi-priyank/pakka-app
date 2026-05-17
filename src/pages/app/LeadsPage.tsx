@@ -15,7 +15,7 @@ export default function LeadsPage() {
   const [showAI,  setShowAI]  = useState(false)
 
   function handleNewProposal(lead: Lead) {
-    navigate(`/app/proposals/new?leadId=${lead.id}`)
+    navigate('/app/proposals/new', { state: { lead } })
   }
 
   const { data } = useLeads({ limit: 200 })

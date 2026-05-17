@@ -6,6 +6,7 @@ import {
   FileText, Layers, DollarSign, Clock, ScrollText,
   Save, Send, Check, Copy, ExternalLink,
   Star, CheckSquare, XCircle, MessageSquare, Briefcase,
+  Lock, ArrowRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -14,8 +15,10 @@ import {
   type CreateProposalInput, type LineItem,
 } from '../schemas/proposal.schema'
 import type { Proposal, ProposalTemplate } from '../schemas/proposal.schema'
+import type { Lead } from '@/features/leads/schemas/lead.schema'
 import { useCreateProposal, useUpdateProposal, useSendProposal } from '../hooks/useProposals'
 import { useLeads } from '@/features/leads/hooks/useLeads'
+import { useNavigate } from 'react-router-dom'
 
 type Tab = 'cover' | 'scope' | 'pricing' | 'milestones' | 'terms' | 'credibility'
 
@@ -43,32 +46,41 @@ function calcTotals(lineItems: LineItem[], gstType: string) {
 
 interface Props {
   proposal?:        Proposal
-  defaultLeadId?:   string
+  defaultLead?:     Lead
   defaultTemplate?: ProposalTemplate
   onSaved?:         (proposal: Proposal) => void
   onDiscard?:       () => void
 }
 
-export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplate, onSaved, onDiscard }: Props) {
+export default function ProposalEditor({ proposal, defaultLead, defaultTemplate, onSaved, onDiscard }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('cover')
   const [shareUrl, setShareUrl]   = useState<string | null>(null)
   const [copied,   setCopied]     = useState(false)
+  const navigate = useNavigate()
 
   const createMutation = useCreateProposal()
   const updateMutation = useUpdateProposal()
   const sendMutation   = useSendProposal()
   const { data: leadsData } = useLeads({ limit: 100 })
 
-  const isEdit   = !!proposal
-  const isSaving = createMutation.isPending || updateMutation.isPending
+  const isEdit      = !!proposal
+  const isSaving    = createMutation.isPending || updateMutation.isPending
+  const isLocked    = isEdit && (proposal?.contracts?.length ?? 0) > 0
+  const contractId  = proposal?.contracts?.[0]?.id
 
   const c = (proposal?.content ?? defaultTemplate?.content ?? {}) as Record<string, unknown>
+
+  // Pre-fill a line item from lead budget when creating from lead
+  const leadBudgetNum = defaultLead?.budget ? parseFloat(defaultLead.budget.replace(/[^0-9.]/g, '')) : NaN
+  const leadLineItem  = defaultLead && !isNaN(leadBudgetNum) && leadBudgetNum > 0
+    ? [{ description: defaultLead.service ?? 'Service', qty: 1, rate: leadBudgetNum, gstRate: 18 as const }]
+    : []
 
   const { register, control, handleSubmit, watch, setValue, formState: { errors, isDirty } } = useForm<CreateProposalInput>({
     resolver: zodResolver(createProposalSchema),
     defaultValues: {
-      title:      proposal?.title ?? defaultTemplate?.name ?? '',
-      leadId:     proposal?.leadId ?? defaultLeadId ?? undefined,
+      title:      proposal?.title ?? defaultTemplate?.name ?? (defaultLead?.service ? `Proposal — ${defaultLead.service}` : ''),
+      leadId:     proposal?.leadId ?? defaultLead?.id ?? undefined,
       clientId:   proposal?.clientId ?? undefined,
       validUntil: proposal?.validUntil ? proposal.validUntil.slice(0, 10) : '',
       content: {
@@ -78,7 +90,7 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
         scopeItems:      (c.scopeItems    as [])      ?? [],
         deliverables:    (c.deliverables  as [])      ?? [],
         exclusions:      (c.exclusions    as string[]) ?? [],
-        lineItems:       (c.lineItems     as [])      ?? [],
+        lineItems:       (c.lineItems     as [])      ?? leadLineItem,
         pricingNotes:    (c.pricingNotes  as string)  ?? '',
         gstType:         (c.gstType       as 'IGST')  ?? 'IGST',
         paymentSchedule: (c.paymentSchedule as [])   ?? [],
@@ -193,8 +205,27 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
         )}
       </div>
 
+      {/* ── Contract lock banner (PC2) ── */}
+      {isLocked && (
+        <div className="flex items-start gap-3 px-6 py-3 bg-[#FFFAEB] dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50">
+          <Lock size={14} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+          <p className="text-[12.5px] text-amber-800 dark:text-amber-300 flex-1">
+            This proposal is locked because a contract has been generated from it. To change scope or price, amend the contract directly.
+          </p>
+          {contractId && (
+            <button
+              type="button"
+              onClick={() => navigate(`/app/contracts/${contractId}`)}
+              className="flex items-center gap-1 text-[12px] font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 shrink-0 transition-colors"
+            >
+              View contract <ArrowRight size={11} />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* ── Scrollable content ── */}
-      <div className="flex-1 overflow-y-auto bg-[#F5F6FA] dark:bg-[#0C0D10]">
+      <div className={cn('flex-1 overflow-y-auto bg-[#F5F6FA] dark:bg-[#0C0D10]', isLocked && 'pointer-events-none opacity-60')}>
         <form id="proposal-form" onSubmit={handleSubmit(onSave)} className="max-w-2xl mx-auto px-6 py-6 space-y-5">
 
           {/* ══ COVER ══════════════════════════════════════════════════════════ */}
@@ -688,7 +719,7 @@ export default function ProposalEditor({ proposal, defaultLeadId, defaultTemplat
           <button
             type="submit"
             form="proposal-form"
-            disabled={isSaving}
+            disabled={isSaving || isLocked}
             className="btn-primary flex items-center gap-1.5 text-[13px]"
           >
             <Save size={13} strokeWidth={2} />

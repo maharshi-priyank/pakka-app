@@ -1,17 +1,18 @@
-import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useProposal } from '@/features/proposals/hooks/useProposals'
 import ProposalEditor from '@/features/proposals/components/ProposalEditor'
 import type { Proposal, ProposalTemplate } from '@/features/proposals/schemas/proposal.schema'
+import type { Lead } from '@/features/leads/schemas/lead.schema'
 
 export default function ProposalEditorPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const [searchParams] = useSearchParams()
   const isNew = !id || id === 'new'
-  const defaultLeadId    = searchParams.get('leadId') ?? undefined
-  const templateFromState = (location.state as { template?: ProposalTemplate } | null)?.template
+  const state           = location.state as { template?: ProposalTemplate; lead?: Lead } | null
+  const templateFromState = state?.template
+  const leadFromState     = state?.lead
 
   const { data: proposal, isLoading } = useProposal(isNew ? null : id ?? null)
 
@@ -64,7 +65,7 @@ export default function ProposalEditorPage() {
 
       <ProposalEditor
         proposal={!isNew ? proposal : undefined}
-        defaultLeadId={defaultLeadId}
+        defaultLead={isNew ? leadFromState : undefined}
         defaultTemplate={isNew ? templateFromState : undefined}
         onSaved={handleSaved}
         onDiscard={handleDiscard}

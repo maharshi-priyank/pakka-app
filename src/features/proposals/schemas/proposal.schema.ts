@@ -108,6 +108,8 @@ export interface ProposalLead   { id: string; name: string; email?: string }
 export interface ProposalClient { id: string; name: string; company?: string | null }
 export interface ProposalOpen   { id: string; openedAt: string }
 
+export interface ProposalContract { id: string; status: string }
+
 export interface Proposal {
   id:          string
   userId:      string
@@ -124,6 +126,7 @@ export interface Proposal {
   validUntil:  string | null
   acceptedAt:  string | null
   opens:       ProposalOpen[]
+  contracts?:  ProposalContract[]
   createdAt:   string
   _count?:     { opens: number }
 }
