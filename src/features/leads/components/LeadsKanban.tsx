@@ -16,13 +16,12 @@ import { useLeads, useUpdateLeadStage, useConvertLeadToClient } from '../hooks/u
 import LeadCard, { LeadCardSkeleton } from './LeadCard'
 import LeadDrawer from './LeadDrawer'
 
-// Column accent colors — left border + count badge
-const COLUMN_ACCENTS: Record<LeadStage, { dot: string; count: string }> = {
-  ENQUIRY:       { dot: 'bg-[#667085]',  count: 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]'  },
-  PROPOSAL_SENT: { dot: 'bg-[#2563EB]',  count: 'bg-[#EFF6FF] dark:bg-[#1E2040] text-[#175CD3] dark:text-[#818CF8]'  },
-  NEGOTIATING:   { dot: 'bg-[#F79009]',  count: 'bg-[#FFFAEB] dark:bg-amber-950/40 text-[#B54708]'  },
-  WON:           { dot: 'bg-[#12B76A]',  count: 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48]'  },
-  LOST:          { dot: 'bg-[#F04438]',  count: 'bg-[#FEF3F2] dark:bg-red-950/40 text-[#D92D20]'  },
+const COLUMN_ACCENTS: Record<LeadStage, { bar: string; count: string }> = {
+  ENQUIRY:       { bar: 'bg-[#667085]',  count: 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]'  },
+  PROPOSAL_SENT: { bar: 'bg-[#2563EB]',  count: 'bg-[#EFF6FF] dark:bg-[#1E2040] text-[#175CD3] dark:text-[#818CF8]'  },
+  NEGOTIATING:   { bar: 'bg-[#F79009]',  count: 'bg-[#FFFAEB] dark:bg-amber-950/40 text-[#B54708]'  },
+  WON:           { bar: 'bg-[#12B76A]',  count: 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48]'  },
+  LOST:          { bar: 'bg-[#F04438]',  count: 'bg-[#FEF3F2] dark:bg-red-950/40 text-[#D92D20]'  },
 }
 
 interface ColumnProps {
@@ -40,11 +39,13 @@ function KanbanColumn({ stage, leads, onCardClick, onNewProposal, onConvertToCli
   const totalValue = leads.reduce((s, l) => s + (l.budget ? Number(l.budget) : 0), 0)
 
   return (
-    <div className="flex flex-col w-[260px] shrink-0">
+    <div className="flex flex-col w-[260px] shrink-0 rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm overflow-hidden">
+      {/* Stage color bar */}
+      <div className={cn('h-1 shrink-0', accent.bar)} />
+
       {/* Column header */}
-      <div className="flex items-center justify-between mb-2.5 px-1">
+      <div className="flex items-center justify-between px-3 py-2.5 bg-white dark:bg-[#13141A] border-b border-[#F2F4F7] dark:border-[#26283A]">
         <div className="flex items-center gap-2">
-          <span className={cn('w-2 h-2 rounded-full shrink-0', accent.dot)} />
           <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">{STAGE_LABELS[stage]}</span>
           <span className={cn('text-[11px] font-bold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center', accent.count)}>
             {leads.length}
@@ -64,9 +65,9 @@ function KanbanColumn({ stage, leads, onCardClick, onNewProposal, onConvertToCli
       <div
         ref={setNodeRef}
         className={cn(
-          'flex-1 min-h-[200px] rounded-xl p-2 space-y-2.5 transition-all duration-150',
+          'flex-1 min-h-[200px] p-2 space-y-2.5 transition-all duration-150',
           isOver
-            ? 'bg-[#EFF6FF] dark:bg-[#1E2040] ring-2 ring-[#2563EB]/30'
+            ? 'bg-[#EFF6FF] dark:bg-[#1E2040] ring-2 ring-inset ring-[#2563EB]/30'
             : 'bg-[#F5F6FA] dark:bg-[#1A1B23]',
         )}
       >
@@ -169,12 +170,12 @@ export default function LeadsKanban({ search, onNewProposal }: Props) {
     return (
       <div className="flex gap-4 overflow-x-auto pb-4">
         {LEAD_STAGES.map(stage => (
-          <div key={stage} className="w-[260px] shrink-0">
-            <div className="flex items-center gap-2 mb-2.5 px-1">
-              <div className="w-2 h-2 rounded-full bg-[#E4E7EC] dark:bg-[#26283A]" />
+          <div key={stage} className="w-[260px] shrink-0 rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm overflow-hidden">
+            <div className="h-1 bg-[#E4E7EC] dark:bg-[#26283A]" />
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-[#13141A] border-b border-[#F2F4F7] dark:border-[#26283A]">
               <div className="h-3.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded w-24 animate-pulse" />
             </div>
-            <div className="bg-[#F5F6FA] dark:bg-[#1A1B23] rounded-xl p-2 space-y-2.5">
+            <div className="bg-[#F5F6FA] dark:bg-[#1A1B23] p-2 space-y-2.5">
               {[1, 2].map(i => <LeadCardSkeleton key={i} />)}
             </div>
           </div>
