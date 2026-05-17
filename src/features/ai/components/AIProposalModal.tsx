@@ -7,10 +7,11 @@ import { useExtractProposal, type ExtractedProposal } from '../hooks/useAIExtrac
 import { useCreateProposal } from '@/features/proposals/hooks/useProposals'
 
 interface Props {
-  onClose: () => void
+  onClose:        () => void
+  defaultLeadId?: string
 }
 
-export default function AIProposalModal({ onClose }: Props) {
+export default function AIProposalModal({ onClose, defaultLeadId }: Props) {
   const [phase,     setPhase]     = useState<AIModalPhase>('input')
   const [extracted, setExtracted] = useState<ExtractedProposal | null>(null)
   const navigate = useNavigate()
@@ -52,6 +53,7 @@ export default function AIProposalModal({ onClose }: Props) {
     try {
       const proposal = await createMutation.mutateAsync({
         title:       data.title,
+        leadId:      defaultLeadId,
         clientId:    data.clientId,
         clientName:  data.clientName,
         clientEmail: data.clientEmail,

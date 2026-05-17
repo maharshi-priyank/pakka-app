@@ -5,13 +5,15 @@ import { cn } from '@/lib/utils'
 import { useProposalTemplates } from '../hooks/useProposalTemplates'
 import TemplateCard from './TemplateCard'
 import type { ProposalTemplate } from '../schemas/proposal.schema'
+import type { Lead } from '@/features/leads/schemas/lead.schema'
 
 interface Props {
-  open:    boolean
-  onClose: () => void
+  open:         boolean
+  onClose:      () => void
+  defaultLead?: Lead
 }
 
-export default function TemplatePickerModal({ open, onClose }: Props) {
+export default function TemplatePickerModal({ open, onClose, defaultLead }: Props) {
   const [search, setSearch]           = useState('')
   const [activeCategory, setCategory] = useState<string>('All')
   const navigate                      = useNavigate()
@@ -33,7 +35,7 @@ export default function TemplatePickerModal({ open, onClose }: Props) {
 
   function handleUse(template: ProposalTemplate) {
     onClose()
-    navigate('/app/proposals/new', { state: { template } })
+    navigate('/app/proposals/new', { state: { template, lead: defaultLead ?? undefined } })
   }
 
   if (!open) return null

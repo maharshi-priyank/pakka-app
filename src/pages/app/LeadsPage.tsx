@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Plus, Search, IndianRupee } from 'lucide-react'
 import AIIcon from '@/features/ai/components/AIIcon'
 import { LeadsKanban, AddLeadModal } from '@/features/leads'
@@ -7,15 +6,16 @@ import { useLeads } from '@/features/leads'
 import { cn } from '@/lib/utils'
 import type { Lead } from '@/features/leads/schemas/lead.schema'
 import AILeadModal from '@/features/ai/components/AILeadModal'
+import LeadProposalPickerModal from '@/features/leads/components/LeadProposalPickerModal'
 
 export default function LeadsPage() {
-  const navigate = useNavigate()
-  const [search,  setSearch]  = useState('')
-  const [showAdd, setShowAdd] = useState(false)
-  const [showAI,  setShowAI]  = useState(false)
+  const [search,          setSearch]          = useState('')
+  const [showAdd,         setShowAdd]         = useState(false)
+  const [showAI,          setShowAI]          = useState(false)
+  const [proposalForLead, setProposalForLead] = useState<Lead | null>(null)
 
   function handleNewProposal(lead: Lead) {
-    navigate('/app/proposals/new', { state: { lead } })
+    setProposalForLead(lead)
   }
 
   const { data } = useLeads({ limit: 200 })
@@ -84,6 +84,14 @@ export default function LeadsPage() {
 
       {/* AI modal */}
       {showAI && <AILeadModal onClose={() => setShowAI(false)} />}
+
+      {/* Lead → Proposal picker */}
+      {proposalForLead && (
+        <LeadProposalPickerModal
+          lead={proposalForLead}
+          onClose={() => setProposalForLead(null)}
+        />
+      )}
     </div>
   )
 }
