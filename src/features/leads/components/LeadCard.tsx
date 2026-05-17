@@ -104,33 +104,36 @@ export default function LeadCard({ lead, onClick, onNewProposal, onConvertToClie
         </button>
       </div>
 
-      {/* Divider rows */}
-      {lead.service && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
-          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Service</span>
-          <span className="text-[11.5px] font-medium text-[#344054] dark:text-[#C2C8D8] text-right truncate">{lead.service}</span>
-        </div>
-      )}
+      {/* Divider rows — always rendered for uniform card height */}
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+        <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Service</span>
+        {lead.service
+          ? <span className="text-[11.5px] font-medium text-[#344054] dark:text-[#C2C8D8] text-right truncate">{lead.service}</span>
+          : <span className="text-[11px] text-[#D0D5DD] dark:text-[#333649] italic">Not set</span>
+        }
+      </div>
 
-      {lead.budget && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
-          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Budget</span>
-          <span className="flex items-center gap-0.5 text-[13px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">
-            <IndianRupee size={10} strokeWidth={3} />
-            {Number(lead.budget).toLocaleString('en-IN')}
-          </span>
-        </div>
-      )}
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+        <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Budget</span>
+        {lead.budget
+          ? <span className="flex items-center gap-0.5 text-[13px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">
+              <IndianRupee size={10} strokeWidth={3} />
+              {Number(lead.budget).toLocaleString('en-IN')}
+            </span>
+          : <span className="text-[11px] text-[#D0D5DD] dark:text-[#333649] italic">Not set</span>
+        }
+      </div>
 
-      {lead.followUpAt && (
-        <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
-          <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Follow-up</span>
-          <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#D92D20] bg-[#FEF3F2] dark:bg-red-950/40 px-1.5 py-0.5 rounded-md">
-            <CalendarDays size={9} strokeWidth={2.5} />
-            {relativeDay(lead.followUpAt)}
-          </span>
-        </div>
-      )}
+      <div className="flex items-center justify-between gap-2 px-3.5 py-2 border-t border-[#F2F4F7] dark:border-[#26283A]">
+        <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Follow-up</span>
+        {lead.followUpAt
+          ? <span className="flex items-center gap-1 text-[11.5px] font-semibold text-[#D92D20] bg-[#FEF3F2] dark:bg-red-950/40 px-1.5 py-0.5 rounded-md">
+              <CalendarDays size={9} strokeWidth={2.5} />
+              {relativeDay(lead.followUpAt)}
+            </span>
+          : <span className="text-[11px] text-[#D0D5DD] dark:text-[#333649] italic">Not set</span>
+        }
+      </div>
 
       {/* Action CTAs */}
       {(onNewProposal || onConvertToClient) && (
