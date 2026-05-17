@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Bell, CheckCircle2, Eye, ThumbsUp, FileSignature, UserPlus, BellOff,
   Volume2, VolumeX,
@@ -45,13 +46,31 @@ function NotifIcon({ type }: { type: string }) {
   )
 }
 
-function NotifRow({ n, onRead }: { n: AppNotification; onRead: (id: string) => void }) {
+const ENTITY_ROUTES: Record<string, (id: string) => string> = {
+  invoice:  id => `/app/invoices/${id}`,
+  proposal: id => `/app/proposals/${id}`,
+  contract: id => `/app/contracts/${id}`,
+  lead:     () => `/app/leads`,
+}
+
+function NotifRow({ n, onRead, onClose }: { n: AppNotification; onRead: (id: string) => void; onClose: () => void }) {
+  const navigate = useNavigate()
   const time = timeAgo(n.createdAt)
+
+  const routeFn  = n.entityType ? ENTITY_ROUTES[n.entityType] : undefined
+  const href     = routeFn && n.entityId ? routeFn(n.entityId) : undefined
+
+  function handleClick() {
+    if (!n.read) onRead(n.id)
+    if (href) { onClose(); navigate(href) }
+  }
+
   return (
     <button
-      onClick={() => !n.read && onRead(n.id)}
+      onClick={handleClick}
       className={cn(
         'w-full flex items-start gap-3 px-4 py-3 text-left transition-colors',
+        href ? 'cursor-pointer' : 'cursor-default',
         'hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23]',
         !n.read && 'bg-[#EEF2FF]/50 dark:bg-[#1E2040]/40',
       )}
@@ -172,6 +191,7 @@ export default function NotificationBell() {
                     key={n.id}
                     n={n}
                     onRead={(id) => markRead.mutate(id)}
+                    onClose={() => setOpen(false)}
                   />
                 ))}
               </div>
