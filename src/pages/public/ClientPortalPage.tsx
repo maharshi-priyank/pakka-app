@@ -254,7 +254,6 @@ function EmptyState({ label }: { label: string }) {
 function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
   const date    = new Date(meeting.scheduledAt)
   const isUpcoming = meeting.status === 'SCHEDULED' && date >= new Date()
-  const isPast     = meeting.status === 'COMPLETED' || (meeting.status === 'SCHEDULED' && date < new Date())
 
   const dateStr = date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
   const timeStr = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
