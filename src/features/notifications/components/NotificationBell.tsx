@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Bell, CheckCircle2, Eye, ThumbsUp, FileSignature, UserPlus, BellOff,
-  Volume2, VolumeX,
+  Volume2, VolumeX, ThumbsDown, CreditCard, AlertCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useNotifications, useUnreadCount, useMarkRead, useMarkAllRead, type AppNotification } from '../hooks/useNotifications'
@@ -26,7 +26,10 @@ const TYPE_CONFIG: Record<string, { icon: React.ElementType; iconColor: string; 
   'invoice.paid':       { icon: CheckCircle2,   iconColor: 'text-[#027A48] dark:text-[#34D399]',  bg: 'bg-[#ECFDF3] dark:bg-emerald-950/50' },
   'proposal.opened':    { icon: Eye,            iconColor: 'text-[#6366F1]',                       bg: 'bg-[#EEF2FF] dark:bg-[#1E2040]'       },
   'proposal.accepted':  { icon: ThumbsUp,       iconColor: 'text-[#027A48] dark:text-[#34D399]',  bg: 'bg-[#ECFDF3] dark:bg-emerald-950/50' },
+  'proposal.declined':  { icon: ThumbsDown,     iconColor: 'text-[#B42318] dark:text-red-400',    bg: 'bg-[#FEF3F2] dark:bg-red-950/40'      },
   'contract.signed':    { icon: FileSignature,  iconColor: 'text-[#7C3AED] dark:text-[#A78BFA]',  bg: 'bg-[#F5F3FF] dark:bg-violet-950/40'  },
+  'invoice.partial':    { icon: CreditCard,     iconColor: 'text-[#B54708] dark:text-amber-400',  bg: 'bg-[#FFFBEB] dark:bg-amber-950/30'   },
+  'invoice.overdue':    { icon: AlertCircle,    iconColor: 'text-[#B42318] dark:text-red-400',    bg: 'bg-[#FEF3F2] dark:bg-red-950/40'      },
   'lead.created':       { icon: UserPlus,       iconColor: 'text-[#D97706] dark:text-amber-400',  bg: 'bg-[#FFFBEB] dark:bg-amber-950/30'   },
 }
 
