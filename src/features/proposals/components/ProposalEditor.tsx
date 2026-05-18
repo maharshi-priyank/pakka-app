@@ -174,7 +174,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
     setTimeout(() => setCopied(false), 2000)
   }, [shareUrl])
 
-  const canSend = isEdit && proposal?.status === 'DRAFT'
+  const canSend = isEdit && (proposal?.status === 'DRAFT' || proposal?.status === 'DECLINED' || proposal?.status === 'SENT')
   const isSent  = isEdit && (proposal?.status === 'SENT' || proposal?.status === 'OPENED' || proposal?.status === 'ACCEPTED')
 
   return (
