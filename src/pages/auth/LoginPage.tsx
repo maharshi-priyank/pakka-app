@@ -41,8 +41,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center justify-center mb-8">
-          <img src="/logo/full_logo.svg" alt="Clinekt" className="h-8 w-auto block dark:hidden" />
-          <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-8 w-auto hidden dark:block" />
+          <img src="/logo/full_logo.svg" alt="Clinekt" className="h-9 w-auto block dark:hidden" />
+          <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-9 w-auto hidden dark:block" />
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">

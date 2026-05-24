@@ -26,8 +26,8 @@ export default function Sidebar({ onClose }: Props) {
       {/* Logo */}
       <div className="h-[60px] flex items-center justify-between px-4 border-b border-[#EAECF0] dark:border-[#26283A]">
         <div className="flex items-center">
-          <img src="/logo/full_logo.svg" alt="Clinekt" className="h-7 w-auto block dark:hidden" />
-          <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-7 w-auto hidden dark:block" />
+          <img src="/logo/full_logo.svg" alt="Clinekt" className="h-8 w-auto block dark:hidden" />
+          <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-8 w-auto hidden dark:block" />
         </div>
         {onClose && (
           <button
