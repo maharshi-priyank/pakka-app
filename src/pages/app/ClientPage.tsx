@@ -486,14 +486,31 @@ function MiniTable({ headers, children, empty, emptyMsg }: {
 type ClientData = NonNullable<ReturnType<typeof useClient>['data']>
 
 function TimelineTab({ client }: { client: ClientData }) {
-  type TimelineItem = { id: string; type: 'proposal' | 'contract' | 'invoice' | 'lead'; title: string; status: string; date: string; amount?: string }
+  type TimelineItem = { id: string; type: 'proposal' | 'contract' | 'invoice' | 'lead' | 'meeting'; title: string; label: string; status: string; date: string; amount?: string }
 
-  const items: TimelineItem[] = [
-    ...client.proposals.map(p => ({ id: p.id, type: 'proposal' as const, title: p.title, status: p.status, date: p.createdAt, amount: p.totalAmount })),
-    ...client.contracts.map(c => ({ id: c.id, type: 'contract' as const, title: c.title, status: c.status, date: c.createdAt })),
-    ...client.invoices.map(i  => ({ id: i.id, type: 'invoice'  as const, title: i.invoiceNumber, status: i.status, date: i.createdAt, amount: i.total })),
-    ...(client.leads ?? []).map(l => ({ id: l.id, type: 'lead' as const, title: l.name, status: l.stage, date: l.createdAt })),
-  ].sort((a, b) => b.date.localeCompare(a.date))
+  const items: TimelineItem[] = []
+
+  client.proposals.forEach(p => {
+    items.push({ id: `p-c-${p.id}`, type: 'proposal', label: 'Proposal created', title: p.title, status: p.status, date: p.createdAt, amount: p.totalAmount })
+    if (p.acceptedAt) items.push({ id: `p-a-${p.id}`, type: 'proposal', label: 'Proposal accepted', title: p.title, status: 'ACCEPTED', date: p.acceptedAt, amount: p.totalAmount })
+  })
+  client.contracts.forEach(c => {
+    items.push({ id: `c-c-${c.id}`, type: 'contract', label: 'Contract created', title: c.title, status: c.status, date: c.createdAt })
+    if (c.sentAt)   items.push({ id: `c-s-${c.id}`, type: 'contract', label: 'Contract sent',   title: c.title, status: 'SENT',   date: c.sentAt })
+    if (c.signedAt) items.push({ id: `c-g-${c.id}`, type: 'contract', label: 'Contract signed', title: c.title, status: 'SIGNED', date: c.signedAt })
+  })
+  client.invoices.forEach(i => {
+    items.push({ id: `i-c-${i.id}`, type: 'invoice', label: 'Invoice created', title: i.invoiceNumber, status: i.status, date: i.createdAt, amount: i.total })
+    if (i.paidAt) items.push({ id: `i-p-${i.id}`, type: 'invoice', label: 'Invoice paid', title: i.invoiceNumber, status: 'PAID', date: i.paidAt, amount: i.total })
+  })
+  client.leads?.forEach(l => {
+    items.push({ id: `l-${l.id}`, type: 'lead', label: 'Lead added', title: l.name, status: l.stage, date: l.createdAt })
+  })
+  client.meetings?.forEach(m => {
+    items.push({ id: `m-${m.id}`, type: 'meeting', label: 'Meeting scheduled', title: m.title, status: m.status, date: m.scheduledAt })
+  })
+
+  items.sort((a, b) => b.date.localeCompare(a.date))
 
   if (items.length === 0) {
     return (
@@ -503,8 +520,7 @@ function TimelineTab({ client }: { client: ClientData }) {
     )
   }
 
-  const iconMap = { proposal: FileText, contract: FileSignature, invoice: Receipt, lead: Users }
-  const labelMap = { proposal: 'Proposal', contract: 'Contract', invoice: 'Invoice', lead: 'Lead' }
+  const iconMap = { proposal: FileText, contract: FileSignature, invoice: Receipt, lead: Users, meeting: Video }
 
   return (
     <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] p-5">
@@ -522,7 +538,7 @@ function TimelineTab({ client }: { client: ClientData }) {
               <div className="pb-5 min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <span className="text-[11px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">{labelMap[item.type]}</span>
+                    <span className="text-[11px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">{item.label}</span>
                     <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate mt-0.5">{item.title}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

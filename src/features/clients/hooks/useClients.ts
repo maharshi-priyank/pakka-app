@@ -22,10 +22,11 @@ export interface Client {
 }
 
 export interface ClientDetail extends Client {
-  proposals: { id: string; title: string; status: string; totalAmount: string; createdAt: string }[]
-  contracts: { id: string; title: string; status: string; createdAt: string }[]
-  invoices:  { id: string; invoiceNumber: string; status: string; total: string; dueDate: string | null; createdAt: string }[]
+  proposals: { id: string; title: string; status: string; totalAmount: string; createdAt: string; acceptedAt: string | null }[]
+  contracts: { id: string; title: string; status: string; createdAt: string; sentAt: string | null; signedAt: string | null }[]
+  invoices:  { id: string; invoiceNumber: string; status: string; total: string; dueDate: string | null; createdAt: string; paidAt: string | null }[]
   leads:     { id: string; name: string; stage: string; budget: string | null; source: string | null; createdAt: string }[]
+  meetings:  { id: string; title: string; scheduledAt: string; status: string; meetLink: string | null }[]
 }
 
 interface ClientsResponse {
