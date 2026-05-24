@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { nanoid } from 'nanoid'
 import {
@@ -31,7 +31,7 @@ const OPERATORS_FOR_FIELD: Record<string, { op: string; label: string }[]> = {
   'client.hasEmail': [{ op: 'eq', label: 'is' }],
 }
 
-const ACTION_ICONS: Record<string, React.ReactNode> = {
+const ACTION_ICONS: Record<string, ReactNode> = {
   'send_email.client': <Mail size={13} />,
   'send_email.me':     <Mail size={13} />,
   'send_form':         <Send size={13} />,

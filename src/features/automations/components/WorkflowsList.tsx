@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Zap, Edit2, Trash2, Copy, CheckCheck, GitBranch } from 'lucide-react'
+import { Plus, Zap, Edit2, Trash2, GitBranch } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import {
   useWorkflows, useCreateWorkflow, useUpdateWorkflow, useDeleteWorkflow,
