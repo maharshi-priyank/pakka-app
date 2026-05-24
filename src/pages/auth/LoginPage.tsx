@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
-import { Zap } from 'lucide-react'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -41,11 +40,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <Zap size={16} className="text-white" />
-          </div>
-          <span className="font-black text-gray-950 text-xl tracking-tight">Clinekt</span>
+        <div className="flex items-center justify-center mb-8">
+          <img src="/logo/full_logo.svg" alt="Clinekt" className="h-8 w-auto block dark:hidden" />
+          <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-8 w-auto hidden dark:block" />
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">

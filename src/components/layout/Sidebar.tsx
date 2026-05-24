@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
-  Receipt, Building2, Settings, Zap, X, CalendarDays,
+  Receipt, Building2, Settings, X, CalendarDays,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,11 +25,9 @@ export default function Sidebar({ onClose }: Props) {
 
       {/* Logo */}
       <div className="h-[60px] flex items-center justify-between px-4 border-b border-[#EAECF0] dark:border-[#26283A]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#6366F1] dark:bg-[#818CF8] flex items-center justify-center shadow-sm">
-            <Zap size={14} className="text-white" strokeWidth={2.5} />
-          </div>
-          <span className="font-bold text-[#0D1117] dark:text-[#ECEEF3] text-[16px] tracking-tight">Clinekt</span>
+        <div className="flex items-center">
+          <img src="/logo/full_logo.svg" alt="Clinekt" className="h-7 w-auto block dark:hidden" />
+          <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-7 w-auto hidden dark:block" />
         </div>
         {onClose && (
           <button
