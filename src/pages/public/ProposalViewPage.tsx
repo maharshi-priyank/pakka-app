@@ -169,7 +169,7 @@ export default function ProposalViewPage() {
               <Download size={12} strokeWidth={2} />
               Download PDF
             </button>
-            <span className="text-[11px] text-[#98A2B3]">Powered by Pakka</span>
+            <span className="text-[11px] text-[#98A2B3]">Powered by Clinekt</span>
           </div>
         </div>
       </div>
@@ -531,7 +531,7 @@ export default function ProposalViewPage() {
 
         {/* Footer */}
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
-          Sent by {senderName} · {proposal.user.email} · Powered by Pakka
+          Sent by {senderName} · {proposal.user.email} · Powered by Clinekt
         </div>
       </div>
     </div>

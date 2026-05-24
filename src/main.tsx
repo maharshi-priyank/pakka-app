@@ -5,7 +5,7 @@ import App from './App.tsx'
 
 // Apply saved theme before first paint to avoid flash
 try {
-  const stored = localStorage.getItem('pakka-theme')
+  const stored = localStorage.getItem('clinekt-theme')
   if (stored && JSON.parse(stored)?.state?.isDark) {
     document.documentElement.classList.add('dark')
   }

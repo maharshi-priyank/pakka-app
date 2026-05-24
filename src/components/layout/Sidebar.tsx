@@ -29,7 +29,7 @@ export default function Sidebar({ onClose }: Props) {
           <div className="w-8 h-8 rounded-xl bg-[#6366F1] dark:bg-[#818CF8] flex items-center justify-center shadow-sm">
             <Zap size={14} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="font-bold text-[#0D1117] dark:text-[#ECEEF3] text-[16px] tracking-tight">Pakka</span>
+          <span className="font-bold text-[#0D1117] dark:text-[#ECEEF3] text-[16px] tracking-tight">Clinekt</span>
         </div>
         {onClose && (
           <button

@@ -72,7 +72,7 @@ export default function SignupPage() {
           <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
             <Zap size={16} className="text-white" />
           </div>
-          <span className="font-black text-gray-950 text-xl tracking-tight">Pakka</span>
+          <span className="font-black text-gray-950 text-xl tracking-tight">Clinekt</span>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">

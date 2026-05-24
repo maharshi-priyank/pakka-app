@@ -32,7 +32,7 @@ interface InvoiceFilters {
 const EMPTY_FILTERS: InvoiceFilters = { clientIds: [], dateFrom: '', dateTo: '', amountMin: '', amountMax: '' }
 
 type ViewMode = 'table' | 'cards'
-const VIEW_KEY = 'pakka:invoices:view'
+const VIEW_KEY = 'clinekt:invoices:view'
 function getStoredView(): ViewMode {
   try { return (localStorage.getItem(VIEW_KEY) as ViewMode) ?? 'table' } catch { return 'table' }
 }

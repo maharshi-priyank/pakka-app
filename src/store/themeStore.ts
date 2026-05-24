@@ -12,6 +12,6 @@ export const useThemeStore = create<ThemeStore>()(
       isDark: false,
       setDark: (value) => set({ isDark: value }),
     }),
-    { name: 'pakka-theme' },
+    { name: 'clinekt-theme' },
   ),
 )

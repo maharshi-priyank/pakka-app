@@ -124,7 +124,7 @@ export default function InvoiceViewPage() {
             </button>
             <div className="flex items-center gap-1.5 text-[11px] text-[#667085]">
               <Lock size={11} strokeWidth={2} />
-              Secured by Pakka
+              Secured by Clinekt
             </div>
           </div>
         </div>
@@ -307,7 +307,7 @@ export default function InvoiceViewPage() {
 
         {/* Footer */}
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
-          Invoice by {senderName} · {invoice.user.email} · Powered by Pakka
+          Invoice by {senderName} · {invoice.user.email} · Powered by Clinekt
         </div>
       </div>
     </div>

@@ -27,7 +27,7 @@ export default function Topbar({ onMenuToggle }: Props) {
   const { pathname } = useLocation()
   const { isDark, toggle } = useThemeToggle()
 
-  const page     = PAGE_TITLES[pathname] ?? { title: 'Pakka', sub: '' }
+  const page     = PAGE_TITLES[pathname] ?? { title: 'Clinekt', sub: '' }
   const name     = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
   const initials = generateInitials(name)
   const firstName = name.split(' ')[0]

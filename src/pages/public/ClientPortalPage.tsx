@@ -237,7 +237,7 @@ export default function ClientPortalPage() {
         )}
 
         {/* Footer */}
-        <p className="text-center text-[11px] text-[#C9CDD4] pb-4">Powered by Pakka</p>
+        <p className="text-center text-[11px] text-[#C9CDD4] pb-4">Powered by Clinekt</p>
       </div>
     </div>
   )

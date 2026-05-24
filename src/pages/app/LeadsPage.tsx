@@ -35,7 +35,7 @@ interface LeadFilters {
 const EMPTY_FILTERS: LeadFilters = { stages: [], sources: [], budgetMin: '', budgetMax: '', followUp: '' }
 
 type ViewMode = 'kanban' | 'table'
-const VIEW_KEY = 'pakka:leads:view'
+const VIEW_KEY = 'clinekt:leads:view'
 function getStoredView(): ViewMode {
   try { return (localStorage.getItem(VIEW_KEY) as ViewMode) ?? 'kanban' } catch { return 'kanban' }
 }

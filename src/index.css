@@ -277,41 +277,41 @@
 
 /* ─── Keyframe animations ────────────────────────────────────────────────────*/
 
-@keyframes pakka-page-enter {
+@keyframes clinekt-page-enter {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pakka-fade {
+@keyframes clinekt-fade {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-@keyframes pakka-modal-in {
+@keyframes clinekt-modal-in {
   from { opacity: 0; transform: scale(0.95) translateY(8px); }
   to   { opacity: 1; transform: scale(1)    translateY(0); }
 }
 
-@keyframes pakka-slide-right {
+@keyframes clinekt-slide-right {
   from { transform: translateX(110%); }
   to   { transform: translateX(0); }
 }
 
-@keyframes pakka-slide-left {
+@keyframes clinekt-slide-left {
   from { transform: translateX(-110%); }
   to   { transform: translateX(0); }
 }
 
-@keyframes pakka-slide-up {
+@keyframes clinekt-slide-up {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
 
 /* ─── Animation utility classes ─────────────────────────────────────────────*/
 
-.page-enter       { animation: pakka-page-enter  0.22s cubic-bezier(0.16, 1, 0.3, 1); }
-.anim-fade        { animation: pakka-fade         0.15s ease-out; }
-.anim-modal-in    { animation: pakka-modal-in     0.28s cubic-bezier(0.16, 1, 0.3, 1); }
-.anim-slide-right { animation: pakka-slide-right  0.3s  cubic-bezier(0.16, 1, 0.3, 1); }
-.anim-slide-left  { animation: pakka-slide-left   0.3s  cubic-bezier(0.16, 1, 0.3, 1); }
-.anim-slide-up    { animation: pakka-slide-up     0.32s cubic-bezier(0.16, 1, 0.3, 1); }
+.page-enter       { animation: clinekt-page-enter  0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-fade        { animation: clinekt-fade         0.15s ease-out; }
+.anim-modal-in    { animation: clinekt-modal-in     0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-slide-right { animation: clinekt-slide-right  0.3s  cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-slide-left  { animation: clinekt-slide-left   0.3s  cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-slide-up    { animation: clinekt-slide-up     0.32s cubic-bezier(0.16, 1, 0.3, 1); }

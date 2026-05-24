@@ -89,8 +89,8 @@ export function playSound(id: SoundId) {
 
 // ── Preferences (localStorage) ────────────────────────────────────────────
 
-const SOUND_KEY   = 'pakka_notif_sound'
-const DESKTOP_KEY = 'pakka_notif_desktop'
+const SOUND_KEY   = 'clinekt_notif_sound'
+const DESKTOP_KEY = 'clinekt_notif_desktop'
 
 export function getSound(): SoundId {
   const stored = localStorage.getItem(SOUND_KEY) as SoundId | null
