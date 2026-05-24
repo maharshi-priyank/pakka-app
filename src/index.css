@@ -23,6 +23,9 @@
   --accent-hover: #4F46E5;
   --accent-bg:    #EEF2FF;
   --accent-text:  #4338CA;
+  --btn-bg:       #0D1117;
+  --btn-hover:    #1a1d2e;
+  --btn-shadow:   rgba(13,17,23,0.18);
   --scrollbar:    #E4E7EC;
   --scrollbar-h:  #D0D5DD;
 }
@@ -42,6 +45,9 @@
   --accent-hover: #6366F1;
   --accent-bg:    #1E2040;
   --accent-text:  #A5B4FC;
+  --btn-bg:       #6366F1;
+  --btn-hover:    #4F46E5;
+  --btn-shadow:   rgba(99,102,241,0.25);
   --scrollbar:    #26283A;
   --scrollbar-h:  #333649;
 }
@@ -225,18 +231,18 @@
     font-weight: 600;
     font-family: inherit;
     color: #fff;
-    background: var(--accent);
-    border: 1px solid var(--accent);
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-bg);
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.15s, box-shadow 0.15s;
     white-space: nowrap;
-    box-shadow: 0 1px 3px rgba(99,102,241,0.2);
+    box-shadow: 0 1px 3px var(--btn-shadow);
   }
   .btn-primary:hover:not(:disabled) {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
-    box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+    background: var(--btn-hover);
+    border-color: var(--btn-hover);
+    box-shadow: 0 2px 8px var(--btn-shadow);
   }
   .btn-primary:focus-visible {
     outline: none;
