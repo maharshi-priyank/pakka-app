@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Camera, Check, Loader2, Building2, User, Receipt, Upload, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useProfile, useUpdateProfile, useUploadLogo } from '../hooks/useProfile'
+import { useProfile, useUpdateProfile, useUploadLogo, useRedeemPromo } from '../hooks/useProfile'
 
 const profileSchema = z.object({
   name:         z.string().min(1, 'Name is required'),
@@ -35,9 +35,17 @@ export default function ProfileTab() {
   const { data: profile, isLoading } = useProfile()
   const { mutateAsync: updateProfile, isPending: saving } = useUpdateProfile()
   const { mutateAsync: uploadLogo, isPending: uploading }  = useUploadLogo()
+  const redeemPromo = useRedeemPromo()
   const fileRef = useRef<HTMLInputElement>(null)
   const [saved, setSaved] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [promoInput, setPromoInput] = useState('')
+
+  const handleRedeemPromo = useCallback(async () => {
+    if (!promoInput.trim()) return
+    await redeemPromo.mutateAsync(promoInput.trim().toUpperCase())
+    setPromoInput('')
+  }, [promoInput, redeemPromo])
 
   const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -155,6 +163,11 @@ export default function ProfileTab() {
                 {profile.plan === 'FREE' ? 'Free Plan' : profile.plan === 'SOLO' ? 'Solo · ₹299/mo' : 'Studio · ₹699/mo'}
               </div>
             )}
+            {profile?.planExpiresAt && (
+              <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">
+                Expires {new Date(profile.planExpiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -168,6 +181,35 @@ export default function ProfileTab() {
           </div>
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+      </div>
+
+      {/* Promo code */}
+      <div className="card p-6">
+        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A] mb-4">
+          <Zap size={14} className="text-[#6366F1] dark:text-[#818CF8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Promo Code</h3>
+        </div>
+        <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mb-3">
+          Have a promo code? Redeem it to unlock Solo or Studio features for 30 days.
+        </p>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={promoInput}
+            onChange={e => setPromoInput(e.target.value.toUpperCase())}
+            onKeyDown={e => e.key === 'Enter' && handleRedeemPromo()}
+            placeholder="e.g. BETA2026"
+            className="form-input flex-1 uppercase tracking-widest font-mono"
+          />
+          <button
+            type="button"
+            onClick={handleRedeemPromo}
+            disabled={redeemPromo.isPending || !promoInput.trim()}
+            className="btn-primary shrink-0"
+          >
+            {redeemPromo.isPending ? 'Redeeming…' : 'Redeem'}
+          </button>
+        </div>
       </div>
 
       {/* Personal info */}

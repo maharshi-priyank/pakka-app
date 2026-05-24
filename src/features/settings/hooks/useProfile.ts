@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -8,6 +9,7 @@ export interface UserProfile {
   email:             string
   name:              string
   plan:              'FREE' | 'SOLO' | 'STUDIO'
+  planExpiresAt:     string | null
   businessName:      string | null
   businessType:      string | null
   gstNumber:         string | null
@@ -43,6 +45,21 @@ export function useUpdateProfile() {
     onSuccess: (updated) => {
       queryClient.setQueryData(['profile'], updated)
     },
+  })
+}
+
+export function useRedeemPromo() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (code: string) => {
+      const { data } = await api.post<{ data: { plan: string; expiresAt: string } }>('/users/redeem-promo', { code })
+      return data.data
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['profile'] })
+      toast.success(`Upgraded to ${data.plan} plan — valid for 30 days!`)
+    },
+    onError: (err: Error) => toast.error(err.message),
   })
 }
 
