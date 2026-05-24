@@ -75,7 +75,7 @@ export default function TemplatePickerModal({ open, onClose, defaultLead }: Prop
                 className={cn(
                   'px-3 py-1 rounded-full text-[12px] font-semibold whitespace-nowrap transition-colors',
                   activeCategory === cat
-                    ? 'bg-[#6366F1] text-white'
+                    ? 'bg-[#0D1117] dark:bg-[#6366F1] text-white'
                     : 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8] hover:bg-[#E4E7EC] dark:hover:bg-[#26283A] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
                 )}
               >

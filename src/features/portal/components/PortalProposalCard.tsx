@@ -118,7 +118,7 @@ export default function PortalProposalCard({ proposal, appUrl, onStatusChange }:
               <button
                 onClick={handleAccept}
                 disabled={accept.isPending}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
               >
                 <CheckCircle2 size={12} /> {accept.isPending ? 'Accepting…' : 'Yes, accept'}
               </button>

@@ -150,7 +150,7 @@ export default function NotificationBell() {
             <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">
               Notifications
               {unreadCount > 0 && (
-                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#6366F1] text-white text-[10px] font-bold">
+                <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#0D1117] dark:bg-[#6366F1] text-white text-[10px] font-bold">
                   {unreadCount}
                 </span>
               )}

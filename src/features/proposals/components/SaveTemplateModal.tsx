@@ -109,7 +109,7 @@ export default function SaveTemplateModal({ open, onClose, proposalId, defaultNa
             <button
               type="submit"
               disabled={saveMut.isPending}
-              className="h-8 px-3.5 rounded-lg bg-[#6366F1] text-white text-[12.5px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-1.5"
+              className="h-8 px-3.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12.5px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-1.5"
             >
               {saveMut.isPending ? <Loader2 size={12} className="animate-spin" /> : <LayoutTemplate size={12} />}
               Save template

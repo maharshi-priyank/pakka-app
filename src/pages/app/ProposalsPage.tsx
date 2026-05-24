@@ -271,7 +271,7 @@ export default function ProposalsPage() {
             <SlidersHorizontal size={12} />
             Filters
             {activeCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-[#6366F1] text-white text-[9px] font-bold flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-[#0D1117] dark:bg-[#6366F1] text-white text-[9px] font-bold flex items-center justify-center">
                 {activeCount}
               </span>
             )}

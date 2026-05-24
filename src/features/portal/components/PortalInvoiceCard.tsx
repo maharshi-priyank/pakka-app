@@ -124,7 +124,7 @@ export default function PortalInvoiceCard({
           <button
             onClick={handlePayNow}
             disabled={createOrder.isPending}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60 shadow-sm"
           >
             <CreditCard size={13} strokeWidth={2} />
             {createOrder.isPending ? 'Opening…' : 'Pay Now'}

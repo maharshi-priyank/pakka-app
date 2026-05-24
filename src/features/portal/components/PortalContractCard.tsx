@@ -85,7 +85,7 @@ export default function PortalContractCard({ contract, appUrl, onStatusChange }:
         <div className="border-t border-[#F2F4F7] px-5 py-3 bg-[#FAFBFF]">
           <button
             onClick={() => setShowOtp(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#6366F1] text-white text-[12.5px] font-semibold hover:bg-[#4F46E5] transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12.5px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
           >
             <PenLine size={12} strokeWidth={2.5} /> Sign Contract
           </button>
@@ -108,7 +108,7 @@ export default function PortalContractCard({ contract, appUrl, onStatusChange }:
             <button
               onClick={handleSign}
               disabled={sign.isPending || otp.length !== 6}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#6366F1] text-white text-[12.5px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12.5px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
             >
               <PenLine size={12} /> {sign.isPending ? 'Signing…' : 'Confirm & Sign'}
             </button>

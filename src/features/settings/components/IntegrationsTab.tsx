@@ -97,7 +97,7 @@ export default function IntegrationsTab() {
               <button
                 onClick={() => connect.mutate()}
                 disabled={connect.isPending}
-                className="px-4 py-1.5 rounded-lg bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-1.5"
+                className="px-4 py-1.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-1.5"
               >
                 {connect.isPending ? <Loader2 size={12} className="animate-spin" /> : <CalendarDays size={12} />}
                 Connect Google Calendar

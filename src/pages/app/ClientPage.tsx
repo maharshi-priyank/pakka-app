@@ -385,7 +385,7 @@ export default function ClientPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={copyPortalLink}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#4F46E5] transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
                   >
                     {copied ? <><CheckCheck size={12} /> Copied!</> : <><Copy size={12} /> Copy link</>}
                   </button>

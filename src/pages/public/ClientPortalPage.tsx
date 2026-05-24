@@ -139,7 +139,7 @@ export default function ClientPortalPage() {
               className={cn(
                 'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-[12.5px] font-semibold transition-all',
                 tab === key
-                  ? 'bg-[#6366F1] text-white shadow-sm'
+                  ? 'bg-[#0D1117] dark:bg-[#6366F1] text-white shadow-sm'
                   : 'text-[#667085] hover:text-[#344054] hover:bg-[#F4F5F8]',
               )}
             >
@@ -298,7 +298,7 @@ function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
           href={meeting.meetLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#4F46E5] transition-colors"
+          className="mt-3 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
         >
           <Video size={12} /> Join Meeting <ExternalLink size={10} />
         </a>

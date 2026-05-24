@@ -99,7 +99,7 @@ export default function MeetingsPage() {
         </div>
         <button
           onClick={() => setScheduleOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#4F46E5] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D1117] dark:bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
         >
           <Video size={14} /> Schedule Call
         </button>
@@ -148,7 +148,7 @@ export default function MeetingsPage() {
             {activeTab === 'SCHEDULED' && (
               <button
                 onClick={() => setScheduleOpen(true)}
-                className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#4F46E5] transition-colors"
+                className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D1117] dark:bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
               >
                 <Video size={13} /> Schedule Call
               </button>

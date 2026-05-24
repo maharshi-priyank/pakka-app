@@ -73,7 +73,7 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
           <button
             onClick={handleSaveEdit}
             disabled={updateMut.isPending}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
           >
             {updateMut.isPending ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
             Save
@@ -169,7 +169,7 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
 
       {mode === 'pick' && (
         <div className="pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="w-full h-7 rounded-lg bg-[#6366F1] text-white text-[11.5px] font-semibold hover:bg-[#4F46E5] transition-colors">
+          <button className="w-full h-7 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[11.5px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors">
             Use this template
           </button>
         </div>

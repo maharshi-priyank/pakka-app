@@ -420,7 +420,7 @@ export default function ScheduleCallModal({
             <button
               type="submit"
               disabled={createMeeting.isPending}
-              className="h-9 px-4 rounded-lg bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-2"
+              className="h-9 px-4 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-2"
             >
               {createMeeting.isPending ? (
                 <><Loader2 size={13} className="animate-spin" /> Scheduling…</>
