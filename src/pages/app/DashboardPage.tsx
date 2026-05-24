@@ -330,7 +330,7 @@ export default function DashboardPage() {
             className={cn(
               'flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold rounded-lg transition-colors border',
               editMode
-                ? 'text-white bg-[#6366F1] border-[#6366F1] hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5]'
+                ? 'text-white bg-[#0D1117] dark:bg-[#6366F1] border-[#0D1117] dark:border-[#6366F1] hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5]'
                 : 'text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] border-[#EAECF0] dark:border-[#3D4258] hover:bg-[#F4F5F8] dark:hover:bg-[#26283A] hover:text-[#344054] dark:hover:text-[#C2C8D8] shadow-sm',
             )}
           >

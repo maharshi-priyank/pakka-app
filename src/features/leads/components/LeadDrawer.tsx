@@ -139,7 +139,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
               className={cn(
                 'px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all border',
                 s === lead.stage
-                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  ? 'bg-[#0D1117] dark:bg-[#6366F1] text-white border-[#0D1117] dark:border-[#6366F1]'
                   : 'bg-[#F3F4F6] dark:bg-[#21222D] text-[#6B7280] dark:text-[#8B92A8] border-transparent hover:bg-[#E5E7EB] dark:hover:bg-[#26283A]',
               )}
             >
