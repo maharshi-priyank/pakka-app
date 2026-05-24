@@ -193,7 +193,7 @@ function ActionStepBlock({
           <span className="text-[#6366F1] dark:text-[#818CF8]">{ACTION_ICONS[step.action.type] ?? <Zap size={13} />}</span>
           {ACTION_LABELS[step.action.type] ?? step.action.type}
         </div>
-        {step.action.type.startsWith('send_email') && step.action.config.subject && (
+        {step.action.type.startsWith('send_email') && typeof step.action.config.subject === 'string' && step.action.config.subject && (
           <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] truncate mt-0.5">
             {step.action.config.subject as string}
           </p>
