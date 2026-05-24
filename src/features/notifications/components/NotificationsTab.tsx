@@ -94,7 +94,7 @@ export default function NotificationsTab() {
                     className={cn(
                       'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all',
                       isPreviewing
-                        ? 'bg-[#2563EB] text-white scale-95'
+                        ? 'bg-[#0D1117] dark:bg-[#6366F1] text-white scale-95'
                         : 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8] hover:bg-[#E4E7EC] dark:hover:bg-[#26283A] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
                     )}
                   >

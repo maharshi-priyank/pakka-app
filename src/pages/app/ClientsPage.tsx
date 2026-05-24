@@ -30,7 +30,7 @@ export default function ClientsPage() {
         </div>
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1D4ED8] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0D1117] dark:bg-[#6366F1] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
         >
           <Plus size={15} strokeWidth={2.5} />
           Add Client
@@ -194,7 +194,7 @@ function EmptyState({ search, onAdd }: { search: string; onAdd: () => void }) {
       </p>
       <button
         onClick={onAdd}
-        className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-[#2563EB] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1D4ED8] transition-colors"
+        className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-[#0D1117] dark:bg-[#6366F1] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
       >
         <Plus size={14} strokeWidth={2.5} />
         Add First Client

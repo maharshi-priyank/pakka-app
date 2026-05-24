@@ -87,7 +87,7 @@ export default function AddClientModal({ onClose }: Props) {
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-2 px-5 py-2 bg-[#2563EB] text-white rounded-lg text-[13px] font-semibold hover:bg-[#1D4ED8] transition-colors disabled:opacity-60"
+              className="flex items-center gap-2 px-5 py-2 bg-[#0D1117] dark:bg-[#6366F1] text-white hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60"
             >
               {isPending && <Loader2 size={13} className="animate-spin" />}
               {isPending ? 'Adding…' : 'Add Client'}

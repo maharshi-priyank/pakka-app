@@ -491,7 +491,7 @@ export default function ProposalViewPage() {
               <button
                 onClick={() => acceptMutation.mutate()}
                 disabled={acceptMutation.isPending || declineMutation.isPending}
-                className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-[#2563EB] text-white text-[14px] font-bold hover:bg-[#1D4ED8] transition-colors disabled:opacity-60"
+                className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-[#0D1117] text-white hover:bg-[#1a1d2e] transition-colors disabled:opacity-60"
               >
                 {acceptMutation.isPending ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

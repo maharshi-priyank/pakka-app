@@ -172,7 +172,7 @@ export default function BusinessTab() {
             'flex items-center gap-2 px-5 py-2 rounded-lg text-[13px] font-semibold transition-colors',
             saving || !isDirty
               ? 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3] dark:text-[#545C74] cursor-not-allowed'
-              : 'bg-[#2563EB] text-white hover:bg-[#1D4ED8]',
+              : 'bg-[#0D1117] dark:bg-[#6366F1] text-white hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5]',
           )}
         >
           {saving && <Loader2 size={13} className="animate-spin" />}
