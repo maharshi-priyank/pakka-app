@@ -1,26 +1,24 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { User, Zap, Building2, Bell, Puzzle } from 'lucide-react'
+import { User, Building2, Bell, Puzzle } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { AutomationsList } from '@/features/automations'
 import ProfileTab from '@/features/settings/components/ProfileTab'
 import BusinessTab from '@/features/settings/components/BusinessTab'
 import NotificationsTab from '@/features/notifications/components/NotificationsTab'
 import IntegrationsTab from '@/features/settings/components/IntegrationsTab'
 
 const TABS = [
-  { key: 'automations',   label: 'Automations',   icon: Zap      },
-  { key: 'profile',       label: 'Profile',       icon: User     },
+  { key: 'profile',       label: 'Profile',       icon: User      },
   { key: 'business',      label: 'Business',      icon: Building2 },
-  { key: 'notifications', label: 'Notifications', icon: Bell     },
-  { key: 'integrations',  label: 'Integrations',  icon: Puzzle   },
+  { key: 'notifications', label: 'Notifications', icon: Bell      },
+  { key: 'integrations',  label: 'Integrations',  icon: Puzzle    },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
 
 export default function SettingsPage() {
   const { search }                    = useLocation()
-  const [activeTab, setActiveTab]     = useState<TabKey>('automations')
+  const [activeTab, setActiveTab]     = useState<TabKey>('profile')
 
   useEffect(() => {
     const tab = new URLSearchParams(search).get('tab') as TabKey | null
@@ -32,7 +30,7 @@ export default function SettingsPage() {
 
       <div>
         <h1 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Settings</h1>
-        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Manage your automations, profile, and business details.</p>
+        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Manage your profile, business details, and integrations.</p>
       </div>
 
       <div className="flex gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
@@ -53,7 +51,6 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      {activeTab === 'automations'   && <AutomationsList />}
       {activeTab === 'profile'       && <ProfileTab />}
       {activeTab === 'business'      && <BusinessTab />}
       {activeTab === 'notifications' && <NotificationsTab />}

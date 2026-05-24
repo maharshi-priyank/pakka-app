@@ -219,6 +219,13 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: '/app/automations/:id',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/WorkflowBuilderPage')
+              return { Component }
+            },
+          },
+          {
             path: '/app/settings',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/SettingsPage')
