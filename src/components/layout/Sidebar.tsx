@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
-  Receipt, Building2, Settings, X, CalendarDays,
+  Receipt, Building2, Settings, X, CalendarDays, ClipboardList, Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -12,7 +12,9 @@ const navItems = [
   { icon: PenLine,         label: 'Contracts',  href: '/app/contracts' },
   { icon: Receipt,         label: 'Invoices',   href: '/app/invoices' },
   { icon: Building2,       label: 'Clients',    href: '/app/clients' },
-  { icon: CalendarDays,    label: 'Meetings',   href: '/app/meetings' },
+  { icon: CalendarDays,    label: 'Meetings',     href: '/app/meetings' },
+  { icon: ClipboardList,   label: 'Forms',        href: '/app/forms' },
+  { icon: Zap,             label: 'Automations',  href: '/app/automations' },
 ]
 
 interface Props {

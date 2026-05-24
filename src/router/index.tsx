@@ -77,6 +77,14 @@ export const router = createBrowserRouter([
       return { Component }
     },
   },
+  // ── Intake form (no auth required) ────────────────────────────────────────
+  {
+    path: '/q/:token',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/public/IntakeFormPage')
+      return { Component }
+    },
+  },
   // ── Client portal (no auth required) ───────────────────────────────────────
   {
     path: '/portal/:token',
@@ -186,6 +194,27 @@ export const router = createBrowserRouter([
             path: '/app/meetings',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/MeetingsPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/app/forms',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/FormsPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/app/forms/:id',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/FormBuilderPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/app/automations',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/AutomationsPage')
               return { Component }
             },
           },
