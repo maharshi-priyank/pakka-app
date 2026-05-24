@@ -17,8 +17,11 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message =
-      error.response?.data?.error?.message ?? error.message ?? 'Something went wrong'
-    return Promise.reject(new Error(message))
+    const data    = error.response?.data
+    const message = data?.message ?? data?.error?.message ?? error.message ?? 'Something went wrong'
+    const err     = new Error(message) as Error & { code?: string; status?: number }
+    err.code   = data?.code
+    err.status = error.response?.status
+    return Promise.reject(err)
   },
 )

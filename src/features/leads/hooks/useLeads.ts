@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
+import { useUiStore } from '@/store/uiStore'
 import type { Lead, LeadsListResponse, LeadStage } from '../schemas/lead.schema'
 import type { CreateLeadInput, UpdateLeadInput } from '../schemas/lead.schema'
 
@@ -84,10 +85,14 @@ export function useLead(id: string | null) {
 
 export function useCreateLead() {
   const qc = useQueryClient()
+  const { openUpgradeModal } = useUiStore()
   return useMutation({
     mutationFn: createLead,
     onSuccess: () => { qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] }); toast.success('Lead added') },
-    onError: (err: Error) => toast.error(err.message || 'Failed to add lead'),
+    onError: (err: Error & { code?: string }) => {
+      if (err.code === 'PLAN_LIMIT') openUpgradeModal('leads')
+      else toast.error(err.message || 'Failed to add lead')
+    },
   })
 }
 

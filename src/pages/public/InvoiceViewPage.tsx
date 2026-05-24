@@ -16,6 +16,7 @@ const publicApi = axios.create({
 interface PublicUser {
   name: string; businessName: string | null; email: string
   logoUrl: string | null; gstNumber: string | null
+  plan: 'FREE' | 'SOLO' | 'STUDIO'
 }
 interface PublicClient {
   id: string; name: string; company: string | null; email: string | null; gstNumber: string | null
@@ -100,6 +101,21 @@ export default function InvoiceViewPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F6FA]">
+
+      {/* Watermark (FREE plan) */}
+      {invoice.user.plan === 'FREE' && (
+        <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden select-none">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute whitespace-nowrap text-[64px] font-bold text-black/[0.04]"
+              style={{ transform: 'rotate(-35deg)', top: `${i * 18 - 10}%`, left: '-20%', width: '140%' }}
+            >
+              Clinekt • Clinekt • Clinekt • Clinekt • Clinekt
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Brand bar */}
       <div className="bg-white border-b border-[#EAECF0] sticky top-0 z-10">

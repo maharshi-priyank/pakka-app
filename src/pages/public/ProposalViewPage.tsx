@@ -20,10 +20,11 @@ const publicApi = axios.create({
 })
 
 interface PublicProposalUser {
-  name: string
+  name:         string
   businessName: string | null
-  email: string
-  logoUrl: string | null
+  email:        string
+  logoUrl:      string | null
+  plan:         'FREE' | 'SOLO' | 'STUDIO'
 }
 
 interface PublicProposal extends Proposal {
@@ -147,6 +148,21 @@ export default function ProposalViewPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F6FA]">
+
+      {/* Watermark (FREE plan) */}
+      {proposal.user.plan === 'FREE' && (
+        <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden select-none">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute whitespace-nowrap text-[64px] font-bold text-black/[0.04]"
+              style={{ transform: 'rotate(-35deg)', top: `${i * 18 - 10}%`, left: '-20%', width: '140%' }}
+            >
+              Clinekt • Clinekt • Clinekt • Clinekt • Clinekt
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Brand bar */}
       <div className="bg-white border-b border-[#EAECF0] sticky top-0 z-10">

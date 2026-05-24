@@ -7,6 +7,7 @@ export interface UserProfile {
   id:                string
   email:             string
   name:              string
+  plan:              'FREE' | 'SOLO' | 'STUDIO'
   businessName:      string | null
   businessType:      string | null
   gstNumber:         string | null

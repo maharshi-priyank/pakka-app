@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
+import { useUiStore } from '@/store/uiStore'
 import type {
   Proposal,
   ProposalListResponse,
@@ -68,10 +69,14 @@ export function useProposal(id: string | null) {
 
 export function useCreateProposal() {
   const qc = useQueryClient()
+  const { openUpgradeModal } = useUiStore()
   return useMutation({
     mutationFn: createProposal,
     onSuccess: () => { qc.invalidateQueries({ queryKey: [PROPOSALS_QUERY_KEY] }); toast.success('Proposal created') },
-    onError: (err: Error) => toast.error(err.message || 'Failed to create proposal'),
+    onError: (err: Error & { code?: string }) => {
+      if (err.code === 'PLAN_LIMIT') openUpgradeModal('proposals')
+      else toast.error(err.message || 'Failed to create proposal')
+    },
   })
 }
 

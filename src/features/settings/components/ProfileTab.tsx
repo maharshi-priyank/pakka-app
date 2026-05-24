@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Camera, Check, Loader2, Building2, User, Receipt, Upload } from 'lucide-react'
+import { Camera, Check, Loader2, Building2, User, Receipt, Upload, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useProfile, useUpdateProfile, useUploadLogo } from '../hooks/useProfile'
 
@@ -144,6 +144,17 @@ export default function ProfileTab() {
               {profile?.businessName ?? profile?.name ?? 'Your Business'}
             </p>
             <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">{profile?.email}</p>
+            {profile?.plan && (
+              <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold
+                bg-[#F4F5F8] dark:bg-[#21222D] border-[#EAECF0] dark:border-[#3D4258] text-[#667085] dark:text-[#8B92A8]
+                data-[plan=SOLO]:bg-[#EEF2FF] data-[plan=SOLO]:dark:bg-[#1E2040] data-[plan=SOLO]:border-[#C7D2FE] data-[plan=SOLO]:dark:border-[#6366F1]/40 data-[plan=SOLO]:text-[#4338CA] data-[plan=SOLO]:dark:text-[#A5B4FC]
+                data-[plan=STUDIO]:bg-[#F5F3FF] data-[plan=STUDIO]:dark:bg-[#1E1040] data-[plan=STUDIO]:border-[#DDD6FE] data-[plan=STUDIO]:dark:border-[#7C3AED]/40 data-[plan=STUDIO]:text-[#7C3AED] data-[plan=STUDIO]:dark:text-[#C4B5FD]"
+                data-plan={profile.plan}
+              >
+                <Zap size={10} strokeWidth={2.5} />
+                {profile.plan === 'FREE' ? 'Free Plan' : profile.plan === 'SOLO' ? 'Solo · ₹299/mo' : 'Studio · ₹699/mo'}
+              </div>
+            )}
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
