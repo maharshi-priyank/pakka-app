@@ -46,31 +46,32 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
 
       {/* ── Left panel ─────────────────────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col justify-between px-12 py-10">
-        {/* Logo */}
-        <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-8 w-auto" />
+      <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col justify-between px-12 py-12">
+        {/* Logo + content grouped together */}
+        <div className="space-y-10">
+          <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto" />
 
-        {/* Headline */}
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-[38px] font-black text-white leading-tight tracking-tight">
-              Run your freelance<br />
-              business like a pro.
-            </h2>
-            <p className="text-white/50 text-[15px] mt-4 leading-relaxed">
-              The all-in-one CRM for Indian freelancers &amp; agencies — from first lead to final payment.
-            </p>
-          </div>
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-[38px] font-black text-white leading-tight tracking-tight">
+                Run your freelance<br />
+                business like a pro.
+              </h2>
+              <p className="text-white/50 text-[15px] mt-4 leading-relaxed">
+                The all-in-one CRM for Indian freelancers &amp; agencies — from first lead to final payment.
+              </p>
+            </div>
 
-          <div className="space-y-4">
-            {FEATURES.map(({ icon: Icon, text }) => (
-              <div key={text} className="flex items-start gap-3">
-                <span className="w-8 h-8 rounded-lg bg-[#2563EB]/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Icon size={15} className="text-[#60A5FA]" />
-                </span>
-                <p className="text-white/70 text-[14px] leading-snug">{text}</p>
-              </div>
-            ))}
+            <div className="space-y-4">
+              {FEATURES.map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-start gap-3">
+                  <span className="w-8 h-8 rounded-lg bg-[#2563EB]/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <Icon size={15} className="text-[#60A5FA]" />
+                  </span>
+                  <p className="text-white/70 text-[14px] leading-snug">{text}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
