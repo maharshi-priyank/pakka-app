@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useSearchParams } from 'react-router-dom'
 import {
   Wallet, Plus, Trash2, Edit2, CheckSquare, Square as SquareIcon,
   IndianRupee, ChevronRight, Loader2, Receipt, Image, ExternalLink,
+  FolderKanban,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useClients } from '@/features/clients/hooks/useClients'
+import { useProjects } from '@/features/projects/hooks/useProjects'
 import {
   useExpenses, useCreateExpense, useUpdateExpense,
   useDeleteExpense, useBillExpenses, useUploadReceipt,
@@ -20,6 +23,7 @@ const EXPENSE_CATEGORIES = ['Travel', 'Materials', 'Software', 'Food', 'Accommod
 // ─── Schema ────────────────────────────────────────────────────────────────────
 const expenseSchema = z.object({
   clientId:    z.string().optional(),
+  projectId:   z.string().optional(),
   category:    z.string().min(1, 'Category required'),
   description: z.string().min(1, 'Description required'),
   amount:      z.number({ message: 'Required' }).min(0),
@@ -37,6 +41,9 @@ function fmtAmount(v: string | number) {
 type FilterTab = 'all' | 'unbilled' | 'billed'
 
 export default function ExpensesPage() {
+  const [searchParams] = useSearchParams()
+  const preselectedProjectId = searchParams.get('projectId') ?? ''
+
   const [filter,     setFilter]     = useState<FilterTab>('all')
   const [clientFilter, setClientFilter] = useState('')
   const [showForm,   setShowForm]   = useState(false)
@@ -48,6 +55,8 @@ export default function ExpensesPage() {
 
   const { data: clientsData } = useClients()
   const clients = clientsData?.clients ?? []
+  const { data: projectsData } = useProjects()
+  const projects = projectsData?.projects ?? []
   const { data: expenses = [], isLoading } = useExpenses({
     clientId:   clientFilter || undefined,
     isBillable: filter === 'unbilled' ? true : undefined,
@@ -74,6 +83,7 @@ export default function ExpensesPage() {
       date:       new Date().toISOString().slice(0, 10),
       isBillable: true,
       amount:     undefined as any,
+      projectId:  preselectedProjectId || undefined,
     })
     setShowForm(true)
   }
@@ -83,6 +93,7 @@ export default function ExpensesPage() {
     setLocalReceiptUrl(expense.receiptUrl ?? undefined)
     reset({
       clientId:    expense.clientId ?? undefined,
+      projectId:   expense.projectId ?? undefined,
       category:    expense.category,
       description: expense.description,
       amount:      Number(expense.amount),
@@ -92,6 +103,13 @@ export default function ExpensesPage() {
     })
     setShowForm(true)
   }
+
+  useEffect(() => {
+    if (preselectedProjectId) {
+      openNewForm()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preselectedProjectId])
 
   async function handleReceiptUpload(file: File) {
     setUploadingReceipt(true)
@@ -106,6 +124,7 @@ export default function ExpensesPage() {
   async function onSubmit(data: ExpenseForm) {
     const payload: CreateExpensePayload = {
       clientId:    data.clientId || undefined,
+      projectId:   data.projectId || undefined,
       category:    data.category,
       description: data.description,
       amount:      data.amount,
@@ -158,13 +177,15 @@ export default function ExpensesPage() {
         <div>
           <h1 className="text-[20px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Expenses</h1>
           <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
-            {totalAmount > 0 && (
-              <>₹{fmtAmount(totalAmount)} total · </>
+            {preselectedProjectId && projects.find(p => p.id === preselectedProjectId) ? (
+              <>Logging for <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{projects.find(p => p.id === preselectedProjectId)?.name}</span></>
+            ) : (
+              <>
+                {totalAmount > 0 && <>₹{fmtAmount(totalAmount)} total · </>}
+                {unbilledAmount > 0 && <>₹{fmtAmount(unbilledAmount)} unbilled</>}
+                {totalAmount === 0 && 'Log out-of-pocket costs and bill them back to clients'}
+              </>
             )}
-            {unbilledAmount > 0 && (
-              <>₹{fmtAmount(unbilledAmount)} unbilled</>
-            )}
-            {totalAmount === 0 && 'Log out-of-pocket costs and bill them back to clients'}
           </p>
         </div>
         <button onClick={openNewForm} className="btn-primary text-[13px] flex items-center gap-1.5">
@@ -194,6 +215,13 @@ export default function ExpensesPage() {
                   {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
+            </div>
+            <div>
+              <label className="form-label">Project <span className="font-normal text-[#98A2B3]">(optional)</span></label>
+              <select {...register('projectId')} className="form-input w-full">
+                <option value="">No project</option>
+                {projects.map(p => <option key={p.id} value={p.id}>{p.name}{p.client ? ` · ${p.client.name}` : ''}</option>)}
+              </select>
             </div>
             <div>
               <label className="form-label">Description *</label>
@@ -387,12 +415,20 @@ export default function ExpensesPage() {
                   {expense.category}
                 </span>
 
-                {/* Description + client */}
+                {/* Description + client + project */}
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] text-[#344054] dark:text-[#C2C8D8] truncate">{expense.description}</p>
-                  {expense.client && (
-                    <p className="text-[11px] text-[#667085] dark:text-[#545C74] mt-0.5">{expense.client.name}</p>
-                  )}
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    {expense.client && (
+                      <p className="text-[11px] text-[#667085] dark:text-[#545C74]">{expense.client.name}</p>
+                    )}
+                    {expense.project && (
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#027A48] bg-[#ECFDF3] px-1.5 py-0.5 rounded-full">
+                        <FolderKanban size={9} />
+                        {expense.project.name}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Amount + date */}

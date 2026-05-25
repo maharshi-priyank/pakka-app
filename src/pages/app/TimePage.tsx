@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   Clock, Play, Square, Plus, Trash2, Edit2, CheckSquare,
-  Square as SquareIcon, IndianRupee, ChevronRight, Loader2,
+  Square as SquareIcon, IndianRupee, ChevronRight, Loader2, FolderKanban,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useClients } from '@/features/clients/hooks/useClients'
+import { useProjects } from '@/features/projects/hooks/useProjects'
 import {
   useTimeEntries, useCreateTimeEntry, useUpdateTimeEntry,
   useDeleteTimeEntry, useBillEntries,
@@ -19,6 +21,7 @@ interface TimerState {
   startedAt:   string
   description: string
   clientId:    string
+  projectId:   string
 }
 
 const TIMER_KEY = 'pakka_timer'
@@ -32,12 +35,13 @@ function getStoredTimer(): TimerState | null {
 
 // ─── Form schema ──────────────────────────────────────────────────────────────
 const logEntrySchema = z.object({
-  clientId:     z.string().optional(),
-  description:  z.string().min(1, 'Description required'),
-  date:         z.string().min(1, 'Date required'),
-  hours:        z.number({ message: 'Required' }).min(0.1).max(24),
-  minutes:      z.number().min(0).max(59),
-  hourlyRate:   z.number().min(0).optional(),
+  clientId:    z.string().optional(),
+  projectId:   z.string().optional(),
+  description: z.string().min(1, 'Description required'),
+  date:        z.string().min(1, 'Date required'),
+  hours:       z.number({ message: 'Required' }).min(0.1).max(24),
+  minutes:     z.number().min(0).max(59),
+  hourlyRate:  z.number().min(0).optional(),
 })
 type LogEntryForm = z.infer<typeof logEntrySchema>
 
@@ -68,7 +72,6 @@ function groupByDate(entries: TimeEntry[]) {
   return [...map.entries()].sort((a, b) => b[0].localeCompare(a[0]))
 }
 
-// ─── Week helpers ─────────────────────────────────────────────────────────────
 function weekBounds() {
   const now  = new Date()
   const day  = now.getDay()
@@ -78,51 +81,70 @@ function weekBounds() {
   const to = new Date(from)
   to.setDate(from.getDate() + 6)
   to.setHours(23, 59, 59, 999)
-  return {
-    from: from.toISOString().slice(0, 10),
-    to:   to.toISOString().slice(0, 10),
-  }
+  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) }
 }
 
 export default function TimePage() {
+  const [searchParams] = useSearchParams()
+  const preselectedProjectId = searchParams.get('projectId') ?? ''
+
   const { from, to } = weekBounds()
   const [dateFrom, setDateFrom] = useState(from)
   const [dateTo,   setDateTo]   = useState(to)
 
-  const [timerState,    setTimerState]    = useState<TimerState | null>(getStoredTimer)
-  const [elapsed,       setElapsed]       = useState(0)
-  const [timerDesc,     setTimerDesc]     = useState('')
-  const [timerClientId, setTimerClientId] = useState('')
+  const [timerState,     setTimerState]     = useState<TimerState | null>(getStoredTimer)
+  const [elapsed,        setElapsed]        = useState(0)
+  const [timerDesc,      setTimerDesc]      = useState('')
+  const [timerClientId,  setTimerClientId]  = useState('')
+  const [timerProjectId, setTimerProjectId] = useState(preselectedProjectId)
 
-  const [showLogForm, setShowLogForm]   = useState(false)
-  const [editEntry,   setEditEntry]     = useState<TimeEntry | null>(null)
-  const [selected,    setSelected]      = useState<Set<string>>(new Set())
-  const [confirmId,   setConfirmId]     = useState<string | null>(null)
+  const [showLogForm, setShowLogForm] = useState(false)
+  const [editEntry,   setEditEntry]   = useState<TimeEntry | null>(null)
+  const [selected,    setSelected]    = useState<Set<string>>(new Set())
+  const [confirmId,   setConfirmId]   = useState<string | null>(null)
 
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const { data: clientsData } = useClients()
   const clients = clientsData?.clients ?? []
-  const { data: entries = [], isLoading } = useTimeEntries({ from: dateFrom, to: dateTo })
-  const createEntry  = useCreateTimeEntry()
-  const updateEntry  = useUpdateTimeEntry()
-  const deleteEntry  = useDeleteTimeEntry()
-  const billEntries  = useBillEntries()
+  const { data: projectsData } = useProjects({ limit: 100 })
+  const projects = projectsData?.projects ?? []
 
-  const {
-    register, handleSubmit, reset,
-    formState: { errors },
-  } = useForm<LogEntryForm>({ resolver: zodResolver(logEntrySchema), defaultValues: { minutes: 0 } })
+  const { data: entries = [], isLoading } = useTimeEntries({ from: dateFrom, to: dateTo })
+  const createEntry = useCreateTimeEntry()
+  const updateEntry = useUpdateTimeEntry()
+  const deleteEntry = useDeleteTimeEntry()
+  const billEntries = useBillEntries()
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<LogEntryForm>({
+    resolver: zodResolver(logEntrySchema),
+    defaultValues: { minutes: 0 },
+  })
+
+  // Pre-open form if navigated from a project
+  useEffect(() => {
+    if (preselectedProjectId && !showLogForm && !timerState) {
+      reset({
+        projectId:   preselectedProjectId,
+        description: '',
+        date:        new Date().toISOString().slice(0, 10),
+        hours:       1,
+        minutes:     0,
+      })
+      setShowLogForm(true)
+    }
+  }, [preselectedProjectId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ─── Live timer ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (timerState) {
       setTimerDesc(timerState.description)
       setTimerClientId(timerState.clientId)
+      setTimerProjectId(timerState.projectId ?? '')
       startTick(timerState.startedAt)
     }
     return () => stopTick()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function startTick(startedAt: string) {
     stopTick()
@@ -141,6 +163,7 @@ export default function TimePage() {
       startedAt:   new Date().toISOString(),
       description: timerDesc,
       clientId:    timerClientId,
+      projectId:   timerProjectId,
     }
     localStorage.setItem(TIMER_KEY, JSON.stringify(state))
     setTimerState(state)
@@ -156,7 +179,8 @@ export default function TimePage() {
     const minutes = durationMins % 60
     reset({
       description: timerState.description,
-      clientId:    timerState.clientId || undefined,
+      clientId:    timerState.clientId  || undefined,
+      projectId:   timerState.projectId || undefined,
       date:        new Date().toISOString().slice(0, 10),
       hours:       hours || 0,
       minutes,
@@ -171,10 +195,11 @@ export default function TimePage() {
   function handleOpenManualLog() {
     setEditEntry(null)
     reset({
+      projectId:   preselectedProjectId || undefined,
       description: '',
-      date: new Date().toISOString().slice(0, 10),
-      hours: 1,
-      minutes: 0,
+      date:        new Date().toISOString().slice(0, 10),
+      hours:       1,
+      minutes:     0,
     })
     setShowLogForm(true)
   }
@@ -182,7 +207,8 @@ export default function TimePage() {
   function handleOpenEdit(entry: TimeEntry) {
     setEditEntry(entry)
     reset({
-      clientId:    entry.clientId ?? undefined,
+      clientId:    entry.clientId  ?? undefined,
+      projectId:   entry.projectId ?? undefined,
       description: entry.description,
       date:        entry.date.slice(0, 10),
       hours:       Math.floor(entry.durationMins / 60),
@@ -195,7 +221,8 @@ export default function TimePage() {
   async function onSubmitEntry(data: LogEntryForm) {
     const durationMins = Math.round((data.hours * 60) + (data.minutes ?? 0))
     const payload: CreateTimeEntryPayload = {
-      clientId:    data.clientId || undefined,
+      clientId:    data.clientId  || undefined,
+      projectId:   data.projectId || undefined,
       description: data.description,
       date:        data.date,
       durationMins,
@@ -212,40 +239,33 @@ export default function TimePage() {
   }
 
   // ─── Selection ─────────────────────────────────────────────────────────────
-  const unbilledEntries = entries.filter(e => !e.isBilled)
-  const selectedUnbilled = [...selected].filter(id => {
+  const unbilledEntries   = entries.filter(e => !e.isBilled)
+  const selectedUnbilled  = [...selected].filter(id => {
     const e = entries.find(e => e.id === id)
     return e && !e.isBilled
   })
-
-  // Check if all selected entries share the same client
-  const selectedEntries    = entries.filter(e => selected.has(e.id))
-  const selectedClientIds  = [...new Set(selectedEntries.map(e => e.clientId))]
+  const selectedEntries   = entries.filter(e => selected.has(e.id))
+  const selectedClientIds = [...new Set(selectedEntries.map(e => e.clientId))]
   const canBill = selectedUnbilled.length > 0 && selectedClientIds.length === 1
 
   function toggleSelect(id: string) {
-    setSelected(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   }
-
-  function selectAll() {
-    setSelected(new Set(unbilledEntries.map(e => e.id)))
-  }
-
+  function selectAll()      { setSelected(new Set(unbilledEntries.map(e => e.id))) }
   function clearSelection() { setSelected(new Set()) }
 
-  // ─── Totals ──────────────────────────────────────────────────────────────
-  const totalMins    = entries.reduce((s, e) => s + e.durationMins, 0)
-  const unbilledMins = unbilledEntries.reduce((s, e) => s + e.durationMins, 0)
-  const unbilledValue = unbilledEntries.reduce((s, e) => {
-    if (!e.hourlyRate) return s
-    return s + (e.durationMins / 60) * Number(e.hourlyRate)
-  }, 0)
+  // ─── Totals ───────────────────────────────────────────────────────────────
+  const totalMins     = entries.reduce((s, e) => s + e.durationMins, 0)
+  const unbilledMins  = unbilledEntries.reduce((s, e) => s + e.durationMins, 0)
+  const unbilledValue = unbilledEntries.reduce((s, e) =>
+    s + (e.hourlyRate ? (e.durationMins / 60) * Number(e.hourlyRate) : 0), 0)
 
   const grouped = groupByDate(entries)
+
+  // Active project name (for timer bar / form context)
+  const activeProjectName = preselectedProjectId
+    ? projects.find(p => p.id === preselectedProjectId)?.name
+    : undefined
 
   return (
     <div className="space-y-5 max-w-[860px]">
@@ -254,7 +274,11 @@ export default function TimePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[20px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Time Tracking</h1>
-          <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Log hours and convert them to invoices</p>
+          <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
+            {activeProjectName
+              ? <span className="flex items-center gap-1.5"><FolderKanban size={12} className="text-[#2563EB]" /> Logging for <span className="text-[#2563EB] font-semibold">{activeProjectName}</span></span>
+              : 'Log hours and convert them to invoices'}
+          </p>
         </div>
       </div>
 
@@ -277,6 +301,11 @@ export default function TimePage() {
                   · {clients.find(c => c.id === timerState.clientId)?.name}
                 </span>
               )}
+              {timerState.projectId && projects.find(p => p.id === timerState.projectId) && (
+                <span className="ml-2 text-emerald-600 dark:text-emerald-400 flex items-center gap-1 inline-flex">
+                  <FolderKanban size={10} /> {projects.find(p => p.id === timerState.projectId)?.name}
+                </span>
+              )}
             </p>
             <button
               onClick={handleStopTimer}
@@ -286,35 +315,45 @@ export default function TimePage() {
             </button>
           </div>
         ) : (
-          <div className="flex gap-3 items-start">
-            <select
-              value={timerClientId}
-              onChange={e => setTimerClientId(e.target.value)}
-              className="form-input text-[13px] w-36 shrink-0"
-            >
-              <option value="">No client</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            <input
-              value={timerDesc}
-              onChange={e => setTimerDesc(e.target.value)}
-              placeholder="What are you working on?"
-              className="form-input text-[13px] flex-1"
-              onKeyDown={e => { if (e.key === 'Enter') handleStartTimer() }}
-            />
-            <button
-              onClick={handleStartTimer}
-              disabled={!timerDesc.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563EB] text-white text-[13px] font-bold hover:bg-[#1D4ED8] transition-colors disabled:opacity-50 shrink-0"
-            >
-              <Play size={13} strokeWidth={2.5} fill="currentColor" /> Start
-            </button>
-            <button
-              onClick={handleOpenManualLog}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors shrink-0"
-            >
-              <Plus size={13} strokeWidth={2.5} /> Log manually
-            </button>
+          <div className="space-y-2.5">
+            <div className="flex gap-3 items-start">
+              <select
+                value={timerClientId}
+                onChange={e => setTimerClientId(e.target.value)}
+                className="form-input text-[13px] w-36 shrink-0"
+              >
+                <option value="">No client</option>
+                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <select
+                value={timerProjectId}
+                onChange={e => setTimerProjectId(e.target.value)}
+                className="form-input text-[13px] w-40 shrink-0"
+              >
+                <option value="">No project</option>
+                {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+              <input
+                value={timerDesc}
+                onChange={e => setTimerDesc(e.target.value)}
+                placeholder="What are you working on?"
+                className="form-input text-[13px] flex-1"
+                onKeyDown={e => { if (e.key === 'Enter') handleStartTimer() }}
+              />
+              <button
+                onClick={handleStartTimer}
+                disabled={!timerDesc.trim()}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563EB] text-white text-[13px] font-bold hover:bg-[#1D4ED8] transition-colors disabled:opacity-50 shrink-0"
+              >
+                <Play size={13} strokeWidth={2.5} fill="currentColor" /> Start
+              </button>
+              <button
+                onClick={handleOpenManualLog}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors shrink-0"
+              >
+                <Plus size={13} strokeWidth={2.5} /> Log manually
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -335,15 +374,24 @@ export default function TimePage() {
                 </select>
               </div>
               <div>
+                <label className="form-label">Project</label>
+                <select {...register('projectId')} className="form-input w-full">
+                  <option value="">No project</option>
+                  {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="form-label">Description</label>
+                <input {...register('description')} className="form-input w-full" placeholder="What did you work on?" />
+                {errors.description && <p className="form-error">{errors.description.message}</p>}
+              </div>
+              <div>
                 <label className="form-label">Date</label>
                 <input {...register('date')} type="date" className="form-input w-full" />
                 {errors.date && <p className="form-error">{errors.date.message}</p>}
               </div>
-            </div>
-            <div>
-              <label className="form-label">Description</label>
-              <input {...register('description')} className="form-input w-full" placeholder="What did you work on?" />
-              {errors.description && <p className="form-error">{errors.description.message}</p>}
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
@@ -366,9 +414,9 @@ export default function TimePage() {
                 disabled={createEntry.isPending || updateEntry.isPending}
                 className="btn-primary text-[13px]"
               >
-                {(createEntry.isPending || updateEntry.isPending) ? (
-                  <><Loader2 size={12} className="animate-spin" /> Saving…</>
-                ) : editEntry ? 'Save changes' : 'Log entry'}
+                {(createEntry.isPending || updateEntry.isPending)
+                  ? <><Loader2 size={12} className="animate-spin" /> Saving…</>
+                  : editEntry ? 'Save changes' : 'Log entry'}
               </button>
               <button
                 type="button"
@@ -385,39 +433,25 @@ export default function TimePage() {
       {/* ── Timesheet ── */}
       <div className="bg-white dark:bg-[#1A1B23] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A] flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div>
-              <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Timesheet</p>
-              {totalMins > 0 && (
-                <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
-                  {fmtDuration(totalMins)} logged
-                  {unbilledMins > 0 && ` · ${fmtDuration(unbilledMins)} unbilled`}
-                  {unbilledValue > 0 && (
-                    <span className="ml-1">
-                      · <IndianRupee size={10} className="inline" />
-                      {unbilledValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })} value
-                    </span>
-                  )}
-                </p>
-              )}
-            </div>
+          <div>
+            <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Timesheet</p>
+            {totalMins > 0 && (
+              <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
+                {fmtDuration(totalMins)} logged
+                {unbilledMins > 0 && ` · ${fmtDuration(unbilledMins)} unbilled`}
+                {unbilledValue > 0 && (
+                  <span className="ml-1">
+                    · <IndianRupee size={10} className="inline" />
+                    {unbilledValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })} value
+                  </span>
+                )}
+              </p>
+            )}
           </div>
-
-          {/* Date range */}
           <div className="flex items-center gap-2">
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={e => setDateFrom(e.target.value)}
-              className="form-input text-[12px] w-[130px]"
-            />
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="form-input text-[12px] w-[130px]" />
             <span className="text-[#D0D5DD] text-[12px]">–</span>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={e => setDateTo(e.target.value)}
-              className="form-input text-[12px] w-[130px]"
-            />
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="form-input text-[12px] w-[130px]" />
           </div>
         </div>
 
@@ -439,7 +473,6 @@ export default function TimePage() {
           </div>
         )}
 
-        {/* Select all unbilled */}
         {unbilledEntries.length > 0 && selected.size === 0 && (
           <div className="px-5 py-2 border-b border-[#F2F4F7] dark:border-[#26283A]">
             <button onClick={selectAll} className="text-[12px] text-[#667085] dark:text-[#8B92A8] hover:text-[#2563EB] transition-colors">
@@ -462,16 +495,12 @@ export default function TimePage() {
           <div className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
             {grouped.map(([date, dayEntries]) => (
               <div key={date}>
-                {/* Date header */}
                 <div className="px-5 py-2 bg-[#FAFAFA] dark:bg-[#21222D]">
                   <p className="text-[11px] font-bold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wider">
                     {new Date(date + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })}
-                    <span className="ml-2 font-normal">
-                      · {fmtDuration(dayEntries.reduce((s, e) => s + e.durationMins, 0))}
-                    </span>
+                    <span className="ml-2 font-normal">· {fmtDuration(dayEntries.reduce((s, e) => s + e.durationMins, 0))}</span>
                   </p>
                 </div>
-                {/* Entries */}
                 {dayEntries.map(entry => (
                   <div
                     key={entry.id}
@@ -480,35 +509,35 @@ export default function TimePage() {
                       entry.isBilled && 'opacity-60',
                     )}
                   >
-                    {/* Checkbox */}
                     {!entry.isBilled ? (
-                      <button
-                        onClick={() => toggleSelect(entry.id)}
-                        className="shrink-0 text-[#D0D5DD] hover:text-[#2563EB] transition-colors"
-                      >
+                      <button onClick={() => toggleSelect(entry.id)} className="shrink-0 text-[#D0D5DD] hover:text-[#2563EB] transition-colors">
                         {selected.has(entry.id)
                           ? <CheckSquare size={15} className="text-[#2563EB]" />
                           : <SquareIcon size={15} />}
                       </button>
-                    ) : (
-                      <div className="w-4 shrink-0" />
-                    )}
+                    ) : <div className="w-4 shrink-0" />}
 
                     {/* Client badge */}
                     {entry.client ? (
-                      <span className="text-[11px] font-semibold text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded-full shrink-0">
+                      <span className="text-[11px] font-semibold text-[#2563EB] bg-[#EFF6FF] dark:bg-[#1E3A5F]/60 px-2 py-0.5 rounded-full shrink-0">
                         {entry.client.name}
                       </span>
                     ) : (
                       <span className="text-[11px] text-[#D0D5DD] shrink-0">—</span>
                     )}
 
-                    {/* Description */}
+                    {/* Project badge */}
+                    {entry.project && (
+                      <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full shrink-0">
+                        <FolderKanban size={9} />
+                        {entry.project.name}
+                      </span>
+                    )}
+
                     <p className="text-[13px] text-[#344054] dark:text-[#C2C8D8] flex-1 min-w-0 truncate">
                       {entry.description}
                     </p>
 
-                    {/* Duration + rate */}
                     <div className="flex items-center gap-3 shrink-0">
                       <span className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
                         {fmtDuration(entry.durationMins)}
@@ -523,7 +552,6 @@ export default function TimePage() {
                       )}
                     </div>
 
-                    {/* Actions */}
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                       <button
                         onClick={() => handleOpenEdit(entry)}
@@ -537,12 +565,8 @@ export default function TimePage() {
                             onClick={() => { deleteEntry.mutate(entry.id); setConfirmId(null) }}
                             disabled={deleteEntry.isPending}
                             className="text-[11px] text-red-500 font-semibold hover:text-red-700 px-1"
-                          >
-                            Delete
-                          </button>
-                          <button onClick={() => setConfirmId(null)} className="text-[11px] text-[#98A2B3] px-1">
-                            Cancel
-                          </button>
+                          >Delete</button>
+                          <button onClick={() => setConfirmId(null)} className="text-[11px] text-[#98A2B3] px-1">Cancel</button>
                         </div>
                       ) : (
                         <button
@@ -560,7 +584,6 @@ export default function TimePage() {
           </div>
         )}
 
-        {/* Footer: bill selected */}
         {selected.size > 0 && (
           <div className="px-5 py-3 border-t border-[#EAECF0] dark:border-[#26283A] bg-[#FAFAFA] dark:bg-[#21222D] flex items-center justify-between">
             <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">

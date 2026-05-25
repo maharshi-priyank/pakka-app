@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
-export interface TimeEntryClient { id: string; name: string }
+export interface TimeEntryClient  { id: string; name: string }
+export interface TimeEntryProject { id: string; name: string }
 
 export interface TimeEntry {
   id:           string
   userId:       string
   clientId:     string | null
   client:       TimeEntryClient | null
+  projectId:    string | null
+  project:      TimeEntryProject | null
   description:  string
   date:         string
   durationMins: number
@@ -22,6 +25,7 @@ export interface TimeEntry {
 
 export interface CreateTimeEntryPayload {
   clientId?:    string
+  projectId?:   string
   description:  string
   date:         string
   durationMins: number
@@ -30,6 +34,7 @@ export interface CreateTimeEntryPayload {
 
 export interface UpdateTimeEntryPayload {
   clientId?:     string
+  projectId?:    string
   description?:  string
   date?:         string
   durationMins?: number
@@ -39,10 +44,11 @@ export interface UpdateTimeEntryPayload {
 }
 
 export interface TimeEntriesQuery {
-  clientId?: string
-  from?:     string
-  to?:       string
-  isBilled?: boolean
+  clientId?:  string
+  projectId?: string
+  from?:      string
+  to?:        string
+  isBilled?:  boolean
 }
 
 const KEY = 'time-entries'

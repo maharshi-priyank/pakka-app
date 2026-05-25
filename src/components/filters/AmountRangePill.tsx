@@ -3,6 +3,7 @@ import { IndianRupee, ChevronDown, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Props {
+  label?:  string
   min:     string
   max:     string
   onMin:   (v: string) => void
@@ -18,7 +19,7 @@ function fmt(v: string) {
   return `₹${n}`
 }
 
-export default function AmountRangePill({ min, max, onMin, onMax, onClear }: Props) {
+export default function AmountRangePill({ label = 'Amount', min, max, onMin, onMax, onClear }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const isActive = !!(min || max)
@@ -31,7 +32,7 @@ export default function AmountRangePill({ min, max, onMin, onMax, onClear }: Pro
     return () => document.removeEventListener('mousedown', handle)
   }, [open])
 
-  const label = isActive ? `${fmt(min) || '₹0'} – ${fmt(max) || '∞'}` : 'Amount'
+  const displayLabel = isActive ? `${fmt(min) || '₹0'} – ${fmt(max) || '∞'}` : label
 
   return (
     <div ref={ref} className="relative">
@@ -45,7 +46,7 @@ export default function AmountRangePill({ min, max, onMin, onMax, onClear }: Pro
         )}
       >
         <IndianRupee size={11} strokeWidth={2} />
-        {label}
+        {displayLabel}
         {isActive ? (
           <span
             role="button"
