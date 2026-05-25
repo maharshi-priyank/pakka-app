@@ -42,20 +42,20 @@ export default function LoginPage() {
         {/* Logo — top left */}
         <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto self-start" />
 
-        {/* Spacer — pushes heading to lower third */}
+        {/* Spacer — pushes heading to vertical middle */}
         <div className="flex-1" />
 
-        {/* Heading */}
+        {/* Heading — left aligned, mid-panel */}
         <h2 className="heading-display text-[52px] text-[#FFFFF0]">
           Run your freelance<br />
           business like a pro.
         </h2>
 
-        {/* Gap between heading and tagline (like Terac) */}
-        <div className="flex-1 max-h-14" />
+        {/* Spacer — pushes tagline to very bottom */}
+        <div className="flex-1" />
 
-        {/* Tagline pinned near bottom */}
-        <p className="text-white/40 text-[13px] leading-relaxed max-w-[300px] pb-2">
+        {/* Tagline pinned at bottom */}
+        <p className="text-white/40 text-[13px] leading-relaxed max-w-[340px] pb-2">
           The all-in-one CRM for Indian freelancers &amp; agencies — from first lead to final payment.
         </p>
       </div>

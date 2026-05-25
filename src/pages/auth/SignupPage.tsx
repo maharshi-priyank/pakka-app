@@ -64,20 +64,20 @@ export default function SignupPage() {
         {/* Logo — top left */}
         <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto self-start" />
 
-        {/* Spacer pushes heading to lower third */}
+        {/* Spacer — pushes heading to vertical middle */}
         <div className="flex-1" />
 
-        {/* Heading */}
+        {/* Heading — left aligned, mid-panel */}
         <h2 className="heading-display text-[52px] text-[#FFFFF0]">
           Everything you need<br />
           to close more clients.
         </h2>
 
-        {/* Gap between heading and tagline */}
-        <div className="flex-1 max-h-14" />
+        {/* Spacer — pushes tagline to very bottom */}
+        <div className="flex-1" />
 
-        {/* Tagline pinned near bottom */}
-        <p className="text-white/40 text-[13px] leading-relaxed max-w-[300px] pb-2">
+        {/* Tagline pinned at bottom */}
+        <p className="text-white/40 text-[13px] leading-relaxed max-w-[340px] pb-2">
           Join freelancers across India managing their pipeline, proposals, contracts, and invoices in one place.
         </p>
       </div>
