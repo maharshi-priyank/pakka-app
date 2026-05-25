@@ -292,6 +292,67 @@
   letter-spacing: -0.02em;
 }
 
+/* ─── Driver.js tour overrides ───────────────────────────────────────────────*/
+.pakka-tour-popover {
+  background: #ffffff !important;
+  border-radius: 14px !important;
+  border: 1px solid #E4E7EC !important;
+  box-shadow: 0 8px 32px rgba(16, 24, 40, 0.12) !important;
+  padding: 20px !important;
+  font-family: 'Geist Variable', -apple-system, sans-serif !important;
+  max-width: 300px !important;
+}
+
+.pakka-tour-popover .driver-popover-title {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #0F172A !important;
+  margin-bottom: 6px !important;
+}
+
+.pakka-tour-popover .driver-popover-description {
+  font-size: 13px !important;
+  color: #64748B !important;
+  line-height: 1.55 !important;
+}
+
+.pakka-tour-popover .driver-popover-progress-text {
+  font-size: 11px !important;
+  color: #94A3B8 !important;
+}
+
+.pakka-tour-popover .driver-popover-navigation-btns button {
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  border: 1px solid #E4E7EC !important;
+  background: #fff !important;
+  color: #1E293B !important;
+  cursor: pointer !important;
+  transition: background 0.15s !important;
+}
+
+.pakka-tour-popover .driver-popover-navigation-btns button:hover {
+  background: #F9FAFB !important;
+}
+
+.pakka-tour-popover .driver-popover-next-btn {
+  background: #0F172A !important;
+  color: #fff !important;
+  border-color: #0F172A !important;
+}
+
+.pakka-tour-popover .driver-popover-next-btn:hover {
+  background: #1E293B !important;
+}
+
+.pakka-tour-popover .driver-popover-close-btn {
+  color: #94A3B8 !important;
+  font-size: 16px !important;
+}
+
 /* ─── Keyframe animations ────────────────────────────────────────────────────*/
 
 @keyframes clinekt-page-enter {

@@ -1,12 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 import BottomNav from './BottomNav'
+import { useOnboardingTour } from '@/hooks/useOnboardingTour'
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { pathname } = useLocation()
+  const { startIfFirstVisit } = useOnboardingTour()
+
+  useEffect(() => {
+    startIfFirstVisit()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#F4F5F8] dark:bg-[#0C0D10] transition-colors">

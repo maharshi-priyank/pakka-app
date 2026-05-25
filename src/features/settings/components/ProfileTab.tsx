@@ -2,9 +2,10 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Camera, Check, Loader2, Building2, User, Receipt, Upload, Zap } from 'lucide-react'
+import { Camera, Check, Loader2, Building2, User, Receipt, Upload, Zap, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useProfile, useUpdateProfile, useUploadLogo, useRedeemPromo } from '../hooks/useProfile'
+import { useOnboardingTour } from '@/hooks/useOnboardingTour'
 
 const profileSchema = z.object({
   name:         z.string().min(1, 'Name is required'),
@@ -36,6 +37,7 @@ export default function ProfileTab() {
   const { mutateAsync: updateProfile, isPending: saving } = useUpdateProfile()
   const { mutateAsync: uploadLogo, isPending: uploading }  = useUploadLogo()
   const redeemPromo = useRedeemPromo()
+  const { resetTour } = useOnboardingTour()
   const fileRef = useRef<HTMLInputElement>(null)
   const [saved, setSaved] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
@@ -181,6 +183,25 @@ export default function ProfileTab() {
           </div>
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+      </div>
+
+      {/* Onboarding tour */}
+      <div className="card p-6">
+        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A] mb-4">
+          <MapPin size={14} className="text-[#2563EB]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Product Tour</h3>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">
+            Replay the guided walkthrough to explore all features.
+          </p>
+          <button
+            onClick={resetTour}
+            className="btn-secondary shrink-0 text-[12.5px]"
+          >
+            Replay tour
+          </button>
+        </div>
       </div>
 
       {/* Promo code */}

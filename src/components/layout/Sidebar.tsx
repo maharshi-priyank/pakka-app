@@ -6,15 +6,15 @@ import {
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard',   href: '/app/dashboard' },
-  { icon: Users,           label: 'Leads',        href: '/app/leads' },
-  { icon: FileText,        label: 'Proposals',    href: '/app/proposals' },
-  { icon: PenLine,         label: 'Contracts',    href: '/app/contracts' },
-  { icon: Receipt,         label: 'Invoices',     href: '/app/invoices' },
-  { icon: Building2,       label: 'Clients',      href: '/app/clients' },
-  { icon: CalendarDays,    label: 'Meetings',     href: '/app/meetings' },
-  { icon: ClipboardList,   label: 'Forms',        href: '/app/forms' },
-  { icon: Zap,             label: 'Automations',  href: '/app/automations' },
+  { icon: LayoutDashboard, label: 'Dashboard',   href: '/app/dashboard',   tourId: 'tour-dashboard' },
+  { icon: Users,           label: 'Leads',        href: '/app/leads',       tourId: 'tour-leads' },
+  { icon: FileText,        label: 'Proposals',    href: '/app/proposals',   tourId: 'tour-proposals' },
+  { icon: PenLine,         label: 'Contracts',    href: '/app/contracts',   tourId: 'tour-contracts' },
+  { icon: Receipt,         label: 'Invoices',     href: '/app/invoices',    tourId: 'tour-invoices' },
+  { icon: Building2,       label: 'Clients',      href: '/app/clients',     tourId: 'tour-clients' },
+  { icon: CalendarDays,    label: 'Meetings',     href: '/app/meetings',    tourId: undefined },
+  { icon: ClipboardList,   label: 'Forms',        href: '/app/forms',       tourId: undefined },
+  { icon: Zap,             label: 'Automations',  href: '/app/automations', tourId: undefined },
 ]
 
 interface Props {
@@ -48,10 +48,11 @@ export default function Sidebar({ onClose }: Props) {
           Menu
         </p>
         <nav className="space-y-0.5">
-          {navItems.map(({ icon: Icon, label, href }) => (
+          {navItems.map(({ icon: Icon, label, href, tourId }) => (
             <NavLink
               key={href}
               to={href}
+              id={tourId}
               onClick={onClose}
               className={({ isActive }) =>
                 cn(
@@ -81,6 +82,7 @@ export default function Sidebar({ onClose }: Props) {
       <div className="border-t border-white/[0.06] px-3 py-3">
         <NavLink
           to="/app/settings"
+          id="tour-settings"
           onClick={onClose}
           className={({ isActive }) =>
             cn(
