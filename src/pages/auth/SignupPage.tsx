@@ -57,7 +57,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex overflow-hidden">
 
       {/* ── Left panel ─────────────────────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col px-10 py-8">
@@ -83,7 +83,7 @@ export default function SignupPage() {
       </div>
 
       {/* ── Right panel (form) ──────────────────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-10 bg-white">
+      <div className="flex-1 flex items-center justify-center px-6 py-10 bg-white overflow-y-auto">
         <div className="w-full max-w-[400px]">
 
           <div className="lg:hidden mb-8 flex justify-center">
