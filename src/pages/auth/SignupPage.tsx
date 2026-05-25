@@ -83,7 +83,8 @@ export default function SignupPage() {
       </div>
 
       {/* ── Right panel (form) ──────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 py-10 bg-white overflow-y-auto h-screen">
+      <div className="flex-1 bg-white overflow-y-auto">
+        <div className="min-h-full flex flex-col justify-center items-center px-6 py-10">
         <div className="w-full max-w-[400px]">
 
           <div className="lg:hidden mb-8 flex justify-center">
@@ -148,6 +149,7 @@ export default function SignupPage() {
               Sign in
             </Link>
           </p>
+        </div>
         </div>
       </div>
     </div>
