@@ -78,7 +78,7 @@ export default function Topbar({ onMenuToggle }: Props) {
 
         {/* User pill */}
         <button className="flex items-center gap-2 h-9 pl-1 pr-2 lg:pr-2.5 rounded-lg hover:bg-[#F5F6FA] dark:hover:bg-[#1A1B23] transition-colors group">
-          <div className="w-7 h-7 rounded-full bg-[#6366F1] dark:bg-[#818CF8] flex items-center justify-center text-white text-[11px] font-bold select-none shrink-0">
+          <div className="w-7 h-7 rounded-full bg-[#2563EB] flex items-center justify-center text-white text-[11px] font-bold select-none shrink-0">
             {initials}
           </div>
           <div className="hidden sm:block text-left">

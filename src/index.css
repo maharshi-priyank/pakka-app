@@ -9,25 +9,25 @@
    Light defaults; .dark overrides below.
 */
 :root {
-  --bg-app:       #F4F5F8;
+  --bg-app:       #F3F4F8;
   --bg-surface:   #FFFFFF;
   --bg-surface-2: #F9FAFB;
-  --bg-surface-3: #F2F4F7;
-  --border:       #EAECF0;
-  --border-2:     #D0D5DD;
-  --text-1:       #101828;
-  --text-2:       #344054;
-  --text-3:       #667085;
-  --text-4:       #98A2B3;
-  --accent:       #6366F1;
-  --accent-hover: #4F46E5;
-  --accent-bg:    #EEF2FF;
-  --accent-text:  #4338CA;
-  --btn-bg:       #0D1117;
-  --btn-hover:    #1a1d2e;
-  --btn-shadow:   rgba(13,17,23,0.18);
-  --scrollbar:    #E4E7EC;
-  --scrollbar-h:  #D0D5DD;
+  --bg-surface-3: #F1F3F7;
+  --border:       #E4E7EC;
+  --border-2:     #CDD1DA;
+  --text-1:       #0F172A;
+  --text-2:       #1E293B;
+  --text-3:       #64748B;
+  --text-4:       #94A3B8;
+  --accent:       #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-bg:    #EFF6FF;
+  --accent-text:  #1D4ED8;
+  --btn-bg:       #0F172A;
+  --btn-hover:    #1E293B;
+  --btn-shadow:   rgba(15,23,42,0.15);
+  --scrollbar:    #E2E8F0;
+  --scrollbar-h:  #CBD5E1;
 }
 
 .dark {
@@ -41,13 +41,13 @@
   --text-2:       #C2C8D8;
   --text-3:       #8B92A8;
   --text-4:       #545C74;
-  --accent:       #818CF8;
-  --accent-hover: #6366F1;
-  --accent-bg:    #1E2040;
-  --accent-text:  #A5B4FC;
-  --btn-bg:       #6366F1;
-  --btn-hover:    #4F46E5;
-  --btn-shadow:   rgba(99,102,241,0.25);
+  --accent:       #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-bg:    #1E3A5F;
+  --accent-text:  #93C5FD;
+  --btn-bg:       #2563EB;
+  --btn-hover:    #1D4ED8;
+  --btn-shadow:   rgba(37,99,235,0.3);
   --scrollbar:    #26283A;
   --scrollbar-h:  #333649;
 }
@@ -213,7 +213,7 @@
 
   .form-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 0 0 3px rgba(99,102,241,0.15);
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 0 0 3px rgba(37,99,235,0.12);
     background: var(--bg-surface);
   }
 
