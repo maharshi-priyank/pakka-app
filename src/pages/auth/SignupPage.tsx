@@ -62,7 +62,7 @@ export default function SignupPage() {
       {/* ── Left panel ─────────────────────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col px-10 py-8">
         {/* Logo — top left */}
-        <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto" />
+        <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto self-start" />
 
         {/* Spacer pushes heading to lower third */}
         <div className="flex-1" />
@@ -74,8 +74,7 @@ export default function SignupPage() {
             to close more clients.
           </h2>
           <p className="text-white/45 text-[14px] leading-relaxed max-w-[340px]">
-            Join freelancers across India who manage their pipeline,<br />
-            proposals, contracts, and invoices in one place.
+            Join freelancers across India managing their pipeline, proposals, contracts, and invoices in one place.
           </p>
         </div>
       </div>

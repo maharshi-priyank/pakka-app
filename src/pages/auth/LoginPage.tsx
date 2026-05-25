@@ -40,7 +40,7 @@ export default function LoginPage() {
       {/* ── Left panel ─────────────────────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col px-10 py-8">
         {/* Logo — top left */}
-        <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto" />
+        <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto self-start" />
 
         {/* Spacer pushes heading to lower third */}
         <div className="flex-1" />
@@ -52,8 +52,7 @@ export default function LoginPage() {
             business like a pro.
           </h2>
           <p className="text-white/45 text-[14px] leading-relaxed max-w-[340px]">
-            The all-in-one CRM for Indian freelancers &amp; agencies —<br />
-            from first lead to final payment.
+            The all-in-one CRM for Indian freelancers &amp; agencies — from first lead to final payment.
           </p>
         </div>
       </div>
