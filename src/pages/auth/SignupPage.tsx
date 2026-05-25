@@ -67,16 +67,19 @@ export default function SignupPage() {
         {/* Spacer pushes heading to lower third */}
         <div className="flex-1" />
 
-        {/* Heading at bottom */}
-        <div className="mb-8">
-          <h2 className="heading-display text-[52px] text-[#FFFFF0] mb-5">
-            Everything you need<br />
-            to close more clients.
-          </h2>
-          <p className="text-white/45 text-[14px] leading-relaxed max-w-[340px]">
-            Join freelancers across India managing their pipeline, proposals, contracts, and invoices in one place.
-          </p>
-        </div>
+        {/* Heading */}
+        <h2 className="heading-display text-[52px] text-[#FFFFF0]">
+          Everything you need<br />
+          to close more clients.
+        </h2>
+
+        {/* Gap between heading and tagline */}
+        <div className="flex-1 max-h-14" />
+
+        {/* Tagline pinned near bottom */}
+        <p className="text-white/40 text-[13px] leading-relaxed max-w-[300px] pb-2">
+          Join freelancers across India managing their pipeline, proposals, contracts, and invoices in one place.
+        </p>
       </div>
 
       {/* ── Right panel (form) ──────────────────────────────────────────────── */}
