@@ -36,7 +36,7 @@ const logEntrySchema = z.object({
   description:  z.string().min(1, 'Description required'),
   date:         z.string().min(1, 'Date required'),
   hours:        z.number({ message: 'Required' }).min(0.1).max(24),
-  minutes:      z.number().min(0).max(59).default(0),
+  minutes:      z.number().min(0).max(59),
   hourlyRate:   z.number().min(0).optional(),
 })
 type LogEntryForm = z.infer<typeof logEntrySchema>
@@ -101,7 +101,8 @@ export default function TimePage() {
 
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const { data: clients = [] } = useClients()
+  const { data: clientsData } = useClients()
+  const clients = clientsData?.clients ?? []
   const { data: entries = [], isLoading } = useTimeEntries({ from: dateFrom, to: dateTo })
   const createEntry  = useCreateTimeEntry()
   const updateEntry  = useUpdateTimeEntry()
@@ -109,9 +110,9 @@ export default function TimePage() {
   const billEntries  = useBillEntries()
 
   const {
-    register, handleSubmit, reset, setValue,
+    register, handleSubmit, reset,
     formState: { errors },
-  } = useForm<LogEntryForm>({ resolver: zodResolver(logEntrySchema) })
+  } = useForm<LogEntryForm>({ resolver: zodResolver(logEntrySchema), defaultValues: { minutes: 0 } })
 
   // ─── Live timer ────────────────────────────────────────────────────────────
   useEffect(() => {

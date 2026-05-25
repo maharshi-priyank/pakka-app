@@ -24,7 +24,7 @@ const expenseSchema = z.object({
   description: z.string().min(1, 'Description required'),
   amount:      z.number({ message: 'Required' }).min(0),
   date:        z.string().min(1, 'Date required'),
-  isBillable:  z.boolean().default(true),
+  isBillable:  z.boolean(),
   receiptUrl:  z.string().optional(),
 })
 type ExpenseForm = z.infer<typeof expenseSchema>
@@ -46,7 +46,8 @@ export default function ExpensesPage() {
   const [uploadingReceipt, setUploadingReceipt] = useState(false)
   const [localReceiptUrl, setLocalReceiptUrl] = useState<string | undefined>(undefined)
 
-  const { data: clients = [] } = useClients()
+  const { data: clientsData } = useClients()
+  const clients = clientsData?.clients ?? []
   const { data: expenses = [], isLoading } = useExpenses({
     clientId:   clientFilter || undefined,
     isBillable: filter === 'unbilled' ? true : undefined,
@@ -61,7 +62,7 @@ export default function ExpensesPage() {
   const {
     register, handleSubmit, reset, setValue, watch,
     formState: { errors },
-  } = useForm<ExpenseForm>({ resolver: zodResolver(expenseSchema) })
+  } = useForm<ExpenseForm>({ resolver: zodResolver(expenseSchema), defaultValues: { isBillable: true } })
 
   const watchedReceiptUrl = watch('receiptUrl') ?? localReceiptUrl
 
