@@ -1,7 +1,16 @@
 import { z } from 'zod'
 
-export const INVOICE_STATUS = ['DRAFT', 'SENT', 'VIEWED', 'PARTIAL', 'PAID', 'OVERDUE', 'CANCELLED'] as const
-export const GST_TYPES       = ['CGST_SGST', 'IGST', 'EXEMPT'] as const
+export const INVOICE_STATUS     = ['DRAFT', 'SENT', 'VIEWED', 'PARTIAL', 'PAID', 'OVERDUE', 'CANCELLED'] as const
+export const GST_TYPES          = ['CGST_SGST', 'IGST', 'EXEMPT'] as const
+export const RECURRENCE_CYCLES  = ['MONTHLY', 'QUARTERLY', 'YEARLY', 'WEEKLY'] as const
+export type  RecurrenceCycle    = typeof RECURRENCE_CYCLES[number]
+
+export const RECURRENCE_CYCLE_LABELS: Record<RecurrenceCycle, string> = {
+  MONTHLY:   'Monthly',
+  QUARTERLY: 'Quarterly (every 3 months)',
+  YEARLY:    'Yearly',
+  WEEKLY:    'Weekly',
+}
 
 export type InvoiceStatus = typeof INVOICE_STATUS[number]
 export type GstType       = typeof GST_TYPES[number]
@@ -34,14 +43,18 @@ export const lineItemSchema = z.object({
 })
 
 export const invoiceFormSchema = z.object({
-  title:      z.string().optional(),
-  clientId:   z.string().optional(),
-  contractId: z.string().optional(),
-  lineItems:  z.array(lineItemSchema).min(1, 'Add at least one line item'),
-  gstType:    z.enum(GST_TYPES),
-  tdsRate:    z.number().min(0).max(30).optional(),
-  dueDate:    z.string().optional(),
-  notes:      z.string().optional(),
+  title:              z.string().optional(),
+  clientId:           z.string().optional(),
+  contractId:         z.string().optional(),
+  lineItems:          z.array(lineItemSchema).min(1, 'Add at least one line item'),
+  gstType:            z.enum(GST_TYPES),
+  tdsRate:            z.number().min(0).max(30).optional(),
+  dueDate:            z.string().optional(),
+  notes:              z.string().optional(),
+  isRecurring:        z.boolean().optional(),
+  recurrenceCycle:    z.enum(RECURRENCE_CYCLES).optional(),
+  recurrenceDay:      z.number().int().min(1).max(28).optional(),
+  recurrenceEndDate:  z.string().optional(),
 })
 
 export type LineItem        = z.infer<typeof lineItemSchema>
@@ -55,25 +68,32 @@ export interface InvoiceContract {
 }
 
 export interface Invoice {
-  id:            string
-  userId:        string
-  contractId:    string | null
-  clientId:      string | null
-  invoiceNumber: string
-  status:        InvoiceStatus
-  lineItems:     LineItem[]
-  subtotal:      number
-  gstAmount:     number
-  total:         number
-  gstType:       GstType
-  tdsRate:       number | null
-  dueDate:       string | null
-  paidAt:        string | null
-  remindersSent: number
-  createdAt:     string
-  updatedAt:     string
-  client:        InvoiceClient | null
-  contract:      InvoiceContract | null
+  id:                 string
+  userId:             string
+  contractId:         string | null
+  clientId:           string | null
+  invoiceNumber:      string
+  status:             InvoiceStatus
+  lineItems:          LineItem[]
+  subtotal:           number
+  gstAmount:          number
+  total:              number
+  gstType:            GstType
+  tdsRate:            number | null
+  amountPaid:         number
+  dueDate:            string | null
+  paidAt:             string | null
+  remindersSent:      number
+  isRecurring:        boolean
+  recurrenceCycle:    RecurrenceCycle | null
+  recurrenceDay:      number | null
+  recurrenceEndDate:  string | null
+  recurrenceNextDate: string | null
+  parentInvoiceId:    string | null
+  createdAt:          string
+  updatedAt:          string
+  client:             InvoiceClient | null
+  contract:           InvoiceContract | null
 }
 
 export interface InvoiceListResponse {

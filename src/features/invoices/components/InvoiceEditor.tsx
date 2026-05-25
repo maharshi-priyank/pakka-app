@@ -3,10 +3,10 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Plus, Trash2, IndianRupee, Send, CheckCircle2,
-  FileText, Save, Copy, Check, ExternalLink,
+  FileText, Save, Copy, Check, ExternalLink, RefreshCw,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { invoiceFormSchema, type InvoiceFormData, type Invoice } from '../schemas/invoice.schema'
+import { invoiceFormSchema, RECURRENCE_CYCLE_LABELS, type InvoiceFormData, type Invoice } from '../schemas/invoice.schema'
 import { useCreateInvoice, useUpdateInvoice, useSendInvoice, useMarkPaid } from '../hooks/useInvoices'
 
 const GST_RATE_OPTIONS = [0, 5, 12, 18, 28]
@@ -40,14 +40,18 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: invoice
       ? {
-          clientId:   invoice.clientId   ?? undefined,
-          contractId: invoice.contractId ?? undefined,
-          lineItems:  invoice.lineItems.length > 0
+          clientId:          invoice.clientId   ?? undefined,
+          contractId:        invoice.contractId ?? undefined,
+          lineItems:         invoice.lineItems.length > 0
             ? invoice.lineItems
             : [{ description: '', qty: 1, rate: 0, gstRate: 18 }],
-          gstType: invoice.gstType,
-          tdsRate: invoice.tdsRate ?? undefined,
-          dueDate: invoice.dueDate ? invoice.dueDate.slice(0, 10) : undefined,
+          gstType:           invoice.gstType,
+          tdsRate:           invoice.tdsRate ?? undefined,
+          dueDate:           invoice.dueDate ? invoice.dueDate.slice(0, 10) : undefined,
+          isRecurring:       invoice.isRecurring,
+          recurrenceCycle:   invoice.recurrenceCycle    ?? undefined,
+          recurrenceDay:     invoice.recurrenceDay      ?? undefined,
+          recurrenceEndDate: invoice.recurrenceEndDate  ? invoice.recurrenceEndDate.slice(0, 10) : undefined,
         }
       : {
           contractId: defaultContractId,
@@ -59,9 +63,11 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
 
   const { fields, append, remove } = useFieldArray({ control, name: 'lineItems' })
 
-  const lineItems = watch('lineItems')
-  const gstType   = watch('gstType')
-  const tdsRate   = watch('tdsRate')
+  const lineItems       = watch('lineItems')
+  const gstType         = watch('gstType')
+  const tdsRate         = watch('tdsRate')
+  const isRecurring     = watch('isRecurring')
+  const recurrenceCycle = watch('recurrenceCycle')
 
   const subtotal  = lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate)), 0)
   const gstAmount = gstType === 'EXEMPT'
@@ -300,6 +306,87 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           {/* Error summary */}
           {errors.lineItems?.root && (
             <p className="form-error">{errors.lineItems.root.message}</p>
+          )}
+
+          {/* Recurring invoice */}
+          {canEdit && (
+            <div className="bg-white dark:bg-[#1A1B23] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm overflow-hidden">
+              <div className="px-5 py-4 flex items-center justify-between border-b border-[#F2F4F7] dark:border-[#26283A]">
+                <div className="flex items-center gap-2.5">
+                  <RefreshCw size={14} className="text-[#2563EB]" />
+                  <h3 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Recurring Invoice</h3>
+                </div>
+                <Controller
+                  control={control}
+                  name="isRecurring"
+                  render={({ field }) => (
+                    <button
+                      type="button"
+                      onClick={() => field.onChange(!field.value)}
+                      className={cn(
+                        'relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0',
+                        field.value ? 'bg-[#2563EB]' : 'bg-[#D0D5DD] dark:bg-[#3D4258]',
+                      )}
+                    >
+                      <span className={cn(
+                        'inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform',
+                        field.value ? 'translate-x-4' : 'translate-x-0.5',
+                      )} />
+                    </button>
+                  )}
+                />
+              </div>
+
+              {isRecurring ? (
+                <div className="px-5 py-4 space-y-4">
+                  <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">
+                    A new draft invoice will be automatically created on the schedule below.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="form-label">Repeat cycle</label>
+                      <Controller
+                        control={control}
+                        name="recurrenceCycle"
+                        render={({ field }) => (
+                          <select {...field} value={field.value ?? ''} className="form-input w-full">
+                            <option value="" disabled>Select cycle…</option>
+                            {(Object.entries(RECURRENCE_CYCLE_LABELS) as [string, string][]).map(([val, label]) => (
+                              <option key={val} value={val}>{label}</option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                    </div>
+                    {recurrenceCycle !== 'WEEKLY' && (
+                      <div>
+                        <label className="form-label">Day of month <span className="font-normal text-[#98A2B3]">(1–28)</span></label>
+                        <input
+                          {...register('recurrenceDay', { valueAsNumber: true })}
+                          type="number" min="1" max="28"
+                          placeholder="1"
+                          className="form-input w-full"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="max-w-[220px]">
+                    <label className="form-label">End date <span className="font-normal text-[#98A2B3]">(optional)</span></label>
+                    <input
+                      {...register('recurrenceEndDate')}
+                      type="date"
+                      className="form-input w-full"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="px-5 py-3">
+                  <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">
+                    Enable to auto-generate this invoice on a monthly, quarterly, or yearly schedule.
+                  </p>
+                </div>
+              )}
+            </div>
           )}
 
         </div>

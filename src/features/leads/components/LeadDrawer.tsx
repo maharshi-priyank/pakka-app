@@ -3,14 +3,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   X, Trash2, Loader2, Building2, Mail, Phone,
-  Tag, Calendar, IndianRupee, Clock, Video,
+  Tag, Calendar, IndianRupee, Clock, Video, UserPlus,
 } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
 import {
   updateLeadSchema, LEAD_STAGES, LEAD_SOURCES, STAGE_LABELS,
   type Lead, type UpdateLeadInput,
 } from '../schemas/lead.schema'
-import { useUpdateLead, useDeleteLead, useUpdateLeadStage } from '../hooks/useLeads'
+import { useUpdateLead, useDeleteLead, useUpdateLeadStage, useConvertLeadToClient } from '../hooks/useLeads'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 
 interface Props {
@@ -49,6 +49,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
   const updateLead  = useUpdateLead()
   const deleteLead  = useDeleteLead()
   const updateStage = useUpdateLeadStage()
+  const convertToClient = useConvertLeadToClient()
 
   const {
     register,
@@ -301,17 +302,29 @@ export default function LeadDrawer({ lead, onClose }: Props) {
                 <Trash2 size={13} /> Delete
               </button>
               {!isEditing && (
-                <>
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setScheduleOpen(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"
                   >
                     <Video size={12} /> Schedule Call
                   </button>
+                  {!lead.clientId && (
+                    <button
+                      onClick={() => convertToClient.mutate(lead.id)}
+                      disabled={convertToClient.isPending}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#2563EB] text-[12px] font-semibold text-[#2563EB] hover:bg-[#EFF6FF] dark:hover:bg-[#1E3A5F] transition-colors"
+                    >
+                      {convertToClient.isPending
+                        ? <Loader2 size={12} className="animate-spin" />
+                        : <UserPlus size={12} />}
+                      Convert to Client
+                    </button>
+                  )}
                   <button onClick={() => setIsEditing(true)} className="btn-primary">
                     Edit lead
                   </button>
-                </>
+                </div>
               )}
             </>
           )}

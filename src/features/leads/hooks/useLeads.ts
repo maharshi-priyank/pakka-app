@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { useUiStore } from '@/store/uiStore'
@@ -124,16 +125,18 @@ export function useDeleteLead() {
 }
 
 export function useConvertLeadToClient() {
-  const qc = useQueryClient()
+  const qc       = useQueryClient()
+  const navigate = useNavigate()
   return useMutation({
     mutationFn: async (leadId: string) => {
-      const { data } = await api.post(`/leads/${leadId}/convert-to-client`)
+      const { data } = await api.post<{ data: { id: string; name: string } }>(`/leads/${leadId}/convert-to-client`)
       return data.data
     },
-    onSuccess: () => {
+    onSuccess: (client) => {
       qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] })
       qc.invalidateQueries({ queryKey: ['clients'] })
-      toast.success('Lead converted to client')
+      toast.success(`${client.name} added as a client`)
+      navigate(`/app/clients/${client.id}`)
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to convert lead'),
   })
