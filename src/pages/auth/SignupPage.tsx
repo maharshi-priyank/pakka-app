@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Mail } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -39,7 +40,7 @@ export default function SignupPage() {
       <div className="min-h-screen flex items-center justify-center bg-white px-4">
         <div className="w-full max-w-sm text-center">
           <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <span className="text-2xl">✉️</span>
+            <Mail size={24} className="text-[#2563EB]" strokeWidth={1.5} />
           </div>
           <h2 className="text-[22px] font-black text-[#0F172A] mb-2">Check your email</h2>
           <p className="text-[14px] text-[#64748B] leading-relaxed">

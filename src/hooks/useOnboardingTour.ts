@@ -4,6 +4,15 @@ import 'driver.js/dist/driver.css'
 
 const TOUR_KEY = 'pakka_tour_v1_seen'
 
+function icon(path: string, color = '#2563EB') {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:7px">${path}</svg>`
+}
+
+const ICONS = {
+  sparkle: '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>',
+  check:   '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>',
+}
+
 export function useOnboardingTour() {
   const startTour = useCallback(() => {
     const driverObj = driver({
@@ -20,8 +29,8 @@ export function useOnboardingTour() {
       steps: [
         {
           popover: {
-            title: '👋 Welcome to Clinekt!',
-            description: 'Let\'s take a quick 30-second tour so you know exactly where everything is.',
+            title: `${icon(ICONS.sparkle)}Welcome to Clinekt!`,
+            description: "Let's take a quick 30-second tour so you know exactly where everything is.",
             side: 'over',
             align: 'center',
           },
@@ -76,7 +85,7 @@ export function useOnboardingTour() {
         },
         {
           popover: {
-            title: "You're all set! 🚀",
+            title: `${icon(ICONS.check, '#16A34A')}You're all set!`,
             description: 'Start by adding your first lead. The whole workflow — proposal → contract → invoice — flows from there.',
             side: 'over',
             align: 'center',
@@ -93,7 +102,6 @@ export function useOnboardingTour() {
 
   const startIfFirstVisit = useCallback(() => {
     if (!localStorage.getItem(TOUR_KEY)) {
-      // Small delay so the layout has rendered
       setTimeout(startTour, 800)
     }
   }, [startTour])
