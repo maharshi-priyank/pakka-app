@@ -6,6 +6,7 @@ import {
   IndianRupee, CheckCircle2, Clock, ScrollText, Layers, FileText,
   AlertCircle, CheckSquare, XCircle, Star, MessageSquare, Briefcase,
   ExternalLink, ChevronDown, ArrowRight, Download, ThumbsUp, ThumbsDown,
+  Loader2, CreditCard, Lock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type {
@@ -28,7 +29,24 @@ interface PublicProposalUser {
 }
 
 interface PublicProposal extends Proposal {
-  user: PublicProposalUser
+  user:            PublicProposalUser
+  depositAmount:   string | null
+  depositPaid:     boolean
+  depositPaidAt:   string | null
+  depositOrderId?: string | null
+}
+
+interface DepositOrder {
+  orderId:   string
+  amount:    number
+  currency:  string
+  keyId:     string
+  milestone: string
+}
+
+interface AcceptResponse {
+  proposal:     PublicProposal
+  depositOrder: DepositOrder | null
 }
 
 async function fetchPublicProposal(slug: string): Promise<PublicProposal> {
@@ -40,14 +58,21 @@ async function recordOpen(slug: string) {
   try { await publicApi.post(`/proposals/view/${slug}/open`) } catch { /* ignore */ }
 }
 
-async function acceptProposal(slug: string): Promise<PublicProposal> {
-  const { data } = await publicApi.post<{ data: PublicProposal }>(`/proposals/view/${slug}/accept`)
+async function acceptProposal(slug: string): Promise<AcceptResponse> {
+  const { data } = await publicApi.post<{ data: AcceptResponse }>(`/proposals/view/${slug}/accept`)
   return data.data
 }
 
 async function declineProposal(slug: string): Promise<PublicProposal> {
   const { data } = await publicApi.post<{ data: PublicProposal }>(`/proposals/view/${slug}/decline`)
   return data.data
+}
+
+async function verifyDepositPayment(
+  slug: string,
+  dto: { orderId: string; paymentId: string; signature: string },
+) {
+  await publicApi.post(`/proposals/view/${slug}/verify-deposit`, dto)
 }
 
 function fmt(value: string | number) {
@@ -64,7 +89,11 @@ export default function ProposalViewPage() {
   const isPrint = new URLSearchParams(search).get('print') === '1'
   const openRecorded = useRef(false)
   const queryClient  = useQueryClient()
-  const [actionDone, setActionDone] = useState<'accepted' | 'declined' | null>(null)
+  const [actionDone,    setActionDone]    = useState<'accepted' | 'declined' | null>(null)
+  const [depositOrder,  setDepositOrder]  = useState<DepositOrder | null>(null)
+  const [depositPaid,   setDepositPaid]   = useState(false)
+  const [payError,      setPayError]      = useState('')
+  const [payLoading,    setPayLoading]    = useState(false)
 
   const { data: proposal, isLoading, isError } = useQuery({
     queryKey: ['public-proposal', slug],
@@ -75,8 +104,9 @@ export default function ProposalViewPage() {
 
   const acceptMutation = useMutation({
     mutationFn: () => acceptProposal(slug!),
-    onSuccess: () => {
+    onSuccess: (res) => {
       setActionDone('accepted')
+      if (res.depositOrder) setDepositOrder(res.depositOrder)
       queryClient.invalidateQueries({ queryKey: ['public-proposal', slug] })
     },
   })
@@ -88,6 +118,65 @@ export default function ProposalViewPage() {
       queryClient.invalidateQueries({ queryKey: ['public-proposal', slug] })
     },
   })
+
+  // If the page is loaded for an already-accepted proposal with a pending deposit,
+  // re-call accept (idempotent) to retrieve the existing deposit order info
+  useEffect(() => {
+    if (
+      proposal?.status === 'ACCEPTED' &&
+      proposal.depositAmount &&
+      !proposal.depositPaid &&
+      !depositPaid &&
+      !depositOrder &&
+      slug
+    ) {
+      acceptProposal(slug).then(res => {
+        if (res.depositOrder) setDepositOrder(res.depositOrder)
+      }).catch(() => {})
+    }
+    if (proposal?.depositPaid) setDepositPaid(true)
+  }, [proposal])
+
+  async function handlePayDeposit() {
+    if (!depositOrder || !slug) return
+    setPayError('')
+    setPayLoading(true)
+    try {
+      const rzp = new (window as any).Razorpay({
+        key:         depositOrder.keyId,
+        order_id:    depositOrder.orderId,
+        amount:      depositOrder.amount,
+        currency:    depositOrder.currency,
+        name:        proposal?.user.businessName ?? proposal?.user.name ?? 'Clinekt',
+        description: `Deposit — ${depositOrder.milestone}`,
+        theme:       { color: '#2563EB' },
+        modal:       { ondismiss: () => setPayLoading(false) },
+        handler: async (response: {
+          razorpay_payment_id: string
+          razorpay_order_id:   string
+          razorpay_signature:  string
+        }) => {
+          try {
+            await verifyDepositPayment(slug, {
+              orderId:   response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+            })
+            setDepositPaid(true)
+            setDepositOrder(null)
+          } catch {
+            setPayError('Payment verification failed. Please contact the sender.')
+          } finally {
+            setPayLoading(false)
+          }
+        },
+      })
+      rzp.open()
+    } catch {
+      setPayError('Could not open payment. Please try again.')
+      setPayLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (proposal && slug && !openRecorded.current) {
@@ -205,6 +294,69 @@ export default function ProposalViewPage() {
           <div className="flex items-center gap-2.5 bg-[#FEF3F2] border border-[#FECDCA] rounded-xl px-4 py-3">
             <AlertCircle size={16} className="text-[#D92D20] shrink-0" />
             <p className="text-[13px] font-medium text-[#D92D20]">This proposal is no longer active.</p>
+          </div>
+        )}
+
+        {/* ── Deposit paid banner ── */}
+        {depositPaid && (
+          <div className="print:hidden flex items-center gap-3 bg-[#ECFDF3] border border-[#BBF7D0] rounded-xl px-5 py-4">
+            <div className="w-8 h-8 rounded-full bg-[#D1FAE5] flex items-center justify-center shrink-0">
+              <CheckCircle2 size={16} className="text-[#027A48]" />
+            </div>
+            <div>
+              <p className="text-[13px] font-bold text-[#027A48]">Deposit paid successfully</p>
+              <p className="text-[12px] text-[#065F46] mt-0.5">Your payment has been received. The sender has been notified.</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Deposit payment card ── */}
+        {isAccepted && depositOrder && !depositPaid && (
+          <div className="print:hidden bg-white border-2 border-[#2563EB] rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-6 py-5">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center shrink-0">
+                  <CreditCard size={16} className="text-[#2563EB]" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-extrabold text-[#101828]">Pay your deposit</p>
+                  <p className="text-[12px] text-[#667085] mt-0.5">Secure the project by paying the first milestone now</p>
+                </div>
+              </div>
+
+              <div className="bg-[#F8FAFF] rounded-xl border border-[#E0E7FF] px-4 py-3 mb-4">
+                <p className="text-[11px] font-semibold text-[#667085] uppercase tracking-wider mb-1">
+                  {depositOrder.milestone}
+                </p>
+                <div className="flex items-center gap-1">
+                  <IndianRupee size={14} strokeWidth={3} className="text-[#101828]" />
+                  <span className="text-[22px] font-extrabold text-[#101828]">
+                    {(depositOrder.amount / 100).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={handlePayDeposit}
+                disabled={payLoading}
+                className="w-full flex items-center justify-center gap-2 h-11 rounded-xl bg-[#2563EB] text-white text-[14px] font-bold hover:bg-[#1D4ED8] transition-colors disabled:opacity-60"
+              >
+                {payLoading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <>
+                    <Lock size={14} strokeWidth={2.5} />
+                    Pay ₹{(depositOrder.amount / 100).toLocaleString('en-IN')} securely
+                  </>
+                )}
+              </button>
+              {payError && (
+                <p className="text-[12px] text-red-500 mt-2 text-center">{payError}</p>
+              )}
+              <p className="text-[11px] text-[#98A2B3] text-center mt-2 flex items-center justify-center gap-1">
+                <Lock size={9} strokeWidth={2} /> Secured by Razorpay
+              </p>
+            </div>
           </div>
         )}
 
