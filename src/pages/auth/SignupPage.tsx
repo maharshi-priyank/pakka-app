@@ -4,8 +4,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
-import { Star, ShieldCheck, IndianRupee } from 'lucide-react'
-
 const schema = z.object({
   name:     z.string().min(2, 'Name is required'),
   email:    z.string().email('Enter a valid email'),
@@ -13,12 +11,6 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
-
-const PERKS = [
-  { icon: Star,          text: 'Free forever — no credit card required' },
-  { icon: ShieldCheck,   text: 'Secure Supabase auth, your data stays yours' },
-  { icon: IndianRupee,   text: 'GST-ready invoices & Razorpay payments built in' },
-]
 
 export default function SignupPage() {
   const [serverError, setServerError] = useState('')
@@ -68,37 +60,24 @@ export default function SignupPage() {
     <div className="min-h-screen flex">
 
       {/* ── Left panel ─────────────────────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col justify-between px-12 py-12">
-        <div className="space-y-10">
-          <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto" />
+      <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col px-10 py-8">
+        {/* Logo — top left */}
+        <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto" />
 
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-[38px] font-black text-white leading-tight tracking-tight">
-                Everything you need<br />
-                to close more clients.
-              </h2>
-              <p className="text-white/50 text-[15px] mt-4 leading-relaxed">
-                Join Indian freelancers who use Clinekt to manage their pipeline, proposals, contracts, and invoices in one place.
-              </p>
-            </div>
+        {/* Spacer pushes heading to lower third */}
+        <div className="flex-1" />
 
-            <div className="space-y-4">
-              {PERKS.map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-start gap-3">
-                  <span className="w-8 h-8 rounded-lg bg-[#2563EB]/20 flex items-center justify-center shrink-0 mt-0.5">
-                    <Icon size={15} className="text-[#60A5FA]" />
-                  </span>
-                  <p className="text-white/70 text-[14px] leading-snug">{text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Heading at bottom */}
+        <div className="mb-8">
+          <h2 className="heading-display text-[52px] text-[#FFFFF0] mb-5">
+            Everything you need<br />
+            to close more clients.
+          </h2>
+          <p className="text-white/45 text-[14px] leading-relaxed max-w-[340px]">
+            Join freelancers across India who manage their pipeline,<br />
+            proposals, contracts, and invoices in one place.
+          </p>
         </div>
-
-        <p className="text-white/25 text-[12px]">
-          Built for Indian freelancers &amp; agencies · Clinekt 2026
-        </p>
       </div>
 
       {/* ── Right panel (form) ──────────────────────────────────────────────── */}

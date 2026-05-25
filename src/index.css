@@ -282,6 +282,16 @@
   .scrollbar-none::-webkit-scrollbar { display: none; }
 }
 
+/* ─── Display heading style (Terac-inspired) ─────────────────────────────────
+   Weight 500 + line-height ~0.97 — the combination that makes large headings
+   look editorial and tight. Use on hero / page-level titles.
+*/
+.heading-display {
+  font-weight: 500;
+  line-height: 0.97;
+  letter-spacing: -0.02em;
+}
+
 /* ─── Keyframe animations ────────────────────────────────────────────────────*/
 
 @keyframes clinekt-page-enter {
