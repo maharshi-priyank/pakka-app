@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { FileSignature, Receipt, AlertTriangle, Video, CalendarDays, ExternalLink, FolderKanban, Clock, IndianRupee, Bell, ChevronRight, Shield } from 'lucide-react'
+import {
+  FileText, FileSignature, Receipt, AlertTriangle, Video, CalendarDays,
+  ExternalLink, FolderKanban, Clock, IndianRupee, Shield, AlertCircle,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { usePortalData, type PortalProposal, type PortalContract, type PortalInvoice, type PortalMeeting, type PortalProject } from '@/features/portal/hooks/usePortal'
+import {
+  usePortalData,
+  type PortalProposal, type PortalContract, type PortalInvoice,
+  type PortalMeeting, type PortalProject,
+} from '@/features/portal/hooks/usePortal'
 import PortalProposalCard from '@/features/portal/components/PortalProposalCard'
 import PortalContractCard from '@/features/portal/components/PortalContractCard'
 import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
@@ -16,7 +23,15 @@ function fmt(v: string | number) {
 }
 
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-lg', className)} />
+  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded-lg', className)} />
+}
+
+const NAV_ICONS: Partial<Record<Tab, React.ComponentType<{ size?: number; className?: string }>>> = {
+  proposals: FileText,
+  contracts: FileSignature,
+  invoices:  Receipt,
+  meetings:  Video,
+  projects:  FolderKanban,
 }
 
 export default function ClientPortalPage() {
@@ -45,7 +60,19 @@ export default function ClientPortalPage() {
     setInvoices((data?.invoices ?? []).map(i => i.id === id ? { ...i, status } : i))
   }
 
-  const upcomingMeetings = activeMeetings.filter(m => m.status === 'SCHEDULED' && new Date(m.scheduledAt) >= new Date())
+  const upcomingMeetings = activeMeetings.filter(
+    m => m.status === 'SCHEDULED' && new Date(m.scheduledAt) >= new Date(),
+  )
+
+  const hasPendingInvoices  = activeInvoices.some(i => ['SENT', 'VIEWED', 'OVERDUE'].includes(i.status))
+  const hasPendingContracts = activeContracts.some(c => c.status === 'SENT')
+  const hasPendingProposals = activeProposals.some(p => ['SENT', 'OPENED'].includes(p.status))
+
+  const pendingMap: Partial<Record<Tab, boolean>> = {
+    proposals: hasPendingProposals,
+    contracts: hasPendingContracts,
+    invoices:  hasPendingInvoices,
+  }
 
   const TABS: { key: Tab; label: string; count: number }[] = [
     { key: 'overview',  label: 'Overview',  count: 0 },
@@ -70,14 +97,14 @@ export default function ClientPortalPage() {
       .map(c => ({ label: `"${c.title}" needs your signature`, tab: 'contracts' as Tab })),
     ...activeProposals
       .filter(p => p.status === 'SENT' || p.status === 'OPENED')
-      .map(p => ({ label: `"${p.title}" proposal awaits your response`, tab: 'proposals' as Tab })),
+      .map(p => ({ label: `"${p.title}" awaits your response`, tab: 'proposals' as Tab })),
   ] : []
 
   const freelancerName = data?.freelancer.businessName ?? 'Clinekt'
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-[#F4F5F8] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-sm border border-[#EAECF0] p-10 max-w-sm w-full text-center">
           <div className="w-12 h-12 rounded-2xl bg-[#FEF3F2] flex items-center justify-center mx-auto mb-4">
             <AlertTriangle size={22} className="text-[#D92D20]" />
@@ -90,243 +117,288 @@ export default function ClientPortalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F5F8]">
+    <div className="min-h-screen bg-[#F4F6FB]">
 
-      {/* Sticky header */}
+      {/* Header */}
       <header className="bg-white border-b border-[#EAECF0] sticky top-0 z-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             {isLoading ? (
-              <Skeleton className="h-7 w-7 rounded-lg bg-[#F2F4F7]" />
+              <Skeleton className="h-7 w-7 rounded-lg" />
             ) : data?.freelancer.logoUrl ? (
               <img src={data.freelancer.logoUrl} alt={freelancerName} className="w-7 h-7 rounded-lg object-cover" />
             ) : (
-              <div className="w-7 h-7 rounded-lg bg-[#0F172A] flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#101828] flex items-center justify-center shrink-0">
                 <span className="text-white text-[11px] font-bold">{freelancerName.charAt(0)}</span>
               </div>
             )}
-            {isLoading
-              ? <Skeleton className="h-3.5 w-28 bg-[#F2F4F7]" />
-              : <span className="text-[13px] font-bold text-[#101828]">{freelancerName}</span>
-            }
+            <span className="text-[13px] font-bold text-[#101828]">{freelancerName}</span>
           </div>
           <div className="flex items-center gap-1.5 text-[11px] text-[#98A2B3] font-medium">
-            <Shield size={11} />
-            Secured by Clinekt
+            <Shield size={11} /> Secured by Clinekt
           </div>
         </div>
       </header>
 
-      {/* Dark hero */}
-      <div className="bg-[#0F172A]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-10">
-          {isLoading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-3.5 w-14 bg-white/10" />
-              <Skeleton className="h-9 w-60 bg-white/10" />
-              <Skeleton className="h-3.5 w-48 bg-white/10" />
-              <div className="flex gap-2 mt-5">
-                {[1, 2, 3].map(i => <Skeleton key={i} className="h-7 w-20 rounded-full bg-white/10" />)}
-              </div>
-            </div>
-          ) : (
-            <>
-              <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-1">Hello,</p>
-              <h1 className="text-[30px] sm:text-[34px] font-extrabold text-white leading-tight">{data?.client.name}</h1>
-              <p className="text-[13.5px] text-white/50 mt-1.5">
-                Your workspace with <span className="text-white/80 font-medium">{freelancerName}</span>
-              </p>
-              <div className="flex flex-wrap gap-2 mt-5">
-                {[
-                  { label: 'Proposals', count: activeProposals.length },
-                  { label: 'Contracts', count: activeContracts.length },
-                  { label: 'Invoices',  count: activeInvoices.length },
-                  { label: 'Meetings',  count: upcomingMeetings.length },
-                  { label: 'Projects',  count: activeProjects.length },
-                ].filter(s => s.count > 0).map(({ label, count }) => (
-                  <span key={label} className="text-[12px] font-semibold px-3 py-1 rounded-full bg-white/10 text-white/80">
-                    {count} {label}
-                  </span>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      {/* Two-panel body */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-5 py-6 flex gap-6 items-start">
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 space-y-4">
+        {/* Left sidebar — desktop only */}
+        <aside className="hidden lg:block w-[232px] shrink-0 sticky top-[80px]">
+          <div className="bg-white border border-[#EAECF0] rounded-xl overflow-hidden">
 
-        {/* Attention banner */}
-        {!isLoading && attentionItems.length > 0 && (
-          <div className="bg-[#FFFAEB] border border-[#FDE68A] rounded-2xl overflow-hidden">
-            <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-[#FDE68A]">
-              <Bell size={13} className="text-[#B45309] shrink-0" />
-              <p className="text-[12.5px] font-bold text-[#92400E]">
-                {attentionItems.length === 1 ? '1 item needs your attention' : `${attentionItems.length} items need your attention`}
+            {/* Client info */}
+            <div className="p-4 border-b border-[#F2F4F7]">
+              {isLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-9 w-9 rounded-full" />
+                  <Skeleton className="h-4 w-28 mt-3" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              ) : (
+                <>
+                  <div className="w-9 h-9 rounded-full bg-[#F4F6FB] border border-[#EAECF0] flex items-center justify-center mb-3">
+                    <span className="text-[13px] font-bold text-[#344054]">{data?.client.name.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <p className="text-[14px] font-bold text-[#101828] leading-snug">{data?.client.name}</p>
+                  {data?.client.company && (
+                    <p className="text-[12px] text-[#667085] mt-0.5">{data.client.company}</p>
+                  )}
+                  {data?.client.email && (
+                    <p className="text-[11.5px] text-[#98A2B3] mt-0.5 truncate">{data.client.email}</p>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Navigation */}
+            <nav className="p-2">
+              {isLoading ? (
+                <div className="space-y-1 p-1">
+                  {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-9 rounded-lg" />)}
+                </div>
+              ) : (
+                visibleTabs.map(({ key, label, count }) => {
+                  const Icon = key === 'overview' ? FileText : NAV_ICONS[key]
+                  const hasPending = pendingMap[key] ?? false
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setTab(key)}
+                      className={cn(
+                        'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all mb-0.5',
+                        tab === key
+                          ? 'bg-[#F4F6FB] text-[#101828] font-semibold'
+                          : 'text-[#667085] hover:bg-[#F4F6FB] hover:text-[#344054]',
+                      )}
+                    >
+                      {Icon && <Icon size={14} className="shrink-0 text-current opacity-70" />}
+                      <span className="flex-1 text-left">{label}</span>
+                      {hasPending && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#F79009] shrink-0" />
+                      )}
+                      {count > 0 && (
+                        <span className={cn(
+                          'text-[10.5px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center leading-none',
+                          tab === key ? 'bg-[#101828] text-white' : 'bg-[#F2F4F7] text-[#667085]',
+                        )}>
+                          {count}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })
+              )}
+            </nav>
+
+            {/* Footer */}
+            <div className="px-4 py-3 border-t border-[#F2F4F7]">
+              <p className="text-[10.5px] text-[#C9CDD4] flex items-center gap-1.5">
+                <Shield size={10} /> Secured & powered by Clinekt
               </p>
             </div>
-            <div className="divide-y divide-[#FDE68A]">
-              {attentionItems.map((item, i) => (
+          </div>
+        </aside>
+
+        {/* Right content */}
+        <main className="flex-1 min-w-0 space-y-4">
+
+          {/* Mobile: horizontal tab bar */}
+          <div className="lg:hidden overflow-x-auto -mx-1">
+            <div className="flex items-center gap-1 bg-white rounded-xl border border-[#EAECF0] p-1 min-w-fit shadow-sm">
+              {visibleTabs.map(({ key, label, count }) => (
                 <button
-                  key={i}
-                  onClick={() => setTab(item.tab)}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-[#FEF3C7] transition-colors"
+                  key={key}
+                  onClick={() => setTab(key)}
+                  className={cn(
+                    'flex items-center gap-1.5 py-2 px-3 rounded-lg text-[12.5px] font-semibold transition-all whitespace-nowrap',
+                    tab === key ? 'bg-[#101828] text-white' : 'text-[#667085] hover:bg-[#F4F6FB]',
+                  )}
                 >
-                  <span className={cn(
-                    'text-[12.5px] font-medium',
-                    item.urgent ? 'text-[#B42318]' : 'text-[#78350F]',
-                  )}>
-                    {item.label}
-                  </span>
-                  <ChevronRight size={12} className="text-[#B45309] shrink-0" />
+                  {label}
+                  {count > 0 && (
+                    <span className={cn(
+                      'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
+                      tab === key ? 'bg-white/20 text-white' : 'bg-[#F2F4F7] text-[#667085]',
+                    )}>
+                      {count}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
           </div>
-        )}
 
-        {/* Tab bar */}
-        <div className="overflow-x-auto">
-          <div className="flex items-center gap-1 bg-white rounded-xl border border-[#EAECF0] p-1 shadow-sm min-w-fit">
-            {visibleTabs.map(({ key, label, count }) => (
-              <button
-                key={key}
-                onClick={() => setTab(key)}
-                className={cn(
-                  'flex items-center justify-center gap-1.5 py-2 px-4 rounded-lg text-[12.5px] font-semibold transition-all whitespace-nowrap',
-                  tab === key
-                    ? 'bg-[#0F172A] text-white shadow-sm'
-                    : 'text-[#667085] hover:text-[#344054] hover:bg-[#F4F5F8]',
-                )}
-              >
-                {label}
-                {count > 0 && (
-                  <span className={cn(
-                    'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                    tab === key ? 'bg-white/20 text-white' : 'bg-[#F2F4F7] text-[#667085]',
-                  )}>
-                    {count}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
+          {/* Page title */}
+          {!isLoading && (
+            <div>
+              <h2 className="text-[17px] font-bold text-[#101828]">
+                {visibleTabs.find(t => t.key === tab)?.label ?? 'Overview'}
+              </h2>
+              {tab === 'overview' && (
+                <p className="text-[13px] text-[#667085] mt-0.5">
+                  {attentionItems.length > 0
+                    ? `${attentionItems.length} item${attentionItems.length !== 1 ? 's' : ''} need your attention`
+                    : 'Everything is up to date'}
+                </p>
+              )}
+            </div>
+          )}
 
-        {/* Tab content */}
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-2xl bg-white" />)}
-          </div>
-        ) : (
-          <>
-            {tab === 'overview' && (
-              <div className="space-y-3">
-                {activeProposals.length === 0 && activeContracts.length === 0 && activeInvoices.length === 0 && upcomingMeetings.length === 0 ? (
-                  <EmptyState label="No documents shared yet" />
-                ) : (
-                  <>
-                    {upcomingMeetings.slice(0, 2).map(m => (
-                      <PortalMeetingCard key={m.id} meeting={m} />
-                    ))}
-                    {activeProposals.slice(0, 2).map(p => (
-                      <PortalProposalCard key={p.id} proposal={p} appUrl={APP_URL} onStatusChange={handleProposalStatusChange} />
-                    ))}
-                    {activeContracts.slice(0, 2).map(c => (
-                      <PortalContractCard key={c.id} contract={c} appUrl={APP_URL} onStatusChange={handleContractStatusChange} />
-                    ))}
-                    {activeInvoices.slice(0, 2).map(i => (
-                      <PortalInvoiceCard
-                        key={i.id} invoice={i} appUrl={APP_URL}
-                        portalToken={token!}
-                        clientName={data!.client.name}
-                        clientEmail={data!.client.email}
-                        freelancerName={data!.freelancer.businessName}
-                        onStatusChange={handleInvoiceStatusChange}
-                      />
-                    ))}
-                  </>
-                )}
+          {/* Attention banner */}
+          {!isLoading && attentionItems.length > 0 && tab === 'overview' && (
+            <div className="bg-[#FFFAEB] border border-[#FDE68A] rounded-xl p-4">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle size={14} className="text-[#B45309] mt-0.5 shrink-0" />
+                <div className="space-y-2 w-full">
+                  {attentionItems.map((item, i) => (
+                    <div key={i} className="flex items-start justify-between gap-3">
+                      <p className={cn('text-[12.5px]', item.urgent ? 'text-[#B42318] font-medium' : 'text-[#78350F]')}>
+                        {item.label}
+                      </p>
+                      <button
+                        onClick={() => setTab(item.tab)}
+                        className="text-[11.5px] font-semibold text-[#B45309] hover:underline shrink-0"
+                      >
+                        View →
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {tab === 'proposals' && (
-              <div className="space-y-3">
-                {activeProposals.length === 0 ? <EmptyState label="No proposals yet" /> : activeProposals.map(p => (
-                  <PortalProposalCard key={p.id} proposal={p} appUrl={APP_URL} onStatusChange={handleProposalStatusChange} />
-                ))}
-              </div>
-            )}
+          {/* Tab content */}
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
+            </div>
+          ) : (
+            <>
+              {tab === 'overview' && (
+                <div className="space-y-3">
+                  {activeProposals.length === 0 && activeContracts.length === 0 &&
+                   activeInvoices.length === 0 && upcomingMeetings.length === 0 ? (
+                    <EmptyState label="No documents shared yet" />
+                  ) : (
+                    <>
+                      {upcomingMeetings.slice(0, 2).map(m => <PortalMeetingCard key={m.id} meeting={m} />)}
+                      {activeProposals.slice(0, 2).map(p => (
+                        <PortalProposalCard key={p.id} proposal={p} appUrl={APP_URL} onStatusChange={handleProposalStatusChange} />
+                      ))}
+                      {activeContracts.slice(0, 2).map(c => (
+                        <PortalContractCard key={c.id} contract={c} appUrl={APP_URL} onStatusChange={handleContractStatusChange} />
+                      ))}
+                      {activeInvoices.slice(0, 2).map(i => (
+                        <PortalInvoiceCard
+                          key={i.id} invoice={i} appUrl={APP_URL} portalToken={token!}
+                          clientName={data!.client.name} clientEmail={data!.client.email}
+                          freelancerName={data!.freelancer.businessName}
+                          onStatusChange={handleInvoiceStatusChange}
+                        />
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
 
-            {tab === 'contracts' && (
-              <div className="space-y-3">
-                {activeContracts.length === 0 ? <EmptyState label="No contracts yet" /> : activeContracts.map(c => (
-                  <PortalContractCard key={c.id} contract={c} appUrl={APP_URL} onStatusChange={handleContractStatusChange} />
-                ))}
-              </div>
-            )}
+              {tab === 'proposals' && (
+                <div className="space-y-3">
+                  {activeProposals.length === 0 ? <EmptyState label="No proposals yet" /> : activeProposals.map(p => (
+                    <PortalProposalCard key={p.id} proposal={p} appUrl={APP_URL} onStatusChange={handleProposalStatusChange} />
+                  ))}
+                </div>
+              )}
 
-            {tab === 'invoices' && (
-              <div className="space-y-3">
-                {activeInvoices.length === 0 ? <EmptyState label="No invoices yet" /> : activeInvoices.map(i => (
-                  <PortalInvoiceCard
-                    key={i.id} invoice={i} appUrl={APP_URL}
-                    portalToken={token!}
-                    clientName={data!.client.name}
-                    clientEmail={data!.client.email}
-                    freelancerName={data!.freelancer.businessName}
-                    onStatusChange={handleInvoiceStatusChange}
-                  />
-                ))}
-              </div>
-            )}
+              {tab === 'contracts' && (
+                <div className="space-y-3">
+                  {activeContracts.length === 0 ? <EmptyState label="No contracts yet" /> : activeContracts.map(c => (
+                    <PortalContractCard key={c.id} contract={c} appUrl={APP_URL} onStatusChange={handleContractStatusChange} />
+                  ))}
+                </div>
+              )}
 
-            {tab === 'meetings' && (
-              <div className="space-y-3">
-                {activeMeetings.length === 0
-                  ? <EmptyState label="No meetings scheduled yet" />
-                  : activeMeetings.map(m => <PortalMeetingCard key={m.id} meeting={m} />)
-                }
-              </div>
-            )}
+              {tab === 'invoices' && (
+                <div className="space-y-3">
+                  {activeInvoices.length === 0 ? <EmptyState label="No invoices yet" /> : activeInvoices.map(i => (
+                    <PortalInvoiceCard
+                      key={i.id} invoice={i} appUrl={APP_URL} portalToken={token!}
+                      clientName={data!.client.name} clientEmail={data!.client.email}
+                      freelancerName={data!.freelancer.businessName}
+                      onStatusChange={handleInvoiceStatusChange}
+                    />
+                  ))}
+                </div>
+              )}
 
-            {tab === 'projects' && (
-              <div className="space-y-3">
-                {activeProjects.length === 0
-                  ? <EmptyState label="No projects shared yet" />
-                  : activeProjects.map(p => <PortalProjectCard key={p.id} project={p} />)
-                }
-              </div>
-            )}
-          </>
-        )}
+              {tab === 'meetings' && (
+                <div className="space-y-3">
+                  {activeMeetings.length === 0
+                    ? <EmptyState label="No meetings scheduled yet" />
+                    : activeMeetings.map(m => <PortalMeetingCard key={m.id} meeting={m} />)
+                  }
+                </div>
+              )}
 
-        {/* Footer */}
-        <p className="text-center text-[11px] text-[#C9CDD4] pb-4 flex items-center justify-center gap-1.5">
-          <Shield size={10} /> Secured & powered by Clinekt · 2026
-        </p>
+              {tab === 'projects' && (
+                <div className="space-y-3">
+                  {activeProjects.length === 0
+                    ? <EmptyState label="No projects shared yet" />
+                    : activeProjects.map(p => <PortalProjectCard key={p.id} project={p} />)
+                  }
+                </div>
+              )}
+            </>
+          )}
+        </main>
       </div>
     </div>
   )
 }
 
+// ─── Shared helpers ────────────────────────────────────────────────────────────
+
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#EAECF0] p-10 text-center">
+    <div className="bg-white rounded-xl border border-[#EAECF0] p-10 text-center">
       <p className="text-[13px] text-[#98A2B3]">{label}</p>
     </div>
   )
 }
 
-const PORTAL_PROJECT_STATUS: Record<string, { label: string; className: string }> = {
-  ACTIVE:    { label: 'Active',    className: 'bg-emerald-50 text-emerald-700' },
-  COMPLETED: { label: 'Completed', className: 'bg-blue-50 text-blue-700' },
-  ON_HOLD:   { label: 'On Hold',   className: 'bg-amber-50 text-amber-700' },
-  CANCELLED: { label: 'Cancelled', className: 'bg-gray-100 text-gray-500' },
+const STATUS_BADGE: Record<string, string> = {
+  ACTIVE:    'bg-emerald-50 text-emerald-700',
+  COMPLETED: 'bg-[#EFF6FF] text-[#2563EB]',
+  ON_HOLD:   'bg-[#FFFAEB] text-[#B54708]',
+  CANCELLED: 'bg-[#F2F4F7] text-[#667085]',
 }
 
+// ─── PortalProjectCard ────────────────────────────────────────────────────────
+
 function PortalProjectCard({ project }: { project: PortalProject }) {
+  const [open, setOpen] = useState(false)
+
   const totalMins    = project.timeEntries.reduce((s, e) => s + e.durationMins, 0)
   const totalHours   = totalMins / 60
   const expenseTotal = project.expenses.reduce((s, e) => s + Number(e.amount), 0)
@@ -335,146 +407,160 @@ function PortalProjectCard({ project }: { project: PortalProject }) {
     return s + (e.durationMins / 60) * Number(e.hourlyRate)
   }, 0)
 
-  const statusInfo = PORTAL_PROJECT_STATUS[project.status] ?? PORTAL_PROJECT_STATUS['ACTIVE']
+  const statusBadge = STATUS_BADGE[project.status] ?? STATUS_BADGE['ACTIVE']
 
   return (
-    <div className="bg-white rounded-2xl border border-[#EAECF0] p-4 sm:p-5 space-y-4">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#EEF2FF] flex items-center justify-center shrink-0">
-            <FolderKanban size={16} className="text-[#6366F1]" />
+    <div className="bg-white rounded-xl border border-[#EAECF0]">
+      {/* Header row */}
+      <div className="p-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-[#F4F6FB] border border-[#EAECF0] flex items-center justify-center shrink-0">
+            <FolderKanban size={14} className="text-[#667085]" />
           </div>
-          <div>
-            <p className="text-[14px] font-bold text-[#101828]">{project.name}</p>
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold text-[#101828] truncate">{project.name}</p>
             {(project.startDate || project.endDate) && (
               <p className="text-[11.5px] text-[#98A2B3] mt-0.5 flex items-center gap-1">
                 <CalendarDays size={10} />
-                {project.startDate ? new Date(project.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                {project.startDate
+                  ? new Date(project.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                  : '—'}
                 {' → '}
-                {project.endDate ? new Date(project.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Ongoing'}
+                {project.endDate
+                  ? new Date(project.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                  : 'Ongoing'}
               </p>
             )}
           </div>
         </div>
-        <span className={cn('text-[10.5px] font-bold px-2.5 py-1 rounded-full shrink-0', statusInfo.className)}>
-          {statusInfo.label}
+        <span className={cn('text-[10.5px] font-semibold px-2.5 py-1 rounded-full shrink-0', statusBadge)}>
+          {project.status.charAt(0) + project.status.slice(1).toLowerCase().replace('_', ' ')}
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <div className="flex items-center gap-1.5 bg-[#F4F5F8] rounded-lg px-3 py-1.5">
-          <Clock size={12} className="text-[#6366F1]" />
-          <span className="text-[12px] font-semibold text-[#344054]">{totalHours.toFixed(1)}h logged</span>
-        </div>
+      {/* Summary row */}
+      <div className="px-4 pb-4 flex flex-wrap gap-x-5 gap-y-1.5 border-b border-[#F2F4F7]">
+        <span className="flex items-center gap-1.5 text-[12px] text-[#667085]">
+          <Clock size={12} className="text-[#98A2B3]" />
+          {totalHours.toFixed(1)}h logged
+        </span>
         {billedValue > 0 && (
-          <div className="flex items-center gap-1.5 bg-[#F4F5F8] rounded-lg px-3 py-1.5">
-            <IndianRupee size={12} className="text-[#6366F1]" />
-            <span className="text-[12px] font-semibold text-[#344054]">
-              ₹{billedValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })} time value
-            </span>
-          </div>
+          <span className="flex items-center gap-1.5 text-[12px] text-[#667085]">
+            <IndianRupee size={12} className="text-[#98A2B3]" />
+            ₹{billedValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })} time value
+          </span>
         )}
         {expenseTotal > 0 && (
-          <div className="flex items-center gap-1.5 bg-[#FEF3F2] rounded-lg px-3 py-1.5">
-            <Receipt size={12} className="text-[#D92D20]" />
-            <span className="text-[12px] font-semibold text-[#344054]">
-              ₹{expenseTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })} expenses
-            </span>
-          </div>
+          <span className="flex items-center gap-1.5 text-[12px] text-[#667085]">
+            <Receipt size={12} className="text-[#98A2B3]" />
+            ₹{expenseTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })} expenses
+          </span>
         )}
         {project.budget && (
-          <div className="flex items-center gap-1.5 bg-[#ECFDF3] rounded-lg px-3 py-1.5">
-            <IndianRupee size={12} className="text-[#027A48]" />
-            <span className="text-[12px] font-semibold text-[#344054]">
-              ₹{Number(project.budget).toLocaleString('en-IN', { maximumFractionDigits: 0 })} budget
-            </span>
-          </div>
+          <span className="flex items-center gap-1.5 text-[12px] text-[#667085]">
+            <IndianRupee size={12} className="text-[#98A2B3]" />
+            ₹{Number(project.budget).toLocaleString('en-IN', { maximumFractionDigits: 0 })} budget
+          </span>
         )}
       </div>
 
-      {project.timeEntries.length > 0 && (
-        <div>
-          <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-2">Time Log</p>
-          <div className="space-y-1.5">
-            {project.timeEntries.map(e => (
-              <div key={e.id} className="flex items-center justify-between gap-2 py-1 border-b border-[#F2F4F7] last:border-0">
-                <div className="min-w-0">
-                  <p className="text-[12.5px] text-[#344054] truncate">{e.description || 'Work session'}</p>
-                  <p className="text-[11px] text-[#98A2B3]">
-                    {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0 text-right">
-                  <div>
-                    <p className="text-[12.5px] font-semibold text-[#101828]">{(e.durationMins / 60).toFixed(1)}h</p>
-                    {project.shareRateWithClient && e.hourlyRate && (
-                      <p className="text-[11px] text-[#98A2B3]">₹{Number(e.hourlyRate).toLocaleString('en-IN')}/hr</p>
-                    )}
-                  </div>
-                  {e.isBilled && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#ECFDF3] text-[#027A48]">Billed</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Expand toggle */}
+      {(project.timeEntries.length > 0 || project.expenses.length > 0) && (
+        <>
+          <button
+            onClick={() => setOpen(o => !o)}
+            className="w-full px-4 py-2.5 text-[12px] font-medium text-[#667085] hover:text-[#344054] hover:bg-[#F9FAFB] transition-colors text-left"
+          >
+            {open ? '▲ Hide details' : '▼ Show time & expenses'}
+          </button>
 
-      {project.expenses.length > 0 && (
-        <div>
-          <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-2">Expenses</p>
-          <div className="space-y-1.5">
-            {project.expenses.map(e => (
-              <div key={e.id} className="flex items-center justify-between gap-2 py-1 border-b border-[#F2F4F7] last:border-0">
-                <div className="min-w-0">
-                  <p className="text-[12.5px] text-[#344054] truncate">{e.description}</p>
-                  <p className="text-[11px] text-[#98A2B3]">
-                    {e.category} · {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                  </p>
+          {open && (
+            <div className="px-4 pb-4 space-y-4 border-t border-[#F2F4F7] pt-4">
+              {project.timeEntries.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wider mb-2">Time Log</p>
+                  <div className="space-y-0">
+                    {project.timeEntries.map((e, idx) => (
+                      <div
+                        key={e.id}
+                        className={cn(
+                          'flex items-center justify-between gap-2 py-2',
+                          idx < project.timeEntries.length - 1 && 'border-b border-[#F2F4F7]',
+                        )}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-[12.5px] text-[#344054] truncate">{e.description || 'Work session'}</p>
+                          <p className="text-[11px] text-[#98A2B3]">
+                            {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-[12.5px] font-medium text-[#101828]">{(e.durationMins / 60).toFixed(1)}h</p>
+                          {project.shareRateWithClient && e.hourlyRate && (
+                            <p className="text-[11px] text-[#98A2B3]">₹{Number(e.hourlyRate).toLocaleString('en-IN')}/hr</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <p className="text-[12.5px] font-semibold text-[#101828]">
-                    ₹{Number(e.amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-                  </p>
-                  {e.isBilled && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#ECFDF3] text-[#027A48]">Billed</span>
-                  )}
+              )}
+
+              {project.expenses.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wider mb-2">Expenses</p>
+                  <div className="space-y-0">
+                    {project.expenses.map((e, idx) => (
+                      <div
+                        key={e.id}
+                        className={cn(
+                          'flex items-center justify-between gap-2 py-2',
+                          idx < project.expenses.length - 1 && 'border-b border-[#F2F4F7]',
+                        )}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-[12.5px] text-[#344054] truncate">{e.description}</p>
+                          <p className="text-[11px] text-[#98A2B3]">
+                            {e.category} · {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </p>
+                        </div>
+                        <p className="text-[12.5px] font-medium text-[#101828] shrink-0">
+                          ₹{Number(e.amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   )
 }
 
-function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
-  const date    = new Date(meeting.scheduledAt)
-  const isUpcoming = meeting.status === 'SCHEDULED' && date >= new Date()
+// ─── PortalMeetingCard ────────────────────────────────────────────────────────
 
-  const dateStr = date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
-  const timeStr = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-  const durationLabel = meeting.durationMins >= 60
-    ? `${meeting.durationMins / 60}h`
-    : `${meeting.durationMins}m`
+function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
+  const date       = new Date(meeting.scheduledAt)
+  const isUpcoming = meeting.status === 'SCHEDULED' && date >= new Date()
+  const dateStr    = date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  const timeStr    = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+  const duration   = meeting.durationMins >= 60 ? `${meeting.durationMins / 60}h` : `${meeting.durationMins}m`
 
   return (
-    <div className="bg-white rounded-2xl border border-[#EAECF0] p-4 sm:p-5">
+    <div className="bg-white rounded-xl border border-[#EAECF0] p-4">
       <div className="flex items-start gap-3">
-        <div className={cn(
-          'w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0',
-          isUpcoming ? 'bg-[#EEF2FF]' : 'bg-[#F2F4F7]',
-        )}>
-          <Video size={16} className={isUpcoming ? 'text-[#6366F1]' : 'text-[#98A2B3]'} />
+        <div className="w-8 h-8 rounded-lg bg-[#F4F6FB] border border-[#EAECF0] flex items-center justify-center shrink-0">
+          <Video size={14} className="text-[#667085]" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-[14px] font-semibold text-[#101828] truncate">{meeting.title}</p>
+            <p className="text-[13.5px] font-semibold text-[#101828] truncate">{meeting.title}</p>
             <span className={cn(
-              'text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0',
-              isUpcoming ? 'bg-[#EEF2FF] text-[#4338CA]'
+              'text-[10.5px] font-semibold px-2 py-0.5 rounded-full shrink-0',
+              isUpcoming ? 'bg-[#EFF6FF] text-[#2563EB]'
                 : meeting.status === 'COMPLETED' ? 'bg-[#ECFDF3] text-[#027A48]'
                 : 'bg-[#F2F4F7] text-[#667085]',
             )}>
@@ -485,7 +571,7 @@ function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
             <span className="flex items-center gap-1 text-[12px] text-[#667085]">
               <CalendarDays size={11} /> {dateStr} · {timeStr}
             </span>
-            <span className="text-[11px] text-[#98A2B3] bg-[#F2F4F7] px-2 py-0.5 rounded-full">{durationLabel}</span>
+            <span className="text-[11px] text-[#98A2B3] bg-[#F4F6FB] px-2 py-0.5 rounded-full">{duration}</span>
           </div>
           {meeting.agenda && (
             <p className="text-[12px] text-[#667085] mt-1.5 line-clamp-2">{meeting.agenda}</p>
@@ -495,9 +581,8 @@ function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
       {isUpcoming && meeting.meetLink && (
         <a
           href={meeting.meetLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 flex items-center justify-center gap-1.5 h-9 rounded-xl bg-[#0F172A] text-white text-[12.5px] font-semibold hover:bg-[#1e293b] transition-colors"
+          target="_blank" rel="noopener noreferrer"
+          className="mt-3 flex items-center justify-center gap-1.5 h-9 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[12.5px] font-semibold transition-colors"
         >
           <Video size={13} /> Join Meeting <ExternalLink size={11} />
         </a>
