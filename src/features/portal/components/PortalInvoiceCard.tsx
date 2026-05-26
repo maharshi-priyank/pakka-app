@@ -106,34 +106,29 @@ export default function PortalInvoiceCard({
           </div>
         </div>
 
-        {/* Amount */}
-        <p className={cn('text-[24px] font-bold', isOverdue ? 'text-[#D92D20]' : 'text-[#101828]')}>
-          ₹{fmt(invoice.total)}
-        </p>
-
-        {/* Pay Now */}
-        {isPayable && (
-          <div className="mt-4 space-y-2">
+        {/* Amount row + Pay Now inline */}
+        <div className="flex items-center justify-between gap-3 mt-1">
+          <p className={cn('text-[22px] font-bold leading-none', isOverdue ? 'text-[#D92D20]' : 'text-[#101828]')}>
+            ₹{fmt(invoice.total)}
+          </p>
+          {isPayable && (
             <button
               onClick={handlePayNow}
               disabled={createOrder.isPending}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13.5px] font-semibold transition-colors disabled:opacity-60"
+              className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13px] font-semibold transition-colors disabled:opacity-60"
             >
-              <CreditCard size={14} strokeWidth={2} />
-              {createOrder.isPending ? 'Opening payment…' : 'Pay Now'}
+              <CreditCard size={13} strokeWidth={2} />
+              {createOrder.isPending ? 'Opening…' : 'Pay Now'}
             </button>
-            {payError && <p className="text-[11.5px] text-center text-[#D92D20]">{payError}</p>}
-          </div>
-        )}
-
-        {localStatus === 'PAID' && (
-          <div className="mt-3 flex items-center gap-2 py-2.5 px-3 rounded-lg bg-[#ECFDF3]">
-            <CheckCircle2 size={14} className="text-[#027A48]" />
-            <p className="text-[12.5px] font-semibold text-[#027A48]">
-              Paid{invoice.paidAt ? ` on ${new Date(invoice.paidAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
-            </p>
-          </div>
-        )}
+          )}
+          {localStatus === 'PAID' && (
+            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-[#027A48]">
+              <CheckCircle2 size={13} />
+              Paid{invoice.paidAt ? ` · ${new Date(invoice.paidAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
+            </div>
+          )}
+        </div>
+        {payError && <p className="text-[11.5px] text-[#D92D20] mt-2">{payError}</p>}
       </div>
     </div>
   )

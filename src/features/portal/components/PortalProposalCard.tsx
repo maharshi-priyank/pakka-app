@@ -85,73 +85,71 @@ export default function PortalProposalCard({ proposal, appUrl, onStatusChange }:
           </div>
         </div>
 
-        {/* Amount */}
-        <p className="text-[24px] font-bold text-[#101828]">₹{fmt(total)}</p>
+        {/* Amount row + Accept/Decline inline */}
+        <div className="flex items-center justify-between gap-3 mt-1">
+          <p className="text-[22px] font-bold text-[#101828] leading-none">₹{fmt(total)}</p>
+          {canAct && confirm === null && (
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setConfirm('accept')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13px] font-semibold transition-colors"
+              >
+                <CheckCircle2 size={13} strokeWidth={2} /> Accept
+              </button>
+              <button
+                onClick={() => setConfirm('decline')}
+                className="px-3 py-2 rounded-lg text-[12.5px] font-medium text-[#98A2B3] hover:text-[#667085] transition-colors"
+              >
+                Decline
+              </button>
+            </div>
+          )}
+          {localStatus === 'ACCEPTED' && (
+            <div className="flex items-center gap-1.5 text-[12px] font-semibold text-[#027A48]">
+              <CheckCircle2 size={13} /> Accepted
+            </div>
+          )}
+        </div>
 
-        {/* Action area */}
-        {canAct && (
-          <div className="mt-4 space-y-2">
-            {confirm === null ? (
-              <>
-                <button
-                  onClick={() => setConfirm('accept')}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13.5px] font-semibold transition-colors"
-                >
-                  <CheckCircle2 size={14} strokeWidth={2} /> Accept Proposal
-                </button>
-                <button
-                  onClick={() => setConfirm('decline')}
-                  className="w-full flex items-center justify-center py-2 rounded-lg text-[12.5px] font-medium text-[#98A2B3] hover:text-[#667085] transition-colors"
-                >
-                  Decline
-                </button>
-              </>
-            ) : confirm === 'accept' ? (
-              <div className="rounded-lg bg-[#F9FAFB] border border-[#EAECF0] p-3.5 space-y-3">
-                <p className="text-[12.5px] font-semibold text-[#101828]">Accept this proposal for ₹{fmt(total)}?</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleAccept}
-                    disabled={accept.isPending}
-                    className="flex-1 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[12.5px] font-semibold transition-colors disabled:opacity-60"
-                  >
-                    {accept.isPending ? 'Accepting…' : 'Yes, accept'}
-                  </button>
-                  <button
-                    onClick={() => setConfirm(null)}
-                    className="px-4 py-2 rounded-lg border border-[#EAECF0] text-[12.5px] text-[#667085] hover:text-[#344054] font-medium bg-white transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-lg bg-[#F9FAFB] border border-[#EAECF0] p-3.5 space-y-3">
-                <p className="text-[12.5px] font-semibold text-[#344054]">Decline this proposal?</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleDecline}
-                    disabled={decline.isPending}
-                    className="flex-1 py-2 rounded-lg bg-[#D92D20] hover:bg-[#B42318] text-white text-[12.5px] font-semibold transition-colors disabled:opacity-60"
-                  >
-                    {decline.isPending ? 'Declining…' : 'Yes, decline'}
-                  </button>
-                  <button
-                    onClick={() => setConfirm(null)}
-                    className="px-4 py-2 rounded-lg border border-[#EAECF0] text-[12.5px] text-[#667085] hover:text-[#344054] font-medium bg-white transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
+        {/* Confirmation panels */}
+        {confirm === 'accept' && (
+          <div className="mt-3 rounded-lg bg-[#F9FAFB] border border-[#EAECF0] p-3.5 space-y-3">
+            <p className="text-[12.5px] font-semibold text-[#101828]">Accept this proposal for ₹{fmt(total)}?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleAccept}
+                disabled={accept.isPending}
+                className="flex-1 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[12.5px] font-semibold transition-colors disabled:opacity-60"
+              >
+                {accept.isPending ? 'Accepting…' : 'Yes, accept'}
+              </button>
+              <button
+                onClick={() => setConfirm(null)}
+                className="px-4 py-2 rounded-lg border border-[#EAECF0] text-[12.5px] text-[#667085] hover:text-[#344054] font-medium bg-white transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
-
-        {localStatus === 'ACCEPTED' && (
-          <div className="mt-3 flex items-center gap-2 py-2.5 px-3 rounded-lg bg-[#ECFDF3]">
-            <CheckCircle2 size={14} className="text-[#027A48]" />
-            <p className="text-[12.5px] font-semibold text-[#027A48]">You accepted this proposal</p>
+        {confirm === 'decline' && (
+          <div className="mt-3 rounded-lg bg-[#F9FAFB] border border-[#EAECF0] p-3.5 space-y-3">
+            <p className="text-[12.5px] font-semibold text-[#344054]">Decline this proposal?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleDecline}
+                disabled={decline.isPending}
+                className="flex-1 py-2 rounded-lg bg-[#D92D20] hover:bg-[#B42318] text-white text-[12.5px] font-semibold transition-colors disabled:opacity-60"
+              >
+                {decline.isPending ? 'Declining…' : 'Yes, decline'}
+              </button>
+              <button
+                onClick={() => setConfirm(null)}
+                className="px-4 py-2 rounded-lg border border-[#EAECF0] text-[12.5px] text-[#667085] hover:text-[#344054] font-medium bg-white transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
       </div>

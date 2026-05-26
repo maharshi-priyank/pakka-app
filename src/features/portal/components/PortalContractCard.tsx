@@ -113,14 +113,16 @@ export default function PortalContractCard({ contract, appUrl, onStatusChange }:
           </div>
         </div>
 
-        {/* Sign Contract button */}
+        {/* Sign Contract — right-aligned */}
         {localStatus === 'SENT' && !showOtp && (
-          <button
-            onClick={openOtp}
-            className="mt-1 w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13.5px] font-semibold transition-colors"
-          >
-            <PenLine size={14} strokeWidth={2.5} /> Sign Contract
-          </button>
+          <div className="flex justify-end mt-2">
+            <button
+              onClick={openOtp}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13px] font-semibold transition-colors"
+            >
+              <PenLine size={13} strokeWidth={2.5} /> Sign Contract
+            </button>
+          </div>
         )}
 
         {/* OTP entry */}
