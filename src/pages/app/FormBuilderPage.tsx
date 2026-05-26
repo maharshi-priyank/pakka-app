@@ -11,7 +11,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { nanoid } from 'nanoid'
 import {
   ArrowLeft, Copy, CheckCheck, GripVertical, Trash2, Plus,
-  Loader2, ChevronDown, ChevronUp, Check, Zap,
+  Loader2, ChevronDown, ChevronUp, Check, Zap, Code2, X,
 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { useForm, useUpdateForm, type FormField, type FormSubmission } from '@/features/forms/hooks/useForms'
@@ -276,6 +276,8 @@ export default function FormBuilderPage() {
   const [autoCreateLead,  setAutoCreateLead]  = useState(false)
   const [leadFieldMap,    setLeadFieldMap]    = useState<Record<string, string>>({})
   const [copied,          setCopied]          = useState(false)
+  const [embedCopied,     setEmbedCopied]     = useState(false)
+  const [showEmbed,       setShowEmbed]       = useState(false)
   const [saved,           setSaved]           = useState(false)
 
   useEffect(() => {
@@ -329,11 +331,22 @@ export default function FormBuilderPage() {
 
   const shareUrl = form ? `${window.location.origin}/q/${form.token}` : ''
 
+  const embedCode = form
+    ? `<iframe\n  src="${shareUrl}"\n  width="100%"\n  height="640"\n  style="border:none;border-radius:12px;"\n  title="${title || form.title}"\n></iframe>`
+    : ''
+
   function copyLink() {
     if (!shareUrl) return
     navigator.clipboard.writeText(shareUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  function copyEmbed() {
+    if (!embedCode) return
+    navigator.clipboard.writeText(embedCode)
+    setEmbedCopied(true)
+    setTimeout(() => setEmbedCopied(false), 2000)
   }
 
   return (
@@ -375,6 +388,12 @@ export default function FormBuilderPage() {
                 className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
               >
                 {copied ? <><CheckCheck size={13} /> Copied!</> : <><Copy size={13} /> Share link</>}
+              </button>
+              <button
+                onClick={() => setShowEmbed(true)}
+                className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
+              >
+                <Code2 size={13} /> Embed
               </button>
               <button
                 onClick={handleSave}
@@ -529,6 +548,58 @@ export default function FormBuilderPage() {
         </>
       ) : (
         <p className="text-[14px] text-[#98A2B3]">Form not found.</p>
+      )}
+
+      {/* Embed modal */}
+      {showEmbed && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowEmbed(false)} />
+          <div className="relative bg-white dark:bg-[#13141A] rounded-2xl shadow-2xl dark:shadow-black/60 w-full max-w-[540px] p-6 space-y-4">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Embed on your website</p>
+                <p className="text-[12.5px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Paste this snippet in your HTML where you want the form to appear.</p>
+              </div>
+              <button
+                onClick={() => setShowEmbed(false)}
+                className="text-[#98A2B3] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors mt-0.5"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Code block */}
+            <div className="relative group">
+              <pre className="bg-[#F4F6FB] dark:bg-[#0D0E14] border border-[#E4E7EC] dark:border-[#26283A] rounded-xl px-4 py-3.5 text-[12px] font-mono text-[#344054] dark:text-[#C2C8D8] whitespace-pre overflow-x-auto leading-relaxed">
+                {embedCode}
+              </pre>
+              <button
+                onClick={copyEmbed}
+                className="absolute top-2.5 right-2.5 flex items-center gap-1.5 h-7 px-2.5 rounded-lg bg-white dark:bg-[#21222D] border border-[#E4E7EC] dark:border-[#26283A] text-[11.5px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#2A2B38] transition-colors shadow-sm"
+              >
+                {embedCopied ? <><CheckCheck size={11} className="text-[#027A48]" /> Copied!</> : <><Copy size={11} /> Copy</>}
+              </button>
+            </div>
+
+            {/* Tips */}
+            <div className="space-y-1.5">
+              <p className="text-[11.5px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Tips</p>
+              <ul className="space-y-1">
+                {[
+                  'Change height to fit your form — typically 500–800px.',
+                  'Add allow-forms to a sandbox attribute if your site uses Content Security Policy.',
+                  'Works on any website: plain HTML, WordPress, Webflow, Framer, Wix.',
+                ].map(tip => (
+                  <li key={tip} className="flex items-start gap-2 text-[12px] text-[#667085] dark:text-[#8B92A8]">
+                    <span className="mt-1.5 w-1 h-1 rounded-full bg-[#D0D5DD] dark:bg-[#3D4258] shrink-0" />
+                    {tip}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
