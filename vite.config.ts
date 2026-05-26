@@ -17,8 +17,8 @@ export default defineConfig({
         short_name: 'Clinekt',
         description:
           'Run your entire freelance business on one platform. GST invoices, e-signed contracts, UPI payments, WhatsApp reminders — all in one place.',
-        theme_color: '#101828',
-        background_color: '#F4F6FB',
+        theme_color: '#000000',
+        background_color: '#000000',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
