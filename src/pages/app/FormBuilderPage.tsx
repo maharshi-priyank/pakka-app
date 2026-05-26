@@ -11,10 +11,20 @@ import { CSS } from '@dnd-kit/utilities'
 import { nanoid } from 'nanoid'
 import {
   ArrowLeft, Copy, CheckCheck, GripVertical, Trash2, Plus,
-  Loader2, ChevronDown, ChevronUp, Check,
+  Loader2, ChevronDown, ChevronUp, Check, Zap,
 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { useForm, useUpdateForm, type FormField, type FormSubmission } from '@/features/forms/hooks/useForms'
+
+const LEAD_FIELDS = [
+  { key: 'name',    label: 'Name *' },
+  { key: 'email',   label: 'Email' },
+  { key: 'phone',   label: 'Phone' },
+  { key: 'company', label: 'Company' },
+  { key: 'service', label: 'Service' },
+  { key: 'budget',  label: 'Budget' },
+  { key: 'notes',   label: 'Notes' },
+]
 
 type FieldType = FormField['type']
 const FIELD_TYPES: { type: FieldType; label: string }[] = [
@@ -259,18 +269,22 @@ export default function FormBuilderPage() {
   const { data: form, isLoading } = useForm(id!)
   const { mutateAsync: updateForm, isPending: saving } = useUpdateForm()
 
-  const [activeTab, setActiveTab] = useState<'builder' | 'responses'>('builder')
-  const [title,     setTitle]     = useState('')
-  const [desc,      setDesc]      = useState('')
-  const [fields,    setFields]    = useState<FormField[]>([])
-  const [copied,    setCopied]    = useState(false)
-  const [saved,     setSaved]     = useState(false)
+  const [activeTab,       setActiveTab]       = useState<'builder' | 'responses'>('builder')
+  const [title,           setTitle]           = useState('')
+  const [desc,            setDesc]            = useState('')
+  const [fields,          setFields]          = useState<FormField[]>([])
+  const [autoCreateLead,  setAutoCreateLead]  = useState(false)
+  const [leadFieldMap,    setLeadFieldMap]    = useState<Record<string, string>>({})
+  const [copied,          setCopied]          = useState(false)
+  const [saved,           setSaved]           = useState(false)
 
   useEffect(() => {
     if (form) {
       setTitle(form.title)
       setDesc(form.description ?? '')
       setFields(form.fields)
+      setAutoCreateLead(form.autoCreateLead)
+      setLeadFieldMap(form.leadFieldMap ?? {})
     }
   }, [form])
 
@@ -308,7 +322,7 @@ export default function FormBuilderPage() {
 
   async function handleSave() {
     if (!id) return
-    await updateForm({ id, title, description: desc || undefined, fields })
+    await updateForm({ id, title, description: desc || undefined, fields, autoCreateLead, leadFieldMap })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -432,6 +446,71 @@ export default function FormBuilderPage() {
               )}
 
               <AddFieldMenu onAdd={addField} />
+
+              {/* Lead automation */}
+              <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] p-5 mt-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center shrink-0">
+                      <Zap size={14} className="text-[#6366F1] dark:text-[#818CF8]" />
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Auto-create lead</p>
+                      <p className="text-[11.5px] text-[#667085] dark:text-[#8B92A8]">Add a lead to your CRM on every submission</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={autoCreateLead}
+                    onClick={() => setAutoCreateLead(v => !v)}
+                    className={cn(
+                      'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                      autoCreateLead ? 'bg-[#6366F1]' : 'bg-[#D0D5DD] dark:bg-[#3D4258]',
+                    )}
+                  >
+                    <span className={cn(
+                      'inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
+                      autoCreateLead ? 'translate-x-4' : 'translate-x-0',
+                    )} />
+                  </button>
+                </div>
+
+                {autoCreateLead && (
+                  <div className="mt-4 space-y-2.5 border-t border-[#F2F4F7] dark:border-[#26283A] pt-4">
+                    <p className="text-[11.5px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide mb-3">
+                      Map form fields → lead fields
+                    </p>
+                    {LEAD_FIELDS.map(lf => (
+                      <div key={lf.key} className="flex items-center gap-3">
+                        <span className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] w-20 shrink-0">{lf.label}</span>
+                        <select
+                          value={leadFieldMap[lf.key] ?? ''}
+                          onChange={e => setLeadFieldMap(prev => {
+                            const next = { ...prev }
+                            if (e.target.value) next[lf.key] = e.target.value
+                            else delete next[lf.key]
+                            return next
+                          })}
+                          className="form-input text-[12.5px] py-1 h-8 flex-1"
+                        >
+                          <option value="">— not mapped —</option>
+                          {fields.map(f => (
+                            <option key={f.id} value={f.id}>
+                              {f.label || `Unnamed ${f.type} field`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                    {!leadFieldMap['name'] && (
+                      <p className="text-[11.5px] text-amber-600 dark:text-amber-400 mt-2">
+                        Map at least "Name" so leads have a name.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <ResponsesTab submissions={form.submissions} fields={form.fields} />

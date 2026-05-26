@@ -11,15 +11,17 @@ export interface FormField {
 }
 
 export interface IntakeForm {
-  id:          string
-  title:       string
-  description: string | null
-  token:       string
-  fields:      FormField[]
-  isActive:    boolean
-  createdAt:   string
-  updatedAt:   string
-  _count?:     { submissions: number }
+  id:             string
+  title:          string
+  description:    string | null
+  token:          string
+  fields:         FormField[]
+  isActive:       boolean
+  autoCreateLead: boolean
+  leadFieldMap:   Record<string, string>
+  createdAt:      string
+  updatedAt:      string
+  _count?:        { submissions: number }
 }
 
 export interface FormSubmission {
@@ -74,7 +76,7 @@ export function useCreateForm() {
 export function useUpdateForm() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, ...payload }: Partial<IntakeForm> & { id: string }) => {
+    mutationFn: async ({ id, ...payload }: Partial<IntakeForm> & { id: string; leadFieldMap?: Record<string, string> }) => {
       const { data } = await api.patch<{ data: IntakeForm }>(`/forms/${id}`, payload)
       return data.data
     },
