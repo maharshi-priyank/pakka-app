@@ -477,36 +477,47 @@ export default function FormBuilderPage() {
                 </div>
 
                 {autoCreateLead && (
-                  <div className="mt-4 space-y-2.5 border-t border-[#F2F4F7] dark:border-[#26283A] pt-4">
-                    <p className="text-[11.5px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide mb-3">
-                      Map form fields → lead fields
-                    </p>
-                    {LEAD_FIELDS.map(lf => (
-                      <div key={lf.key} className="flex items-center gap-3">
-                        <span className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] w-20 shrink-0">{lf.label}</span>
-                        <select
-                          value={leadFieldMap[lf.key] ?? ''}
-                          onChange={e => setLeadFieldMap(prev => {
-                            const next = { ...prev }
-                            if (e.target.value) next[lf.key] = e.target.value
-                            else delete next[lf.key]
-                            return next
-                          })}
-                          className="form-input text-[12.5px] py-1 h-8 flex-1"
-                        >
-                          <option value="">— not mapped —</option>
-                          {fields.map(f => (
-                            <option key={f.id} value={f.id}>
-                              {f.label || `Unnamed ${f.type} field`}
-                            </option>
-                          ))}
-                        </select>
+                  <div className="mt-4 border-t border-[#F2F4F7] dark:border-[#26283A] pt-4">
+                    {fields.length === 0 ? (
+                      <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40">
+                        <Zap size={14} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                        <p className="text-[12px] text-amber-700 dark:text-amber-400 leading-snug">
+                          Add form fields above first, then map them to lead fields here.
+                        </p>
                       </div>
-                    ))}
-                    {!leadFieldMap['name'] && (
-                      <p className="text-[11.5px] text-amber-600 dark:text-amber-400 mt-2">
-                        Map at least "Name" so leads have a name.
-                      </p>
+                    ) : (
+                      <div className="space-y-2.5">
+                        <p className="text-[11.5px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide mb-3">
+                          Map form fields → lead fields
+                        </p>
+                        {LEAD_FIELDS.map(lf => (
+                          <div key={lf.key} className="flex items-center gap-3">
+                            <span className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] w-20 shrink-0">{lf.label}</span>
+                            <select
+                              value={leadFieldMap[lf.key] ?? ''}
+                              onChange={e => setLeadFieldMap(prev => {
+                                const next = { ...prev }
+                                if (e.target.value) next[lf.key] = e.target.value
+                                else delete next[lf.key]
+                                return next
+                              })}
+                              className="form-input text-[12.5px] py-1 h-8 flex-1"
+                            >
+                              <option value="">— not mapped —</option>
+                              {fields.map(f => (
+                                <option key={f.id} value={f.id}>
+                                  {f.label || `Unnamed ${f.type} field`}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        ))}
+                        {!leadFieldMap['name'] && (
+                          <p className="text-[11.5px] text-amber-600 dark:text-amber-400 mt-2">
+                            Map at least "Name" so leads have a name.
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
