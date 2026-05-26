@@ -200,7 +200,7 @@ export default function ExpensesPage() {
             {editExpense ? 'Edit expense' : 'Log expense'}
           </h3>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="form-label">Category *</label>
                 <select {...register('category')} className="form-input w-full">
@@ -228,7 +228,7 @@ export default function ExpensesPage() {
               <input {...register('description')} className="form-input w-full" placeholder="e.g. Cab to client site" />
               {errors.description && <p className="form-error">{errors.description.message}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="form-label">Amount (₹) *</label>
                 <input {...register('amount', { valueAsNumber: true })} type="number" min="0" step="0.01" className="form-input w-full" />

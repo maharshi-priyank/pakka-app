@@ -33,7 +33,7 @@ export default function ProposalEditorPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-60px)] max-w-full -mx-6 -my-6">
+    <div className="flex flex-col h-[calc(100vh-60px)] max-h-[calc(100vh-136px)] lg:max-h-none max-w-full -mx-4 -my-4 lg:-mx-6 lg:-my-6">
       {/* Breadcrumb bar */}
       <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] shrink-0">
         <button

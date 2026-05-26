@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, Receipt, MoreHorizontal,
   PenLine, Building2, Settings, LogOut, X,
+  FolderKanban, Clock, Wallet, BarChart3, CalendarDays, ClipboardList, Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
@@ -10,14 +11,21 @@ import { supabase } from '@/lib/supabase'
 const PRIMARY_TABS = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/app/dashboard' },
   { icon: Users,           label: 'Leads',     href: '/app/leads' },
-  { icon: FileText,        label: 'Proposals',  href: '/app/proposals' },
-  { icon: Receipt,         label: 'Invoices',   href: '/app/invoices' },
+  { icon: FileText,        label: 'Proposals', href: '/app/proposals' },
+  { icon: Receipt,         label: 'Invoices',  href: '/app/invoices' },
 ]
 
 const MORE_ITEMS = [
-  { icon: PenLine,   label: 'Contracts', href: '/app/contracts' },
-  { icon: Building2, label: 'Clients',   href: '/app/clients' },
-  { icon: Settings,  label: 'Settings',  href: '/app/settings' },
+  { icon: PenLine,       label: 'Contracts',   href: '/app/contracts' },
+  { icon: Building2,     label: 'Clients',     href: '/app/clients' },
+  { icon: FolderKanban,  label: 'Projects',    href: '/app/projects' },
+  { icon: Clock,         label: 'Time',        href: '/app/time' },
+  { icon: Wallet,        label: 'Expenses',    href: '/app/expenses' },
+  { icon: BarChart3,     label: 'Reports',     href: '/app/reports' },
+  { icon: CalendarDays,  label: 'Meetings',    href: '/app/meetings' },
+  { icon: ClipboardList, label: 'Forms',       href: '/app/forms' },
+  { icon: Zap,           label: 'Automations', href: '/app/automations' },
+  { icon: Settings,      label: 'Settings',    href: '/app/settings' },
 ]
 
 export default function BottomNav() {
@@ -110,17 +118,17 @@ export default function BottomNav() {
             </div>
 
             <div className="px-4 pb-2">
-              <div className="space-y-0.5">
+              <div className="grid grid-cols-2 gap-1.5">
                 {MORE_ITEMS.map(({ icon: Icon, label, href }) => (
                   <button
                     key={href}
                     onClick={() => goTo(href)}
-                    className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors text-left"
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors text-left"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-[#F4F5F8] dark:bg-[#21222D] flex items-center justify-center shrink-0">
-                      <Icon size={17} className="text-[#344054] dark:text-[#C2C8D8]" strokeWidth={2} />
+                    <div className="w-8 h-8 rounded-xl bg-[#F4F5F8] dark:bg-[#21222D] flex items-center justify-center shrink-0">
+                      <Icon size={16} className="text-[#344054] dark:text-[#C2C8D8]" strokeWidth={2} />
                     </div>
-                    <span className="text-[14px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{label}</span>
+                    <span className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{label}</span>
                   </button>
                 ))}
               </div>
@@ -129,12 +137,12 @@ export default function BottomNav() {
 
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-left"
+                className="w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-left"
               >
-                <div className="w-9 h-9 rounded-xl bg-[#FEF3F2] dark:bg-red-950/40 flex items-center justify-center shrink-0">
-                  <LogOut size={17} className="text-[#D92D20] dark:text-red-400" strokeWidth={2} />
+                <div className="w-8 h-8 rounded-xl bg-[#FEF3F2] dark:bg-red-950/40 flex items-center justify-center shrink-0">
+                  <LogOut size={16} className="text-[#D92D20] dark:text-red-400" strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-semibold text-[#D92D20] dark:text-red-400">Sign out</span>
+                <span className="text-[13px] font-semibold text-[#D92D20] dark:text-red-400">Sign out</span>
               </button>
             </div>
           </div>

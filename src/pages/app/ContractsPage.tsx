@@ -172,8 +172,8 @@ export default function ContractsPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2.5">
-        <div className="relative flex-1 max-w-xs">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[160px] max-w-xs">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3] dark:text-[#545C74] pointer-events-none" />
           <input
             ref={searchRef}

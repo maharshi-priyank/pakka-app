@@ -30,21 +30,21 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
   const contact  = meeting.client?.name ?? meeting.lead?.name ?? null
 
   return (
-    <div className="flex items-center gap-4 px-5 py-4 hover:bg-[#FAFBFF] dark:hover:bg-[#1A1B23] transition-colors">
-      <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] dark:bg-blue-950/40 flex items-center justify-center shrink-0">
-        <CalendarDays size={16} className="text-[#2563EB] dark:text-[#60A5FA]" />
+    <div className="flex items-start gap-3 px-4 sm:px-5 py-3.5 hover:bg-[#FAFBFF] dark:hover:bg-[#1A1B23] transition-colors">
+      <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] dark:bg-blue-950/40 flex items-center justify-center shrink-0 mt-0.5">
+        <CalendarDays size={15} className="text-[#2563EB] dark:text-[#60A5FA]" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">{meeting.title}</p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <p className="text-[13.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">{meeting.title}</p>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
           <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">{formatDateTime(meeting.scheduledAt)}</p>
           {contact && (
-            <><span className="text-[#D0D5DD] dark:text-[#3D4258]">·</span><p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] truncate">{contact}</p></>
+            <><span className="text-[#D0D5DD] dark:text-[#3D4258]">·</span><p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] truncate max-w-[120px]">{contact}</p></>
           )}
           <><span className="text-[#D0D5DD] dark:text-[#3D4258]">·</span><p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">{meeting.durationMins} min</p></>
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0">
         <span className={cn('text-[11px] font-semibold px-2.5 py-0.5 rounded-full', STATUS_COLORS[meeting.status])}>
           {meeting.status.charAt(0) + meeting.status.slice(1).toLowerCase()}
         </span>
@@ -53,9 +53,9 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
             href={meeting.meetLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399] text-[11px] font-semibold hover:bg-[#D1FAE5] dark:hover:bg-emerald-900/40 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399] text-[11px] font-semibold hover:bg-[#D1FAE5] dark:hover:bg-emerald-900/40 transition-colors"
           >
-            <Video size={10} /> Join <ExternalLink size={9} />
+            <Video size={10} /> <span className="hidden sm:inline">Join</span> <ExternalLink size={9} />
           </a>
         )}
         {meeting.status === 'SCHEDULED' && (
@@ -92,7 +92,7 @@ export default function MeetingsPage() {
 
   return (
     <div className="max-w-[860px] space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Meetings</h1>
           <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Schedule and manage your calls with leads and clients.</p>

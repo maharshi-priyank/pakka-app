@@ -132,7 +132,7 @@ export default function LeadsPage() {
     <div className="space-y-4 max-w-[1400px]">
 
       {/* Page header */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-[17px] font-bold text-[#0D1117] dark:text-[#ECEEF3] tracking-tight">Leads</h1>
           {pipelineValue !== null && pipelineValue > 0 && (
@@ -166,7 +166,7 @@ export default function LeadsPage() {
       {/* Toolbar */}
       <div className="flex items-center gap-2 flex-wrap">
         {/* Search */}
-        <div className="relative">
+        <div className="relative flex-1 min-w-[160px] max-w-xs">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3] dark:text-[#545C74] pointer-events-none" />
           <input
             ref={searchRef}
@@ -176,7 +176,7 @@ export default function LeadsPage() {
             className={cn(
               'h-8 pl-8 pr-7 text-[12.5px] bg-white dark:bg-[#13141A] text-[#101828] dark:text-[#ECEEF3]',
               'border border-[#E4E7EC] dark:border-[#26283A] rounded-lg outline-none',
-              'focus:border-[#2563EB] transition-colors w-[180px]',
+              'focus:border-[#2563EB] transition-colors w-full',
               'placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]',
             )}
           />

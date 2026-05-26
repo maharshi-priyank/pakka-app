@@ -393,7 +393,7 @@ export default function TimePage() {
                 {errors.date && <p className="form-error">{errors.date.message}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div>
                 <label className="form-label">Hours</label>
                 <input {...register('hours', { valueAsNumber: true })} type="number" min="0" max="24" step="0.5" className="form-input w-full" />
@@ -403,7 +403,7 @@ export default function TimePage() {
                 <label className="form-label">Minutes</label>
                 <input {...register('minutes', { valueAsNumber: true })} type="number" min="0" max="59" step="15" className="form-input w-full" />
               </div>
-              <div>
+              <div className="col-span-2 sm:col-span-1">
                 <label className="form-label">Rate / hr (₹)</label>
                 <input {...register('hourlyRate', { valueAsNumber: true })} type="number" min="0" placeholder="Optional" className="form-input w-full" />
               </div>
@@ -432,7 +432,7 @@ export default function TimePage() {
 
       {/* ── Timesheet ── */}
       <div className="bg-white dark:bg-[#1A1B23] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A] flex items-center justify-between gap-4">
+        <div className="px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A] flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Timesheet</p>
             {totalMins > 0 && (
@@ -448,10 +448,10 @@ export default function TimePage() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="form-input text-[12px] w-[130px]" />
+          <div className="flex items-center gap-2 shrink-0">
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="form-input text-[12px] w-[130px] sm:w-[130px]" />
             <span className="text-[#D0D5DD] text-[12px]">–</span>
-            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="form-input text-[12px] w-[130px]" />
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="form-input text-[12px] w-[130px] sm:w-[130px]" />
           </div>
         </div>
 

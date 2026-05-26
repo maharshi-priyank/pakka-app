@@ -8,14 +8,20 @@ import CalendarBell     from '@/features/meetings/components/CalendarBell'
 import { useThemeToggle } from '@/hooks/useThemeToggle'
 
 const PAGE_TITLES: Record<string, { title: string; sub: string }> = {
-  '/app/dashboard': { title: 'Dashboard',  sub: 'Welcome back' },
-  '/app/leads':     { title: 'Leads',      sub: 'Manage your pipeline' },
-  '/app/proposals': { title: 'Proposals',  sub: 'Track and send proposals' },
-  '/app/contracts': { title: 'Contracts',  sub: 'E-sign and manage contracts' },
-  '/app/invoices':  { title: 'Invoices',   sub: 'Billing and payments' },
-  '/app/clients':   { title: 'Clients',    sub: 'Your client roster' },
-  '/app/meetings':  { title: 'Meetings',   sub: 'Scheduled calls & events' },
-  '/app/settings':  { title: 'Settings',   sub: 'Account and preferences' },
+  '/app/dashboard':  { title: 'Dashboard',   sub: 'Welcome back' },
+  '/app/leads':      { title: 'Leads',       sub: 'Manage your pipeline' },
+  '/app/proposals':  { title: 'Proposals',   sub: 'Track and send proposals' },
+  '/app/contracts':  { title: 'Contracts',   sub: 'E-sign and manage contracts' },
+  '/app/invoices':   { title: 'Invoices',    sub: 'Billing and payments' },
+  '/app/clients':    { title: 'Clients',     sub: 'Your client roster' },
+  '/app/projects':   { title: 'Projects',    sub: 'Track engagements' },
+  '/app/time':       { title: 'Time',        sub: 'Log and bill your hours' },
+  '/app/expenses':   { title: 'Expenses',    sub: 'Track business costs' },
+  '/app/reports':    { title: 'Reports',     sub: 'Business insights' },
+  '/app/meetings':   { title: 'Meetings',    sub: 'Scheduled calls & events' },
+  '/app/forms':      { title: 'Forms',       sub: 'Collect client info' },
+  '/app/automations':{ title: 'Automations', sub: 'Rules and workflows' },
+  '/app/settings':   { title: 'Settings',    sub: 'Account and preferences' },
 }
 
 interface Props {
@@ -27,7 +33,8 @@ export default function Topbar({ onMenuToggle }: Props) {
   const { pathname } = useLocation()
   const { isDark, toggle } = useThemeToggle()
 
-  const page     = PAGE_TITLES[pathname] ?? { title: 'Clinekt', sub: '' }
+  const pageKey  = Object.keys(PAGE_TITLES).find(k => pathname === k || pathname.startsWith(k + '/'))
+  const page     = pageKey ? PAGE_TITLES[pageKey] : { title: 'Clinekt', sub: '' }
   const name     = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
   const initials = generateInitials(name)
   const firstName = name.split(' ')[0]
@@ -40,10 +47,10 @@ export default function Topbar({ onMenuToggle }: Props) {
     <header className="h-[56px] lg:h-[60px] bg-white dark:bg-[#13141A] border-b border-[#EAECF0] dark:border-[#26283A] flex items-center justify-between px-4 lg:px-6 shrink-0 transition-colors">
 
       <div className="flex items-center gap-3">
-        {/* Hamburger — mobile only */}
+        {/* Hamburger — hidden on mobile (BottomNav handles nav), hidden on desktop (sidebar always visible) */}
         <button
           onClick={onMenuToggle}
-          className="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#1A1B23] transition-colors"
+          className="hidden w-8 h-8 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#1A1B23] transition-colors"
           aria-label="Open menu"
         >
           <Menu size={18} strokeWidth={2} />
