@@ -6,10 +6,11 @@ import { z } from 'zod'
 import {
   ArrowLeft, Mail, Phone, MapPin, Hash, Building2, FileText,
   FileSignature, Receipt, Link2, RotateCcw, Copy, CheckCheck,
-  Video, Pencil, X, Loader2, IndianRupee, Users, Clock,
+  Video, Pencil, X, Loader2, IndianRupee, Users, Clock, FolderKanban,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { useClient, useUpdateClient, useRegeneratePortalToken } from '@/features/clients/hooks/useClients'
+import type { ClientProject } from '@/features/clients/hooks/useClients'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -40,7 +41,7 @@ const SOURCE_LABELS: Record<string, string> = {
   linkedin: 'LinkedIn', cold_outreach: 'Cold outreach', other: 'Other',
 }
 
-type Tab = 'proposals' | 'contracts' | 'invoices' | 'leads' | 'timeline'
+type Tab = 'proposals' | 'contracts' | 'invoices' | 'leads' | 'projects' | 'timeline'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -171,7 +172,8 @@ export default function ClientPage() {
     { key: 'proposals', label: 'Proposals', count: client.proposals.length },
     { key: 'contracts', label: 'Contracts', count: client.contracts.length },
     { key: 'invoices',  label: 'Invoices',  count: client.invoices.length  },
-    { key: 'leads',     label: 'Leads',     count: leads.length            },
+    { key: 'leads',     label: 'Leads',     count: leads.length                },
+    { key: 'projects',  label: 'Projects',  count: (client.projects ?? []).length },
     { key: 'timeline',  label: 'Timeline',  count: client.proposals.length + client.contracts.length + client.invoices.length + leads.length },
   ] : []
 
@@ -366,6 +368,10 @@ export default function ClientPage() {
               </MiniTable>
             )}
 
+            {activeTab === 'projects' && (
+              <ProjectsTab projects={client.projects ?? []} onNavigate={id => navigate(`/app/projects/${id}`)} />
+            )}
+
             {activeTab === 'timeline' && (
               <TimelineTab client={client} />
             )}
@@ -479,6 +485,120 @@ function MiniTable({ headers, children, empty, emptyMsg }: {
           {children}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+const PROJECT_STATUS_COLORS: Record<string, string> = {
+  ACTIVE:    'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400',
+  COMPLETED: 'bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-[#60A5FA]',
+  ON_HOLD:   'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400',
+  CANCELLED: 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]',
+}
+const PROJECT_STATUS_LABELS: Record<string, string> = {
+  ACTIVE: 'Active', COMPLETED: 'Completed', ON_HOLD: 'On Hold', CANCELLED: 'Cancelled',
+}
+
+function ProjectsTab({ projects, onNavigate }: { projects: ClientProject[]; onNavigate: (id: string) => void }) {
+  if (projects.length === 0) {
+    return (
+      <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] py-14 text-center">
+        <FolderKanban size={28} className="text-[#D0D5DD] dark:text-[#3D4258] mx-auto mb-3" strokeWidth={1.5} />
+        <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74]">No projects linked to this client yet</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {projects.map(p => {
+        const totalMins  = p.timeEntries.reduce((s, e) => s + e.durationMins, 0)
+        const totalHours = totalMins / 60
+        const billedValue = p.timeEntries.reduce((s, e) => {
+          if (!e.hourlyRate) return s
+          return s + (e.durationMins / 60) * Number(e.hourlyRate)
+        }, 0)
+        const expenseTotal = p.expenses.reduce((s, e) => s + Number(e.amount), 0)
+
+        return (
+          <div
+            key={p.id}
+            onClick={() => onNavigate(p.id)}
+            className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] p-4 cursor-pointer hover:border-[#6366F1] dark:hover:border-[#6366F1] transition-colors group"
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center shrink-0">
+                  <FolderKanban size={14} className="text-[#6366F1] dark:text-[#818CF8]" />
+                </div>
+                <p className="text-[13.5px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate group-hover:text-[#6366F1] transition-colors">{p.name}</p>
+              </div>
+              <span className={cn('text-[10.5px] font-semibold px-2 py-0.5 rounded-full shrink-0', PROJECT_STATUS_COLORS[p.status] ?? PROJECT_STATUS_COLORS['ACTIVE'])}>
+                {PROJECT_STATUS_LABELS[p.status] ?? p.status}
+              </span>
+            </div>
+
+            {/* Stats row */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <Clock size={11} className="text-[#98A2B3] dark:text-[#545C74]" />
+                <span className="text-[12px] text-[#344054] dark:text-[#C2C8D8] font-medium">
+                  {totalHours.toFixed(1)}h logged
+                </span>
+              </div>
+              {billedValue > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <IndianRupee size={11} className="text-[#98A2B3] dark:text-[#545C74]" />
+                  <span className="text-[12px] text-[#344054] dark:text-[#C2C8D8] font-medium">
+                    {formatCurrency(billedValue)} billed value
+                  </span>
+                </div>
+              )}
+              {expenseTotal > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Receipt size={11} className="text-[#98A2B3] dark:text-[#545C74]" />
+                  <span className="text-[12px] text-[#344054] dark:text-[#C2C8D8] font-medium">
+                    {formatCurrency(expenseTotal)} expenses
+                  </span>
+                </div>
+              )}
+              {p.budget && (
+                <div className="flex items-center gap-1.5">
+                  <IndianRupee size={11} className="text-indigo-400" />
+                  <span className="text-[12px] text-indigo-600 dark:text-indigo-400 font-medium">
+                    {formatCurrency(Number(p.budget))} budget
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Time entries preview */}
+            {p.timeEntries.length > 0 && (
+              <div className="mt-3 border-t border-[#F2F4F7] dark:border-[#26283A] pt-3 space-y-1.5">
+                {p.timeEntries.slice(0, 3).map(e => (
+                  <div key={e.id} className="flex items-center justify-between gap-2">
+                    <span className="text-[12px] text-[#667085] dark:text-[#8B92A8] truncate">
+                      {e.description || 'No description'} — {formatDate(e.date)}
+                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11.5px] font-medium text-[#344054] dark:text-[#C2C8D8]">
+                        {(e.durationMins / 60).toFixed(1)}h
+                      </span>
+                      {e.isBilled && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399]">Billed</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {p.timeEntries.length > 3 && (
+                  <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74]">+{p.timeEntries.length - 3} more entries</p>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

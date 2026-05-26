@@ -21,12 +21,31 @@ export interface Client {
   }
 }
 
+export interface ClientProjectTimeEntry {
+  id: string; description: string; date: string
+  durationMins: number; hourlyRate: string | null; isBilled: boolean
+}
+
+export interface ClientProjectExpense {
+  id: string; description: string; category: string
+  amount: string; date: string; isBilled: boolean
+}
+
+export interface ClientProject {
+  id: string; name: string; status: string
+  budget: string | null; startDate: string | null; endDate: string | null
+  createdAt: string; shareRateWithClient: boolean
+  timeEntries: ClientProjectTimeEntry[]
+  expenses:    ClientProjectExpense[]
+}
+
 export interface ClientDetail extends Client {
   proposals: { id: string; title: string; status: string; totalAmount: string; createdAt: string; acceptedAt: string | null }[]
   contracts: { id: string; title: string; status: string; createdAt: string; sentAt: string | null; signedAt: string | null }[]
   invoices:  { id: string; invoiceNumber: string; status: string; total: string; dueDate: string | null; createdAt: string; paidAt: string | null }[]
   leads:     { id: string; name: string; stage: string; budget: string | null; source: string | null; createdAt: string }[]
   meetings:  { id: string; title: string; scheduledAt: string; status: string; meetLink: string | null }[]
+  projects:  ClientProject[]
 }
 
 interface ClientsResponse {

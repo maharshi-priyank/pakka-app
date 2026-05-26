@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { FileText, FileSignature, Receipt, AlertTriangle, Video, CalendarDays, ExternalLink } from 'lucide-react'
+import { FileText, FileSignature, Receipt, AlertTriangle, Video, CalendarDays, ExternalLink, FolderKanban, Clock, IndianRupee } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { usePortalData, type PortalProposal, type PortalContract, type PortalInvoice, type PortalMeeting } from '@/features/portal/hooks/usePortal'
+import { usePortalData, type PortalProposal, type PortalContract, type PortalInvoice, type PortalMeeting, type PortalProject } from '@/features/portal/hooks/usePortal'
 import PortalProposalCard from '@/features/portal/components/PortalProposalCard'
 import PortalContractCard from '@/features/portal/components/PortalContractCard'
 import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
 
 const APP_URL = (import.meta.env.VITE_API_URL as string).replace('/api/v1', '')
 
-type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings'
+type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings' | 'projects'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] rounded-lg', className)} />
@@ -29,7 +29,8 @@ export default function ClientPortalPage() {
   const activeProposals = proposals ?? data?.proposals ?? []
   const activeContracts = contracts ?? data?.contracts ?? []
   const activeInvoices  = invoices  ?? data?.invoices  ?? []
-  const activeMeetings  = data?.meetings ?? []
+  const activeMeetings  = data?.meetings  ?? []
+  const activeProjects  = data?.projects  ?? []
 
   function handleProposalStatusChange(id: string, status: string) {
     setProposals((data?.proposals ?? []).map(p => p.id === id ? { ...p, status } : p))
@@ -49,6 +50,7 @@ export default function ClientPortalPage() {
     { key: 'contracts',  label: 'Contracts', icon: FileSignature, count: activeContracts.length },
     { key: 'invoices',   label: 'Invoices',  icon: Receipt,       count: activeInvoices.length },
     { key: 'meetings',   label: 'Meetings',  icon: Video,         count: upcomingMeetings.length },
+    { key: 'projects',   label: 'Projects',  icon: FolderKanban,  count: activeProjects.length },
   ]
 
   if (isError) {
@@ -122,6 +124,7 @@ export default function ClientPortalPage() {
               { label: 'Contracts', count: activeContracts.length,   color: 'bg-[#F4F3FF] text-[#5925DC]' },
               { label: 'Invoices',  count: activeInvoices.length,    color: 'bg-[#ECFDF3] text-[#027A48]' },
               { label: 'Meetings',  count: upcomingMeetings.length,  color: 'bg-[#FFF1F3] text-[#C01048]' },
+              { label: 'Projects',  count: activeProjects.length,    color: 'bg-[#FFF7ED] text-[#C2410C]' },
             ].map(({ label, count, color }) => (
               <span key={label} className={cn('text-[12px] font-semibold px-3 py-1 rounded-full', color)}>
                 {count} {label}
@@ -233,6 +236,15 @@ export default function ClientPortalPage() {
                 }
               </div>
             )}
+
+            {tab === 'projects' && (
+              <div className="space-y-3">
+                {activeProjects.length === 0
+                  ? <EmptyState label="No projects shared yet" />
+                  : activeProjects.map(p => <PortalProjectCard key={p.id} project={p} />)
+                }
+              </div>
+            )}
           </>
         )}
 
@@ -247,6 +259,143 @@ function EmptyState({ label }: { label: string }) {
   return (
     <div className="bg-white rounded-2xl border border-[#EAECF0] p-10 text-center">
       <p className="text-[13px] text-[#98A2B3]">{label}</p>
+    </div>
+  )
+}
+
+const PORTAL_PROJECT_STATUS: Record<string, { label: string; className: string }> = {
+  ACTIVE:    { label: 'Active',    className: 'bg-emerald-50 text-emerald-700' },
+  COMPLETED: { label: 'Completed', className: 'bg-blue-50 text-blue-700' },
+  ON_HOLD:   { label: 'On Hold',   className: 'bg-amber-50 text-amber-700' },
+  CANCELLED: { label: 'Cancelled', className: 'bg-gray-100 text-gray-500' },
+}
+
+function PortalProjectCard({ project }: { project: PortalProject }) {
+  const totalMins    = project.timeEntries.reduce((s, e) => s + e.durationMins, 0)
+  const totalHours   = totalMins / 60
+  const expenseTotal = project.expenses.reduce((s, e) => s + Number(e.amount), 0)
+  const billedValue  = project.timeEntries.reduce((s, e) => {
+    if (!e.hourlyRate) return s
+    return s + (e.durationMins / 60) * Number(e.hourlyRate)
+  }, 0)
+
+  const statusInfo = PORTAL_PROJECT_STATUS[project.status] ?? PORTAL_PROJECT_STATUS['ACTIVE']
+
+  return (
+    <div className="bg-white rounded-2xl border border-[#EAECF0] p-4 sm:p-5 space-y-4">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#EEF2FF] flex items-center justify-center shrink-0">
+            <FolderKanban size={16} className="text-[#6366F1]" />
+          </div>
+          <div>
+            <p className="text-[14px] font-bold text-[#101828]">{project.name}</p>
+            {(project.startDate || project.endDate) && (
+              <p className="text-[11.5px] text-[#98A2B3] mt-0.5 flex items-center gap-1">
+                <CalendarDays size={10} />
+                {project.startDate ? new Date(project.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                {' → '}
+                {project.endDate ? new Date(project.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Ongoing'}
+              </p>
+            )}
+          </div>
+        </div>
+        <span className={cn('text-[10.5px] font-bold px-2.5 py-1 rounded-full shrink-0', statusInfo.className)}>
+          {statusInfo.label}
+        </span>
+      </div>
+
+      {/* Summary chips */}
+      <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-1.5 bg-[#F4F5F8] rounded-lg px-3 py-1.5">
+          <Clock size={12} className="text-[#6366F1]" />
+          <span className="text-[12px] font-semibold text-[#344054]">{totalHours.toFixed(1)}h logged</span>
+        </div>
+        {billedValue > 0 && (
+          <div className="flex items-center gap-1.5 bg-[#F4F5F8] rounded-lg px-3 py-1.5">
+            <IndianRupee size={12} className="text-[#6366F1]" />
+            <span className="text-[12px] font-semibold text-[#344054]">
+              ₹{billedValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })} time value
+            </span>
+          </div>
+        )}
+        {expenseTotal > 0 && (
+          <div className="flex items-center gap-1.5 bg-[#FEF3F2] rounded-lg px-3 py-1.5">
+            <Receipt size={12} className="text-[#D92D20]" />
+            <span className="text-[12px] font-semibold text-[#344054]">
+              ₹{expenseTotal.toLocaleString('en-IN', { maximumFractionDigits: 0 })} expenses
+            </span>
+          </div>
+        )}
+        {project.budget && (
+          <div className="flex items-center gap-1.5 bg-[#ECFDF3] rounded-lg px-3 py-1.5">
+            <IndianRupee size={12} className="text-[#027A48]" />
+            <span className="text-[12px] font-semibold text-[#344054]">
+              ₹{Number(project.budget).toLocaleString('en-IN', { maximumFractionDigits: 0 })} budget
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Time log */}
+      {project.timeEntries.length > 0 && (
+        <div>
+          <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-2">Time Log</p>
+          <div className="space-y-1.5">
+            {project.timeEntries.map(e => (
+              <div key={e.id} className="flex items-center justify-between gap-2 py-1 border-b border-[#F2F4F7] last:border-0">
+                <div className="min-w-0">
+                  <p className="text-[12.5px] text-[#344054] truncate">{e.description || 'Work session'}</p>
+                  <p className="text-[11px] text-[#98A2B3]">
+                    {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 text-right">
+                  <div>
+                    <p className="text-[12.5px] font-semibold text-[#101828]">{(e.durationMins / 60).toFixed(1)}h</p>
+                    {project.shareRateWithClient && e.hourlyRate && (
+                      <p className="text-[11px] text-[#98A2B3]">
+                        ₹{Number(e.hourlyRate).toLocaleString('en-IN')}/hr
+                      </p>
+                    )}
+                  </div>
+                  {e.isBilled && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#ECFDF3] text-[#027A48]">Billed</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Billable expenses */}
+      {project.expenses.length > 0 && (
+        <div>
+          <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-2">Expenses</p>
+          <div className="space-y-1.5">
+            {project.expenses.map(e => (
+              <div key={e.id} className="flex items-center justify-between gap-2 py-1 border-b border-[#F2F4F7] last:border-0">
+                <div className="min-w-0">
+                  <p className="text-[12.5px] text-[#344054] truncate">{e.description}</p>
+                  <p className="text-[11px] text-[#98A2B3]">
+                    {e.category} · {new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <p className="text-[12.5px] font-semibold text-[#101828]">
+                    ₹{Number(e.amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                  </p>
+                  {e.isBilled && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#ECFDF3] text-[#027A48]">Billed</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -30,10 +30,11 @@ export interface Project {
   endDate:     string | null
   createdAt:   string
   updatedAt:   string
-  client:      ProjectClient | null
-  _count?:     ProjectCount
-  invoiced?:   number
-  collected?:  number
+  client:              ProjectClient | null
+  _count?:             ProjectCount
+  invoiced?:           number
+  collected?:          number
+  shareRateWithClient: boolean
 }
 
 export interface ProjectDetail extends Project {
@@ -79,13 +80,14 @@ export interface ProjectsResponse {
 }
 
 export interface CreateProjectInput {
-  name:         string
-  description?: string
-  clientId?:    string
-  status?:      ProjectStatus
-  budget?:      number
-  startDate?:   string
-  endDate?:     string
+  name:                 string
+  description?:         string
+  clientId?:            string
+  status?:              ProjectStatus
+  budget?:              number
+  startDate?:           string
+  endDate?:             string
+  shareRateWithClient?: boolean
 }
 
 export interface UpdateProjectInput extends Partial<CreateProjectInput> {

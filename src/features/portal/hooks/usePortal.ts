@@ -46,6 +46,28 @@ export interface PortalMeeting {
   status:       string
 }
 
+export interface PortalProjectTimeEntry {
+  id: string; description: string; date: string
+  durationMins: number; hourlyRate: string | null; isBilled: boolean
+}
+
+export interface PortalProjectExpense {
+  id: string; description: string; category: string
+  amount: string; date: string; isBilled: boolean
+}
+
+export interface PortalProject {
+  id:                  string
+  name:                string
+  status:              string
+  budget:              string | null
+  startDate:           string | null
+  endDate:             string | null
+  shareRateWithClient: boolean
+  timeEntries:         PortalProjectTimeEntry[]
+  expenses:            PortalProjectExpense[]
+}
+
 export interface PortalData {
   client: {
     id:      string
@@ -61,6 +83,7 @@ export interface PortalData {
   contracts: PortalContract[]
   invoices:  PortalInvoice[]
   meetings:  PortalMeeting[]
+  projects:  PortalProject[]
 }
 
 export function usePortalData(token: string) {

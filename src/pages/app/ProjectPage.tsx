@@ -147,6 +147,38 @@ function EditProjectModal({
   )
 }
 
+// ─── Share Rate Toggle ────────────────────────────────────────────────────────
+
+function ShareRateToggle({ projectId, value }: { projectId: string; value: boolean }) {
+  const { mutateAsync } = useUpdateProject()
+  const [pending, setPending] = useState(false)
+
+  async function toggle() {
+    setPending(true)
+    try { await mutateAsync({ id: projectId, shareRateWithClient: !value }) }
+    finally { setPending(false) }
+  }
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={value}
+      onClick={toggle}
+      disabled={pending}
+      className={cn(
+        'relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors disabled:opacity-50',
+        value ? 'bg-[#6366F1]' : 'bg-[#D0D5DD] dark:bg-[#3D4258]',
+      )}
+    >
+      <span className={cn(
+        'inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
+        value ? 'translate-x-4' : 'translate-x-0',
+      )} />
+    </button>
+  )
+}
+
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
 function StatCard({ label, value, sub, icon: Icon, accent = false }: {
@@ -425,6 +457,15 @@ export default function ProjectPage() {
                 <div>
                   <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Created</dt>
                   <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5">{formatDate(project.createdAt)}</dd>
+                </div>
+                <div className="pt-1 border-t border-[#F2F4F7] dark:border-[#26283A]">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Share rates with client</p>
+                      <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Show hourly rates in client portal</p>
+                    </div>
+                    <ShareRateToggle projectId={project.id} value={project.shareRateWithClient} />
+                  </div>
                 </div>
               </dl>
             </div>
