@@ -272,7 +272,7 @@ export default function TimePage() {
     <div className="space-y-5 max-w-[860px]">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[20px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Time Tracking</h1>
           <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
@@ -316,41 +316,47 @@ export default function TimePage() {
             </button>
           </div>
         ) : (
-          <div className="space-y-2.5">
-            <div className="flex gap-3 items-start">
+          <div className="space-y-2">
+            {/* Row 1: client + project selectors */}
+            <div className="flex gap-2">
               <DropdownSelect
                 value={timerClientId}
                 onChange={setTimerClientId}
                 placeholder="No client"
                 options={[{ value: '', label: 'No client' }, ...clients.map(c => ({ value: c.id, label: c.name }))]}
-                className="shrink-0"
+                className="flex-1 min-w-0"
               />
               <DropdownSelect
                 value={timerProjectId}
                 onChange={setTimerProjectId}
                 placeholder="No project"
                 options={[{ value: '', label: 'No project' }, ...projects.map(p => ({ value: p.id, label: p.name }))]}
-                className="shrink-0"
+                className="flex-1 min-w-0"
               />
+            </div>
+            {/* Row 2: description input + action buttons */}
+            <div className="flex gap-2">
               <input
                 value={timerDesc}
                 onChange={e => setTimerDesc(e.target.value)}
                 placeholder="What are you working on?"
-                className="form-input text-[13px] flex-1"
+                className="form-input text-[13px] flex-1 min-w-0"
                 onKeyDown={e => { if (e.key === 'Enter') handleStartTimer() }}
               />
               <button
                 onClick={handleStartTimer}
                 disabled={!timerDesc.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563EB] text-white text-[13px] font-bold hover:bg-[#1D4ED8] transition-colors disabled:opacity-50 shrink-0"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-[#2563EB] text-white text-[13px] font-bold hover:bg-[#1D4ED8] transition-colors disabled:opacity-50 shrink-0"
               >
-                <Play size={13} strokeWidth={2.5} fill="currentColor" /> Start
+                <Play size={13} strokeWidth={2.5} fill="currentColor" />
+                <span className="hidden sm:inline">Start</span>
               </button>
               <button
                 onClick={handleOpenManualLog}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors shrink-0"
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors shrink-0"
               >
-                <Plus size={13} strokeWidth={2.5} /> Log manually
+                <Plus size={13} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Log manually</span>
               </button>
             </div>
           </div>

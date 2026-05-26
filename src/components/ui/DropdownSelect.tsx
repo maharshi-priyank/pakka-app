@@ -32,14 +32,14 @@ export default function DropdownSelect({ value, onChange, options, className, pl
         type="button"
         onClick={() => setOpen(v => !v)}
         className={cn(
-          'flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[12.5px] font-medium transition-colors',
+          'flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[12.5px] font-medium transition-colors w-full min-w-0',
           'bg-white dark:bg-[#13141A] text-[#344054] dark:text-[#C2C8D8]',
           open
             ? 'border-[#2563EB] dark:border-[#2563EB]'
             : 'border-[#E4E7EC] dark:border-[#26283A] hover:border-[#D0D5DD] dark:hover:border-[#3D4258]',
         )}
       >
-        <span>{selected?.label ?? placeholder ?? '—'}</span>
+        <span className="truncate flex-1 text-left">{selected?.label ?? placeholder ?? '—'}</span>
         <ChevronDown
           size={12}
           strokeWidth={2.5}
