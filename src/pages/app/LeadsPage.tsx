@@ -147,14 +147,15 @@ export default function LeadsPage() {
           {/* AI button */}
           <button
             onClick={() => setShowAI(true)}
+            title="Add with AI"
             className={cn(
-              'flex items-center gap-1.5 h-9 px-3.5 rounded-lg text-[13px] font-semibold transition-all',
+              'flex items-center gap-1.5 h-9 px-3 sm:px-3.5 rounded-lg text-[13px] font-semibold transition-all',
               'bg-gradient-to-r from-indigo-600 to-violet-600 text-white',
               'hover:from-indigo-500 hover:to-violet-500 shadow-sm hover:shadow-indigo-200 hover:shadow-md',
             )}
           >
             <AIIcon size={13} />
-            Add with AI
+            <span className="hidden sm:inline">Add with AI</span>
           </button>
           <button onClick={() => setShowAdd(true)} className="btn-primary">
             <Plus size={14} strokeWidth={2.5} />

@@ -1,40 +1,19 @@
-import { useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { generateInitials } from '@/lib/utils'
-import { LogOut, ChevronDown, Menu, Sun, Moon } from 'lucide-react'
+import { LogOut, ChevronDown, Sun, Moon } from 'lucide-react'
 import NotificationBell from '@/features/notifications/components/NotificationBell'
 import CalendarBell     from '@/features/meetings/components/CalendarBell'
 import { useThemeToggle } from '@/hooks/useThemeToggle'
-
-const PAGE_TITLES: Record<string, { title: string; sub: string }> = {
-  '/app/dashboard':  { title: 'Dashboard',   sub: 'Welcome back' },
-  '/app/leads':      { title: 'Leads',       sub: 'Manage your pipeline' },
-  '/app/proposals':  { title: 'Proposals',   sub: 'Track and send proposals' },
-  '/app/contracts':  { title: 'Contracts',   sub: 'E-sign and manage contracts' },
-  '/app/invoices':   { title: 'Invoices',    sub: 'Billing and payments' },
-  '/app/clients':    { title: 'Clients',     sub: 'Your client roster' },
-  '/app/projects':   { title: 'Projects',    sub: 'Track engagements' },
-  '/app/time':       { title: 'Time',        sub: 'Log and bill your hours' },
-  '/app/expenses':   { title: 'Expenses',    sub: 'Track business costs' },
-  '/app/reports':    { title: 'Reports',     sub: 'Business insights' },
-  '/app/meetings':   { title: 'Meetings',    sub: 'Scheduled calls & events' },
-  '/app/forms':      { title: 'Forms',       sub: 'Collect client info' },
-  '/app/automations':{ title: 'Automations', sub: 'Rules and workflows' },
-  '/app/settings':   { title: 'Settings',    sub: 'Account and preferences' },
-}
 
 interface Props {
   onMenuToggle?: () => void
 }
 
-export default function Topbar({ onMenuToggle }: Props) {
+export default function Topbar({ onMenuToggle: _onMenuToggle }: Props) {
   const { user } = useAuthStore()
-  const { pathname } = useLocation()
   const { isDark, toggle } = useThemeToggle()
 
-  const pageKey  = Object.keys(PAGE_TITLES).find(k => pathname === k || pathname.startsWith(k + '/'))
-  const page     = pageKey ? PAGE_TITLES[pageKey] : { title: 'Clinekt', sub: '' }
   const name     = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
   const initials = generateInitials(name)
   const firstName = name.split(' ')[0]
@@ -46,21 +25,13 @@ export default function Topbar({ onMenuToggle }: Props) {
   return (
     <header className="h-[56px] lg:h-[60px] bg-white dark:bg-[#13141A] border-b border-[#EAECF0] dark:border-[#26283A] flex items-center justify-between px-4 lg:px-6 shrink-0 transition-colors">
 
-      <div className="flex items-center gap-3">
-        {/* Hamburger — hidden on mobile (BottomNav handles nav), hidden on desktop (sidebar always visible) */}
-        <button
-          onClick={onMenuToggle}
-          className="hidden w-8 h-8 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#1A1B23] transition-colors"
-          aria-label="Open menu"
-        >
-          <Menu size={18} strokeWidth={2} />
-        </button>
-
-        {/* Page identity */}
-        <div>
-          <h1 className="text-[15px] lg:text-[16px] font-bold text-[#101828] dark:text-[#ECEEF3] leading-tight tracking-tight">{page.title}</h1>
-          {page.sub && <p className="hidden sm:block text-[11.5px] text-[#98A2B3] dark:text-[#545C74] leading-none mt-0.5">{page.sub}</p>}
-        </div>
+      {/* Logo */}
+      <div className="flex items-center">
+        <img
+          src={isDark ? '/logo/full_logo_dark_theme.svg' : '/logo/full_logo.svg'}
+          alt="Clinekt"
+          className="h-6 w-auto"
+        />
       </div>
 
       {/* Right side */}
