@@ -71,6 +71,9 @@
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
 
+  button, [role="button"] { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+
   html {
     font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
