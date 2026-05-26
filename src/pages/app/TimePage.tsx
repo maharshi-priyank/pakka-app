@@ -8,6 +8,7 @@ import {
   Square as SquareIcon, IndianRupee, ChevronRight, Loader2, FolderKanban,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import DropdownSelect from '@/components/ui/DropdownSelect'
 import { useClients } from '@/features/clients/hooks/useClients'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import {
@@ -317,22 +318,20 @@ export default function TimePage() {
         ) : (
           <div className="space-y-2.5">
             <div className="flex gap-3 items-start">
-              <select
+              <DropdownSelect
                 value={timerClientId}
-                onChange={e => setTimerClientId(e.target.value)}
-                className="form-input text-[13px] w-36 shrink-0"
-              >
-                <option value="">No client</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-              <select
+                onChange={setTimerClientId}
+                placeholder="No client"
+                options={[{ value: '', label: 'No client' }, ...clients.map(c => ({ value: c.id, label: c.name }))]}
+                className="shrink-0"
+              />
+              <DropdownSelect
                 value={timerProjectId}
-                onChange={e => setTimerProjectId(e.target.value)}
-                className="form-input text-[13px] w-40 shrink-0"
-              >
-                <option value="">No project</option>
-                {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
+                onChange={setTimerProjectId}
+                placeholder="No project"
+                options={[{ value: '', label: 'No project' }, ...projects.map(p => ({ value: p.id, label: p.name }))]}
+                className="shrink-0"
+              />
               <input
                 value={timerDesc}
                 onChange={e => setTimerDesc(e.target.value)}

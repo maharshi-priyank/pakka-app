@@ -8,6 +8,7 @@ import {
   IndianRupee, ChevronRight, Loader2, Receipt, Image, ExternalLink,
   FolderKanban,
 } from 'lucide-react'
+import DropdownSelect from '@/components/ui/DropdownSelect'
 import { cn } from '@/lib/utils'
 import { useClients } from '@/features/clients/hooks/useClients'
 import { useProjects } from '@/features/projects/hooks/useProjects'
@@ -336,14 +337,13 @@ export default function ExpensesPage() {
             </button>
           ))}
         </div>
-        <select
+        <DropdownSelect
           value={clientFilter}
-          onChange={e => setClientFilter(e.target.value)}
-          className="form-input text-[12px] w-full sm:w-[160px]"
-        >
-          <option value="">All clients</option>
-          {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
+          onChange={setClientFilter}
+          placeholder="All clients"
+          options={[{ value: '', label: 'All clients' }, ...clients.map(c => ({ value: c.id, label: c.name }))]}
+          className="w-full sm:w-auto"
+        />
       </div>
 
       {/* ── Expense list ── */}

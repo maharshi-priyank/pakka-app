@@ -3,6 +3,7 @@ import {
   BarChart3, Download, TrendingUp, IndianRupee, Users,
   Wallet, Clock, FileText, Info,
 } from 'lucide-react'
+import DropdownSelect from '@/components/ui/DropdownSelect'
 import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -686,13 +687,11 @@ export default function ReportsPage() {
 
         {/* Period controls */}
         <div className="flex items-center gap-2">
-          <select
+          <DropdownSelect
             value={preset}
-            onChange={e => handlePresetChange(e.target.value as Preset)}
-            className="form-input text-[12px] py-1.5 h-8"
-          >
-            {PRESETS.map(p => <option key={p} value={p}>{PRESET_LABELS[p]}</option>)}
-          </select>
+            onChange={v => handlePresetChange(v as Preset)}
+            options={PRESETS.map(p => ({ value: p, label: PRESET_LABELS[p] }))}
+          />
           {preset === 'custom' && (
             <>
               <input
