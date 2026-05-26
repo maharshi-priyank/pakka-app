@@ -672,13 +672,13 @@ export default function ReportsPage() {
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-semibold transition-all',
+                  'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[12.5px] font-semibold transition-all',
                   tab === t.key
                     ? 'bg-white dark:bg-[#1A1B23] text-[#101828] dark:text-[#ECEEF3] shadow-sm'
                     : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
                 )}
               >
-                <Icon size={13} strokeWidth={2} /> {t.label}
+                <Icon size={13} strokeWidth={2} /><span className="hidden sm:inline">{t.label}</span>
               </button>
             )
           })}

@@ -173,7 +173,7 @@ export default function ExpensesPage() {
     <div className="space-y-5 max-w-[860px]">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-[20px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Expenses</h1>
           <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
@@ -319,7 +319,7 @@ export default function ExpensesPage() {
       )}
 
       {/* ── Filters ── */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-2">
           {(['all', 'unbilled', 'billed'] as FilterTab[]).map(tab => (
             <button
@@ -339,7 +339,7 @@ export default function ExpensesPage() {
         <select
           value={clientFilter}
           onChange={e => setClientFilter(e.target.value)}
-          className="form-input text-[12px] w-[160px]"
+          className="form-input text-[12px] w-full sm:w-[160px]"
         >
           <option value="">All clients</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
