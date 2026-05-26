@@ -26,3 +26,6 @@ dist-ssr
 .env.local
 dist/
 node_modules/
+
+# PWA dev artifacts
+dev-dist

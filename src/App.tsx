@@ -9,6 +9,8 @@ import { useAuthStore } from '@/store/authStore'
 import { queryClient } from '@/lib/queryClient'
 import { router } from '@/router'
 import UpgradeModal from '@/components/UpgradeModal'
+import PWAInstallPrompt from '@/components/PWAInstallPrompt'
+import PWAUpdatePrompt from '@/components/PWAUpdatePrompt'
 
 // Module-level guard — sync at most once per authenticated user ID.
 // Prevents duplicate calls from getSession + onAuthStateChange both firing,
@@ -57,6 +59,8 @@ export default function App() {
       <RouterProvider router={router} />
       <Toaster richColors position="top-right" closeButton />
       <UpgradeModal />
+      <PWAInstallPrompt />
+      <PWAUpdatePrompt />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
