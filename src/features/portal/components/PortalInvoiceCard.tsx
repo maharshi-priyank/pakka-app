@@ -1,7 +1,16 @@
 import { useState } from 'react'
-import { Receipt, ExternalLink, Download, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ExternalLink, Download, CreditCard, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useCreateInvoiceOrder, type PortalInvoice } from '../hooks/usePortal'
+
+const ACCENT_BAR: Record<string, string> = {
+  SENT:      'bg-[#6366F1]',
+  VIEWED:    'bg-[#6366F1]',
+  OVERDUE:   'bg-[#D92D20]',
+  PAID:      'bg-[#027A48]',
+  PARTIAL:   'bg-[#B54708]',
+  CANCELLED: 'bg-[#98A2B3]',
+}
 
 const STATUS_LABEL: Record<string, string> = {
   SENT:      'Awaiting payment',
@@ -26,11 +35,11 @@ function fmt(v: string | number) {
 }
 
 interface Props {
-  invoice:     PortalInvoice
-  appUrl:      string
-  portalToken: string
-  clientName:  string
-  clientEmail: string | null
+  invoice:        PortalInvoice
+  appUrl:         string
+  portalToken:    string
+  clientName:     string
+  clientEmail:    string | null
   freelancerName: string | null
   onStatusChange: (id: string, status: string) => void
 }
@@ -48,15 +57,15 @@ export default function PortalInvoiceCard({
     try {
       const order = await createOrder.mutateAsync(invoice.id)
       const rzp = new (window as any).Razorpay({
-        key:       order.keyId,
-        order_id:  order.orderId,
-        amount:    order.amount,
-        currency:  order.currency,
-        name:      freelancerName ?? 'Clinekt',
+        key:         order.keyId,
+        order_id:    order.orderId,
+        amount:      order.amount,
+        currency:    order.currency,
+        name:        freelancerName ?? 'Clinekt',
         description: `Invoice ${invoice.invoiceNumber}`,
-        prefill:   { name: clientName, email: clientEmail ?? '' },
-        theme:     { color: '#6366F1' },
-        handler:   () => {
+        prefill:     { name: clientName, email: clientEmail ?? '' },
+        theme:       { color: '#6366F1' },
+        handler:     () => {
           setLocalStatus('PAID')
           onStatusChange(invoice.id, 'PAID')
         },
@@ -69,78 +78,81 @@ export default function PortalInvoiceCard({
 
   const isPayable = localStatus === 'SENT' || localStatus === 'VIEWED' || localStatus === 'OVERDUE'
   const isOverdue = localStatus === 'OVERDUE'
+  const accentBar = ACCENT_BAR[localStatus] ?? 'bg-[#98A2B3]'
 
   return (
-    <div className={cn(
-      'bg-white rounded-2xl border shadow-sm overflow-hidden',
-      isOverdue ? 'border-[#FDA29B]' : 'border-[#EAECF0]',
-    )}>
-      <div className="px-5 py-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3">
-            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center shrink-0', isOverdue ? 'bg-[#FEF3F2]' : 'bg-[#ECFDF3]')}>
-              {isOverdue
-                ? <AlertCircle size={16} className="text-[#D92D20]" />
-                : <Receipt size={16} className="text-[#027A48]" />
-              }
-            </div>
-            <div>
-              <p className="text-[14px] font-bold text-[#101828] leading-tight">{invoice.invoiceNumber}</p>
-              <p className="text-[11.5px] text-[#98A2B3] mt-0.5">
-                {new Date(invoice.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                {invoice.dueDate && ` · Due ${new Date(invoice.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
-              </p>
-            </div>
-          </div>
-          <span className={cn('text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0', STATUS_STYLE[localStatus] ?? 'bg-[#F2F4F7] text-[#667085]')}>
+    <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
+      {/* Status accent bar */}
+      <div className={cn('h-1', accentBar)} />
+
+      <div className="px-5 pt-4 pb-5">
+        {/* Top row: status badge + view/pdf links */}
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <span className={cn('text-[11px] font-semibold px-2.5 py-1 rounded-full', STATUS_STYLE[localStatus] ?? 'bg-[#F2F4F7] text-[#667085]')}>
             {STATUS_LABEL[localStatus] ?? localStatus}
           </span>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <p className={cn('text-[20px] font-bold', isOverdue ? 'text-[#D92D20]' : 'text-[#101828]')}>
-            ₹{fmt(invoice.total)}
-          </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <a
               href={`${appUrl}/invoice/${invoice.id}`}
               target="_blank" rel="noreferrer"
-              className="flex items-center gap-1.5 text-[12px] font-medium text-[#667085] hover:text-[#6366F1] transition-colors"
+              className="flex items-center gap-1 text-[11.5px] font-medium text-[#98A2B3] hover:text-[#6366F1] transition-colors"
             >
-              <ExternalLink size={12} /> View
+              <ExternalLink size={11} /> View
             </a>
             <button
               onClick={() => window.open(`${appUrl}/invoice/${invoice.id}?print=1`, '_blank')}
-              className="flex items-center gap-1.5 text-[12px] font-medium text-[#667085] hover:text-[#6366F1] transition-colors"
+              className="flex items-center gap-1 text-[11.5px] font-medium text-[#98A2B3] hover:text-[#6366F1] transition-colors"
             >
-              <Download size={12} /> PDF
+              <Download size={11} /> PDF
             </button>
           </div>
         </div>
+
+        {/* Amount hero */}
+        <p className={cn('text-[32px] font-extrabold leading-none', isOverdue ? 'text-[#D92D20]' : 'text-[#101828]')}>
+          ₹{fmt(invoice.total)}
+        </p>
+        <p className="text-[12px] text-[#98A2B3] mt-1.5">
+          {invoice.invoiceNumber}
+          {' · '}
+          {new Date(invoice.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+          {invoice.dueDate && (
+            <span className={cn(isOverdue && 'text-[#D92D20] font-semibold')}>
+              {` · Due ${new Date(invoice.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`}
+            </span>
+          )}
+        </p>
+
+        {/* Pay Now — full width prominent CTA */}
+        {isPayable && (
+          <div className="mt-5 space-y-2">
+            <button
+              onClick={handlePayNow}
+              disabled={createOrder.isPending}
+              className={cn(
+                'w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-[14px] font-bold transition-colors disabled:opacity-60',
+                isOverdue
+                  ? 'bg-[#D92D20] hover:bg-[#B42318] text-white'
+                  : 'bg-[#0F172A] hover:bg-[#1e293b] text-white',
+              )}
+            >
+              <CreditCard size={15} strokeWidth={2} />
+              {createOrder.isPending ? 'Opening payment…' : 'Pay Now'}
+            </button>
+            {payError && <p className="text-[11.5px] text-center text-red-500">{payError}</p>}
+          </div>
+        )}
+
+        {/* Paid confirmation */}
+        {localStatus === 'PAID' && (
+          <div className="mt-4 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#ECFDF3]">
+            <CheckCircle2 size={14} className="text-[#027A48]" />
+            <p className="text-[13px] font-semibold text-[#027A48]">
+              Paid{invoice.paidAt ? ` on ${new Date(invoice.paidAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
+            </p>
+          </div>
+        )}
       </div>
-
-      {isPayable && (
-        <div className="border-t border-[#F2F4F7] px-5 py-3 bg-[#FAFBFF] space-y-2">
-          <button
-            onClick={handlePayNow}
-            disabled={createOrder.isPending}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60 shadow-sm"
-          >
-            <CreditCard size={13} strokeWidth={2} />
-            {createOrder.isPending ? 'Opening…' : 'Pay Now'}
-          </button>
-          {payError && <p className="text-[11.5px] text-red-500">{payError}</p>}
-        </div>
-      )}
-
-      {localStatus === 'PAID' && (
-        <div className="border-t border-[#F2F4F7] px-5 py-2.5 flex items-center gap-2 bg-[#F0FDF4]">
-          <CheckCircle2 size={13} className="text-[#027A48]" />
-          <p className="text-[12px] font-semibold text-[#027A48]">
-            Payment received{invoice.paidAt ? ` on ${new Date(invoice.paidAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
-          </p>
-        </div>
-      )}
     </div>
   )
 }

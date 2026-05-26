@@ -1,18 +1,22 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { FileText, FileSignature, Receipt, AlertTriangle, Video, CalendarDays, ExternalLink, FolderKanban, Clock, IndianRupee } from 'lucide-react'
+import { FileSignature, Receipt, AlertTriangle, Video, CalendarDays, ExternalLink, FolderKanban, Clock, IndianRupee, Bell, ChevronRight, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePortalData, type PortalProposal, type PortalContract, type PortalInvoice, type PortalMeeting, type PortalProject } from '@/features/portal/hooks/usePortal'
 import PortalProposalCard from '@/features/portal/components/PortalProposalCard'
 import PortalContractCard from '@/features/portal/components/PortalContractCard'
 import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
 
-const APP_URL = (import.meta.env.VITE_API_URL as string).replace('/api/v1', '')
+const APP_URL = import.meta.env.VITE_APP_URL as string
 
 type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings' | 'projects'
 
+function fmt(v: string | number) {
+  return Number(v).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+}
+
 function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse bg-[#F2F4F7] rounded-lg', className)} />
+  return <div className={cn('animate-pulse rounded-lg', className)} />
 }
 
 export default function ClientPortalPage() {
@@ -21,7 +25,6 @@ export default function ClientPortalPage() {
 
   const [tab, setTab] = useState<Tab>('overview')
 
-  // Local state mirrors for optimistic updates across tabs
   const [proposals, setProposals] = useState<PortalProposal[] | null>(null)
   const [contracts, setContracts] = useState<PortalContract[] | null>(null)
   const [invoices,  setInvoices]  = useState<PortalInvoice[]  | null>(null)
@@ -44,14 +47,33 @@ export default function ClientPortalPage() {
 
   const upcomingMeetings = activeMeetings.filter(m => m.status === 'SCHEDULED' && new Date(m.scheduledAt) >= new Date())
 
-  const TABS: { key: Tab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; count: number }[] = [
-    { key: 'overview',   label: 'Overview',  icon: FileText,      count: 0 },
-    { key: 'proposals',  label: 'Proposals', icon: FileText,      count: activeProposals.length },
-    { key: 'contracts',  label: 'Contracts', icon: FileSignature, count: activeContracts.length },
-    { key: 'invoices',   label: 'Invoices',  icon: Receipt,       count: activeInvoices.length },
-    { key: 'meetings',   label: 'Meetings',  icon: Video,         count: upcomingMeetings.length },
-    { key: 'projects',   label: 'Projects',  icon: FolderKanban,  count: activeProjects.length },
+  const TABS: { key: Tab; label: string; count: number }[] = [
+    { key: 'overview',  label: 'Overview',  count: 0 },
+    { key: 'proposals', label: 'Proposals', count: activeProposals.length },
+    { key: 'contracts', label: 'Contracts', count: activeContracts.length },
+    { key: 'invoices',  label: 'Invoices',  count: activeInvoices.length },
+    { key: 'meetings',  label: 'Meetings',  count: upcomingMeetings.length },
+    { key: 'projects',  label: 'Projects',  count: activeProjects.length },
   ]
+
+  const visibleTabs = TABS.filter(t => t.key === 'overview' || t.count > 0)
+
+  const attentionItems: { label: string; tab: Tab; urgent?: boolean }[] = data ? [
+    ...activeInvoices
+      .filter(i => i.status === 'OVERDUE')
+      .map(i => ({ label: `Invoice ${i.invoiceNumber} is overdue — ₹${fmt(i.total)}`, tab: 'invoices' as Tab, urgent: true })),
+    ...activeInvoices
+      .filter(i => i.status === 'SENT' || i.status === 'VIEWED')
+      .map(i => ({ label: `Invoice ${i.invoiceNumber} awaits payment — ₹${fmt(i.total)}`, tab: 'invoices' as Tab })),
+    ...activeContracts
+      .filter(c => c.status === 'SENT')
+      .map(c => ({ label: `"${c.title}" needs your signature`, tab: 'contracts' as Tab })),
+    ...activeProposals
+      .filter(p => p.status === 'SENT' || p.status === 'OPENED')
+      .map(p => ({ label: `"${p.title}" proposal awaits your response`, tab: 'proposals' as Tab })),
+  ] : []
+
+  const freelancerName = data?.freelancer.businessName ?? 'Clinekt'
 
   if (isError) {
     return (
@@ -67,108 +89,140 @@ export default function ClientPortalPage() {
     )
   }
 
-  const freelancerName = data?.freelancer.businessName ?? 'Your provider'
-  const pendingCount   = activeInvoices.filter(i => i.status === 'SENT' || i.status === 'OVERDUE' || i.status === 'VIEWED').length
-                        + activeProposals.filter(p => p.status === 'SENT' || p.status === 'OPENED').length
-                        + activeContracts.filter(c => c.status === 'SENT').length
-
   return (
-    <div className="min-h-screen bg-[#F4F5F8]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="min-h-screen bg-[#F4F5F8]">
 
-      {/* Header */}
+      {/* Sticky header */}
       <header className="bg-white border-b border-[#EAECF0] sticky top-0 z-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
             {isLoading ? (
-              <Skeleton className="h-8 w-8 rounded-lg" />
+              <Skeleton className="h-7 w-7 rounded-lg bg-[#F2F4F7]" />
             ) : data?.freelancer.logoUrl ? (
-              <img src={data.freelancer.logoUrl} alt={freelancerName} className="w-8 h-8 rounded-lg object-cover" />
+              <img src={data.freelancer.logoUrl} alt={freelancerName} className="w-7 h-7 rounded-lg object-cover" />
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-[#6366F1] flex items-center justify-center">
-                <span className="text-white text-[13px] font-bold">{freelancerName.charAt(0)}</span>
+              <div className="w-7 h-7 rounded-lg bg-[#0F172A] flex items-center justify-center shrink-0">
+                <span className="text-white text-[11px] font-bold">{freelancerName.charAt(0)}</span>
               </div>
             )}
             {isLoading
-              ? <Skeleton className="h-4 w-32" />
-              : <span className="text-[14px] font-bold text-[#101828]">{freelancerName}</span>
+              ? <Skeleton className="h-3.5 w-28 bg-[#F2F4F7]" />
+              : <span className="text-[13px] font-bold text-[#101828]">{freelancerName}</span>
             }
           </div>
-          <span className="text-[11px] text-[#98A2B3] font-medium">Client Portal</span>
+          <div className="flex items-center gap-1.5 text-[11px] text-[#98A2B3] font-medium">
+            <Shield size={11} />
+            Secured by Clinekt
+          </div>
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+      {/* Dark hero */}
+      <div className="bg-[#0F172A]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-10">
+          {isLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-3.5 w-14 bg-white/10" />
+              <Skeleton className="h-9 w-60 bg-white/10" />
+              <Skeleton className="h-3.5 w-48 bg-white/10" />
+              <div className="flex gap-2 mt-5">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-7 w-20 rounded-full bg-white/10" />)}
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-1">Hello,</p>
+              <h1 className="text-[30px] sm:text-[34px] font-extrabold text-white leading-tight">{data?.client.name}</h1>
+              <p className="text-[13.5px] text-white/50 mt-1.5">
+                Your workspace with <span className="text-white/80 font-medium">{freelancerName}</span>
+              </p>
+              <div className="flex flex-wrap gap-2 mt-5">
+                {[
+                  { label: 'Proposals', count: activeProposals.length },
+                  { label: 'Contracts', count: activeContracts.length },
+                  { label: 'Invoices',  count: activeInvoices.length },
+                  { label: 'Meetings',  count: upcomingMeetings.length },
+                  { label: 'Projects',  count: activeProjects.length },
+                ].filter(s => s.count > 0).map(({ label, count }) => (
+                  <span key={label} className="text-[12px] font-semibold px-3 py-1 rounded-full bg-white/10 text-white/80">
+                    {count} {label}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
-        {/* Greeting */}
-        {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-        ) : (
-          <div>
-            <h1 className="text-[20px] font-bold text-[#101828]">Hi, {data?.client.name} 👋</h1>
-            <p className="text-[13px] text-[#667085] mt-0.5">
-              {pendingCount > 0
-                ? `You have ${pendingCount} item${pendingCount > 1 ? 's' : ''} waiting for your attention`
-                : 'Everything is up to date'}
-            </p>
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 space-y-4">
+
+        {/* Attention banner */}
+        {!isLoading && attentionItems.length > 0 && (
+          <div className="bg-[#FFFAEB] border border-[#FDE68A] rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-[#FDE68A]">
+              <Bell size={13} className="text-[#B45309] shrink-0" />
+              <p className="text-[12.5px] font-bold text-[#92400E]">
+                {attentionItems.length === 1 ? '1 item needs your attention' : `${attentionItems.length} items need your attention`}
+              </p>
+            </div>
+            <div className="divide-y divide-[#FDE68A]">
+              {attentionItems.map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => setTab(item.tab)}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-[#FEF3C7] transition-colors"
+                >
+                  <span className={cn(
+                    'text-[12.5px] font-medium',
+                    item.urgent ? 'text-[#B42318]' : 'text-[#78350F]',
+                  )}>
+                    {item.label}
+                  </span>
+                  <ChevronRight size={12} className="text-[#B45309] shrink-0" />
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Stat chips */}
-        {!isLoading && (
-          <div className="flex flex-wrap gap-2">
-            {[
-              { label: 'Proposals', count: activeProposals.length,   color: 'bg-[#EEF2FF] text-[#4338CA]' },
-              { label: 'Contracts', count: activeContracts.length,   color: 'bg-[#F4F3FF] text-[#5925DC]' },
-              { label: 'Invoices',  count: activeInvoices.length,    color: 'bg-[#ECFDF3] text-[#027A48]' },
-              { label: 'Meetings',  count: upcomingMeetings.length,  color: 'bg-[#FFF1F3] text-[#C01048]' },
-              { label: 'Projects',  count: activeProjects.length,    color: 'bg-[#FFF7ED] text-[#C2410C]' },
-            ].map(({ label, count, color }) => (
-              <span key={label} className={cn('text-[12px] font-semibold px-3 py-1 rounded-full', color)}>
-                {count} {label}
-              </span>
+        {/* Tab bar */}
+        <div className="overflow-x-auto">
+          <div className="flex items-center gap-1 bg-white rounded-xl border border-[#EAECF0] p-1 shadow-sm min-w-fit">
+            {visibleTabs.map(({ key, label, count }) => (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className={cn(
+                  'flex items-center justify-center gap-1.5 py-2 px-4 rounded-lg text-[12.5px] font-semibold transition-all whitespace-nowrap',
+                  tab === key
+                    ? 'bg-[#0F172A] text-white shadow-sm'
+                    : 'text-[#667085] hover:text-[#344054] hover:bg-[#F4F5F8]',
+                )}
+              >
+                {label}
+                {count > 0 && (
+                  <span className={cn(
+                    'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
+                    tab === key ? 'bg-white/20 text-white' : 'bg-[#F2F4F7] text-[#667085]',
+                  )}>
+                    {count}
+                  </span>
+                )}
+              </button>
             ))}
           </div>
-        )}
-
-        {/* Tabs */}
-        <div className="flex items-center gap-1 bg-white rounded-xl border border-[#EAECF0] p-1 shadow-sm">
-          {TABS.map(({ key, label, count }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={cn(
-                'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-[12.5px] font-semibold transition-all',
-                tab === key
-                  ? 'bg-[#0D1117] dark:bg-[#6366F1] text-white shadow-sm'
-                  : 'text-[#667085] hover:text-[#344054] hover:bg-[#F4F5F8]',
-              )}
-            >
-              {label}
-              {count > 0 && (
-                <span className={cn(
-                  'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                  tab === key ? 'bg-white/20 text-white' : 'bg-[#F2F4F7] text-[#667085]',
-                )}>
-                  {count}
-                </span>
-              )}
-            </button>
-          ))}
         </div>
 
         {/* Tab content */}
         {isLoading ? (
           <div className="space-y-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-2xl bg-white" />)}
           </div>
         ) : (
           <>
-            {/* Overview — latest from each */}
             {tab === 'overview' && (
-              <div className="space-y-5">
+              <div className="space-y-3">
                 {activeProposals.length === 0 && activeContracts.length === 0 && activeInvoices.length === 0 && upcomingMeetings.length === 0 ? (
                   <EmptyState label="No documents shared yet" />
                 ) : (
@@ -249,7 +303,9 @@ export default function ClientPortalPage() {
         )}
 
         {/* Footer */}
-        <p className="text-center text-[11px] text-[#C9CDD4] pb-4">Powered by Clinekt</p>
+        <p className="text-center text-[11px] text-[#C9CDD4] pb-4 flex items-center justify-center gap-1.5">
+          <Shield size={10} /> Secured & powered by Clinekt · 2026
+        </p>
       </div>
     </div>
   )
@@ -283,7 +339,6 @@ function PortalProjectCard({ project }: { project: PortalProject }) {
 
   return (
     <div className="bg-white rounded-2xl border border-[#EAECF0] p-4 sm:p-5 space-y-4">
-      {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-[#EEF2FF] flex items-center justify-center shrink-0">
@@ -306,7 +361,6 @@ function PortalProjectCard({ project }: { project: PortalProject }) {
         </span>
       </div>
 
-      {/* Summary chips */}
       <div className="flex flex-wrap gap-2">
         <div className="flex items-center gap-1.5 bg-[#F4F5F8] rounded-lg px-3 py-1.5">
           <Clock size={12} className="text-[#6366F1]" />
@@ -338,7 +392,6 @@ function PortalProjectCard({ project }: { project: PortalProject }) {
         )}
       </div>
 
-      {/* Time log */}
       {project.timeEntries.length > 0 && (
         <div>
           <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-2">Time Log</p>
@@ -355,9 +408,7 @@ function PortalProjectCard({ project }: { project: PortalProject }) {
                   <div>
                     <p className="text-[12.5px] font-semibold text-[#101828]">{(e.durationMins / 60).toFixed(1)}h</p>
                     {project.shareRateWithClient && e.hourlyRate && (
-                      <p className="text-[11px] text-[#98A2B3]">
-                        ₹{Number(e.hourlyRate).toLocaleString('en-IN')}/hr
-                      </p>
+                      <p className="text-[11px] text-[#98A2B3]">₹{Number(e.hourlyRate).toLocaleString('en-IN')}/hr</p>
                     )}
                   </div>
                   {e.isBilled && (
@@ -370,7 +421,6 @@ function PortalProjectCard({ project }: { project: PortalProject }) {
         </div>
       )}
 
-      {/* Billable expenses */}
       {project.expenses.length > 0 && (
         <div>
           <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-2">Expenses</p>
@@ -447,9 +497,9 @@ function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
           href={meeting.meetLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
+          className="mt-3 flex items-center justify-center gap-1.5 h-9 rounded-xl bg-[#0F172A] text-white text-[12.5px] font-semibold hover:bg-[#1e293b] transition-colors"
         >
-          <Video size={12} /> Join Meeting <ExternalLink size={10} />
+          <Video size={13} /> Join Meeting <ExternalLink size={11} />
         </a>
       )}
     </div>
