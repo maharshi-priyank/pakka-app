@@ -21,8 +21,7 @@ export function initNewRelic(): void {
       privacy:               { cookies_enabled: true },
       browser_consent_mode:  { enabled: false },
       ajax: {
-        deny_list:       ['bam.nr-data.net'],
-        capture_payloads: 'none' as never,
+        deny_list: ['bam.nr-data.net'],
       },
       performance: {
         capture_marks:    false,
