@@ -18,7 +18,9 @@ export interface Meeting {
   scheduledAt:  string
   durationMins: number
   meetLink:     string | null
-  googleEventId: string | null
+  googleEventId:  string | null
+  outlookEventId: string | null
+  meetProvider:   string | null
   status:       MeetingStatus
   reminderSent: boolean
   createdAt:    string
@@ -33,6 +35,7 @@ export interface CreateMeetingDto {
   leadId?:      string
   clientId?:    string
   guestEmails?: string[]
+  provider?:    'google' | 'outlook'
 }
 
 export interface UpdateMeetingDto extends Partial<CreateMeetingDto> {}
@@ -65,6 +68,20 @@ export function useMeetings(query?: { status?: MeetingStatus; page?: number; lim
       if (query?.limit)  params.set('limit',  String(query.limit))
       return api.get(`/meetings?${params}`).then(r => r.data.data as { items: Meeting[]; total: number; page: number; limit: number })
     },
+  })
+}
+
+export function useCheckConflicts(params: { scheduledAt?: string; durationMins?: number; provider?: 'google' | 'outlook' } | null) {
+  return useQuery({
+    queryKey: ['meetings', 'conflicts', params],
+    queryFn:  async () => {
+      if (!params?.scheduledAt) return { hasConflict: false, conflicts: [] as { title: string; start: string; end: string }[] }
+      const p = new URLSearchParams({ scheduledAt: params.scheduledAt, durationMins: String(params.durationMins ?? 30) })
+      if (params.provider) p.set('provider', params.provider)
+      return api.get<{ data: { hasConflict: boolean; conflicts: { title: string; start: string; end: string }[] } }>(`/meetings/check-conflicts?${p}`).then(r => r.data.data)
+    },
+    enabled:   !!params?.scheduledAt,
+    staleTime: 30_000,
   })
 }
 

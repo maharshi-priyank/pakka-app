@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CalendarDays, Video, ExternalLink, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { CalendarDays, Video, ExternalLink, CheckCircle2, XCircle, Loader2, Mail } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useMeetings, useCompleteMeeting, useCancelMeeting, type Meeting, type MeetingStatus } from '@/features/meetings/hooks/useMeetings'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
@@ -53,9 +53,17 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
             href={meeting.meetLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399] text-[11px] font-semibold hover:bg-[#D1FAE5] dark:hover:bg-emerald-900/40 transition-colors"
+            className={cn(
+              'flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-colors',
+              meeting.meetProvider === 'outlook'
+                ? 'bg-[#EFF6FF] dark:bg-blue-950/40 text-[#0078D4] dark:text-[#60A5FA] hover:bg-[#DBEAFE] dark:hover:bg-blue-900/40'
+                : 'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399] hover:bg-[#D1FAE5] dark:hover:bg-emerald-900/40',
+            )}
+            title={meeting.meetProvider === 'outlook' ? 'Join Teams meeting' : 'Join Google Meet'}
           >
-            <Video size={10} /> <span className="hidden sm:inline">Join</span> <ExternalLink size={9} />
+            {meeting.meetProvider === 'outlook' ? <Mail size={10} /> : <Video size={10} />}
+            <span className="hidden sm:inline">Join</span>
+            <ExternalLink size={9} />
           </a>
         )}
         {meeting.status === 'SCHEDULED' && (

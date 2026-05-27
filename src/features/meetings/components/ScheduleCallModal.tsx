@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { X, Video, AlertTriangle, Loader2, UserRound, Building2, Plus } from 'lucide-react'
+import { X, Video, AlertTriangle, Loader2, UserRound, Building2, Plus, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useCreateMeeting, type CreateMeetingDto } from '../hooks/useMeetings'
+import { useCreateMeeting, useCheckConflicts, type CreateMeetingDto } from '../hooks/useMeetings'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useLeads } from '@/features/leads/hooks/useLeads'
 import { useClients } from '@/features/clients/hooks/useClients'
@@ -62,6 +62,12 @@ export default function ScheduleCallModal({
   const { data: profile } = useProfile()
   const createMeeting     = useCreateMeeting()
 
+  const bothConnected = !!(profile?.googleCalendarConnected && profile?.outlookConnected)
+  const [provider, setProvider] = useState<'google' | 'outlook'>('google')
+  const [conflictDate, setConflictDate] = useState(todayDateStr)
+  const [conflictTime, setConflictTime] = useState(nextHalfHourStr)
+  const [conflictDuration, setConflictDuration] = useState(30)
+
   const [contact,       setContact]       = useState<SelectedContact | null>(null)
   const [contactSearch, setContactSearch] = useState('')
   const [dropdownOpen,  setDropdownOpen]  = useState(false)
@@ -70,6 +76,19 @@ export default function ScheduleCallModal({
   const [guestInput,  setGuestInput]  = useState('')
   const [guestEmails, setGuestEmails] = useState<string[]>([])
   const [guestError,  setGuestError]  = useState('')
+
+  const hasCalendar = profile?.googleCalendarConnected || profile?.outlookConnected
+  const conflictScheduledAt = conflictDate && conflictTime
+    ? new Date(`${conflictDate}T${conflictTime}:00`).toISOString()
+    : undefined
+  const activeProvider = bothConnected
+    ? provider
+    : profile?.googleCalendarConnected ? 'google' : profile?.outlookConnected ? 'outlook' : undefined
+  const { data: conflictData } = useCheckConflicts(
+    hasCalendar && conflictScheduledAt
+      ? { scheduledAt: conflictScheduledAt, durationMins: conflictDuration, provider: activeProvider }
+      : null
+  )
 
   const { data: leadsData }   = useLeads({ search: contactSearch, limit: 5 })
   const { data: clientsData } = useClients(contactSearch)
@@ -98,7 +117,12 @@ export default function ScheduleCallModal({
 
   useEffect(() => {
     if (!open) return
-    reset({ title: defaultTitle, date: todayDateStr(), time: nextHalfHourStr(), durationMins: 30, agenda: '' })
+    const date = todayDateStr()
+    const time = nextHalfHourStr()
+    reset({ title: defaultTitle, date, time, durationMins: 30, agenda: '' })
+    setConflictDate(date)
+    setConflictTime(time)
+    setConflictDuration(30)
     setContactSearch('')
     setDropdownOpen(false)
     setGuestEmails([])
@@ -162,6 +186,7 @@ export default function ScheduleCallModal({
       leadId:       contact?.type === 'lead'   ? contact.id : undefined,
       clientId:     contact?.type === 'client' ? contact.id : undefined,
       guestEmails:  guestEmails.length > 0 ? guestEmails : undefined,
+      provider:     activeProvider,
     }
     createMeeting.mutate(dto, {
       onSuccess: (meeting) => { onSuccess?.(meeting.meetLink); onClose() },
@@ -186,13 +211,48 @@ export default function ScheduleCallModal({
                 ? 'A Google Calendar invite with Meet link will be sent.'
                 : profile?.outlookConnected
                   ? 'An Outlook Calendar invite with Teams link will be sent.'
-                  : 'Connect Google or Outlook Calendar to auto-generate a meeting link.'}
+                  : 'Connect Google Calendar or Outlook to auto-generate a meeting link.'}
             </p>
           </div>
           <button onClick={onClose} className="text-[#98A2B3] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors ml-4">
             <X size={18} />
           </button>
         </div>
+
+        {/* Provider selector — only shown when both integrations are active */}
+        {bothConnected && (
+          <div className="mx-6 mt-4 flex items-center gap-2">
+            <span className="text-[12px] text-[#667085] dark:text-[#8B92A8] font-medium shrink-0">Meeting via:</span>
+            <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#F2F4F7] dark:bg-[#21222D] border border-[#EAECF0] dark:border-[#3D4258]">
+              <button
+                type="button"
+                onClick={() => setProvider('google')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1 rounded-md text-[12px] font-semibold transition-all',
+                  provider === 'google'
+                    ? 'bg-white dark:bg-[#13141A] text-[#101828] dark:text-[#ECEEF3] shadow-sm'
+                    : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+                )}
+              >
+                <Video size={12} />
+                Google Meet
+              </button>
+              <button
+                type="button"
+                onClick={() => setProvider('outlook')}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1 rounded-md text-[12px] font-semibold transition-all',
+                  provider === 'outlook'
+                    ? 'bg-white dark:bg-[#13141A] text-[#101828] dark:text-[#ECEEF3] shadow-sm'
+                    : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+                )}
+              >
+                <Mail size={12} />
+                Teams
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* No calendar connected banner */}
         {profile && !profile.googleCalendarConnected && !profile.outlookConnected && (
@@ -329,7 +389,7 @@ export default function ScheduleCallModal({
               <label className={labelCls}>Date *</label>
               <input
                 type="date"
-                {...register('date', { required: 'Date is required' })}
+                {...register('date', { required: 'Date is required', onChange: e => setConflictDate(e.target.value) })}
                 min={todayDateStr()}
                 className={inputCls}
               />
@@ -339,17 +399,32 @@ export default function ScheduleCallModal({
               <input
                 type="time"
                 step="900"
-                {...register('time', { required: 'Time is required' })}
+                {...register('time', { required: 'Time is required', onChange: e => setConflictTime(e.target.value) })}
                 className={inputCls}
               />
             </div>
           </div>
 
+          {/* Conflict warning */}
+          {conflictData?.hasConflict && (
+            <div className="flex items-start gap-2.5 bg-[#FFFAEB] dark:bg-amber-950/30 border border-[#FEF0C7] dark:border-amber-800/40 rounded-xl px-4 py-3">
+              <AlertTriangle size={14} className="text-[#B54708] shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[12px] font-semibold text-[#B54708] dark:text-amber-400">
+                  Calendar conflict detected
+                </p>
+                <p className="text-[11px] text-[#B54708]/80 dark:text-amber-500 mt-0.5">
+                  {conflictData.conflicts.map(c => c.title).join(', ')} already scheduled at this time.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Duration */}
           <div>
             <label className={labelCls}>Duration</label>
             <select
-              {...register('durationMins')}
+              {...register('durationMins', { onChange: e => setConflictDuration(Number(e.target.value)) })}
               className={inputCls}
             >
               {DURATION_OPTIONS.map(opt => (

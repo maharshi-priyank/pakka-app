@@ -20,9 +20,9 @@ export interface UserProfile {
   bankAccountNumber: string | null
   bankIfsc:          string | null
   upiId:                    string | null
-  googleCalendarConnected:  boolean
-  outlookConnected:         boolean
-  createdAt:                string
+  googleCalendarConnected: boolean
+  outlookConnected:        boolean
+  createdAt:               string
 }
 
 export function useProfile() {
