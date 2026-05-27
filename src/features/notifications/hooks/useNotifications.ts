@@ -21,8 +21,8 @@ export function useNotifications() {
   return useQuery<AppNotification[]>({
     queryKey:       ['notifications'],
     queryFn:        () => api.get('/notifications').then(r => r.data.data),
-    refetchInterval: 30_000,
-    staleTime:      15_000,
+    refetchInterval: 300_000,
+    staleTime:      300_000,
   })
 }
 
@@ -32,8 +32,8 @@ export function useUnreadCount() {
     queryFn:         () =>
       api.get<{ data: UnreadCountResponse }>('/notifications/unread-count')
         .then(r => r.data.data.count),
-    refetchInterval: 30_000,
-    staleTime:       15_000,
+    refetchInterval: 300_000,
+    staleTime:       300_000,
   })
 }
 
