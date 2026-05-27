@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { CalendarDays, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { CalendarDays, CheckCircle2, AlertCircle, Loader2, Mail } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useProfile } from '../hooks/useProfile'
 
@@ -20,19 +20,124 @@ function useDisconnectGoogle() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: () => api.post('/auth/google/disconnect'),
-    onSuccess:  () => {
-      qc.invalidateQueries({ queryKey: ['profile'] })
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['profile'] }),
+  })
+}
+
+function useConnectOutlook() {
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.get<{ data: { authUrl: string } }>('/auth/microsoft/connect')
+      return data.data.authUrl
+    },
+    onSuccess: (authUrl) => {
+      window.location.href = authUrl
     },
   })
 }
 
-export default function IntegrationsTab() {
-  const { data: profile, isLoading } = useProfile()
-  const connect    = useConnectGoogle()
-  const disconnect = useDisconnectGoogle()
+function useDisconnectOutlook() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post('/auth/microsoft/disconnect'),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: ['profile'] }),
+  })
+}
+
+interface IntegrationCardProps {
+  icon:        React.ReactNode
+  iconBg:      string
+  title:       string
+  description: string
+  isLoading:   boolean
+  isConnected: boolean
+  connectLabel: string
+  onConnect:   () => void
+  onDisconnect: () => void
+  connectPending:    boolean
+  disconnectPending: boolean
+}
+
+function IntegrationCard({
+  icon, iconBg, title, description,
+  isLoading, isConnected,
+  connectLabel, onConnect, onDisconnect,
+  connectPending, disconnectPending,
+}: IntegrationCardProps) {
   const [confirmDisconnect, setConfirmDisconnect] = useState(false)
 
-  const isConnected = profile?.googleCalendarConnected ?? false
+  return (
+    <div className="card p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
+            {icon}
+          </div>
+          <div>
+            <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
+            <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5 max-w-sm">{description}</p>
+            {isConnected && (
+              <div className="flex items-center gap-1.5 mt-2">
+                <CheckCircle2 size={13} className="text-[#027A48] dark:text-[#34D399]" />
+                <span className="text-[12px] font-semibold text-[#027A48] dark:text-[#34D399]">Connected</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          {isLoading ? (
+            <div className="w-8 h-8 flex items-center justify-center">
+              <Loader2 size={16} className="animate-spin text-[#98A2B3]" />
+            </div>
+          ) : isConnected ? (
+            confirmDisconnect ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setConfirmDisconnect(false)}
+                  className="text-[12px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { onDisconnect(); setConfirmDisconnect(false) }}
+                  disabled={disconnectPending}
+                  className="px-3 py-1.5 rounded-lg bg-[#FEF3F2] dark:bg-red-950/40 text-[#D92D20] dark:text-red-400 text-[12px] font-semibold hover:bg-[#FEE2E2] dark:hover:bg-red-950/60 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {disconnectPending ? <Loader2 size={12} className="animate-spin" /> : <AlertCircle size={12} />}
+                  Confirm disconnect
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDisconnect(true)}
+                className="px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
+              >
+                Disconnect
+              </button>
+            )
+          ) : (
+            <button
+              onClick={onConnect}
+              disabled={connectPending}
+              className="px-4 py-1.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-1.5"
+            >
+              {connectPending ? <Loader2 size={12} className="animate-spin" /> : null}
+              {connectLabel}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function IntegrationsTab() {
+  const { data: profile, isLoading } = useProfile()
+  const connectGoogle    = useConnectGoogle()
+  const disconnectGoogle = useDisconnectGoogle()
+  const connectOutlook    = useConnectOutlook()
+  const disconnectOutlook = useDisconnectOutlook()
 
   return (
     <div className="space-y-4">
@@ -41,71 +146,33 @@ export default function IntegrationsTab() {
         <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Connect third-party services to enhance your workflow.</p>
       </div>
 
-      {/* Google Calendar card */}
-      <div className="card p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[#ECFDF3] dark:bg-emerald-950/40 flex items-center justify-center shrink-0">
-              <CalendarDays size={18} className="text-[#027A48] dark:text-[#34D399]" />
-            </div>
-            <div>
-              <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Google Calendar</p>
-              <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5 max-w-sm">
-                Auto-generate Google Meet links and send calendar invites to clients when scheduling calls from leads or client drawers.
-              </p>
-              {isConnected && (
-                <div className="flex items-center gap-1.5 mt-2">
-                  <CheckCircle2 size={13} className="text-[#027A48] dark:text-[#34D399]" />
-                  <span className="text-[12px] font-semibold text-[#027A48] dark:text-[#34D399]">Connected</span>
-                </div>
-              )}
-            </div>
-          </div>
+      <IntegrationCard
+        icon={<CalendarDays size={18} className="text-[#027A48] dark:text-[#34D399]" />}
+        iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40"
+        title="Google Calendar"
+        description="Auto-generate Google Meet links and send calendar invites to clients when scheduling calls from leads or client drawers."
+        isLoading={isLoading}
+        isConnected={profile?.googleCalendarConnected ?? false}
+        connectLabel="Connect Google Calendar"
+        onConnect={() => connectGoogle.mutate()}
+        onDisconnect={() => disconnectGoogle.mutate()}
+        connectPending={connectGoogle.isPending}
+        disconnectPending={disconnectGoogle.isPending}
+      />
 
-          <div className="shrink-0">
-            {isLoading ? (
-              <div className="w-8 h-8 flex items-center justify-center">
-                <Loader2 size={16} className="animate-spin text-[#98A2B3]" />
-              </div>
-            ) : isConnected ? (
-              confirmDisconnect ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setConfirmDisconnect(false)}
-                    className="text-[12px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => { disconnect.mutate(); setConfirmDisconnect(false) }}
-                    disabled={disconnect.isPending}
-                    className="px-3 py-1.5 rounded-lg bg-[#FEF3F2] dark:bg-red-950/40 text-[#D92D20] dark:text-red-400 text-[12px] font-semibold hover:bg-[#FEE2E2] dark:hover:bg-red-950/60 transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                  >
-                    {disconnect.isPending ? <Loader2 size={12} className="animate-spin" /> : <AlertCircle size={12} />}
-                    Confirm disconnect
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setConfirmDisconnect(true)}
-                  className="px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
-                >
-                  Disconnect
-                </button>
-              )
-            ) : (
-              <button
-                onClick={() => connect.mutate()}
-                disabled={connect.isPending}
-                className="px-4 py-1.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-1.5"
-              >
-                {connect.isPending ? <Loader2 size={12} className="animate-spin" /> : <CalendarDays size={12} />}
-                Connect Google Calendar
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <IntegrationCard
+        icon={<Mail size={18} className="text-[#0078D4]" />}
+        iconBg="bg-[#EFF6FF] dark:bg-blue-950/40"
+        title="Outlook Calendar"
+        description="Auto-generate Microsoft Teams meeting links and send calendar invites to clients when scheduling calls. Connects via your Microsoft 365 account."
+        isLoading={isLoading}
+        isConnected={profile?.outlookConnected ?? false}
+        connectLabel="Connect Outlook"
+        onConnect={() => connectOutlook.mutate()}
+        onDisconnect={() => disconnectOutlook.mutate()}
+        connectPending={connectOutlook.isPending}
+        disconnectPending={disconnectOutlook.isPending}
+      />
     </div>
   )
 }
