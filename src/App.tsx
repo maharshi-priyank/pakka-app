@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { RouterProvider } from 'react-router-dom'
-import { setCurrentRouteName, setCustomAttribute } from '@/lib/newrelic'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from 'sonner'
@@ -9,14 +8,15 @@ import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { queryClient } from '@/lib/queryClient'
 import { router } from '@/router'
+import UpgradeModal from '@/components/UpgradeModal'
+import PWAInstallPrompt from '@/components/PWAInstallPrompt'
+import PWAUpdatePrompt from '@/components/PWAUpdatePrompt'
+import { setCurrentRouteName, setCustomAttribute } from '@/lib/newrelic'
 
 // Track route changes for New Relic SPA monitoring
 router.subscribe(({ location }) => {
   setCurrentRouteName(location.pathname)
 })
-import UpgradeModal from '@/components/UpgradeModal'
-import PWAInstallPrompt from '@/components/PWAInstallPrompt'
-import PWAUpdatePrompt from '@/components/PWAUpdatePrompt'
 
 // Module-level guard — sync at most once per authenticated user ID.
 // Prevents duplicate calls from getSession + onAuthStateChange both firing,

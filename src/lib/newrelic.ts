@@ -1,66 +1,41 @@
-import { BrowserAgent } from '@newrelic/browser-agent/loaders/browser-agent'
+// The New Relic SPA agent is loaded via CDN in index.html and exposes window.newrelic.
+// All calls here are safe no-ops when the agent is absent (ad-blockers, SSR, etc).
 
-// Resolved at build time from VITE_* env vars — empty string = disabled
-const LICENSE_KEY  = import.meta.env.VITE_NEW_RELIC_LICENSE_KEY  ?? ''
-const APP_ID       = import.meta.env.VITE_NEW_RELIC_APP_ID        ?? ''
-const ACCOUNT_ID   = import.meta.env.VITE_NEW_RELIC_ACCOUNT_ID    ?? ''
-const TRUST_KEY    = import.meta.env.VITE_NEW_RELIC_TRUST_KEY     ?? ACCOUNT_ID
-
-let agent: BrowserAgent | null = null
-
-/**
- * Call once before React mounts.
- * No-op when env vars are absent so dev/local environments are unaffected.
- */
-export function initNewRelic(): void {
-  if (!LICENSE_KEY || !APP_ID || !ACCOUNT_ID) return
-
-  agent = new BrowserAgent({
-    init: {
-      distributed_tracing:  { enabled: true },
-      privacy:               { cookies_enabled: true },
-      browser_consent_mode:  { enabled: false },
-      ajax: {
-        deny_list: ['bam.nr-data.net'],
-      },
-      performance: {
-        capture_marks:    false,
-        capture_measures: true,
-      },
-    },
-    info: {
-      beacon:        'bam.nr-data.net',
-      errorBeacon:   'bam.nr-data.net',
-      licenseKey:    LICENSE_KEY,
-      applicationID: APP_ID,
-      sa:            1,
-    },
-    loader_config: {
-      accountID:     ACCOUNT_ID,
-      trustKey:      TRUST_KEY,
-      agentID:       APP_ID,
-      licenseKey:    LICENSE_KEY,
-      applicationID: APP_ID,
-    },
-  })
+interface NrAgent {
+  noticeError(error: Error | string, attributes?: Record<string, string | number | boolean>): void
+  setCurrentRouteName(name: string): void
+  setCustomAttribute(key: string, value: string | number | boolean): void
+  addPageAction(name: string, attributes?: Record<string, string | number | boolean>): void
+  recordCustomEvent(eventType: string, attributes?: Record<string, string | number | boolean>): void
 }
 
-/** Report a caught JS error to New Relic Errors Inbox */
+declare global {
+  interface Window { newrelic?: NrAgent }
+}
+
+function nr(): NrAgent | undefined {
+  return window.newrelic
+}
+
+// Called in main.tsx — nothing to init, agent starts from index.html
+export function initNewRelic(): void { /* no-op: CDN loader handles init */ }
+
+/** Report a caught error to New Relic Errors Inbox */
 export function noticeError(error: Error, attributes?: Record<string, string | number | boolean>): void {
-  agent?.noticeError(error, attributes)
+  nr()?.noticeError(error, attributes)
 }
 
-/** Tag the current page view (called on route change) */
+/** Tag the current SPA route for page view grouping */
 export function setCurrentRouteName(name: string): void {
-  agent?.setCurrentRouteName(name)
+  nr()?.setCurrentRouteName(name)
 }
 
-/** Attach a custom attribute to all subsequent events in this session */
+/** Attach a custom attribute to all events in this session (e.g. userId) */
 export function setCustomAttribute(key: string, value: string | number | boolean): void {
-  agent?.setCustomAttribute(key, value)
+  nr()?.setCustomAttribute(key, value)
 }
 
-/** Record a custom event visible in NRQL queries */
-export function recordCustomEvent(eventType: string, attributes: Record<string, string | number | boolean>): void {
-  agent?.recordCustomEvent(eventType, attributes)
+/** Record a named custom event queryable via NRQL */
+export function recordCustomEvent(eventType: string, attributes?: Record<string, string | number | boolean>): void {
+  nr()?.recordCustomEvent(eventType, attributes)
 }

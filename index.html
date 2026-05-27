@@ -32,6 +32,33 @@
     <meta name="twitter:description" content="GST invoices, e-signed contracts, UPI payments, WhatsApp reminders — all in one place." />
     <meta name="twitter:image" content="/pwa-512x512.png" />
 
+    <!-- New Relic Browser Agent (SPA loader) — must be first in head -->
+    <script type="text/javascript">
+      window.NREUM||(NREUM={});
+      NREUM.init={
+        distributed_tracing:{enabled:true},
+        performance:{capture_marks:false,capture_measures:true},
+        browser_consent_mode:{enabled:false},
+        privacy:{cookies_enabled:true},
+        ajax:{deny_list:["bam.nr-data.net"]}
+      };
+      NREUM.loader_config={
+        accountID:"8105622",
+        trustKey:"8105622",
+        agentID:"1431933170",
+        licenseKey:"NRJS-dd5a321c4dc5326fb06",
+        applicationID:"1431933170"
+      };
+      NREUM.info={
+        beacon:"bam.nr-data.net",
+        errorBeacon:"bam.nr-data.net",
+        licenseKey:"NRJS-dd5a321c4dc5326fb06",
+        applicationID:"1431933170",
+        sa:1
+      };
+    </script>
+    <script src="https://js-agent.newrelic.com/nr-loader-spa-1.315.0.min.js"></script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
