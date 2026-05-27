@@ -21,6 +21,7 @@ export interface UserProfile {
   bankIfsc:          string | null
   upiId:                    string | null
   googleCalendarConnected:  boolean
+  outlookConnected:         boolean
   createdAt:                string
 }
 

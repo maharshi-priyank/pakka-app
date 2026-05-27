@@ -184,7 +184,9 @@ export default function ScheduleCallModal({
             <p className="text-[12px] text-[#8A94A6] dark:text-[#545C74] mt-0.5">
               {profile?.googleCalendarConnected
                 ? 'A Google Calendar invite with Meet link will be sent.'
-                : 'Connect Google Calendar to auto-generate a Meet link.'}
+                : profile?.outlookConnected
+                  ? 'An Outlook Calendar invite with Teams link will be sent.'
+                  : 'Connect Google or Outlook Calendar to auto-generate a meeting link.'}
             </p>
           </div>
           <button onClick={onClose} className="text-[#98A2B3] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors ml-4">
@@ -192,15 +194,15 @@ export default function ScheduleCallModal({
           </button>
         </div>
 
-        {/* Google Calendar not connected banner */}
-        {profile && !profile.googleCalendarConnected && (
+        {/* No calendar connected banner */}
+        {profile && !profile.googleCalendarConnected && !profile.outlookConnected && (
           <div className="mx-6 mt-4 flex items-start gap-2.5 bg-[#FFFAEB] dark:bg-amber-950/30 border border-[#FEF0C7] dark:border-amber-800/40 rounded-xl px-4 py-3">
             <AlertTriangle size={14} className="text-[#B54708] shrink-0 mt-0.5" />
             <p className="text-[12px] text-[#B54708] dark:text-amber-400">
               <Link to="/app/settings?tab=integrations" className="font-semibold underline" onClick={onClose}>
-                Connect Google Calendar
+                Connect Google Calendar or Outlook
               </Link>{' '}
-              in Settings to auto-generate a Meet link when scheduling calls.
+              in Settings to auto-generate a meeting link when scheduling calls.
             </p>
           </div>
         )}
