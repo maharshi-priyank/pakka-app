@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
 
+@font-face {
+  font-family: 'Roca Two';
+  src: url('/roca-two-font/fonnts.com-Roca_Two_Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ─── Dark-mode variant ──────────────────────────────────────────────────────
    Enables dark: utilities when .dark is on <html>.
 */

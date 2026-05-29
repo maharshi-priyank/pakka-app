@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { generateInitials } from '@/lib/utils'
-import { LogOut, ChevronDown, Sun, Moon } from 'lucide-react'
+import { LogOut, ChevronDown, Sun, Moon, Search } from 'lucide-react'
 import NotificationBell from '@/features/notifications/components/NotificationBell'
 import CalendarBell     from '@/features/meetings/components/CalendarBell'
 import { useThemeToggle } from '@/hooks/useThemeToggle'
@@ -25,12 +25,13 @@ export default function Topbar({ onMenuToggle: _onMenuToggle }: Props) {
   return (
     <header className="h-[56px] lg:h-[60px] bg-white dark:bg-[#13141A] border-b border-[#EAECF0] dark:border-[#26283A] flex items-center justify-between px-4 lg:px-6 shrink-0 transition-colors">
 
-      {/* Logo */}
-      <div className="flex items-center">
-        <img
-          src={isDark ? '/logo/full_logo_dark_theme.svg' : '/logo/full_logo.svg'}
-          alt="Clinekt"
-          className="h-6 w-auto"
+      {/* Search */}
+      <div className="relative flex items-center">
+        <Search size={14} className="absolute left-3 text-[#98A2B3] dark:text-[#545C74] pointer-events-none" strokeWidth={2} />
+        <input
+          type="text"
+          placeholder="Search..."
+          className="h-9 w-56 lg:w-72 pl-8 pr-3 rounded-lg text-[13px] bg-[#F5F6FA] dark:bg-[#1A1B23] border border-transparent focus:border-[#2563EB] focus:bg-white dark:focus:bg-[#13141A] text-[#101828] dark:text-[#ECEEF3] placeholder-[#98A2B3] dark:placeholder-[#545C74] outline-none transition-all"
         />
       </div>
 

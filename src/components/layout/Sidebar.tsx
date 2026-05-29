@@ -107,11 +107,9 @@ export default function Sidebar({ onClose }: Props) {
 
       {/* Logo */}
       <div className="h-[60px] flex items-center justify-between px-5 border-b border-white/[0.06] shrink-0">
-        <img
-          src="/logo/full_logo_dark_theme.svg"
-          alt="Clinekt"
-          className="h-7 w-auto"
-        />
+        <span style={{ fontFamily: "'Roca Two', serif", fontWeight: 700, fontSize: 26, letterSpacing: '-0.06em', color: '#ffffff', lineHeight: 1 }}>
+          Rupway
+        </span>
         {onClose && (
           <button
             onClick={onClose}
