@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
-  Receipt, Building2, Settings, X, CalendarDays, ClipboardList, Zap, Clock, Wallet, BarChart3, FolderKanban, GripVertical,
+  Receipt, Building2, Settings, X, CalendarDays, ClipboardList, Zap, Clock, Wallet, BarChart3, FolderKanban, GripVertical, Mail,
 } from 'lucide-react'
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
@@ -167,6 +167,29 @@ export default function Sidebar({ onClose }: Props) {
           <GripVertical size={14} className="text-white/25 shrink-0" />
           Customise
         </button>
+        <NavLink
+          to="/app/email-templates"
+          onClick={onClose}
+          className={({ isActive }) =>
+            cn(
+              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-100',
+              isActive
+                ? 'bg-[#2563EB] text-white shadow-sm'
+                : 'text-white/50 hover:text-white hover:bg-white/[0.07]',
+            )
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <Mail
+                size={15}
+                strokeWidth={isActive ? 2.5 : 2}
+                className={cn('shrink-0 transition-colors', isActive ? 'text-white' : 'text-white/40')}
+              />
+              Email Templates
+            </>
+          )}
+        </NavLink>
         <NavLink
           to="/app/settings"
           id="tour-settings"

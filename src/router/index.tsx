@@ -267,6 +267,13 @@ export const router = createBrowserRouter([
               return { Component }
             },
           },
+          {
+            path: '/app/email-templates',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/EmailTemplatesPage')
+              return { Component }
+            },
+          },
         ],
       },
     ],
