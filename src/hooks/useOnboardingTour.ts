@@ -29,7 +29,7 @@ export function useOnboardingTour() {
       steps: [
         {
           popover: {
-            title: `${icon(ICONS.sparkle)}Welcome to Clinekt!`,
+            title: `${icon(ICONS.sparkle)}Welcome to Rupway!`,
             description: "Let's take a quick 30-second tour so you know exactly where everything is.",
             side: 'over',
             align: 'center',
@@ -63,7 +63,7 @@ export function useOnboardingTour() {
           element: '#tour-invoices',
           popover: {
             title: 'Invoices',
-            description: 'Generate GST-compliant invoices and collect payments via Razorpay — directly from Clinekt.',
+            description: 'Generate GST-compliant invoices and collect payments via Razorpay — directly from Rupway.',
             side: 'right',
           },
         },

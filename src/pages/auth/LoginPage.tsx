@@ -40,7 +40,7 @@ export default function LoginPage() {
       {/* ── Left panel ─────────────────────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col px-10 py-8">
         {/* Logo — top left */}
-        <img src="/logo/full_logo_dark_theme.svg" alt="Clinekt" className="h-10 w-auto self-start" />
+        <span style={{ fontFamily: "'Roca Two', serif", fontWeight: 700, fontSize: 30, letterSpacing: '-0.06em', color: '#ffffff', lineHeight: 1 }}>Rupway</span>
 
         {/* Spacer — pushes heading to vertical middle */}
         <div className="flex-1" />
@@ -67,11 +67,11 @@ export default function LoginPage() {
 
           {/* Mobile logo */}
           <div className="lg:hidden mb-8 flex justify-center">
-            <img src="/logo/full_logo.svg" alt="Clinekt" className="h-8 w-auto" />
+            <span style={{ fontFamily: "'Roca Two', serif", fontWeight: 700, fontSize: 28, letterSpacing: '-0.06em', color: '#0f172a', lineHeight: 1 }}>Rupway</span>
           </div>
 
           <h1 className="text-[26px] font-black text-[#0F172A] tracking-tight mb-1">Welcome back</h1>
-          <p className="text-[14px] text-[#64748B] mb-8">Sign in to your Clinekt account</p>
+          <p className="text-[14px] text-[#64748B] mb-8">Sign in to your Rupway account</p>
 
           {serverError && (
             <div className="mb-5 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-[13px] text-red-600">

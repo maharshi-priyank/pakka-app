@@ -23,8 +23,8 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 
 export const DEFAULT_ORDER = WIDGET_REGISTRY.map(w => w.id)
 
-const ORDER_KEY  = 'clinekt_dash_order_v2'
-const HIDDEN_KEY = 'clinekt_dash_hidden_v2'
+const ORDER_KEY  = 'rupway_dash_order_v2'
+const HIDDEN_KEY = 'rupway_dash_hidden_v2'
 
 export function loadDashboardState(): { order: string[]; hidden: string[] } {
   try {
@@ -51,7 +51,7 @@ export function getWidgetMeta(id: string): WidgetMeta | undefined {
 
 // ─── Widget size overrides ────────────────────────────────────────────────────
 
-const SIZES_KEY = 'clinekt_dash_sizes_v2'
+const SIZES_KEY = 'rupway_dash_sizes_v2'
 
 export function loadWidgetSizes(): Record<string, 1 | 2 | 4> {
   try {

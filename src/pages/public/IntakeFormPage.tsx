@@ -272,7 +272,7 @@ export default function IntakeFormPage() {
           </form>
         </div>
 
-        <p className="text-center text-[11px] text-[#D0D5DD]">Powered by Clinekt</p>
+        <p className="text-center text-[11px] text-[#D0D5DD]">Powered by Rupway</p>
       </div>
     </div>
   )

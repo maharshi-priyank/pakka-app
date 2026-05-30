@@ -150,7 +150,7 @@ export default function ContractSignPage() {
             </button>
             <div className="flex items-center gap-1.5 text-[11px] text-[#667085]">
               <Lock size={11} strokeWidth={2} />
-              Secure · Powered by Clinekt
+              Secure · Powered by Rupway
             </div>
           </div>
         </div>
@@ -415,7 +415,7 @@ export default function ContractSignPage() {
         )}
 
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
-          Contract by {senderName} · {contract.user.email} · Powered by Clinekt
+          Contract by {senderName} · {contract.user.email} · Powered by Rupway
         </div>
       </div>
     </div>

@@ -100,7 +100,7 @@ export default function ClientPortalPage() {
       .map(p => ({ label: `"${p.title}" awaits your response`, tab: 'proposals' as Tab })),
   ] : []
 
-  const freelancerName = data?.freelancer.businessName ?? 'Clinekt'
+  const freelancerName = data?.freelancer.businessName ?? 'Rupway'
 
   if (isError) {
     return (
@@ -135,7 +135,7 @@ export default function ClientPortalPage() {
             <span className="text-[13px] font-bold text-[#101828]">{freelancerName}</span>
           </div>
           <div className="flex items-center gap-1.5 text-[11px] text-[#98A2B3] font-medium">
-            <Shield size={11} /> Secured by Clinekt
+            <Shield size={11} /> Secured by Rupway
           </div>
         </div>
       </header>
@@ -214,7 +214,7 @@ export default function ClientPortalPage() {
             {/* Footer */}
             <div className="px-4 py-3 border-t border-[#F2F4F7]">
               <p className="text-[10.5px] text-[#C9CDD4] flex items-center gap-1.5">
-                <Shield size={10} /> Secured & powered by Clinekt
+                <Shield size={10} /> Secured & powered by Rupway
               </p>
             </div>
           </div>

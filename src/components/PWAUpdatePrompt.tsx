@@ -22,7 +22,7 @@ export default function PWAUpdatePrompt() {
 
   useEffect(() => {
     if (!needRefresh) return
-    toast.message('A new version of Clinekt is ready', {
+    toast.message('A new version of Rupway is ready', {
       description: 'Reload to get the latest improvements.',
       duration: Infinity,
       action: {

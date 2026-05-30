@@ -212,7 +212,7 @@ export default function NotificationsTab() {
           <h3 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Mobile push notifications</h3>
         </div>
         <p className="text-[12.5px] text-[#667085] dark:text-[#8B92A8] mb-4 ml-[23px]">
-          Get pinged on your phone the moment a client pays, signs, or opens your work — even when Clinekt is closed. Install Clinekt to your home screen first for the best experience.
+          Get pinged on your phone the moment a client pays, signs, or opens your work — even when Rupway is closed. Install Rupway to your home screen first for the best experience.
         </p>
 
         <div className="ml-[23px] space-y-3">

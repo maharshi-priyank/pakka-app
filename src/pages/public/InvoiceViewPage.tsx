@@ -111,7 +111,7 @@ export default function InvoiceViewPage() {
               className="absolute whitespace-nowrap text-[64px] font-bold text-black/[0.04]"
               style={{ transform: 'rotate(-35deg)', top: `${i * 18 - 10}%`, left: '-20%', width: '140%' }}
             >
-              Clinekt • Clinekt • Clinekt • Clinekt • Clinekt
+              Rupway • Rupway • Rupway • Rupway • Rupway
             </div>
           ))}
         </div>
@@ -140,7 +140,7 @@ export default function InvoiceViewPage() {
             </button>
             <div className="flex items-center gap-1.5 text-[11px] text-[#667085]">
               <Lock size={11} strokeWidth={2} />
-              Secured by Clinekt
+              Secured by Rupway
             </div>
           </div>
         </div>
@@ -323,7 +323,7 @@ export default function InvoiceViewPage() {
 
         {/* Footer */}
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
-          Invoice by {senderName} · {invoice.user.email} · Powered by Clinekt
+          Invoice by {senderName} · {invoice.user.email} · Powered by Rupway
         </div>
       </div>
     </div>

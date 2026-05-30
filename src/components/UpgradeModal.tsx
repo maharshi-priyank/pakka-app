@@ -15,7 +15,7 @@ const PLANS = [
       '3 proposals / month',
       '3 active leads',
       '1 client',
-      'Clinekt watermark on docs',
+      'Rupway watermark on docs',
     ],
   },
   {
@@ -121,7 +121,7 @@ export default function UpgradeModal() {
           <div className="px-6 pb-6 pt-0 flex items-center justify-between border-t border-[#F1F3F8] dark:border-[#26283A] pt-4">
             <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Plans launching soon — join the waitlist to get early access.</p>
             <a
-              href="https://clinekt.in/#waitlist"
+              href="https://rupway.in/#waitlist"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary text-[13px] h-9 px-4 shrink-0"
