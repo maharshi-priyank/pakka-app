@@ -19,7 +19,8 @@ export interface UserProfile {
   bankAccountName:   string | null
   bankAccountNumber: string | null
   bankIfsc:          string | null
-  upiId:                    string | null
+  upiId:                   string | null
+  upiQrUrl:                string | null
   googleCalendarConnected: boolean
   outlookConnected:        boolean
   createdAt:               string
@@ -82,6 +83,28 @@ export function useUploadLogo() {
 
       const { data } = supabase.storage.from('avatars').getPublicUrl(path)
       // Bust cache by appending timestamp
+      return `${data.publicUrl}?t=${Date.now()}`
+    },
+  })
+}
+
+export function useUploadUpiQr() {
+  const user = useAuthStore((s) => s.user)
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      if (!user) throw new Error('Not authenticated')
+
+      const ext  = file.name.split('.').pop() ?? 'png'
+      const path = `upi-qr/${user.id}/qr.${ext}`
+
+      const { error } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type })
+
+      if (error) throw new Error(error.message)
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
       return `${data.publicUrl}?t=${Date.now()}`
     },
   })

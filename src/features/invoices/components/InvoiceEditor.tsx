@@ -3,11 +3,12 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Plus, Trash2, IndianRupee, Send, CheckCircle2,
-  FileText, Save, Copy, Check, ExternalLink, RefreshCw,
+  FileText, Save, Copy, Check, ExternalLink, RefreshCw, Wallet,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { invoiceFormSchema, RECURRENCE_CYCLE_LABELS, type InvoiceFormData, type Invoice } from '../schemas/invoice.schema'
 import { useCreateInvoice, useUpdateInvoice, useSendInvoice, useMarkPaid } from '../hooks/useInvoices'
+import RecordPaymentModal from './RecordPaymentModal'
 
 const GST_RATE_OPTIONS = [0, 5, 12, 18, 28]
 
@@ -81,6 +82,8 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const sendMutation   = useSendInvoice()
   const paidMutation   = useMarkPaid()
 
+  const [showRecordPayment, setShowRecordPayment] = useState(false)
+
   async function onSubmit(data: InvoiceFormData) {
     const result = isNew
       ? await createMutation.mutateAsync(data)
@@ -114,6 +117,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const isSaving = createMutation.isPending || updateMutation.isPending
 
   return (
+    <>
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-6 py-6 space-y-5">
@@ -416,6 +420,19 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
             </div>
           )}
 
+          {/* Record Payment / TDS */}
+          {displayInvoice && displayInvoice.status !== 'PAID' && displayInvoice.status !== 'DRAFT' && (
+            <button
+              type="button"
+              onClick={() => setShowRecordPayment(true)}
+              className="btn-secondary text-[13px] text-[#6941C6] border-[#D6BBFB] hover:bg-[#F4F3FF]"
+            >
+              <span className="flex items-center gap-1.5">
+                <Wallet size={13} strokeWidth={2} /> Record Payment / TDS
+              </span>
+            </button>
+          )}
+
           {/* Mark paid */}
           {displayInvoice && displayInvoice.status !== 'PAID' && displayInvoice.status !== 'DRAFT' && (
             <button
@@ -482,5 +499,10 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
         </div>
       </div>
     </div>
+
+    {showRecordPayment && displayInvoice && (
+      <RecordPaymentModal invoice={displayInvoice} onClose={() => setShowRecordPayment(false)} />
+    )}
+    </>
   )
 }

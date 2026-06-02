@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useInvoice } from '@/features/invoices/hooks/useInvoices'
 import InvoiceEditor from '@/features/invoices/components/InvoiceEditor'
+import DeliverablesPanel from '@/features/invoices/components/DeliverablesPanel'
 import type { Invoice } from '@/features/invoices/schemas/invoice.schema'
 
 export default function InvoiceEditorPage() {
@@ -54,11 +55,22 @@ export default function InvoiceEditorPage() {
         )}
       </div>
 
-      <InvoiceEditor
-        invoice={!isNew ? invoice : undefined}
-        onSaved={handleSaved}
-        onDiscard={() => navigate('/app/invoices')}
-      />
+      {/* Editor takes the available height; deliverables panel scrolls below on non-draft invoices */}
+      <div className="flex-1 overflow-y-auto">
+        <div className={isNew || !invoice || invoice.status === 'DRAFT' ? 'h-full' : ''}>
+          <InvoiceEditor
+            invoice={!isNew ? invoice : undefined}
+            onSaved={handleSaved}
+            onDiscard={() => navigate('/app/invoices')}
+          />
+        </div>
+
+        {!isNew && invoice && invoice.status !== 'DRAFT' && (
+          <div className="max-w-3xl mx-auto px-6 pb-8 pt-2">
+            <DeliverablesPanel invoice={invoice} />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

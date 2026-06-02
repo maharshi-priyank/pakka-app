@@ -120,6 +120,31 @@ export function useMarkOverdue() {
   })
 }
 
+export function useRecordPayment() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, amountReceived, tdsDeducted, note }: {
+      id: string
+      amountReceived: number
+      tdsDeducted: number
+      note?: string
+    }) => {
+      const { data } = await api.post<{ data: Invoice }>(`/invoices/${id}/record-payment`, {
+        amountReceived,
+        tdsDeducted,
+        note,
+      })
+      return data.data
+    },
+    onSuccess: (updated) => {
+      qc.setQueryData(KEYS.detail(updated.id), updated)
+      qc.invalidateQueries({ queryKey: KEYS.all() })
+      toast.success(updated.status === 'PAID' ? 'Invoice marked as paid' : 'Payment recorded')
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to record payment'),
+  })
+}
+
 export function useDeleteInvoice() {
   const qc = useQueryClient()
   return useMutation({

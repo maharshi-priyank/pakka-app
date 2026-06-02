@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Building2, CreditCard, Smartphone, Check, Loader2, Landmark } from 'lucide-react'
+import { Building2, CreditCard, Smartphone, Check, Loader2, Landmark, Upload, X, QrCode } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useProfile, useUpdateProfile } from '../hooks/useProfile'
+import { useProfile, useUpdateProfile, useUploadUpiQr } from '../hooks/useProfile'
 
 const businessSchema = z.object({
   bankName:          z.string().optional(),
@@ -23,7 +23,9 @@ function Skeleton({ className }: { className?: string }) {
 export default function BusinessTab() {
   const { data: profile, isLoading } = useProfile()
   const { mutateAsync: updateProfile, isPending: saving } = useUpdateProfile()
+  const { mutateAsync: uploadQr, isPending: uploadingQr } = useUploadUpiQr()
   const [saved, setSaved] = useState(false)
+  const [qrPreview, setQrPreview] = useState<string | null>(null)
 
   const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm<BusinessForm>({
     resolver: zodResolver(businessSchema),
@@ -38,7 +40,9 @@ export default function BusinessTab() {
         bankIfsc:          profile.bankIfsc          ?? '',
         upiId:             profile.upiId             ?? '',
       })
+      if (profile.upiQrUrl && !qrPreview) setQrPreview(profile.upiQrUrl)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, reset])
 
   const onSubmit = async (values: BusinessForm) => {
@@ -52,6 +56,17 @@ export default function BusinessTab() {
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
     reset(values)
+  }
+
+  async function handleQrUpload(file: File) {
+    const url = await uploadQr(file)
+    setQrPreview(url)
+    await updateProfile({ upiQrUrl: url })
+  }
+
+  async function handleQrRemove() {
+    setQrPreview(null)
+    await updateProfile({ upiQrUrl: null })
   }
 
   if (isLoading) {
@@ -119,6 +134,48 @@ export default function BusinessTab() {
         <Field label="UPI ID" hint="e.g. yourname@okaxis" error={errors.upiId?.message}>
           <input {...register('upiId')} placeholder="yourname@okaxis" className="form-input max-w-sm" />
         </Field>
+
+        {/* UPI QR Code */}
+        <div className="space-y-1.5">
+          <label className="block text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
+            UPI QR Code <span className="text-[11px] font-normal text-[#98A2B3]">(optional — shown on invoice for quick scan)</span>
+          </label>
+          {qrPreview ? (
+            <div className="flex items-center gap-4">
+              <img src={qrPreview} alt="UPI QR" className="w-[88px] h-[88px] rounded-xl border border-[#EAECF0] dark:border-[#26283A] object-contain bg-white" />
+              <button
+                type="button"
+                onClick={handleQrRemove}
+                disabled={saving}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-[#D92D20] border border-[#FECDCA] hover:bg-[#FEF3F2] transition-colors"
+              >
+                <X size={12} strokeWidth={2.5} /> Remove
+              </button>
+            </div>
+          ) : (
+            <label className={cn(
+              'flex items-center gap-3 w-fit px-4 py-2.5 rounded-xl border-2 border-dashed border-[#D0D5DD] dark:border-[#3A3C4A] cursor-pointer',
+              'hover:border-[#2563EB] hover:bg-[#EFF6FF] dark:hover:bg-[#1A1B23] transition-all',
+              uploadingQr && 'opacity-60 cursor-not-allowed pointer-events-none',
+            )}>
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleQrUpload(f) }}
+              />
+              {uploadingQr ? (
+                <Loader2 size={14} className="animate-spin text-[#2563EB]" />
+              ) : (
+                <QrCode size={14} className="text-[#667085]" />
+              )}
+              <span className="text-[12.5px] font-medium text-[#667085]">
+                {uploadingQr ? 'Uploading…' : 'Upload QR image'}
+              </span>
+              <Upload size={12} className="text-[#98A2B3]" />
+            </label>
+          )}
+        </div>
       </div>
 
       {/* Razorpay (placeholder) */}

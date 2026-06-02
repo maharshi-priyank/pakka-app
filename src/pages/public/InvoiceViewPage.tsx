@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import {
   CheckCircle2, AlertCircle, IndianRupee, Lock, FileText, Calendar, Download,
+  Building2, Smartphone, FileArchive, FileImage, File as FileIcon,
 } from 'lucide-react'
+import { humanSize } from '@/features/invoices/hooks/useDeliverables'
 import { cn } from '@/lib/utils'
 import type { LineItem, GstType } from '@/features/invoices/schemas/invoice.schema'
 
@@ -13,10 +15,25 @@ const publicApi = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+interface PublicDeliverable {
+  id: string; fileName: string; fileSize: number; mimeType: string; fileUrl: string | null
+}
+
+function deliverableIcon(mimeType: string) {
+  if (mimeType.startsWith('image/'))  return <FileImage  size={14} className="text-[#667085] shrink-0" />
+  if (mimeType === 'application/pdf') return <FileText   size={14} className="text-[#D92D20] shrink-0" />
+  if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('rar'))
+                                      return <FileArchive size={14} className="text-[#F79009] shrink-0" />
+  return <FileIcon size={14} className="text-[#667085] shrink-0" />
+}
+
 interface PublicUser {
   name: string; businessName: string | null; email: string
   logoUrl: string | null; gstNumber: string | null
   plan: 'FREE' | 'SOLO' | 'STUDIO'
+  bankName: string | null; bankAccountName: string | null
+  bankAccountNumber: string | null; bankIfsc: string | null
+  upiId: string | null; upiQrUrl: string | null
 }
 interface PublicClient {
   id: string; name: string; company: string | null; email: string | null; gstNumber: string | null
@@ -27,6 +44,7 @@ interface PublicInvoice {
   gstType: GstType; tdsRate: number | null; dueDate: string | null; paidAt: string | null
   createdAt: string
   user: PublicUser; client: PublicClient | null
+  deliverables: PublicDeliverable[]
 }
 
 async function fetchInvoice(id: string): Promise<PublicInvoice> {
@@ -320,6 +338,98 @@ export default function InvoiceViewPage() {
             </div>
           </div>
         </div>
+
+        {/* Deliverables */}
+        {invoice.deliverables?.length > 0 && (
+          <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
+            <div className="px-7 py-4 border-b border-[#F2F4F7] flex items-center justify-between">
+              <h2 className="text-[14px] font-bold text-[#101828]">Deliverables</h2>
+              {isPaid
+                ? <span className="text-[11px] font-semibold text-[#027A48] bg-[#ECFDF3] px-2.5 py-0.5 rounded-full">Unlocked</span>
+                : <span className="text-[11px] font-semibold text-[#B54708] bg-[#FFFAEB] px-2.5 py-0.5 rounded-full flex items-center gap-1"><Lock size={10} strokeWidth={2.5} /> Locked</span>
+              }
+            </div>
+            <div className="divide-y divide-[#F2F4F7]">
+              {invoice.deliverables.map(d => (
+                <div key={d.id} className="flex items-center gap-3 px-7 py-3.5">
+                  {deliverableIcon(d.mimeType)}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-[#344054] truncate">{d.fileName}</p>
+                    <p className="text-[11px] text-[#98A2B3]">{humanSize(d.fileSize)}</p>
+                  </div>
+                  {d.fileUrl ? (
+                    <a
+                      href={d.fileUrl}
+                      download={d.fileName}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] text-white text-[12px] font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0"
+                    >
+                      <Download size={12} strokeWidth={2.5} /> Download
+                    </a>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-[12px] text-[#98A2B3] shrink-0">
+                      <Lock size={12} strokeWidth={2} /> Pay to unlock
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {!isPaid && (
+              <div className="px-7 py-3 bg-[#FFFAEB] border-t border-[#FEF0C7] flex items-center gap-2">
+                <Lock size={12} className="text-[#B54708] shrink-0" strokeWidth={2} />
+                <p className="text-[12px] text-[#B54708]">
+                  Files are unlocked automatically once this invoice is marked as paid.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bank / UPI payment block */}
+        {!isPaid && (invoice.user.bankAccountNumber || invoice.user.upiId) && (
+          <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
+            <div className="px-7 py-4 border-b border-[#F2F4F7]">
+              <h2 className="text-[14px] font-bold text-[#101828]">Pay via Bank Transfer / UPI</h2>
+            </div>
+            <div className="px-7 py-5 flex items-start gap-6">
+              <div className="flex-1 space-y-3">
+                {invoice.user.upiId && (
+                  <div className="flex items-start gap-2.5">
+                    <Smartphone size={14} className="text-[#667085] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wider">UPI ID</p>
+                      <p className="text-[13px] font-semibold text-[#101828] mt-0.5">{invoice.user.upiId}</p>
+                    </div>
+                  </div>
+                )}
+                {invoice.user.bankAccountNumber && (
+                  <div className="flex items-start gap-2.5">
+                    <Building2 size={14} className="text-[#667085] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wider">Bank Transfer</p>
+                      {invoice.user.bankName && (
+                        <p className="text-[13px] font-semibold text-[#101828] mt-0.5">{invoice.user.bankName}</p>
+                      )}
+                      {invoice.user.bankAccountName && (
+                        <p className="text-[12px] text-[#667085]">{invoice.user.bankAccountName}</p>
+                      )}
+                      <p className="text-[12px] text-[#344054] font-mono mt-0.5">A/C: {invoice.user.bankAccountNumber}</p>
+                      {invoice.user.bankIfsc && (
+                        <p className="text-[12px] text-[#344054] font-mono">IFSC: {invoice.user.bankIfsc}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {invoice.user.upiQrUrl && (
+                <img
+                  src={invoice.user.upiQrUrl}
+                  alt="UPI QR Code"
+                  className="w-[110px] h-[110px] rounded-xl border border-[#EAECF0] object-contain shrink-0"
+                />
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
