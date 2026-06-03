@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom'
 import {
   FileText, FileSignature, Receipt, AlertTriangle, Video, CalendarDays,
   ExternalLink, FolderKanban, Clock, IndianRupee, Shield, AlertCircle,
+  Paperclip, FileArchive, FileImage, Download, Lock,
+  File as FileIconLucide,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -10,13 +12,15 @@ import {
   type PortalProposal, type PortalContract, type PortalInvoice,
   type PortalMeeting, type PortalProject,
 } from '@/features/portal/hooks/usePortal'
+import { usePortalAttachments, humanSize } from '@/features/attachments/useAttachments'
+import type { PortalAttachment } from '@/features/attachments/types'
 import PortalProposalCard from '@/features/portal/components/PortalProposalCard'
 import PortalContractCard from '@/features/portal/components/PortalContractCard'
 import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
 
 const APP_URL = import.meta.env.VITE_APP_URL as string
 
-type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings' | 'projects'
+type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings' | 'projects' | 'files'
 
 function fmt(v: string | number) {
   return Number(v).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
@@ -32,11 +36,13 @@ const NAV_ICONS: Partial<Record<Tab, React.ComponentType<{ size?: number; classN
   invoices:  Receipt,
   meetings:  Video,
   projects:  FolderKanban,
+  files:     Paperclip,
 }
 
 export default function ClientPortalPage() {
   const { token } = useParams<{ token: string }>()
   const { data, isLoading, isError } = usePortalData(token!)
+  const { data: portalFiles = [] } = usePortalAttachments(token ?? '')
 
   const [tab, setTab] = useState<Tab>('overview')
 
@@ -81,6 +87,7 @@ export default function ClientPortalPage() {
     { key: 'invoices',  label: 'Invoices',  count: activeInvoices.length },
     { key: 'meetings',  label: 'Meetings',  count: upcomingMeetings.length },
     { key: 'projects',  label: 'Projects',  count: activeProjects.length },
+    { key: 'files',     label: 'Files',     count: portalFiles.length },
   ]
 
   const visibleTabs = TABS.filter(t => t.key === 'overview' || t.count > 0)
@@ -367,6 +374,47 @@ export default function ClientPortalPage() {
                     ? <EmptyState label="No projects shared yet" />
                     : activeProjects.map(p => <PortalProjectCard key={p.id} project={p} />)
                   }
+                </div>
+              )}
+
+              {tab === 'files' && (
+                <div className="space-y-3">
+                  {portalFiles.length === 0 ? (
+                    <EmptyState label="No files shared yet" />
+                  ) : (
+                    portalFiles.map((f: PortalAttachment) => {
+                      let icon = <FileIconLucide size={14} className="text-[#667085] shrink-0" />
+                      if (f.mimeType.startsWith('image/'))  icon = <FileImage   size={14} className="text-[#667085] shrink-0" />
+                      if (f.mimeType === 'application/pdf') icon = <FileText    size={14} className="text-[#D92D20] shrink-0" />
+                      if (f.mimeType.includes('zip') || f.mimeType.includes('tar') || f.mimeType.includes('rar'))
+                                                            icon = <FileArchive size={14} className="text-[#F79009] shrink-0" />
+                      return (
+                        <div key={f.id} className="bg-white rounded-xl border border-[#EAECF0] flex items-center gap-3 px-4 py-3">
+                          {icon}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold text-[#344054] truncate">{f.fileName}</p>
+                            <p className="text-[11px] text-[#98A2B3]">
+                              {humanSize(f.fileSize)}
+                              {f.parentLabel && <> · <span className="text-[#667085]">{f.parentLabel}</span></>}
+                            </p>
+                          </div>
+                          {f.fileUrl ? (
+                            <a
+                              href={f.fileUrl}
+                              download={f.fileName}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] text-white text-[12px] font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0"
+                            >
+                              <Download size={12} strokeWidth={2.5} /> Download
+                            </a>
+                          ) : (
+                            <div className="flex items-center gap-1.5 text-[12px] text-[#98A2B3] shrink-0">
+                              <Lock size={12} strokeWidth={2} /> Locked
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })
+                  )}
                 </div>
               )}
             </>

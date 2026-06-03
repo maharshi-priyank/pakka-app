@@ -95,17 +95,6 @@ export interface Invoice {
   updatedAt:          string
   client:             InvoiceClient | null
   contract:           InvoiceContract | null
-  deliverables:       Deliverable[]
-}
-
-export interface Deliverable {
-  id:        string
-  invoiceId: string
-  fileName:  string
-  fileSize:  number
-  mimeType:  string
-  fileUrl:   string | null  // null = locked (invoice not yet paid)
-  createdAt: string
 }
 
 export interface InvoiceListResponse {

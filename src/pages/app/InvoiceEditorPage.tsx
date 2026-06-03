@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useInvoice } from '@/features/invoices/hooks/useInvoices'
 import InvoiceEditor from '@/features/invoices/components/InvoiceEditor'
-import DeliverablesPanel from '@/features/invoices/components/DeliverablesPanel'
+import InvoiceFilesPanel from '@/features/invoices/components/InvoiceFilesPanel'
 import type { Invoice } from '@/features/invoices/schemas/invoice.schema'
 
 export default function InvoiceEditorPage() {
@@ -67,7 +67,7 @@ export default function InvoiceEditorPage() {
 
         {!isNew && invoice && invoice.status !== 'DRAFT' && (
           <div className="max-w-3xl mx-auto px-6 pb-8 pt-2">
-            <DeliverablesPanel invoice={invoice} />
+            <InvoiceFilesPanel invoice={invoice} />
           </div>
         )}
       </div>

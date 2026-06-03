@@ -6,8 +6,10 @@ import {
   FileText, Layers, DollarSign, Clock, ScrollText,
   Save, Send, Check, Copy, ExternalLink,
   Star, CheckSquare, XCircle, MessageSquare, Briefcase,
-  Lock, ArrowRight,
+  Lock, ArrowRight, Paperclip, Upload, Loader2,
+  FileArchive, FileImage, File as FileIcon,
 } from 'lucide-react'
+import { useAttachments, useUploadAttachment, useDeleteAttachment, humanSize } from '@/features/attachments/useAttachments'
 import { cn } from '@/lib/utils'
 import {
   createProposalSchema,
@@ -20,7 +22,7 @@ import { useCreateProposal, useUpdateProposal, useSendProposal } from '../hooks/
 import { useLeads } from '@/features/leads/hooks/useLeads'
 import { useNavigate } from 'react-router-dom'
 
-type Tab = 'cover' | 'scope' | 'pricing' | 'milestones' | 'terms' | 'credibility'
+type Tab = 'cover' | 'scope' | 'pricing' | 'milestones' | 'terms' | 'credibility' | 'attachments'
 
 const TABS: { id: Tab; label: string; icon: typeof FileText }[] = [
   { id: 'cover',       label: 'Cover',       icon: FileText   },
@@ -29,7 +31,16 @@ const TABS: { id: Tab; label: string; icon: typeof FileText }[] = [
   { id: 'milestones',  label: 'Timeline',    icon: Clock      },
   { id: 'terms',       label: 'Terms',       icon: ScrollText },
   { id: 'credibility', label: 'Credibility', icon: Star       },
+  { id: 'attachments', label: 'Files',       icon: Paperclip  },
 ]
+
+function attachmentFileIcon(mimeType: string) {
+  if (mimeType.startsWith('image/'))  return <FileImage   size={14} className="text-[#667085] shrink-0" />
+  if (mimeType === 'application/pdf') return <FileText    size={14} className="text-[#D92D20] shrink-0" />
+  if (mimeType.includes('zip') || mimeType.includes('tar') || mimeType.includes('rar'))
+                                      return <FileArchive size={14} className="text-[#F79009] shrink-0" />
+  return <FileIcon size={14} className="text-[#667085] shrink-0" />
+}
 
 function calcTotals(lineItems: LineItem[], gstType: string) {
   let subtotal = 0
@@ -53,15 +64,22 @@ interface Props {
 }
 
 export default function ProposalEditor({ proposal, defaultLead, defaultTemplate, onSaved, onDiscard }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('cover')
-  const [shareUrl, setShareUrl]   = useState<string | null>(null)
-  const [copied,   setCopied]     = useState(false)
+  const [activeTab,        setActiveTab]        = useState<Tab>('cover')
+  const [shareUrl,         setShareUrl]         = useState<string | null>(null)
+  const [copied,           setCopied]           = useState(false)
+  const [hidePricingTable, setHidePricingTable] = useState(proposal?.hidePricingTable ?? false)
+  const attachmentInputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
   const createMutation = useCreateProposal()
   const updateMutation = useUpdateProposal()
   const sendMutation   = useSendProposal()
   const { data: leadsData } = useLeads({ limit: 100 })
+
+  const attachParent     = { proposalId: proposal?.id ?? '' }
+  const { data: attachments = [], isLoading: attachmentsLoading } = useAttachments(attachParent)
+  const uploadAttachment = useUploadAttachment(attachParent)
+  const deleteAttachment = useDeleteAttachment(attachParent)
 
   // Re-sync leadId after async leads data loads — the <select> can't pick a value
   // that doesn't exist as an <option> yet, so the initial defaultValues binding is lost.
@@ -153,7 +171,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
     }
 
     if (isEdit && proposal) {
-      const updated = await updateMutation.mutateAsync({ id: proposal.id, ...cleaned })
+      const updated = await updateMutation.mutateAsync({ id: proposal.id, ...cleaned, hidePricingTable })
       onSaved?.(updated)
     } else {
       const created = await createMutation.mutateAsync(cleaned)
@@ -502,6 +520,21 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 />
               </Section>
 
+              <Section title="Pricing visibility" description="Control what the client sees on the proposal">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hidePricingTable}
+                    onChange={e => setHidePricingTable(e.target.checked)}
+                    className="mt-0.5 rounded border-[#D0D5DD]"
+                  />
+                  <div>
+                    <p className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8]">Hide detailed pricing from client</p>
+                    <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Show only the lump-sum total. Use this if you're attaching your own BOQ.</p>
+                  </div>
+                </label>
+              </Section>
+
               <FieldArraySection
                 title="Payment schedule"
                 description="Milestone-linked instalment breakdown"
@@ -681,6 +714,69 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 ))}
               </FieldArraySection>
             </>
+          )}
+          {/* ══ ATTACHMENTS ════════════════════════════════════════════════════ */}
+          {activeTab === 'attachments' && (
+            <Section title="Attached files" description="PDFs, BOQs, or supporting documents visible on the proposal">
+              {!proposal ? (
+                <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Save the proposal first to attach files.</p>
+              ) : (
+                <>
+                  {attachmentsLoading ? (
+                    <div className="flex items-center justify-center py-6">
+                      <Loader2 size={18} className="animate-spin text-[#D0D5DD]" />
+                    </div>
+                  ) : attachments.length === 0 ? (
+                    <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] py-1">No files yet. Upload below.</p>
+                  ) : (
+                    <div className="space-y-2 mb-3">
+                      {attachments.map(a => (
+                        <div key={a.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#FAFAFA] dark:bg-[#1A1B23] border border-[#F2F4F7] dark:border-[#26283A]">
+                          {attachmentFileIcon(a.mimeType)}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[12.5px] font-semibold text-[#344054] dark:text-[#C5CAD6] truncate">{a.fileName}</p>
+                            <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">{humanSize(a.fileSize)}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!window.confirm(`Remove "${a.fileName}"?`)) return
+                              deleteAttachment.mutate(a.id)
+                            }}
+                            disabled={deleteAttachment.isPending}
+                            className="w-6 h-6 flex items-center justify-center rounded-lg text-[#98A2B3] hover:text-[#D92D20] hover:bg-[#FEF3F2] dark:hover:bg-[#2A1A1A] transition-colors"
+                          >
+                            <Trash2 size={12} strokeWidth={2} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <input
+                    ref={attachmentInputRef}
+                    type="file"
+                    multiple
+                    className="sr-only"
+                    onChange={e => {
+                      if (!e.target.files) return
+                      Array.from(e.target.files).forEach(f => uploadAttachment.mutate(f))
+                      e.target.value = ''
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => attachmentInputRef.current?.click()}
+                    disabled={uploadAttachment.isPending}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl border-2 border-dashed border-[#D0D5DD] dark:border-[#3A3C4A] text-[12.5px] font-medium text-[#667085] dark:text-[#8B92A8] hover:border-[#2563EB] hover:text-[#2563EB] hover:bg-[#EFF6FF] dark:hover:bg-[#13141A] transition-all disabled:opacity-50"
+                  >
+                    {uploadAttachment.isPending
+                      ? <><Loader2 size={13} className="animate-spin" /> Uploading…</>
+                      : <><Upload size={13} /> Upload file</>
+                    }
+                  </button>
+                </>
+              )}
+            </Section>
           )}
         </form>
       </div>

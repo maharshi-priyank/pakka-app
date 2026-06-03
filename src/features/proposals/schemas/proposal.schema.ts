@@ -88,7 +88,8 @@ export const createProposalSchema = z.object({
 })
 
 export const updateProposalSchema = createProposalSchema.partial().extend({
-  status: z.enum(PROPOSAL_STATUSES).optional(),
+  status:           z.enum(PROPOSAL_STATUSES).optional(),
+  hidePricingTable: z.boolean().optional(),
 })
 
 export type LineItem          = z.infer<typeof lineItemSchema>
@@ -121,10 +122,11 @@ export interface Proposal {
   status:      ProposalStatus
   slug:        string
   content:     ProposalContent
-  totalAmount: string
-  gstAmount:   string
-  validUntil:  string | null
-  acceptedAt:  string | null
+  totalAmount:      string
+  gstAmount:        string
+  hidePricingTable: boolean
+  validUntil:       string | null
+  acceptedAt:       string | null
   opens:       ProposalOpen[]
   contracts?:  ProposalContract[]
   createdAt:   string

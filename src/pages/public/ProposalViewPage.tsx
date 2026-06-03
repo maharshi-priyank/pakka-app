@@ -6,9 +6,12 @@ import {
   IndianRupee, CheckCircle2, Clock, ScrollText, Layers, FileText,
   AlertCircle, CheckSquare, XCircle, Star, MessageSquare, Briefcase,
   ExternalLink, ChevronDown, ArrowRight, Download, ThumbsUp, ThumbsDown,
-  Loader2, CreditCard, Lock,
+  Loader2, CreditCard, Lock, Paperclip, FileArchive, FileImage,
+  File as FileIconLucide,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { humanSize } from '@/features/attachments/useAttachments'
+import type { Attachment } from '@/features/attachments/types'
 import type {
   Proposal, ProposalContent, LineItem, ScopeItem, Milestone,
   Deliverable, PaymentMilestone, CaseStudy, FaqItem,
@@ -34,6 +37,7 @@ interface PublicProposal extends Proposal {
   depositPaid:     boolean
   depositPaidAt:   string | null
   depositOrderId?: string | null
+  attachments:     Attachment[]
 }
 
 interface DepositOrder {
@@ -483,7 +487,7 @@ export default function ProposalViewPage() {
         )}
 
         {/* ── Pricing ── */}
-        {lineItems.length > 0 && (
+        {lineItems.length > 0 && !proposal.hidePricingTable && (
           <ViewCard icon={IndianRupee} title="Pricing breakdown">
             <div className="overflow-x-auto mt-1">
               <table className="w-full text-[13px]">
@@ -538,6 +542,24 @@ export default function ProposalViewPage() {
             </div>
             {content.pricingNotes && (
               <p className="mt-4 text-[12px] text-[#667085] bg-[#FAFAFA] rounded-lg p-3 leading-relaxed">
+                {content.pricingNotes}
+              </p>
+            )}
+          </ViewCard>
+        )}
+
+        {/* ── Total only (when pricing table hidden) ── */}
+        {lineItems.length > 0 && proposal.hidePricingTable && (
+          <ViewCard icon={IndianRupee} title="Project investment">
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[15px] font-bold text-[#101828]">Total</span>
+              <span className="flex items-center gap-0.5 text-[20px] font-extrabold text-[#101828]">
+                <IndianRupee size={14} strokeWidth={3} />
+                {fmt(total)}
+              </span>
+            </div>
+            {content.pricingNotes && (
+              <p className="mt-3 text-[12px] text-[#667085] bg-[#FAFAFA] rounded-lg p-3 leading-relaxed">
                 {content.pricingNotes}
               </p>
             )}
@@ -638,6 +660,39 @@ export default function ProposalViewPage() {
               {faq.map((item, idx) => (
                 <FaqAccordion key={idx} question={item.question} answer={item.answer} />
               ))}
+            </div>
+          </ViewCard>
+        )}
+
+        {/* ── Attached documents ── */}
+        {(proposal.attachments ?? []).length > 0 && (
+          <ViewCard icon={Paperclip} title="Attached documents">
+            <div className="space-y-2 mt-1">
+              {(proposal.attachments ?? []).map((a: Attachment) => {
+                let icon = <FileIconLucide size={14} className="text-[#667085] shrink-0" />
+                if (a.mimeType.startsWith('image/'))  icon = <FileImage   size={14} className="text-[#667085] shrink-0" />
+                if (a.mimeType === 'application/pdf') icon = <FileText    size={14} className="text-[#D92D20] shrink-0" />
+                if (a.mimeType.includes('zip') || a.mimeType.includes('tar') || a.mimeType.includes('rar'))
+                                                      icon = <FileArchive size={14} className="text-[#F79009] shrink-0" />
+                return (
+                  <div key={a.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#FAFAFA] border border-[#F2F4F7]">
+                    {icon}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-[#344054] truncate">{a.fileName}</p>
+                      <p className="text-[11px] text-[#98A2B3]">{humanSize(a.fileSize)}</p>
+                    </div>
+                    {a.fileUrl && (
+                      <a
+                        href={a.fileUrl}
+                        download={a.fileName}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] text-white text-[12px] font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0"
+                      >
+                        <Download size={12} strokeWidth={2.5} /> Download
+                      </a>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </ViewCard>
         )}

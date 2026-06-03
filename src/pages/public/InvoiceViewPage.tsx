@@ -6,7 +6,13 @@ import {
   CheckCircle2, AlertCircle, IndianRupee, Lock, FileText, Calendar, Download,
   Building2, Smartphone, FileArchive, FileImage, File as FileIcon,
 } from 'lucide-react'
-import { humanSize } from '@/features/invoices/hooks/useDeliverables'
+import { humanSize } from '@/features/attachments/useAttachments'
+import type { Attachment } from '@/features/attachments/types'
+
+async function fetchAttachments(invoiceId: string): Promise<Attachment[]> {
+  const { data } = await publicApi.get<{ data: Attachment[] }>(`/attachments/public/invoice/${invoiceId}`)
+  return data.data
+}
 import { cn } from '@/lib/utils'
 import type { LineItem, GstType } from '@/features/invoices/schemas/invoice.schema'
 
@@ -14,10 +20,6 @@ const publicApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL as string,
   headers: { 'Content-Type': 'application/json' },
 })
-
-interface PublicDeliverable {
-  id: string; fileName: string; fileSize: number; mimeType: string; fileUrl: string | null
-}
 
 function deliverableIcon(mimeType: string) {
   if (mimeType.startsWith('image/'))  return <FileImage  size={14} className="text-[#667085] shrink-0" />
@@ -44,7 +46,6 @@ interface PublicInvoice {
   gstType: GstType; tdsRate: number | null; dueDate: string | null; paidAt: string | null
   createdAt: string
   user: PublicUser; client: PublicClient | null
-  deliverables: PublicDeliverable[]
 }
 
 async function fetchInvoice(id: string): Promise<PublicInvoice> {
@@ -79,6 +80,12 @@ export default function InvoiceViewPage() {
     queryFn:  () => fetchInvoice(id!),
     enabled:  !!id,
     retry:    false,
+  })
+
+  const { data: attachments = [] } = useQuery<Attachment[]>({
+    queryKey: ['public-invoice-attachments', id],
+    queryFn:  () => fetchAttachments(id!),
+    enabled:  !!id,
   })
 
   useEffect(() => {
@@ -340,7 +347,7 @@ export default function InvoiceViewPage() {
         </div>
 
         {/* Deliverables */}
-        {invoice.deliverables?.length > 0 && (
+        {attachments.length > 0 && (
           <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
             <div className="px-7 py-4 border-b border-[#F2F4F7] flex items-center justify-between">
               <h2 className="text-[14px] font-bold text-[#101828]">Deliverables</h2>
@@ -350,17 +357,17 @@ export default function InvoiceViewPage() {
               }
             </div>
             <div className="divide-y divide-[#F2F4F7]">
-              {invoice.deliverables.map(d => (
-                <div key={d.id} className="flex items-center gap-3 px-7 py-3.5">
-                  {deliverableIcon(d.mimeType)}
+              {attachments.map((a: Attachment) => (
+                <div key={a.id} className="flex items-center gap-3 px-7 py-3.5">
+                  {deliverableIcon(a.mimeType)}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-[#344054] truncate">{d.fileName}</p>
-                    <p className="text-[11px] text-[#98A2B3]">{humanSize(d.fileSize)}</p>
+                    <p className="text-[13px] font-semibold text-[#344054] truncate">{a.fileName}</p>
+                    <p className="text-[11px] text-[#98A2B3]">{humanSize(a.fileSize)}</p>
                   </div>
-                  {d.fileUrl ? (
+                  {a.fileUrl ? (
                     <a
-                      href={d.fileUrl}
-                      download={d.fileName}
+                      href={a.fileUrl}
+                      download={a.fileName}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] text-white text-[12px] font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0"
                     >
                       <Download size={12} strokeWidth={2.5} /> Download
