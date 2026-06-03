@@ -210,7 +210,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
     }
 
     if (isEdit && proposal) {
-      const updated = await updateMutation.mutateAsync({ id: proposal.id, ...cleaned, hidePricingTable, projectId: projectId || null })
+      const updated = await updateMutation.mutateAsync({ id: proposal.id, ...cleaned, hidePricingTable, projectId: projectId || undefined })
       onSaved?.(updated)
     } else {
       const created = await createMutation.mutateAsync({ ...cleaned, projectId: projectId || undefined })

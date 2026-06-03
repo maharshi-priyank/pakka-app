@@ -48,6 +48,7 @@ export const createContractSchema = z.object({
   clientId:    z.string().optional(),
   clientName:  z.string().optional(),
   clientEmail: z.string().optional(),
+  projectId:   z.string().optional(),
   content:     contractContentSchema.optional(),
 })
 

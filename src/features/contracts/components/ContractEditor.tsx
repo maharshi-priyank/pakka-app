@@ -103,7 +103,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
       },
     }
     if (isEdit && contract) {
-      const updated = await updateMutation.mutateAsync({ id: contract.id, ...cleaned, projectId: projectId || null })
+      const updated = await updateMutation.mutateAsync({ id: contract.id, ...cleaned, projectId: projectId || undefined })
       onSaved?.(updated)
     } else {
       const created = await createMutation.mutateAsync({ ...cleaned, projectId: projectId || undefined })

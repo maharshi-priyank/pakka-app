@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Search, LayoutTemplate, ChevronRight, FileUp, IndianRupee } from 'lucide-react'
+import { X, Search, LayoutTemplate, FileUp, IndianRupee } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useProposalTemplates, useIncrementTemplateUsage } from '../hooks/useProposalTemplates'
 import TemplateCard from './TemplateCard'
