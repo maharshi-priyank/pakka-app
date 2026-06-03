@@ -131,15 +131,17 @@ export default function ClientPortalPage() {
         <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             {isLoading ? (
-              <Skeleton className="h-7 w-7 rounded-lg" />
+              <Skeleton className="h-7 w-28 rounded-lg" />
             ) : data?.freelancer.logoUrl ? (
-              <img src={data.freelancer.logoUrl} alt={freelancerName} className="w-7 h-7 rounded-lg object-cover" />
+              <>
+                <img src={data.freelancer.logoUrl} alt={freelancerName} className="h-7 w-auto max-w-[120px] rounded-lg object-contain" />
+                <span className="text-[13px] font-bold text-[#101828]">{freelancerName}</span>
+              </>
             ) : (
-              <div className="w-7 h-7 rounded-lg bg-[#101828] flex items-center justify-center shrink-0">
-                <span className="text-white text-[11px] font-bold">{freelancerName.charAt(0)}</span>
-              </div>
+              <span style={{ fontFamily: "'Roca Two', serif", fontWeight: 700, fontSize: 22, letterSpacing: '-0.05em', color: '#101828', lineHeight: 1 }}>
+                {freelancerName}
+              </span>
             )}
-            <span className="text-[13px] font-bold text-[#101828]">{freelancerName}</span>
           </div>
           <div className="flex items-center gap-1.5 text-[11px] text-[#98A2B3] font-medium">
             <Shield size={11} /> Secured by Rupway
