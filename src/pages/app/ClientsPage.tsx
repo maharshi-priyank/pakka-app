@@ -1,18 +1,18 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Plus, Search, Users, Mail, Phone, FileText, FileSignature, Receipt } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { useClients, type Client } from '@/features/clients/hooks/useClients'
 import AddClientModal from '@/features/clients/components/AddClientModal'
-import ClientDrawer from '@/features/clients/components/ClientDrawer'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
 }
 
 export default function ClientsPage() {
-  const [search,         setSearch]         = useState('')
-  const [showAdd,        setShowAdd]        = useState(false)
-  const [selectedClient, setSelectedClient] = useState<string | null>(null)
+  const [search,  setSearch]  = useState('')
+  const [showAdd, setShowAdd] = useState(false)
+  const navigate = useNavigate()
 
   const { data, isLoading } = useClients(search || undefined)
   const clients = data?.clients ?? []
@@ -59,20 +59,13 @@ export default function ClientsPage() {
             <ClientCard
               key={client.id}
               client={client}
-              onClick={() => setSelectedClient(client.id)}
+              onClick={() => navigate(`/app/clients/${client.id}`)}
             />
           ))}
         </div>
       )}
 
       {showAdd && <AddClientModal onClose={() => setShowAdd(false)} />}
-
-      {selectedClient && (
-        <ClientDrawer
-          clientId={selectedClient}
-          onClose={() => setSelectedClient(null)}
-        />
-      )}
     </div>
   )
 }
