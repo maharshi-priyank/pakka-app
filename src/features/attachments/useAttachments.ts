@@ -38,7 +38,7 @@ export function useAttachments(parent: AttachmentParent) {
   return useQuery<Attachment[]>({
     queryKey: ['attachments', parentKey(parent)],
     queryFn:  async () => {
-      const params = new URLSearchParams(query as Record<string, string>).toString()
+      const params = new URLSearchParams(Object.fromEntries(Object.entries(query).filter(([, v]) => v != null)) as Record<string, string>).toString()
       const { data } = await api.get<{ data: Attachment[] }>(`/attachments?${params}`)
       return data.data
     },
