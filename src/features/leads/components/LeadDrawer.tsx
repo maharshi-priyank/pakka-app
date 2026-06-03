@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   X, Trash2, Loader2, Building2, Mail, Phone,
-  Tag, Calendar, IndianRupee, Clock, Video, UserPlus,
+  Tag, Calendar, IndianRupee, Clock, Video, UserPlus, CheckCircle2, ArrowRight,
 } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
 import {
   updateLeadSchema, LEAD_STAGES, LEAD_SOURCES, STAGE_LABELS,
   type Lead, type UpdateLeadInput,
 } from '../schemas/lead.schema'
-import { useUpdateLead, useDeleteLead, useUpdateLeadStage, useConvertLeadToClient } from '../hooks/useLeads'
+import { useUpdateLead, useDeleteLead, useUpdateLeadStage } from '../hooks/useLeads'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
+import ConvertLeadModal from './ConvertLeadModal'
 
 interface Props {
   lead:    Lead | null
@@ -42,14 +44,14 @@ function avatarColor(name: string) {
 }
 
 export default function LeadDrawer({ lead, onClose }: Props) {
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [isEditing, setIsEditing]         = useState(false)
-  const [scheduleOpen, setScheduleOpen]   = useState(false)
+  const [confirmDelete,  setConfirmDelete]  = useState(false)
+  const [isEditing,      setIsEditing]      = useState(false)
+  const [scheduleOpen,   setScheduleOpen]   = useState(false)
+  const [showConvert,    setShowConvert]    = useState(false)
 
   const updateLead  = useUpdateLead()
   const deleteLead  = useDeleteLead()
   const updateStage = useUpdateLeadStage()
-  const convertToClient = useConvertLeadToClient()
 
   const {
     register,
@@ -277,15 +279,14 @@ export default function LeadDrawer({ lead, onClose }: Props) {
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-[#F1F3F8] dark:border-[#26283A] flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-[#F1F3F8] dark:border-[#26283A] space-y-2.5">
           {confirmDelete ? (
             <div className="flex items-center gap-2">
-              <p className="text-[12px] text-red-500 font-medium">Delete this lead?</p>
+              <p className="text-[12px] text-red-500 font-medium flex-1">Delete this lead?</p>
               <button
                 onClick={handleDelete}
                 disabled={deleteLead.isPending}
-                className="btn-primary bg-red-500 hover:bg-red-600 text-[12px] h-8 px-3"
-                style={{ background: '#EF4444' }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
               >
                 {deleteLead.isPending ? <Loader2 size={12} className="animate-spin" /> : 'Yes, delete'}
               </button>
@@ -295,37 +296,48 @@ export default function LeadDrawer({ lead, onClose }: Props) {
             </div>
           ) : (
             <>
-              <button
-                onClick={() => setConfirmDelete(true)}
-                className="flex items-center gap-1.5 text-[12px] font-medium text-[#9CA3AF] dark:text-[#545C74] hover:text-red-500 transition-colors"
-              >
-                <Trash2 size={13} /> Delete
-              </button>
+              {/* Primary row */}
               {!isEditing && (
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setScheduleOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"
-                  >
-                    <Video size={12} /> Schedule Call
-                  </button>
-                  {!lead.clientId && (
-                    <button
-                      onClick={() => convertToClient.mutate(lead.id)}
-                      disabled={convertToClient.isPending}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#2563EB] text-[12px] font-semibold text-[#2563EB] hover:bg-[#EFF6FF] dark:hover:bg-[#1E3A5F] transition-colors"
+                  {lead.clientId && lead.client ? (
+                    <Link
+                      to={`/app/clients/${lead.clientId}`}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800/50 text-[12px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 transition-colors"
                     >
-                      {convertToClient.isPending
-                        ? <Loader2 size={12} className="animate-spin" />
-                        : <UserPlus size={12} />}
+                      <CheckCircle2 size={13} />
+                      Won · View Client
+                      <ArrowRight size={12} />
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setShowConvert(true)}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-[#2563EB] text-[12px] font-semibold text-[#2563EB] hover:bg-[#EFF6FF] dark:hover:bg-[#1E3A5F] transition-colors"
+                    >
+                      <UserPlus size={13} />
                       Convert to Client
                     </button>
                   )}
-                  <button onClick={() => setIsEditing(true)} className="btn-primary">
-                    Edit lead
+                  <button onClick={() => setIsEditing(true)} className="btn-primary shrink-0">
+                    Edit Lead
                   </button>
                 </div>
               )}
+
+              {/* Secondary row */}
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex items-center gap-1.5 text-[12px] font-medium text-[#9CA3AF] dark:text-[#545C74] hover:text-red-500 transition-colors"
+                >
+                  <Trash2 size={13} /> Delete
+                </button>
+                <button
+                  onClick={() => setScheduleOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"
+                >
+                  <Video size={12} /> Schedule Call
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -338,6 +350,14 @@ export default function LeadDrawer({ lead, onClose }: Props) {
         leadName={lead.name}
         defaultTitle={`Discovery call with ${lead.name}`}
       />
+
+      {showConvert && (
+        <ConvertLeadModal
+          lead={lead}
+          open={showConvert}
+          onClose={() => setShowConvert(false)}
+        />
+      )}
     </>
   )
 }

@@ -7,7 +7,7 @@ import {
   Save, Send, Check, Copy, ExternalLink,
   Star, CheckSquare, XCircle, MessageSquare, Briefcase,
   Lock, ArrowRight, Paperclip, Upload, Loader2,
-  FileArchive, FileImage, File as FileIcon,
+  FileArchive, FileImage, File as FileIcon, LayoutTemplate,
 } from 'lucide-react'
 import { useAttachments, useUploadAttachment, useDeleteAttachment, humanSize } from '@/features/attachments/useAttachments'
 import { cn } from '@/lib/utils'
@@ -20,6 +20,8 @@ import type { Proposal, ProposalTemplate } from '../schemas/proposal.schema'
 import type { Lead } from '@/features/leads/schemas/lead.schema'
 import { useCreateProposal, useUpdateProposal, useSendProposal } from '../hooks/useProposals'
 import { useLeads } from '@/features/leads/hooks/useLeads'
+import { useProjects } from '@/features/projects/hooks/useProjects'
+import SaveTemplateModal from './SaveTemplateModal'
 import { useNavigate } from 'react-router-dom'
 
 type Tab = 'cover' | 'scope' | 'pricing' | 'milestones' | 'terms' | 'credibility' | 'attachments'
@@ -56,18 +58,25 @@ function calcTotals(lineItems: LineItem[], gstType: string) {
 }
 
 interface Props {
-  proposal?:        Proposal
-  defaultLead?:     Lead
-  defaultTemplate?: ProposalTemplate
-  onSaved?:         (proposal: Proposal) => void
-  onDiscard?:       () => void
+  proposal?:          Proposal
+  defaultLead?:       Lead
+  defaultTemplate?:   ProposalTemplate
+  defaultProjectId?:  string
+  defaultClientId?:   string
+  onSaved?:           (proposal: Proposal) => void
+  onDiscard?:         () => void
+  /** When set, editor is in "template editing" mode — hides client/project selectors and changes save behavior */
+  templateMode?:      { id: string; name: string }
+  onSaveTemplate?:    (content: object, name: string, totalAmount: number) => void
 }
 
-export default function ProposalEditor({ proposal, defaultLead, defaultTemplate, onSaved, onDiscard }: Props) {
+export default function ProposalEditor({ proposal, defaultLead, defaultTemplate, defaultProjectId, defaultClientId, onSaved, onDiscard, templateMode, onSaveTemplate }: Props) {
   const [activeTab,        setActiveTab]        = useState<Tab>('cover')
   const [shareUrl,         setShareUrl]         = useState<string | null>(null)
   const [copied,           setCopied]           = useState(false)
   const [hidePricingTable, setHidePricingTable] = useState(proposal?.hidePricingTable ?? false)
+  const [projectId,        setProjectId]        = useState(proposal?.projectId ?? defaultProjectId ?? '')
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
   const attachmentInputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
@@ -86,7 +95,10 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
   const leadSynced = useRef(false)
   useEffect(() => {
     if (leadSynced.current || !leadsData?.items?.length) return
-    const targetLeadId = proposal?.leadId ?? defaultLead?.id
+    // Prefer explicit lead, then fall back to the lead linked to the default client
+    const targetLeadId = proposal?.leadId
+      ?? defaultLead?.id
+      ?? (defaultClientId ? leadsData.items.find(l => l.clientId === defaultClientId)?.id : undefined)
     if (targetLeadId) {
       setValue('leadId', targetLeadId)
       leadSynced.current = true
@@ -111,7 +123,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
     defaultValues: {
       title:      proposal?.title ?? defaultTemplate?.name ?? (defaultLead?.service ? `Proposal — ${defaultLead.service}` : ''),
       leadId:     proposal?.leadId ?? defaultLead?.id ?? undefined,
-      clientId:   proposal?.clientId ?? undefined,
+      clientId:   proposal?.clientId ?? defaultClientId ?? undefined,
       validUntil: proposal?.validUntil ? proposal.validUntil.slice(0, 10) : '',
       content: {
         intro:           (c.intro         as string)  ?? '',
@@ -144,9 +156,31 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
   function addExclusion() { setValue('content.exclusions' as never, [...exclusions, ''] as never) }
   function removeExclusion(i: number) { setValue('content.exclusions' as never, exclusions.filter((_, j) => j !== i) as never) }
 
-  const watchedLineItems = watch('content.lineItems') ?? []
-  const watchedGstType   = watch('content.gstType') ?? 'IGST'
+  const watchedLineItems   = watch('content.lineItems')      ?? []
+  const watchedGstType     = watch('content.gstType')        ?? 'IGST'
+  const watchedClientId    = watch('clientId')               ?? ''
+  const watchedIntro       = watch('content.intro')          ?? ''
+  const watchedWhyUs       = watch('content.whyUs')          ?? ''
+  const watchedScopeItems  = watch('content.scopeItems')     ?? []
+  const watchedMilestones  = watch('content.milestones')     ?? []
+  const watchedPaySched    = watch('content.paymentSchedule') ?? []
+  const watchedTerms       = watch('content.terms')          ?? ''
+  const watchedCaseStudies = watch('content.caseStudies')    ?? []
+  const watchedFaq         = watch('content.faq')            ?? []
   const { subtotal, gstAmount, total } = calcTotals(watchedLineItems as LineItem[], watchedGstType)
+
+  const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
+
+  const tabCompletion: Record<Tab, boolean> = {
+    cover:       !!(watchedIntro?.trim() || watchedWhyUs?.trim()),
+    scope:       watchedScopeItems.length > 0,
+    pricing:     watchedLineItems.length > 0,
+    milestones:  watchedMilestones.length > 0 || watchedPaySched.length > 0,
+    terms:       !!(watchedTerms?.trim()),
+    credibility: watchedCaseStudies.length > 0 || watchedFaq.length > 0,
+    attachments: attachments.length > 0,
+  }
+  const completedCount = Object.values(tabCompletion).filter(Boolean).length
 
   const onSave = useCallback(async (data: CreateProposalInput) => {
     const cleaned = {
@@ -170,14 +204,19 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
       },
     }
 
+    if (onSaveTemplate) {
+      onSaveTemplate(cleaned.content as object, data.title || '', total)
+      return
+    }
+
     if (isEdit && proposal) {
-      const updated = await updateMutation.mutateAsync({ id: proposal.id, ...cleaned, hidePricingTable })
+      const updated = await updateMutation.mutateAsync({ id: proposal.id, ...cleaned, hidePricingTable, projectId: projectId || null })
       onSaved?.(updated)
     } else {
-      const created = await createMutation.mutateAsync(cleaned)
+      const created = await createMutation.mutateAsync({ ...cleaned, projectId: projectId || undefined })
       onSaved?.(created)
     }
-  }, [isEdit, proposal, createMutation, updateMutation, onSaved])
+  }, [isEdit, proposal, createMutation, updateMutation, onSaved, onSaveTemplate, total])
 
   const onSend = useCallback(async () => {
     if (!proposal) return
@@ -199,40 +238,63 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
     <div className="flex flex-col h-full">
 
       {/* ── Tab nav ── */}
-      <div className="flex items-center gap-0.5 px-6 pt-4 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] overflow-x-auto">
-        {TABS.map(tab => {
-          const Icon     = tab.icon
-          const isActive = activeTab === tab.id
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                'flex items-center gap-1.5 px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap',
-                isActive
-                  ? 'border-[#2563EB] text-[#2563EB]'
-                  : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+      <div className="border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A]">
+        <div className="flex items-center gap-0.5 px-6 pt-3 overflow-x-auto scrollbar-none">
+          {TABS.map(tab => {
+            const Icon      = tab.icon
+            const isActive  = activeTab === tab.id
+            const isDone    = tabCompletion[tab.id]
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'relative flex items-center gap-1.5 px-3.5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap group',
+                  isActive
+                    ? 'border-[#2563EB] text-[#2563EB]'
+                    : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+                )}
+              >
+                <Icon size={13} strokeWidth={isActive ? 2.5 : 1.8} />
+                {tab.label}
+                {/* Completion dot */}
+                <span className={cn(
+                  'w-1.5 h-1.5 rounded-full transition-colors shrink-0',
+                  isDone
+                    ? isActive ? 'bg-[#2563EB]' : 'bg-[#17B26A]'
+                    : 'bg-[#D0D5DD] dark:bg-[#3D4258]',
+                )} />
+              </button>
+            )
+          })}
+
+          <div className="flex-1" />
+
+          {watchedLineItems.length > 0 && (
+            <div className="flex items-center gap-1 text-[12px] text-[#667085] dark:text-[#8B92A8] bg-[#F9FAFB] dark:bg-[#21222D] border border-[#EAECF0] dark:border-[#3D4258] rounded-lg px-3 py-1.5 mr-2 shrink-0">
+              <IndianRupee size={10} strokeWidth={2.5} />
+              <span className="font-extrabold text-[#101828] dark:text-[#ECEEF3]">
+                {total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              </span>
+              {gstAmount > 0 && (
+                <span className="text-[#98A2B3] dark:text-[#545C74]">+ GST {gstAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
               )}
-            >
-              <Icon size={13} strokeWidth={isActive ? 2.5 : 1.8} />
-              {tab.label}
-            </button>
-          )
-        })}
+            </div>
+          )}
+        </div>
 
-        <div className="flex-1" />
-
-        {watchedLineItems.length > 0 && (
-          <div className="flex items-center gap-1 text-[12px] text-[#667085] dark:text-[#8B92A8] bg-[#F9FAFB] dark:bg-[#21222D] border border-[#EAECF0] dark:border-[#3D4258] rounded-lg px-3 py-1.5 mr-2 shrink-0">
-            <IndianRupee size={10} strokeWidth={2.5} />
-            <span className="font-extrabold text-[#101828] dark:text-[#ECEEF3]">
-              {total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-            </span>
-            {gstAmount > 0 && (
-              <span className="text-[#98A2B3] dark:text-[#545C74]">+ GST {gstAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-            )}
+        {/* Progress bar */}
+        <div className="flex items-center gap-3 px-6 py-2">
+          <div className="flex-1 h-1 bg-[#F2F4F7] dark:bg-[#21222D] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#17B26A] rounded-full transition-all duration-500"
+              style={{ width: `${(completedCount / TABS.length) * 100}%` }}
+            />
           </div>
-        )}
+          <span className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] shrink-0 tabular-nums">
+            {completedCount}/{TABS.length}
+          </span>
+        </div>
       </div>
 
       {/* ── Contract lock banner (PC2) ── */}
@@ -263,18 +325,35 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
             <>
               <Section title="Basic info" description="Proposal title, lead, and validity">
                 <div className="space-y-4">
-                  <div>
-                    <label className="form-label">Lead *</label>
-                    <select {...register('leadId')} className="form-input w-full">
-                      <option value="">— Select a lead —</option>
-                      {(leadsData?.items ?? []).map(l => (
-                        <option key={l.id} value={l.id}>
-                          {l.name}{l.company ? ` · ${l.company}` : ''}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.leadId && <p className="form-error">{errors.leadId.message}</p>}
-                  </div>
+                  {!templateMode && (
+                    <div>
+                      <label className="form-label">Lead *</label>
+                      <select {...register('leadId')} className="form-input w-full">
+                        <option value="">— Select a lead —</option>
+                        {(leadsData?.items ?? []).map(l => (
+                          <option key={l.id} value={l.id}>
+                            {l.name}{l.company ? ` · ${l.company}` : ''}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.leadId && <p className="form-error">{errors.leadId.message}</p>}
+                    </div>
+                  )}
+                  {!templateMode && (projectsData?.projects?.length ?? 0) > 0 && (
+                    <div>
+                      <label className="form-label">Project (optional)</label>
+                      <select
+                        value={projectId}
+                        onChange={e => setProjectId(e.target.value)}
+                        className="form-input w-full"
+                      >
+                        <option value="">— No project —</option>
+                        {(projectsData?.projects ?? []).map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="form-label">Proposal title *</label>
                     <input
@@ -783,9 +862,39 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
 
       {/* ── Footer actions ── */}
       <div className="px-6 py-4 border-t border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] flex items-center justify-between gap-3 shrink-0">
-        <button type="button" onClick={onDiscard} className="btn-secondary text-[13px]">
-          {isDirty ? 'Discard changes' : 'Close'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={onDiscard} className="btn-secondary text-[13px]">
+            {isDirty ? 'Discard' : 'Close'}
+          </button>
+          {/* Prev / Next step */}
+          {(() => {
+            const idx  = TABS.findIndex(t => t.id === activeTab)
+            const prev = TABS[idx - 1]
+            const next = TABS[idx + 1]
+            return (
+              <>
+                {prev && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab(prev.id)}
+                    className="flex items-center gap-1 h-8 px-3 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
+                  >
+                    ← {prev.label}
+                  </button>
+                )}
+                {next && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab(next.id)}
+                    className="flex items-center gap-1 h-8 px-3 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
+                  >
+                    {next.label} →
+                  </button>
+                )}
+              </>
+            )
+          })()}
+        </div>
 
         <div className="flex items-center gap-2">
           {shareUrl && (
@@ -800,7 +909,18 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
             </div>
           )}
 
-          {canSend && (
+          {!templateMode && isEdit && proposal && (
+            <button
+              type="button"
+              onClick={() => setShowSaveTemplate(true)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#6366F1] transition-colors"
+              title="Save as template"
+            >
+              <LayoutTemplate size={14} />
+            </button>
+          )}
+
+          {!templateMode && canSend && (
             <button
               type="button"
               onClick={onSend}
@@ -812,7 +932,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
             </button>
           )}
 
-          {isSent && !shareUrl && (
+          {!templateMode && isSent && !shareUrl && (
             <button
               type="button"
               onClick={onSend}
@@ -831,10 +951,19 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
             className="btn-primary flex items-center gap-1.5 text-[13px]"
           >
             <Save size={13} strokeWidth={2} />
-            {isSaving ? 'Saving…' : isEdit ? 'Save changes' : 'Create proposal'}
+            {isSaving ? 'Saving…' : templateMode ? 'Save template' : isEdit ? 'Save changes' : 'Create proposal'}
           </button>
         </div>
       </div>
+
+      {isEdit && proposal && (
+        <SaveTemplateModal
+          open={showSaveTemplate}
+          onClose={() => setShowSaveTemplate(false)}
+          proposalId={proposal.id}
+          defaultName={watch('title') || proposal.title || ''}
+        />
+      )}
     </div>
   )
 }

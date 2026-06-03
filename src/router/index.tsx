@@ -135,6 +135,13 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: '/app/proposals/templates/:id/edit',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/TemplateEditorPage')
+              return { Component }
+            },
+          },
+          {
             path: '/app/contracts',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ContractsPage')

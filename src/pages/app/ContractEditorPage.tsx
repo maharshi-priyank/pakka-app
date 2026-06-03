@@ -1,17 +1,26 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useContract } from '@/features/contracts/hooks/useContracts'
 import { useCreateInvoiceFromContract } from '@/features/invoices/hooks/useInvoices'
 import ContractEditor from '@/features/contracts/components/ContractEditor'
 import type { Contract } from '@/features/contracts/schemas/contract.schema'
+import { useProject } from '@/features/projects/hooks/useProjects'
 
 export default function ContractEditorPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const isNew = !id || id === 'new'
+
+  const urlProjectId = searchParams.get('projectId') ?? undefined
+  const urlClientId  = searchParams.get('clientId')  ?? undefined
+  const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: contract, isLoading } = useContract(isNew ? null : id ?? null)
   const generateInvoiceMutation = useCreateInvoiceFromContract()
+
+  const effectiveProjectId   = urlProjectId ?? contract?.projectId ?? undefined
+  const effectiveProjectName = projectFromUrl?.name ?? contract?.project?.name ?? null
 
   function handleSaved(c: Contract) {
     navigate(`/app/contracts/${c.id}`, { replace: true })
@@ -36,12 +45,21 @@ export default function ContractEditorPage() {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] shrink-0">
         <button
-          onClick={() => navigate('/app/contracts')}
+          onClick={() => effectiveProjectId ? navigate(`/app/projects/${effectiveProjectId}`) : navigate('/app/contracts')}
           className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
         >
           <ArrowLeft size={14} strokeWidth={2} />
         </button>
-        <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Contracts</span>
+        {effectiveProjectId && effectiveProjectName ? (
+          <>
+            <Link to={`/app/projects/${effectiveProjectId}`} className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
+              {effectiveProjectName}
+            </Link>
+            <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
+          </>
+        ) : (
+          <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Contracts</span>
+        )}
         <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
         <span className="text-[12px] font-medium text-[#344054] dark:text-[#C2C8D8]">
           {isNew ? 'New contract' : (contract?.title ?? 'Edit contract')}
@@ -63,8 +81,10 @@ export default function ContractEditorPage() {
 
       <ContractEditor
         contract={!isNew ? contract : undefined}
+        defaultProjectId={isNew ? urlProjectId : undefined}
+        defaultClientId={isNew ? urlClientId : undefined}
         onSaved={handleSaved}
-        onDiscard={() => navigate('/app/contracts')}
+        onDiscard={() => effectiveProjectId ? navigate(`/app/projects/${effectiveProjectId}`) : navigate('/app/contracts')}
         onGenerateInvoice={contract?.status === 'SIGNED' ? handleGenerateInvoice : undefined}
       />
     </div>

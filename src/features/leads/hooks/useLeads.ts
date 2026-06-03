@@ -124,19 +124,42 @@ export function useDeleteLead() {
   })
 }
 
+export interface ConvertLeadPayload {
+  leadId:           string
+  name?:            string
+  email?:           string
+  phone?:           string
+  company?:         string
+  createProject?:   boolean
+  projectName?:     string
+  projectBudget?:   number
+  projectStartDate?: string
+  projectEndDate?:  string
+}
+
+interface ConvertLeadResult {
+  client:  { id: string; name: string }
+  project: { id: string; name: string } | null
+}
+
 export function useConvertLeadToClient() {
   const qc       = useQueryClient()
   const navigate = useNavigate()
   return useMutation({
-    mutationFn: async (leadId: string) => {
-      const { data } = await api.post<{ data: { id: string; name: string } }>(`/leads/${leadId}/convert-to-client`)
+    mutationFn: async ({ leadId, ...body }: ConvertLeadPayload) => {
+      const { data } = await api.post<{ data: ConvertLeadResult }>(`/leads/${leadId}/convert-to-client`, body)
       return data.data
     },
-    onSuccess: (client) => {
+    onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] })
       qc.invalidateQueries({ queryKey: ['clients'] })
-      toast.success(`${client.name} added as a client`)
-      navigate(`/app/clients/${client.id}`)
+      qc.invalidateQueries({ queryKey: ['projects'] })
+      toast.success(`${result.client.name} added as a client`)
+      if (result.project) {
+        navigate(`/app/projects/${result.project.id}`)
+      } else {
+        navigate(`/app/clients/${result.client.id}`)
+      }
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to convert lead'),
   })

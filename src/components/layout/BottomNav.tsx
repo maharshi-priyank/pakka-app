@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, Receipt, MoreHorizontal,
   PenLine, Building2, Settings, LogOut, X,
-  FolderKanban, Clock, Wallet, BarChart3, CalendarDays, ClipboardList, Zap,
+  FolderKanban, BarChart3, CalendarDays, ClipboardList, Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
@@ -19,8 +19,6 @@ const MORE_ITEMS = [
   { icon: PenLine,       label: 'Contracts',   href: '/app/contracts' },
   { icon: Building2,     label: 'Clients',     href: '/app/clients' },
   { icon: FolderKanban,  label: 'Projects',    href: '/app/projects' },
-  { icon: Clock,         label: 'Time',        href: '/app/time' },
-  { icon: Wallet,        label: 'Expenses',    href: '/app/expenses' },
   { icon: BarChart3,     label: 'Reports',     href: '/app/reports' },
   { icon: CalendarDays,  label: 'Meetings',    href: '/app/meetings' },
   { icon: ClipboardList, label: 'Forms',       href: '/app/forms' },

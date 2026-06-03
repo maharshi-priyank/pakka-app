@@ -53,7 +53,14 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
             <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate leading-snug">
               {invoice.invoiceNumber}
             </p>
-            <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] truncate leading-snug">{clientName}</p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] truncate leading-snug">{clientName}</p>
+              {invoice.project && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-[#60A5FA] shrink-0">
+                  {invoice.project.name}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">

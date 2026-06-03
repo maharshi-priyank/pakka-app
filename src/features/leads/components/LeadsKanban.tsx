@@ -12,9 +12,10 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
 import { cn } from '@/lib/utils'
 import { LEAD_STAGES, STAGE_LABELS, type Lead, type LeadStage } from '../schemas/lead.schema'
-import { useLeads, useUpdateLeadStage, useConvertLeadToClient } from '../hooks/useLeads'
+import { useLeads, useUpdateLeadStage } from '../hooks/useLeads'
 import LeadCard, { LeadCardSkeleton } from './LeadCard'
 import LeadDrawer from './LeadDrawer'
+import ConvertLeadModal from './ConvertLeadModal'
 
 const COLUMN_ACCENTS: Record<LeadStage, { bar: string; count: string }> = {
   ENQUIRY:       { bar: 'bg-[#667085]',  count: 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]'  },
@@ -100,17 +101,13 @@ interface Props {
 }
 
 export default function LeadsKanban({ search, onNewProposal }: Props) {
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
-  const [activeId, setActiveId]         = useState<string | null>(null)
-  const [localLeads, setLocalLeads]     = useState<Lead[] | null>(null)
+  const [selectedLead,    setSelectedLead]    = useState<Lead | null>(null)
+  const [convertingLead,  setConvertingLead]  = useState<Lead | null>(null)
+  const [activeId,        setActiveId]        = useState<string | null>(null)
+  const [localLeads,      setLocalLeads]      = useState<Lead[] | null>(null)
 
   const { data, isLoading } = useLeads({ limit: 200, search: search || undefined })
-  const updateStage    = useUpdateLeadStage()
-  const convertToClient = useConvertLeadToClient()
-
-  function handleConvertToClient(lead: Lead) {
-    convertToClient.mutate(lead.id)
-  }
+  const updateStage = useUpdateLeadStage()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -201,8 +198,8 @@ export default function LeadsKanban({ search, onNewProposal }: Props) {
               leads={stageMap[stage]}
               onCardClick={setSelectedLead}
               onNewProposal={onNewProposal}
-              onConvertToClient={handleConvertToClient}
-              convertingLeadId={convertToClient.isPending ? convertToClient.variables : null}
+              onConvertToClient={setConvertingLead}
+              convertingLeadId={null}
             />
           ))}
         </div>
@@ -217,6 +214,14 @@ export default function LeadsKanban({ search, onNewProposal }: Props) {
       </DndContext>
 
       <LeadDrawer lead={selectedLead} onClose={() => setSelectedLead(null)} />
+
+      {convertingLead && (
+        <ConvertLeadModal
+          lead={convertingLead}
+          open={!!convertingLead}
+          onClose={() => setConvertingLead(null)}
+        />
+      )}
     </>
   )
 }

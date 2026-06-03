@@ -55,7 +55,14 @@ export default function ProposalCard({ proposal, onClick, onConvertToContract, o
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate leading-snug">{proposal.title}</p>
-          <p className="text-[11.5px] text-[#667085] dark:text-[#8B92A8] truncate mt-0.5">{clientName}</p>
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <p className="text-[11.5px] text-[#667085] dark:text-[#8B92A8] truncate">{clientName}</p>
+            {proposal.project && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-[#60A5FA] shrink-0">
+                {proposal.project.name}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
           <span className={cn(STATUS_BADGE_CLASS[proposal.status], 'text-[10px] font-semibold px-1.5 py-0.5 rounded-full')}>

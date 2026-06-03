@@ -95,6 +95,8 @@ export interface Invoice {
   updatedAt:          string
   client:             InvoiceClient | null
   contract:           InvoiceContract | null
+  projectId:          string | null
+  project:            { id: string; name: string } | null
 }
 
 export interface InvoiceListResponse {

@@ -9,13 +9,15 @@ import { cn } from '@/lib/utils'
 import { invoiceFormSchema, RECURRENCE_CYCLE_LABELS, type InvoiceFormData, type Invoice } from '../schemas/invoice.schema'
 import { useCreateInvoice, useUpdateInvoice, useSendInvoice, useMarkPaid } from '../hooks/useInvoices'
 import RecordPaymentModal from './RecordPaymentModal'
+import { useProjects } from '@/features/projects/hooks/useProjects'
 
 const GST_RATE_OPTIONS = [0, 5, 12, 18, 28]
 
 interface Props {
-  invoice?: Invoice
+  invoice?:           Invoice
   defaultContractId?: string
-  defaultClientId?: string
+  defaultClientId?:   string
+  defaultProjectId?:  string
   onSaved: (invoice: Invoice) => void
   onDiscard: () => void
 }
@@ -24,13 +26,14 @@ function fmt(v: number) {
   return v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-export default function InvoiceEditor({ invoice, defaultContractId, defaultClientId, onSaved, onDiscard }: Props) {
+export default function InvoiceEditor({ invoice, defaultContractId, defaultClientId, defaultProjectId, onSaved, onDiscard }: Props) {
   const isNew     = !invoice
   const isPaid    = invoice?.status === 'PAID'
   const canEdit   = !isPaid
-  const [saved,    setSaved]   = useState<Invoice | null>(null)
-  const [viewUrl,  setViewUrl] = useState<string | null>(null)
-  const [copied,   setCopied]  = useState(false)
+  const [saved,      setSaved]     = useState<Invoice | null>(null)
+  const [viewUrl,    setViewUrl]   = useState<string | null>(null)
+  const [copied,     setCopied]    = useState(false)
+  const [projectId,  setProjectId] = useState(invoice?.projectId ?? defaultProjectId ?? '')
 
   const displayInvoice = saved ?? invoice
 
@@ -69,6 +72,9 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const tdsRate         = watch('tdsRate')
   const isRecurring     = watch('isRecurring')
   const recurrenceCycle = watch('recurrenceCycle')
+  const watchedClientId = watch('clientId') ?? ''
+
+  const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
 
   const subtotal  = lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate)), 0)
   const gstAmount = gstType === 'EXEMPT'
@@ -85,9 +91,10 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const [showRecordPayment, setShowRecordPayment] = useState(false)
 
   async function onSubmit(data: InvoiceFormData) {
+    const payload = { ...data, projectId: projectId || null } as InvoiceFormData & { projectId: string | null }
     const result = isNew
-      ? await createMutation.mutateAsync(data)
-      : await updateMutation.mutateAsync(data)
+      ? await createMutation.mutateAsync(payload)
+      : await updateMutation.mutateAsync(payload)
     setSaved(result)
     onSaved(result)
   }
@@ -269,6 +276,24 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
               </div>
             </div>
           </div>
+
+          {/* Project picker */}
+          {(projectsData?.projects?.length ?? 0) > 0 && (
+            <div>
+              <label className="form-label">Project (optional)</label>
+              <select
+                value={projectId}
+                onChange={e => setProjectId(e.target.value)}
+                disabled={!canEdit}
+                className="form-input w-full max-w-xs"
+              >
+                <option value="">— No project —</option>
+                {(projectsData?.projects ?? []).map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Settings row */}
           <div className="grid grid-cols-3 gap-4">

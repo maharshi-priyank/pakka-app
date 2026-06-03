@@ -13,6 +13,7 @@ import {
 } from '../schemas/contract.schema'
 import type { Contract, SendContractResponse } from '../schemas/contract.schema'
 import { useCreateContract, useUpdateContract, useSendContract } from '../hooks/useContracts'
+import { useProjects } from '@/features/projects/hooks/useProjects'
 
 type Tab = 'parties' | 'scope' | 'financials' | 'clauses'
 
@@ -25,15 +26,18 @@ const TABS: { id: Tab; label: string; icon: typeof FileText }[] = [
 
 interface Props {
   contract?:          Contract
+  defaultProjectId?:  string
+  defaultClientId?:   string
   onSaved?:           (contract: Contract) => void
   onDiscard?:         () => void
   onGenerateInvoice?: () => void
 }
 
-export default function ContractEditor({ contract, onSaved, onDiscard, onGenerateInvoice }: Props) {
+export default function ContractEditor({ contract, defaultProjectId, defaultClientId, onSaved, onDiscard, onGenerateInvoice }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('parties')
   const [sendResult, setSendResult] = useState<SendContractResponse | null>(null)
   const [copied,     setCopied]     = useState(false)
+  const [projectId,  setProjectId]  = useState(contract?.projectId ?? defaultProjectId ?? '')
 
   const createMutation = useCreateContract()
   const updateMutation = useUpdateContract()
@@ -48,7 +52,7 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
     resolver: zodResolver(createContractSchema),
     defaultValues: {
       title:      contract?.title ?? '',
-      clientId:   contract?.clientId ?? undefined,
+      clientId:   contract?.clientId ?? defaultClientId ?? undefined,
       proposalId: contract?.proposalId ?? undefined,
       content: {
         intro:              (c.intro              as string) ?? 'This agreement is entered into between the service provider ("Agency") and the client ("Client") for the services described below.',
@@ -78,6 +82,9 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
   const deliverablesArr = useFieldArray({ control, name: 'content.deliverables' })
   const paymentArr      = useFieldArray({ control, name: 'content.paymentSchedule' })
 
+  const watchedClientId = watch('clientId') ?? ''
+  const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
+
   const exclusions = (watch('content.exclusions') ?? []) as string[]
   function addExclusion() { setValue('content.exclusions' as never, [...exclusions, ''] as never) }
   function removeExclusion(i: number) { setValue('content.exclusions' as never, exclusions.filter((_, j) => j !== i) as never) }
@@ -96,10 +103,10 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
       },
     }
     if (isEdit && contract) {
-      const updated = await updateMutation.mutateAsync({ id: contract.id, ...cleaned })
+      const updated = await updateMutation.mutateAsync({ id: contract.id, ...cleaned, projectId: projectId || null })
       onSaved?.(updated)
     } else {
-      const created = await createMutation.mutateAsync(cleaned)
+      const created = await createMutation.mutateAsync({ ...cleaned, projectId: projectId || undefined })
       onSaved?.(created)
     }
   }, [isEdit, contract, createMutation, updateMutation, onSaved])
@@ -213,12 +220,32 @@ export default function ContractEditor({ contract, onSaved, onDiscard, onGenerat
               </CSection>
 
               <CSection title="Project" description="Brief description of the engagement">
-                <textarea
-                  {...register('content.projectDescription')}
-                  rows={3}
-                  className="form-input w-full resize-none text-[13px]"
-                  placeholder="e.g. Design and development of a photography portfolio website including gallery, contact form, and CMS integration."
-                />
+                <div className="space-y-3">
+                  {(projectsData?.projects?.length ?? 0) > 0 && (
+                    <div>
+                      <label className="form-label">Link to project (optional)</label>
+                      <select
+                        value={projectId}
+                        onChange={e => setProjectId(e.target.value)}
+                        className="form-input w-full"
+                      >
+                        <option value="">— No project —</option>
+                        {(projectsData?.projects ?? []).map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <div>
+                    <label className="form-label">Project description</label>
+                    <textarea
+                      {...register('content.projectDescription')}
+                      rows={3}
+                      className="form-input w-full resize-none text-[13px]"
+                      placeholder="e.g. Design and development of a photography portfolio website including gallery, contact form, and CMS integration."
+                    />
+                  </div>
+                </div>
               </CSection>
             </>
           )}

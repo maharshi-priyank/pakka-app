@@ -1,16 +1,25 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useInvoice } from '@/features/invoices/hooks/useInvoices'
 import InvoiceEditor from '@/features/invoices/components/InvoiceEditor'
 import InvoiceFilesPanel from '@/features/invoices/components/InvoiceFilesPanel'
 import type { Invoice } from '@/features/invoices/schemas/invoice.schema'
+import { useProject } from '@/features/projects/hooks/useProjects'
 
 export default function InvoiceEditorPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const isNew = !id || id === 'new'
 
+  const urlProjectId = searchParams.get('projectId') ?? undefined
+  const urlClientId  = searchParams.get('clientId')  ?? undefined
+  const { data: projectFromUrl } = useProject(urlProjectId ?? '')
+
   const { data: invoice, isLoading } = useInvoice(isNew ? null : id ?? null)
+
+  const effectiveProjectId   = urlProjectId ?? invoice?.projectId ?? undefined
+  const effectiveProjectName = projectFromUrl?.name ?? invoice?.project?.name ?? null
 
   function handleSaved(inv: Invoice) {
     navigate(`/app/invoices/${inv.id}`, { replace: true })
@@ -29,12 +38,21 @@ export default function InvoiceEditorPage() {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] shrink-0">
         <button
-          onClick={() => navigate('/app/invoices')}
+          onClick={() => effectiveProjectId ? navigate(`/app/projects/${effectiveProjectId}`) : navigate('/app/invoices')}
           className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
         >
           <ArrowLeft size={14} strokeWidth={2} />
         </button>
-        <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Invoices</span>
+        {effectiveProjectId && effectiveProjectName ? (
+          <>
+            <Link to={`/app/projects/${effectiveProjectId}`} className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
+              {effectiveProjectName}
+            </Link>
+            <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
+          </>
+        ) : (
+          <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Invoices</span>
+        )}
         <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
         <span className="text-[12px] font-medium text-[#344054] dark:text-[#C2C8D8]">
           {isNew ? 'New invoice' : (invoice?.invoiceNumber ?? 'Edit invoice')}
@@ -60,8 +78,10 @@ export default function InvoiceEditorPage() {
         <div className={isNew || !invoice || invoice.status === 'DRAFT' ? 'h-full' : ''}>
           <InvoiceEditor
             invoice={!isNew ? invoice : undefined}
+            defaultProjectId={isNew ? urlProjectId : undefined}
+            defaultClientId={isNew ? urlClientId : undefined}
             onSaved={handleSaved}
-            onDiscard={() => navigate('/app/invoices')}
+            onDiscard={() => effectiveProjectId ? navigate(`/app/projects/${effectiveProjectId}`) : navigate('/app/invoices')}
           />
         </div>
 

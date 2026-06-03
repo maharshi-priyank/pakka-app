@@ -54,8 +54,9 @@ export function useUploadAttachment(parent: AttachmentParent, opts?: { gateInvoi
     mutationFn: async (file: File) => {
       if (!user) throw new Error('Not authenticated')
 
-      const rand = Math.random().toString(36).slice(2, 10)
-      const path = `attachments/${parentPathSegment(parent)}/${rand}-${file.name}`
+      const rand         = Math.random().toString(36).slice(2, 10)
+      const safeName     = file.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '')
+      const path         = `attachments/${parentPathSegment(parent)}/${rand}-${safeName}`
 
       const { error } = await supabase.storage
         .from('deliverables')

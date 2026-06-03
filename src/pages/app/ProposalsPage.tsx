@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List } from 'lucide-react'
+import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List, FileUp } from 'lucide-react'
 import AIIcon from '@/features/ai/components/AIIcon'
 import AIProposalModal from '@/features/ai/components/AIProposalModal'
 import { cn } from '@/lib/utils'
@@ -12,6 +12,7 @@ import type { SortField, SortDir } from '@/features/proposals/components/Proposa
 import TemplatePickerModal from '@/features/proposals/components/TemplatePickerModal'
 import TemplateCard from '@/features/proposals/components/TemplateCard'
 import SaveTemplateModal from '@/features/proposals/components/SaveTemplateModal'
+import ImportTemplateModal from '@/features/proposals/components/ImportTemplateModal'
 import { useProposalTemplates } from '@/features/proposals/hooks/useProposalTemplates'
 import type { ProposalStatus } from '@/features/proposals/schemas/proposal.schema'
 import { STATUS_LABELS } from '@/features/proposals/schemas/proposal.schema'
@@ -347,6 +348,7 @@ export default function ProposalsPage() {
 
 function TemplatesTab() {
   const { data: templates = [], isLoading } = useProposalTemplates()
+  const [showImport, setShowImport] = useState(false)
   const systemTemplates = templates.filter(t => t.isSystem)
   const userTemplates   = templates.filter(t => !t.isSystem)
 
@@ -367,12 +369,20 @@ function TemplatesTab() {
         </div>
       </div>
       <div>
-        <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider mb-3">Your Templates</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider">Your Templates</p>
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors"
+          >
+            <FileUp size={13} /> Import from PDF
+          </button>
+        </div>
         {userTemplates.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 border-2 border-dashed border-[#EAECF0] rounded-xl text-center">
             <LayoutTemplate size={28} className="text-[#D0D5DD] mb-3" strokeWidth={1.5} />
             <p className="text-[13px] font-semibold text-[#667085]">No templates yet</p>
-            <p className="text-[12px] text-[#98A2B3] mt-0.5">Open any proposal and use "Save as Template" to add one here.</p>
+            <p className="text-[12px] text-[#98A2B3] mt-0.5">Open any proposal and use "Save as Template", or import a PDF above.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -380,6 +390,12 @@ function TemplatesTab() {
           </div>
         )}
       </div>
+
+      <ImportTemplateModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        onTemplateCreated={() => setShowImport(false)}
+      />
     </div>
   )
 }

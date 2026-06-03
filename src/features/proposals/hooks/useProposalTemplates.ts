@@ -26,10 +26,19 @@ export function useCreateTemplate() {
   })
 }
 
+export function useProposalTemplate(id: string | null) {
+  return useQuery<ProposalTemplate>({
+    queryKey:  [TEMPLATES_KEY, id],
+    queryFn:   () => api.get<{ data: ProposalTemplate }>(`/proposal-templates/${id}`).then(r => r.data.data),
+    enabled:   !!id,
+    staleTime: 60_000,
+  })
+}
+
 export function useUpdateTemplate() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, ...dto }: { id: string; name?: string; description?: string; category?: string }) =>
+    mutationFn: ({ id, ...dto }: { id: string; name?: string; description?: string; category?: string; content?: object; totalAmount?: number }) =>
       api.patch<{ data: ProposalTemplate }>(`/proposal-templates/${id}`, dto).then(r => r.data.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [TEMPLATES_KEY] })
@@ -61,5 +70,35 @@ export function useSaveProposalAsTemplate() {
       toast.success('Template saved')
     },
     onError: () => toast.error('Failed to save template'),
+  })
+}
+
+export function useIncrementTemplateUsage() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/proposal-templates/${id}/use`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [TEMPLATES_KEY] }),
+  })
+}
+
+export interface ParsedTemplate {
+  title:           string
+  scopeItems:      string[]
+  deliverables:    string[]
+  exclusions:      string[]
+  lineItems:       Array<{ description: string; qty: number; rate: number; gstRate: number }>
+  paymentSchedule: Array<{ milestone: string; percentage: number }>
+  pricingNotes:    string
+  terms:           string
+  confidence:      number
+}
+
+export function useParseTemplate() {
+  return useMutation({
+    mutationFn: (formData: FormData) =>
+      api.post<{ data: ParsedTemplate }>('/ai/parse-template', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then(r => r.data.data),
+    onError: () => toast.error('Failed to parse file — ensure it is a text-based PDF or DOCX'),
   })
 }

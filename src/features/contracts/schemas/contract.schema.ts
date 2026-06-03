@@ -73,8 +73,10 @@ export interface Contract {
   userId:     string
   proposalId: string | null
   clientId:   string | null
+  projectId:  string | null
   proposal:   ContractProposal | null
   client:     ContractClient | null
+  project:    { id: string; name: string } | null
   title:      string
   status:     ContractStatus
   content:    ContractContent

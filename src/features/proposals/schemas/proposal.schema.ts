@@ -81,6 +81,7 @@ export const createProposalSchema = z.object({
   title:       z.string().min(1, 'Title is required').max(200),
   leadId:      z.string().optional(),
   clientId:    z.string().optional(),
+  projectId:   z.string().optional(),
   clientName:  z.string().optional(),
   clientEmail: z.string().email('Invalid email').optional().or(z.literal('')),
   content:     proposalContentSchema.optional(),
@@ -116,8 +117,10 @@ export interface Proposal {
   userId:      string
   leadId:      string | null
   clientId:    string | null
+  projectId:   string | null
   lead:        ProposalLead | null
   client:      ProposalClient | null
+  project:     { id: string; name: string } | null
   title:       string
   status:      ProposalStatus
   slug:        string

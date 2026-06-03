@@ -13,6 +13,7 @@ import {
   useProject, useProjectStats, useUpdateProject, useDeleteProject,
   type ProjectStatus,
 } from '@/features/projects/hooks/useProjects'
+import ProjectFilesPanel from '@/features/projects/components/ProjectFilesPanel'
 
 const STATUS_COLORS: Record<ProjectStatus, string> = {
   ACTIVE:    'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400',
@@ -204,7 +205,7 @@ function StatCard({ label, value, sub, icon: Icon, accent = false }: {
 
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'time'
+type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'time' | 'files'
 
 const TABS: Array<{ value: Tab; label: string }> = [
   { value: 'overview',   label: 'Overview' },
@@ -212,6 +213,7 @@ const TABS: Array<{ value: Tab; label: string }> = [
   { value: 'contracts',  label: 'Contracts' },
   { value: 'invoices',   label: 'Invoices' },
   { value: 'time',       label: 'Time & Expenses' },
+  { value: 'files',      label: 'Files' },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -476,7 +478,8 @@ export default function ProjectPage() {
           <RecordTable
             empty={project.proposals.length === 0}
             emptyLabel="No proposals linked to this project"
-            emptyAction={{ label: 'New Proposal', href: '/app/proposals/new' }}
+            emptyAction={{ label: 'New Proposal', href: `/app/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            addAction={{ label: 'New Proposal', href: `/app/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
           >
             <table className="w-full text-[13px]">
               <thead>
@@ -502,7 +505,8 @@ export default function ProjectPage() {
           <RecordTable
             empty={project.contracts.length === 0}
             emptyLabel="No contracts linked to this project"
-            emptyAction={{ label: 'New Contract', href: '/app/contracts/new' }}
+            emptyAction={{ label: 'New Contract', href: `/app/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            addAction={{ label: 'New Contract', href: `/app/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
           >
             <table className="w-full text-[13px]">
               <thead>
@@ -528,7 +532,8 @@ export default function ProjectPage() {
           <RecordTable
             empty={project.invoices.length === 0}
             emptyLabel="No invoices linked to this project"
-            emptyAction={{ label: 'New Invoice', href: '/app/invoices/new' }}
+            emptyAction={{ label: 'New Invoice', href: `/app/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            addAction={{ label: 'New Invoice', href: `/app/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
           >
             <table className="w-full text-[13px]">
               <thead>
@@ -549,6 +554,12 @@ export default function ProjectPage() {
               </tbody>
             </table>
           </RecordTable>
+        )}
+
+        {tab === 'files' && (
+          <div className="max-w-2xl">
+            <ProjectFilesPanel projectId={project.id} />
+          </div>
         )}
 
         {tab === 'time' && (
@@ -662,20 +673,32 @@ function Td({ children, className }: { children: React.ReactNode; className?: st
 }
 
 function RecordTable({
-  title, children, empty, emptyLabel, emptyAction,
+  title, children, empty, emptyLabel, emptyAction, addAction,
 }: {
   title?:       string
   children:     React.ReactNode
   empty:        boolean
   emptyLabel:   string
   emptyAction?: { label: string; href: string }
+  addAction?:   { label: string; href: string }
 }) {
   const navigate = useNavigate()
   return (
     <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl overflow-hidden">
-      {title && (
-        <div className="px-4 py-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
-          <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{title}</p>
+      {(title || (!empty && addAction)) && (
+        <div className="px-4 py-3 border-b border-[#F2F4F7] dark:border-[#26283A] flex items-center justify-between">
+          {title
+            ? <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{title}</p>
+            : <span />
+          }
+          {!empty && addAction && (
+            <button
+              onClick={() => navigate(addAction.href)}
+              className="flex items-center gap-1 text-[12px] text-[#2563EB] font-semibold hover:text-[#1D4ED8] transition-colors"
+            >
+              <Plus size={12} /> {addAction.label}
+            </button>
+          )}
         </div>
       )}
       {empty ? (

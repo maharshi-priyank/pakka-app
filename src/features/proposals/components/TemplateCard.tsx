@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { LayoutTemplate, Pencil, Trash2, Check, X, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { LayoutTemplate, Pencil, Trash2, Check, X, Loader2, ChevronRight, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUpdateTemplate, useDeleteTemplate } from '../hooks/useProposalTemplates'
 import type { ProposalTemplate } from '../schemas/proposal.schema'
 
 interface Props {
-  template: ProposalTemplate
-  mode:     'pick' | 'manage'
-  onUse?:   (template: ProposalTemplate) => void
+  template:         ProposalTemplate
+  mode:             'pick' | 'manage'
+  onUse?:           (template: ProposalTemplate) => void
+  onPreview?:       (template: ProposalTemplate) => void
+  isPreviewActive?: boolean
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -25,7 +28,8 @@ function fmt(v: number) {
   return `₹${Number(v).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
 }
 
-export default function TemplateCard({ template, mode, onUse }: Props) {
+export default function TemplateCard({ template, mode, onUse, onPreview, isPreviewActive }: Props) {
+  const navigate = useNavigate()
   const [editing, setEditing]         = useState(false)
   const [editName, setEditName]       = useState(template.name)
   const [editCategory, setEditCategory] = useState(template.category ?? '')
@@ -94,6 +98,7 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
       className={cn(
         'card p-4 flex flex-col gap-2.5 group transition-all',
         mode === 'pick' ? 'cursor-pointer hover:ring-2 hover:ring-[#6366F1]/40 hover:shadow-md' : '',
+        isPreviewActive && 'ring-2 ring-[#6366F1]/40 shadow-md',
       )}
       onClick={mode === 'pick' ? () => onUse?.(template) : undefined}
     >
@@ -108,12 +113,29 @@ export default function TemplateCard({ template, mode, onUse }: Props) {
           ) : template.usageCount > 0 ? (
             <span className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74]">Used {template.usageCount}×</span>
           ) : null}
+          {/* Expand preview button — pick mode */}
+          {mode === 'pick' && onPreview && (
+            <button
+              onClick={e => { e.stopPropagation(); onPreview(template) }}
+              className="w-6 h-6 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#6366F1] transition-colors opacity-0 group-hover:opacity-100"
+              title="Preview template"
+            >
+              <ChevronRight size={12} />
+            </button>
+          )}
           {mode === 'manage' && !template.isSystem && (
             <>
               <button
+                onClick={e => { e.stopPropagation(); navigate(`/app/proposals/templates/${template.id}/edit`) }}
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#6366F1] transition-colors"
+                title="Edit template content"
+              >
+                <Layers size={11} />
+              </button>
+              <button
                 onClick={e => { e.stopPropagation(); setEditing(true) }}
                 className="w-6 h-6 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
-                title="Edit template"
+                title="Edit name & category"
               >
                 <Pencil size={11} />
               </button>

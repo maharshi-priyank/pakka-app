@@ -112,8 +112,11 @@ export function useUpdateClient() {
       return data.data
     },
     onSuccess: (updated) => {
+      // Invalidate both the list and the detail — do NOT setQueryData with the
+      // bare Client response since ClientPage expects the full ClientDetail shape
+      // (with proposals/contracts/invoices/leads arrays).
       queryClient.invalidateQueries({ queryKey: ['clients'] })
-      queryClient.setQueryData(['clients', updated.id], updated)
+      queryClient.invalidateQueries({ queryKey: ['clients', updated.id] })
       toast.success('Client updated')
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to update client'),

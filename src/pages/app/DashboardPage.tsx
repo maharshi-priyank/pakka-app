@@ -40,6 +40,7 @@ import QuickActionsWidget   from '@/features/dashboard/widgets/QuickActionsWidge
 import FollowUpsWidget      from '@/features/dashboard/widgets/FollowUpsWidget'
 import ActivityWidget       from '@/features/dashboard/widgets/ActivityWidget'
 import UpcomingCallsWidget  from '@/features/meetings/components/UpcomingCallsWidget'
+import PrioritiesStrip      from '@/features/dashboard/components/PrioritiesStrip'
 
 // ─── Widget renderer ─────────────────────────────────────────────────────────
 
@@ -341,6 +342,9 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
+
+      {/* ── Priorities strip ── */}
+      <PrioritiesStrip />
 
       {/* ── Edit mode hint ── */}
       {editMode && (

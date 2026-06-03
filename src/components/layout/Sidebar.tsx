@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
-  Receipt, Building2, Settings, X, CalendarDays, ClipboardList, Zap, Clock, Wallet, BarChart3, FolderKanban, GripVertical, Mail,
+  Receipt, Building2, Settings, X, CalendarDays, ClipboardList, Zap, BarChart3, FolderKanban, GripVertical, Mail,
 } from 'lucide-react'
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
@@ -23,8 +23,6 @@ const ALL_NAV_ITEMS = [
   { id: 'proposals',   icon: FileText,        label: 'Proposals',    href: '/app/proposals',   tourId: 'tour-proposals' },
   { id: 'contracts',   icon: PenLine,         label: 'Contracts',    href: '/app/contracts',   tourId: 'tour-contracts' },
   { id: 'invoices',    icon: Receipt,         label: 'Invoices',     href: '/app/invoices',    tourId: 'tour-invoices' },
-  { id: 'time',        icon: Clock,           label: 'Time',         href: '/app/time',        tourId: undefined },
-  { id: 'expenses',    icon: Wallet,          label: 'Expenses',     href: '/app/expenses',    tourId: undefined },
   { id: 'reports',     icon: BarChart3,       label: 'Reports',      href: '/app/reports',     tourId: undefined },
   { id: 'meetings',    icon: CalendarDays,    label: 'Meetings',     href: '/app/meetings',    tourId: undefined },
   { id: 'forms',       icon: ClipboardList,   label: 'Forms',        href: '/app/forms',       tourId: undefined },

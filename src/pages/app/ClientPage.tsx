@@ -169,12 +169,12 @@ export default function ClientPage() {
   const leads = client?.leads ?? []
 
   const TABS: { key: Tab; label: string; count: number }[] = client ? [
-    { key: 'proposals', label: 'Proposals', count: client.proposals.length },
-    { key: 'contracts', label: 'Contracts', count: client.contracts.length },
-    { key: 'invoices',  label: 'Invoices',  count: client.invoices.length  },
-    { key: 'leads',     label: 'Leads',     count: leads.length                },
-    { key: 'projects',  label: 'Projects',  count: (client.projects ?? []).length },
-    { key: 'timeline',  label: 'Timeline',  count: client.proposals.length + client.contracts.length + client.invoices.length + leads.length },
+    { key: 'proposals', label: 'Proposals', count: (client.proposals ?? []).length },
+    { key: 'contracts', label: 'Contracts', count: (client.contracts ?? []).length },
+    { key: 'invoices',  label: 'Invoices',  count: (client.invoices  ?? []).length },
+    { key: 'leads',     label: 'Leads',     count: leads.length },
+    { key: 'projects',  label: 'Projects',  count: (client.projects  ?? []).length },
+    { key: 'timeline',  label: 'Timeline',  count: (client.proposals ?? []).length + (client.contracts ?? []).length + (client.invoices ?? []).length + leads.length },
   ] : []
 
   return (
