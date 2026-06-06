@@ -61,26 +61,49 @@ export default function SignupPage() {
     <div className="h-screen flex overflow-hidden">
 
       {/* ── Left panel ─────────────────────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[46%] bg-[#0D1117] flex-col px-10 py-8">
-        {/* Logo — top left */}
-        <img src="/logo/clearwork_full_white.png" alt="ClearWork" style={{ height: 32, width: 'auto', display: 'block' }} />
+      <div className="hidden lg:flex lg:w-[46%] flex-col px-10 py-8 relative overflow-hidden"
+        style={{ background: 'linear-gradient(160deg, #c3daea 0%, #ccdce8 45%, #d8dde2 70%, #dedad4 100%)' }}>
 
-        {/* Spacer — pushes heading to vertical middle */}
-        <div className="flex-1" />
+        {/* Noise texture */}
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")" }} />
 
-        {/* Heading — left aligned, mid-panel */}
-        <h2 className="heading-display text-[52px] text-[#FFFFF0]">
-          Everything you need<br />
-          to close more clients.
-        </h2>
+        {/* Logo */}
+        <div className="relative z-10">
+          <img src="/logo/clearwork_full_dark.png" alt="ClearWork" style={{ height: 28, width: 'auto', display: 'block' }} />
+        </div>
 
-        {/* Spacer — pushes tagline to very bottom */}
-        <div className="flex-1" />
+        {/* Headline + badges */}
+        <div className="relative z-10 mt-12">
+          <h2 className="text-[44px] font-black text-gray-950 leading-[1.08] tracking-tight">
+            Everything you need<br />to close more clients.
+          </h2>
+          <p className="mt-4 text-gray-600 text-[15px] leading-relaxed max-w-[300px]">
+            Join freelancers across India managing their pipeline, proposals, contracts, and invoices in one place.
+          </p>
+          <div className="flex flex-wrap gap-2 mt-6">
+            {['GST invoicing', 'Razorpay payments', 'E-sign contracts'].map(b => (
+              <span key={b} className="px-3 py-1 rounded-full text-xs font-semibold border text-gray-700"
+                style={{ background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(8px)', borderColor: 'rgba(255,255,255,0.8)' }}>
+                {b}
+              </span>
+            ))}
+          </div>
+        </div>
 
-        {/* Tagline pinned at bottom */}
-        <p className="text-white/40 text-[13px] leading-relaxed max-w-[340px] pb-2">
-          Join freelancers across India managing their pipeline, proposals, contracts, and invoices in one place.
-        </p>
+        {/* Dashboard screenshot peeking from bottom */}
+        <div className="absolute bottom-0 left-6 right-6 z-10">
+          <div style={{
+            borderRadius: '16px 16px 0 0',
+            overflow: 'hidden',
+            background: '#fff',
+            border: '1px solid rgba(255,255,255,0.7)',
+            borderBottom: 'none',
+            boxShadow: '0 -8px 48px rgba(15,23,42,0.14), 0 -2px 16px rgba(15,23,42,0.07)',
+          }}>
+            <img src="/screenshots/screenshot-dashboard.png" alt="ClearWork dashboard" className="w-full block" />
+          </div>
+        </div>
       </div>
 
       {/* ── Right panel (form) ──────────────────────────────────────────────── */}
