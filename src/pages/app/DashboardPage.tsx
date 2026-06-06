@@ -17,8 +17,24 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, X, Plus, Check, Maximize2, Minimize2 } from 'lucide-react'
+import { GripVertical, X, Plus, Check, Maximize2, Minimize2, Search, Sun, Moon, PanelRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useAuthStore } from '@/store/authStore'
+import { generateInitials } from '@/lib/utils'
+import { useThemeToggle } from '@/hooks/useThemeToggle'
+import { useSidebarState } from '@/contexts/SidebarContext'
+import NotificationBell from '@/features/notifications/components/NotificationBell'
+import CalendarBell from '@/features/meetings/components/CalendarBell'
+
+function getGreeting(firstName: string): string {
+  const h = new Date().getHours()
+  if (h < 5)  return `Working late, ${firstName}`
+  if (h < 12) return `Good morning, ${firstName}`
+  if (h < 17) return `Good afternoon, ${firstName}`
+  if (h < 21) return `Good evening, ${firstName}`
+  return `Good night, ${firstName}`
+}
 import {
   WIDGET_REGISTRY,
   loadDashboardState,
@@ -249,6 +265,13 @@ export default function DashboardPage() {
   const [editMode,     setEditMode]    = useState(false)
   const [showAddPanel, setShowAddPanel]= useState(false)
   const [activeId,     setActiveId]    = useState<string | null>(null)
+  const { data: profile } = useProfile()
+  const firstName = profile?.name?.split(' ')[0] ?? 'there'
+  const { user } = useAuthStore()
+  const userName = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
+  const initials = generateInitials(userName)
+  const { isDark, toggle: toggleTheme } = useThemeToggle()
+  const { visible: sidebarVisible, setVisible: setSidebarVisible } = useSidebarState()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -307,32 +330,77 @@ export default function DashboardPage() {
   return (
     <div className="space-y-5 max-w-[1320px]">
 
-      {/* ── Page header ── */}
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-[17px] font-semibold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Dashboard</h1>
-          <p className="text-[12px] text-[#667085] dark:text-[#545C74] mt-0.5">Here's what's happening with your business</p>
+      {/* ── Inline page header — Dreelio style ── */}
+      <div className="flex items-center gap-3 md:gap-5 mb-6">
+
+        {/* Re-open sidebar button (desktop only, when collapsed) */}
+        {!sidebarVisible && (
+          <button
+            onClick={() => setSidebarVisible(true)}
+            className="hidden lg:flex w-8 h-8 rounded-lg border border-gray-200 bg-white items-center justify-center text-gray-500 hover:bg-gray-50 shadow-sm shrink-0 transition-colors"
+            title="Open sidebar"
+          >
+            <PanelRight size={15} strokeWidth={2} />
+          </button>
+        )}
+
+        {/* Greeting */}
+        <div className="shrink-0">
+          <h1 className="text-[18px] md:text-[22px] font-bold text-[#101828] dark:text-[#ECEEF3] tracking-tight leading-none">
+            {getGreeting(firstName)}
+          </h1>
+          <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74] mt-1">What are you working on?</p>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Search — centered, hidden on small screens */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <div className="relative w-full max-w-[300px]">
+            <Search
+              size={14}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#545C74] pointer-events-none"
+              strokeWidth={2}
+            />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full h-10 pl-10 pr-4 rounded-full text-[13px] bg-white dark:bg-[#1A1B23] border border-gray-200 dark:border-[#26283A] shadow-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder-gray-400 dark:placeholder-[#545C74] text-gray-900 dark:text-[#ECEEF3]"
+            />
+          </div>
+        </div>
+
+        {/* Right actions */}
+        <div className="flex items-center gap-1 shrink-0">
+          <CalendarBell />
+          <NotificationBell />
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 dark:text-[#8B92A8] hover:bg-white dark:hover:bg-[#1A1B23] hover:shadow-sm transition-all"
+            aria-label="Toggle theme"
+          >
+            {isDark ? <Sun size={15} strokeWidth={2} /> : <Moon size={15} strokeWidth={2} />}
+          </button>
+          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0 select-none">
+            {initials}
+          </div>
+
+          {/* Customise widgets */}
+          <div className="w-px h-5 bg-gray-200 dark:bg-[#26283A] mx-1" />
           {editMode && hidden.length > 0 && (
             <button
               onClick={() => setShowAddPanel(true)}
               className="flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold text-[#6366F1] bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg hover:bg-[#E0E7FF] transition-colors"
             >
               <Plus size={13} strokeWidth={2.5} />
-              Add Widget
+              Add
             </button>
           )}
           <button
-            onClick={() => {
-              if (editMode) setShowAddPanel(false)
-              setEditMode(v => !v)
-            }}
+            onClick={() => { if (editMode) setShowAddPanel(false); setEditMode(v => !v) }}
             className={cn(
               'flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold rounded-lg transition-colors border',
               editMode
-                ? 'text-white bg-[#0D1117] dark:bg-[#6366F1] border-[#0D1117] dark:border-[#6366F1] hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5]'
-                : 'text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] border-[#EAECF0] dark:border-[#3D4258] hover:bg-[#F4F5F8] dark:hover:bg-[#26283A] hover:text-[#344054] dark:hover:text-[#C2C8D8] shadow-sm',
+                ? 'text-white bg-[#0D1117] dark:bg-[#6366F1] border-[#0D1117] dark:border-[#6366F1] hover:bg-[#1a1d2e]'
+                : 'text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] border-[#EAECF0] dark:border-[#3D4258] hover:bg-[#F4F5F8] shadow-sm',
             )}
           >
             {editMode

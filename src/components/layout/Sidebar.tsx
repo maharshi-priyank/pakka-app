@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
   Receipt, Building2, Settings, X, CalendarDays, ClipboardList, Zap, BarChart3, FolderKanban, GripVertical, Mail,
+  ChevronLeft, LogOut,
 } from 'lucide-react'
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
@@ -14,6 +15,9 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/store/authStore'
+import { generateInitials } from '@/lib/utils'
 
 const ALL_NAV_ITEMS = [
   { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',   href: '/app/dashboard',   tourId: 'tour-dashboard' },
@@ -27,6 +31,13 @@ const ALL_NAV_ITEMS = [
   { id: 'meetings',    icon: CalendarDays,    label: 'Meetings',     href: '/app/meetings',    tourId: undefined },
   { id: 'forms',       icon: ClipboardList,   label: 'Forms',        href: '/app/forms',       tourId: undefined },
   { id: 'automations', icon: Zap,             label: 'Automations',  href: '/app/automations', tourId: undefined },
+]
+
+// Section groups — defines labels and order for the nav
+const SECTIONS = [
+  { label: null,           ids: ['dashboard', 'leads', 'clients', 'projects'] },
+  { label: 'TOOLS',        ids: ['proposals', 'contracts', 'invoices', 'reports'] },
+  { label: 'PRODUCTIVITY', ids: ['meetings', 'forms', 'automations'] },
 ]
 
 const DEFAULT_ORDER = ALL_NAV_ITEMS.map(i => i.id)
@@ -53,29 +64,39 @@ function SortableNavRow({ item }: { item: NavItem }) {
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 select-none cursor-default"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 select-none cursor-default"
     >
       <button
         {...attributes}
         {...listeners}
-        className="text-white/25 hover:text-white/50 transition-colors cursor-grab active:cursor-grabbing touch-none"
+        className="text-gray-300 hover:text-gray-500 transition-colors cursor-grab active:cursor-grabbing touch-none"
         tabIndex={-1}
       >
         <GripVertical size={14} />
       </button>
-      <item.icon size={14} className="text-white/40 shrink-0" />
-      <span className="text-[13px] font-medium">{item.label}</span>
+      <item.icon size={14} className="text-gray-400 shrink-0" />
+      <span className="text-[13px] font-medium text-gray-600">{item.label}</span>
     </div>
   )
 }
 
 interface Props {
   onClose?: () => void
+  onCollapse?: () => void
 }
 
-export default function Sidebar({ onClose }: Props) {
+export default function Sidebar({ onClose, onCollapse }: Props) {
   const [order, setOrder] = useState<string[]>(loadOrder)
   const [customizing, setCustomizing] = useState(false)
+
+  const { user } = useAuthStore()
+  const name = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
+  const initials = generateInitials(name)
+  const firstName = name.split(' ')[0]
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+  }
 
   const orderedItems = order.map(id => ALL_NAV_ITEMS.find(n => n.id === id)!).filter(Boolean)
 
@@ -101,130 +122,141 @@ export default function Sidebar({ onClose }: Props) {
   }
 
   return (
-    <aside className="w-[220px] shrink-0 bg-[#0D1117] flex flex-col h-screen sticky top-0 relative overflow-hidden">
+    <aside className="w-[240px] shrink-0 bg-white flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-gray-100">
 
-      {/* Logo */}
-      <div className="h-[60px] flex items-center justify-between px-5 border-b border-white/[0.06] shrink-0">
-        <img src="/logo/clearwork_full_white.png" alt="ClearWork" style={{ height: 28, width: 'auto', display: 'block' }} />
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <X size={15} strokeWidth={2} />
-          </button>
-        )}
+      {/* Logo + collapse */}
+      <div className="h-[60px] flex items-center justify-between px-5 shrink-0">
+        <img src="/logo/clearwork_full_dark.png" alt="ClearWork" style={{ height: 26, width: 'auto', display: 'block' }} />
+        <button
+          onClick={onCollapse ?? onClose}
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+          title="Collapse sidebar"
+        >
+          <ChevronLeft size={15} strokeWidth={2} />
+        </button>
       </div>
 
-      {/* Nav */}
-      <div className="flex-1 py-4 px-3 overflow-y-auto space-y-0.5 min-h-0">
-        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/25 px-3 mb-3">
-          Menu
-        </p>
-        <nav className="space-y-0.5">
-          {orderedItems.map(({ icon: Icon, label, href, tourId }) => (
-            <NavLink
-              key={href}
-              to={href}
-              id={tourId}
-              onClick={onClose}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-100',
-                  isActive
-                    ? 'bg-[#2563EB] text-white shadow-sm'
-                    : 'text-white/50 hover:text-white hover:bg-white/[0.07]',
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon
-                    size={15}
-                    strokeWidth={isActive ? 2.5 : 2}
-                    className={cn('shrink-0 transition-colors', isActive ? 'text-white' : 'text-white/40')}
-                  />
-                  <span>{label}</span>
-                </>
+      {/* Nav — scrollable */}
+      <div className="flex-1 py-3 px-3 overflow-y-auto min-h-0">
+        {SECTIONS.map((section, si) => {
+          const sectionItems = orderedItems.filter(item => section.ids.includes(item.id))
+          if (sectionItems.length === 0) return null
+          return (
+            <div key={si} className={si > 0 ? 'mt-6' : ''}>
+              {section.label && (
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 px-3 mb-2">
+                  {section.label}
+                </p>
               )}
-            </NavLink>
-          ))}
-        </nav>
+              <nav className="space-y-0.5">
+                {sectionItems.map(({ icon: Icon, label, href, tourId }) => (
+                  <NavLink
+                    key={href}
+                    to={href}
+                    id={tourId}
+                    onClick={onClose}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all duration-100',
+                        isActive
+                          ? 'bg-gray-100 text-gray-900 font-semibold'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <Icon
+                          size={15}
+                          strokeWidth={isActive ? 2.5 : 2}
+                          className={cn('shrink-0 transition-colors', isActive ? 'text-gray-900' : 'text-gray-400')}
+                        />
+                        <span>{label}</span>
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </nav>
+            </div>
+          )
+        })}
       </div>
 
       {/* Bottom actions */}
-      <div className="border-t border-white/[0.06] px-3 py-3 space-y-0.5 shrink-0">
-        <button
-          onClick={() => setCustomizing(true)}
-          className="flex items-center gap-3 px-3 py-2 rounded-xl w-full text-[12px] font-medium text-white/30 hover:text-white/60 hover:bg-white/[0.05] transition-all"
-        >
-          <GripVertical size={14} className="text-white/25 shrink-0" />
-          Customise
-        </button>
+      <div className="border-t border-gray-100 px-3 py-3 space-y-0.5 shrink-0">
         <NavLink
           to="/app/email-templates"
           onClick={onClose}
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-100',
-              isActive
-                ? 'bg-[#2563EB] text-white shadow-sm'
-                : 'text-white/50 hover:text-white hover:bg-white/[0.07]',
+              'flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all duration-100',
+              isActive ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
             )
           }
         >
           {({ isActive }) => (
             <>
-              <Mail
-                size={15}
-                strokeWidth={isActive ? 2.5 : 2}
-                className={cn('shrink-0 transition-colors', isActive ? 'text-white' : 'text-white/40')}
-              />
+              <Mail size={15} strokeWidth={isActive ? 2.5 : 2} className={cn('shrink-0', isActive ? 'text-gray-900' : 'text-gray-400')} />
               Email Templates
             </>
           )}
         </NavLink>
+
         <NavLink
           to="/app/settings"
           id="tour-settings"
           onClick={onClose}
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-100',
-              isActive
-                ? 'bg-[#2563EB] text-white shadow-sm'
-                : 'text-white/50 hover:text-white hover:bg-white/[0.07]',
+              'flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all duration-100',
+              isActive ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
             )
           }
         >
           {({ isActive }) => (
             <>
-              <Settings
-                size={15}
-                strokeWidth={isActive ? 2.5 : 2}
-                className={cn('shrink-0 transition-colors', isActive ? 'text-white' : 'text-white/40')}
-              />
+              <Settings size={15} strokeWidth={isActive ? 2.5 : 2} className={cn('shrink-0', isActive ? 'text-gray-900' : 'text-gray-400')} />
               Settings
             </>
           )}
         </NavLink>
+
+        <button
+          onClick={() => setCustomizing(true)}
+          className="flex items-center gap-3 px-3 py-2 rounded-xl w-full text-[13px] font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-all"
+        >
+          <GripVertical size={14} className="text-gray-300 shrink-0" />
+          Customise
+        </button>
+
+        <div className="h-px bg-gray-100 my-1.5" />
+
+        {/* User + sign out */}
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-[13.5px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all group"
+        >
+          <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+            {initials}
+          </div>
+          <span className="flex-1 text-left">{firstName}</span>
+          <LogOut size={13} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
+        </button>
       </div>
 
       {/* Customise overlay */}
       {customizing && (
-        <div className="absolute inset-0 bg-[#0D1117] flex flex-col z-50">
-          {/* Header */}
-          <div className="h-[60px] flex items-center justify-between px-5 border-b border-white/[0.06] shrink-0">
-            <span className="text-[13px] font-semibold text-white/80">Customise sidebar</span>
+        <div className="absolute inset-0 bg-white flex flex-col z-50 border-r border-gray-100">
+          <div className="h-[60px] flex items-center justify-between px-5 border-b border-gray-100 shrink-0">
+            <span className="text-[13px] font-semibold text-gray-800">Customise sidebar</span>
             <button
               onClick={() => setCustomizing(false)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
             >
               <X size={15} strokeWidth={2} />
             </button>
           </div>
 
-          {/* Sortable list */}
           <div className="flex-1 py-3 px-2 overflow-y-auto min-h-0">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={order} strategy={verticalListSortingStrategy}>
@@ -235,11 +267,10 @@ export default function Sidebar({ onClose }: Props) {
             </DndContext>
           </div>
 
-          {/* Footer */}
-          <div className="border-t border-white/[0.06] px-5 py-4 shrink-0">
+          <div className="border-t border-gray-100 px-5 py-4 shrink-0">
             <button
               onClick={resetOrder}
-              className="text-[12px] text-white/30 hover:text-white/60 transition-colors"
+              className="text-[12px] text-gray-400 hover:text-gray-700 transition-colors"
             >
               Reset to default
             </button>

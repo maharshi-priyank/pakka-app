@@ -1,0 +1,131 @@
+<h2>Where should the logo appear in the invoice document?</h2>
+<p class="subtitle">Currently the logo only shows in the sticky top nav bar (tiny, 32px). We're deciding where it lives inside the printable document card. No logo = current UI unchanged.</p>
+
+<div class="cards">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#fff;border:1px solid #EAECF0;border-radius:12px;overflow:hidden;font-family:Inter,sans-serif;">
+        <!-- Top strip with logo + invoice title -->
+        <div style="background:#F8F9FF;border-bottom:1px solid #EAECF0;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;background:#6366F1;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;">V</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#101828;">Vaghela Studio</div>
+              <div style="font-size:10px;color:#98A2B3;">vaghela@gmail.com</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;">Invoice</div>
+            <div style="font-size:18px;font-weight:800;color:#101828;">#INV-0042</div>
+            <div style="font-size:10px;color:#667085;">6 Jun 2026</div>
+          </div>
+        </div>
+        <!-- From/To -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #F2F4F7;">
+          <div style="padding:14px 22px;border-right:1px solid #F2F4F7;">
+            <div style="font-size:9px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">From</div>
+            <div style="font-size:12px;font-weight:700;color:#101828;">Vaghela Studio</div>
+            <div style="font-size:11px;color:#667085;">GST: 24AABCU9603R1ZX</div>
+          </div>
+          <div style="padding:14px 22px;">
+            <div style="font-size:9px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Bill to</div>
+            <div style="font-size:12px;font-weight:700;color:#101828;">Ravi Shankar</div>
+            <div style="font-size:11px;color:#667085;">Acme Corp</div>
+          </div>
+        </div>
+        <!-- Line items stub -->
+        <div style="padding:12px 22px;">
+          <div style="height:8px;background:#F4F6FB;border-radius:4px;width:80%;margin-bottom:6px;"></div>
+          <div style="height:8px;background:#F4F6FB;border-radius:4px;width:60%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Logo in document header strip</h3>
+      <p>Logo + sender info sits at the top of the document card in a tinted strip, with invoice number on the right. Clean 2-column layout. <strong>Logo replaces the blue initial avatar.</strong> Without logo: same layout with initial avatar — no visual regression.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#fff;border:1px solid #EAECF0;border-radius:12px;overflow:hidden;font-family:Inter,sans-serif;">
+        <!-- Header: invoice number top, logo in From section -->
+        <div style="padding:18px 22px 14px;border-bottom:1px solid #F2F4F7;">
+          <div style="font-size:10px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Invoice · DRAFT</div>
+          <div style="font-size:20px;font-weight:800;color:#101828;">#INV-0042</div>
+          <div style="font-size:11px;color:#667085;margin-top:2px;">6 Jun 2026</div>
+        </div>
+        <!-- From / To — logo lives inside From -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #F2F4F7;">
+          <div style="padding:14px 22px;border-right:1px solid #F2F4F7;">
+            <div style="font-size:9px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">From</div>
+            <div style="width:44px;height:44px;background:#6366F1;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:800;margin-bottom:6px;">V</div>
+            <div style="font-size:12px;font-weight:700;color:#101828;">Vaghela Studio</div>
+            <div style="font-size:11px;color:#667085;">vaghela@gmail.com</div>
+            <div style="font-size:10px;color:#98A2B3;margin-top:2px;">GST: 24AABCU9603R1ZX</div>
+          </div>
+          <div style="padding:14px 22px;">
+            <div style="font-size:9px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Bill to</div>
+            <div style="font-size:12px;font-weight:700;color:#101828;margin-top:28px;">Ravi Shankar</div>
+            <div style="font-size:11px;color:#667085;">ravi@acme.com</div>
+            <div style="font-size:11px;color:#667085;">Acme Corp</div>
+          </div>
+        </div>
+        <div style="padding:12px 22px;">
+          <div style="height:8px;background:#F4F6FB;border-radius:4px;width:80%;margin-bottom:6px;"></div>
+          <div style="height:8px;background:#F4F6FB;border-radius:4px;width:60%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Logo inside the "From" section</h3>
+      <p>Invoice number stays at the top as-is (no change). Logo appears above sender name in the From cell. Keeps current document structure 100% intact — just adds logo inside existing From block. Without logo: From section looks exactly like today.</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#fff;border:1px solid #EAECF0;border-radius:12px;overflow:hidden;font-family:Inter,sans-serif;">
+        <!-- Standalone logo banner above everything -->
+        <div style="padding:16px 22px;border-bottom:1px solid #F2F4F7;display:flex;align-items:center;gap:10px;">
+          <div style="width:42px;height:42px;background:#6366F1;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:800;">V</div>
+          <span style="font-size:15px;font-weight:700;color:#101828;">Vaghela Studio</span>
+        </div>
+        <!-- Existing header: invoice type + number + status (unchanged) -->
+        <div style="padding:18px 22px 14px;border-bottom:1px solid #F2F4F7;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <span style="font-size:10px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;">Invoice</span>
+            <span style="margin-left:auto;font-size:10px;font-weight:700;background:#F2F4F7;color:#667085;padding:2px 8px;border-radius:20px;">DRAFT</span>
+          </div>
+          <div style="font-size:20px;font-weight:800;color:#101828;">#INV-0042</div>
+          <div style="font-size:11px;color:#667085;margin-top:2px;">6 Jun 2026</div>
+        </div>
+        <!-- From/To (completely unchanged) -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #F2F4F7;">
+          <div style="padding:14px 22px;border-right:1px solid #F2F4F7;">
+            <div style="font-size:9px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">From</div>
+            <div style="font-size:12px;font-weight:700;color:#101828;">Vaghela Studio</div>
+            <div style="font-size:11px;color:#667085;">vaghela@gmail.com</div>
+          </div>
+          <div style="padding:14px 22px;">
+            <div style="font-size:9px;font-weight:600;color:#98A2B3;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Bill to</div>
+            <div style="font-size:12px;font-weight:700;color:#101828;">Ravi Shankar</div>
+            <div style="font-size:11px;color:#667085;">Acme Corp</div>
+          </div>
+        </div>
+        <div style="padding:12px 22px;">
+          <div style="height:8px;background:#F4F6FB;border-radius:4px;width:80%;margin-bottom:6px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Logo banner above the document (zero change to internals)</h3>
+      <p>A slim logo + business name row is prepended above the header card. Everything below is pixel-identical to today. Without logo: banner doesn't render, document starts exactly as now. Zero risk of layout regression.</p>
+    </div>
+  </div>
+
+</div>
