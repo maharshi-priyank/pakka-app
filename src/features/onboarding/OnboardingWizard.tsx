@@ -7,7 +7,7 @@ import { Check, ChevronRight, Upload, Loader2, FileText, Receipt, PenLine, Spark
 import { useUploadLogo } from '@/features/settings/hooks/useProfile'
 import { toast } from 'sonner'
 
-const STORAGE_KEY = 'rupway_onboarding_v1'
+const STORAGE_KEY = 'clearwork_onboarding_v1'
 
 const SAC_SUGGESTIONS: Record<string, string> = {
   developer:  '998313',

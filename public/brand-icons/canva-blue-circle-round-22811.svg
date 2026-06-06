@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve">
+<g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
+	<linearGradient id="SVGID_1" gradientUnits="userSpaceOnUse" x1="33.1703" y1="24.2182" x2="67.6275" y2="84.751">
+<stop offset="0%" style="stop-color:rgb(9,182,209);stop-opacity: 1"/>
+<stop offset="100%" style="stop-color:rgb(124,44,231);stop-opacity: 1"/>
+</linearGradient>
+<circle cx="45" cy="45" r="45" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: url(#SVGID_1); fill-rule: nonzero; opacity: 1;" transform="  matrix(1 0 0 1 0 0) "/>
+	<path d="M 65.215 53.892 c -0.358 0 -0.672 0.302 -1 0.962 c -3.698 7.499 -10.086 12.805 -17.478 12.805 c -8.547 0 -13.84 -7.715 -13.84 -18.374 c 0 -18.055 10.06 -28.494 18.896 -28.494 c 4.129 0 6.65 2.595 6.65 6.724 c 0 4.901 -2.784 7.495 -2.784 9.224 c 0 0.776 0.483 1.246 1.44 1.246 c 3.845 0 8.357 -4.418 8.357 -10.659 c 0 -6.051 -5.267 -10.5 -14.103 -10.5 c -14.603 0 -27.581 13.538 -27.581 32.27 c 0 14.5 8.28 24.081 21.055 24.081 c 13.56 0 21.4 -13.491 21.4 -17.87 C 66.228 54.336 65.732 53.892 65.215 53.892 L 65.215 53.892 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
+</g>
+</svg>

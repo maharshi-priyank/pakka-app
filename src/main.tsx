@@ -10,7 +10,7 @@ initNewRelic()
 
 // Apply saved theme before first paint to avoid flash
 try {
-  const stored = localStorage.getItem('rupway-theme')
+  const stored = localStorage.getItem('clearwork-theme')
   if (stored && JSON.parse(stored)?.state?.isDark) {
     document.documentElement.classList.add('dark')
   }

@@ -31,7 +31,7 @@ interface ContractFilters {
 const EMPTY_FILTERS: ContractFilters = { clientIds: [], dateFrom: '', dateTo: '', amountMin: '', amountMax: '' }
 
 type ViewMode = 'table' | 'cards'
-const VIEW_KEY = 'rupway:contracts:view'
+const VIEW_KEY = 'clearwork:contracts:view'
 function getStoredView(): ViewMode {
   try { return (localStorage.getItem(VIEW_KEY) as ViewMode) ?? 'table' } catch { return 'table' }
 }

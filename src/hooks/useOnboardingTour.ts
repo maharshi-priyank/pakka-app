@@ -29,7 +29,7 @@ export function useOnboardingTour() {
       steps: [
         {
           popover: {
-            title: `${icon(ICONS.sparkle)}Welcome to Rupway!`,
+            title: `${icon(ICONS.sparkle)}Welcome to ClearWork!`,
             description: "Let's take a quick 30-second tour so you know exactly where everything is.",
             side: 'over',
             align: 'center',
@@ -63,7 +63,7 @@ export function useOnboardingTour() {
           element: '#tour-invoices',
           popover: {
             title: 'Invoices',
-            description: 'Generate GST-compliant invoices and collect payments via Razorpay — directly from Rupway.',
+            description: 'Generate GST-compliant invoices and collect payments via Razorpay — directly from ClearWork.',
             side: 'right',
           },
         },

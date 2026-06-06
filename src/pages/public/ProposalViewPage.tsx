@@ -152,7 +152,7 @@ export default function ProposalViewPage() {
         order_id:    depositOrder.orderId,
         amount:      depositOrder.amount,
         currency:    depositOrder.currency,
-        name:        proposal?.user.businessName ?? proposal?.user.name ?? 'Rupway',
+        name:        proposal?.user.businessName ?? proposal?.user.name ?? 'ClearWork',
         description: `Deposit — ${depositOrder.milestone}`,
         theme:       { color: '#2563EB' },
         modal:       { ondismiss: () => setPayLoading(false) },
@@ -259,7 +259,7 @@ export default function ProposalViewPage() {
               className="absolute whitespace-nowrap text-[64px] font-bold text-black/[0.04]"
               style={{ transform: 'rotate(-35deg)', top: `${i * 18 - 10}%`, left: '-20%', width: '140%' }}
             >
-              Rupway • Rupway • Rupway • Rupway • Rupway
+              ClearWork • ClearWork • ClearWork • ClearWork • ClearWork
             </div>
           ))}
         </div>
@@ -286,7 +286,7 @@ export default function ProposalViewPage() {
               <Download size={12} strokeWidth={2} />
               Download PDF
             </button>
-            <span className="text-[11px] text-[#98A2B3]">Powered by Rupway</span>
+            <span className="text-[11px] text-[#98A2B3]">Powered by ClearWork</span>
           </div>
         </div>
       </div>
@@ -774,7 +774,7 @@ export default function ProposalViewPage() {
 
         {/* Footer */}
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
-          Sent by {senderName} · {proposal.user.email} · Powered by Rupway
+          Sent by {senderName} · {proposal.user.email} · Powered by ClearWork
         </div>
       </div>
     </div>

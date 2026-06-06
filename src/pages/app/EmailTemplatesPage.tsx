@@ -372,7 +372,7 @@ function TemplateList({ onSelect }: { onSelect: (key: string) => void }) {
       <div>
         <h1 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Email Templates</h1>
         <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-1">
-          Customise the emails Rupway sends on your behalf. {customisedCount > 0 && <span className="font-semibold text-[#2563EB]">{customisedCount} customised.</span>}
+          Customise the emails ClearWork sends on your behalf. {customisedCount > 0 && <span className="font-semibold text-[#2563EB]">{customisedCount} customised.</span>}
         </p>
       </div>
 

@@ -7,8 +7,8 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
 }
 
-const STORAGE_KEY = 'rupway-pwa-install-dismissed-at'
-const SESSION_KEY = 'rupway-session-count'
+const STORAGE_KEY = 'clearwork-pwa-install-dismissed-at'
+const SESSION_KEY = 'clearwork-session-count'
 const MIN_SESSIONS_BEFORE_PROMPT = 2
 const SUPPRESS_DAYS_AFTER_DISMISS = 30
 
@@ -115,7 +115,7 @@ export default function PWAInstallPrompt() {
           'animate-in slide-in-from-bottom-4 fade-in duration-300',
         )}
         role="dialog"
-        aria-label="Install Rupway"
+        aria-label="Install ClearWork"
       >
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#101828] flex items-center justify-center shrink-0">
@@ -123,7 +123,7 @@ export default function PWAInstallPrompt() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[13.5px] font-semibold text-[#101828] dark:text-[#ECEEF3]">
-              Install Rupway on your phone
+              Install ClearWork on your phone
             </p>
             <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
               Quick access from your home screen — no app store needed.
@@ -192,7 +192,7 @@ export default function PWAInstallPrompt() {
               <li className="flex items-start gap-3">
                 <span className="w-6 h-6 rounded-full bg-[#F4F6FB] dark:bg-[#21222D] text-[#101828] dark:text-[#ECEEF3] text-[12px] font-bold flex items-center justify-center shrink-0">3</span>
                 <p className="text-[13px] text-[#344054] dark:text-[#C2C8D8]">
-                  Tap <span className="font-semibold">Add</span> in the top right. Rupway is now on your home screen.
+                  Tap <span className="font-semibold">Add</span> in the top right. ClearWork is now on your home screen.
                 </p>
               </li>
             </ol>

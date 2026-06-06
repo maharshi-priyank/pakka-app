@@ -52,7 +52,7 @@ export default function PortalInvoiceCard({
         order_id:    order.orderId,
         amount:      order.amount,
         currency:    order.currency,
-        name:        freelancerName ?? 'Rupway',
+        name:        freelancerName ?? 'ClearWork',
         description: `Invoice ${invoice.invoiceNumber}`,
         prefill:     { name: clientName, email: clientEmail ?? '' },
         theme:       { color: '#101828' },

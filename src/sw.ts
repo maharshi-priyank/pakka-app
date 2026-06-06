@@ -103,7 +103,7 @@ self.addEventListener('push', (event) => {
   try {
     payload = event.data.json() as PushPayload
   } catch {
-    payload = { title: 'Rupway', body: event.data.text() }
+    payload = { title: 'ClearWork', body: event.data.text() }
   }
 
   const { title, body, url = '/app/dashboard', tag, type } = payload

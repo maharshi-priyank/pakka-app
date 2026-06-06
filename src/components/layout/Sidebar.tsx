@@ -105,9 +105,7 @@ export default function Sidebar({ onClose }: Props) {
 
       {/* Logo */}
       <div className="h-[60px] flex items-center justify-between px-5 border-b border-white/[0.06] shrink-0">
-        <span style={{ fontFamily: "'Roca Two', serif", fontWeight: 700, fontSize: 26, letterSpacing: '-0.06em', color: '#ffffff', lineHeight: 1 }}>
-          Rupway
-        </span>
+        <img src="/logo/clearwork_full_white.png" alt="ClearWork" style={{ height: 28, width: 'auto', display: 'block' }} />
         {onClose && (
           <button
             onClick={onClose}

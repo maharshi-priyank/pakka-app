@@ -89,8 +89,8 @@ export function playSound(id: SoundId) {
 
 // ── Preferences (localStorage) ────────────────────────────────────────────
 
-const SOUND_KEY   = 'rupway_notif_sound'
-const DESKTOP_KEY = 'rupway_notif_desktop'
+const SOUND_KEY   = 'clearwork_notif_sound'
+const DESKTOP_KEY = 'clearwork_notif_desktop'
 
 export function getSound(): SoundId {
   const stored = localStorage.getItem(SOUND_KEY) as SoundId | null
