@@ -1,19 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 import BottomNav from './BottomNav'
-import { useOnboardingTour } from '@/hooks/useOnboardingTour'
+import { useProfile } from '@/features/settings/hooks/useProfile'
+
+const OnboardingWizard = lazy(() => import('@/features/onboarding/OnboardingWizard'))
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { pathname } = useLocation()
-  const { startIfFirstVisit } = useOnboardingTour()
-
-  useEffect(() => {
-    startIfFirstVisit()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const { data: profile, isLoading: profileLoading } = useProfile()
+  const showWizard = !profileLoading && !!profile && !profile.onboardingComplete
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#F4F5F8] dark:bg-[#0C0D10] transition-colors">
@@ -49,6 +47,13 @@ export default function AppShell() {
 
       {/* ── Mobile bottom nav (<lg) ───────────────────────────── */}
       <BottomNav />
+
+      {/* ── Onboarding wizard overlay ─────────────────────────── */}
+      {showWizard && (
+        <Suspense fallback={null}>
+          <OnboardingWizard />
+        </Suspense>
+      )}
     </div>
   )
 }
