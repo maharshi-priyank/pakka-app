@@ -138,9 +138,12 @@ export default function ClientPortalPage() {
                 <span className="text-[13px] font-bold text-[#101828]">{freelancerName}</span>
               </>
             ) : (
-              <span style={{ fontFamily: "'Roca Two', serif", fontWeight: 700, fontSize: 22, letterSpacing: '-0.05em', color: '#101828', lineHeight: 1 }}>
-                {freelancerName}
-              </span>
+              <>
+                <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center text-white text-[13px] font-bold">
+                  {freelancerName.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[13px] font-bold text-[#101828]">{freelancerName}</span>
+              </>
             )}
           </div>
           <div className="flex items-center gap-1.5 text-[11px] text-[#98A2B3] font-medium">

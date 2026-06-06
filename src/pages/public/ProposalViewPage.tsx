@@ -10,6 +10,7 @@ import {
   File as FileIconLucide,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import DocumentHeader from '@/components/documents/DocumentHeader'
 import { humanSize } from '@/features/attachments/useAttachments'
 import type { Attachment } from '@/features/attachments/types'
 import type {
@@ -235,6 +236,13 @@ export default function ProposalViewPage() {
 
   const senderName  = proposal.user.businessName ?? proposal.user.name
   const status      = actionDone === 'accepted' ? 'ACCEPTED' : actionDone === 'declined' ? 'DECLINED' : proposal.status
+  const PROPOSAL_STATUS_STYLES: Record<string, string> = {
+    ACCEPTED: 'bg-[#ECFDF3] text-[#027A48]',
+    DECLINED:  'bg-[#FEF3F2] text-[#B42318]',
+    EXPIRED:   'bg-[#FEF3F2] text-[#B42318]',
+    SENT:      'bg-[#EFF8FF] text-[#175CD3]',
+    OPENED:    'bg-[#EFF8FF] text-[#175CD3]',
+  }
   const isExpired   = status === 'EXPIRED' || status === 'DECLINED'
   const isAccepted  = status === 'ACCEPTED'
   const canAct      = !actionDone && (proposal.status === 'SENT' || proposal.status === 'OPENED')
@@ -366,8 +374,20 @@ export default function ProposalViewPage() {
 
         {/* ── Hero ── */}
         <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
+          <DocumentHeader
+            logoUrl={proposal.user.logoUrl}
+            senderName={senderName}
+            senderEmail={proposal.user.email}
+            docType="Proposal"
+            docIdentifier={proposal.title}
+            docDate={proposal.createdAt}
+            statusBadge={
+              <span className={cn('text-[10px] font-bold px-2.5 py-0.5 rounded-full', PROPOSAL_STATUS_STYLES[status] ?? 'bg-[#F2F4F7] text-[#667085]')}>
+                {status}
+              </span>
+            }
+          />
           <div className="px-8 py-8 border-b border-[#F2F4F7]">
-            <p className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-widest mb-2">Proposal</p>
             <h1 className="text-[26px] font-extrabold text-[#101828] leading-tight">{proposal.title}</h1>
             <div className="flex flex-wrap items-center gap-3 mt-3 text-[12px] text-[#667085]">
               <span>From <span className="font-semibold text-[#344054]">{senderName}</span></span>

@@ -65,7 +65,6 @@ export default function OnboardingWizard() {
   const [clientId,          setClientId]          = useState<string | null>(saved.clientId ?? null)
   const [saving,            setSaving]            = useState(false)
   const [showWelcome,       setShowWelcome]       = useState(false)
-  const [pendingDestination, setPendingDestination] = useState<'proposals' | 'contracts' | 'invoices' | 'dashboard'>('dashboard')
 
   const { mutateAsync: uploadLogo, isPending: uploadingLogo } = useUploadLogo()
 
@@ -168,7 +167,6 @@ export default function OnboardingWizard() {
     queryClient.invalidateQueries({ queryKey: ['profile'] })
     localStorage.removeItem(STORAGE_KEY)
     setShowWelcome(true)
-    setPendingDestination(destination)
   }
 
   const slideVariants = {
@@ -187,7 +185,7 @@ export default function OnboardingWizard() {
           {/* Progress */}
           <div className="px-10 pt-10 pb-6 shrink-0">
             <div className="flex items-center mb-4">
-              {STEPS.map((s, i) => (
+              {STEPS.map((_s, i) => (
                 <div key={i} className="flex items-center flex-1 last:flex-none">
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors ${
                     i < step  ? 'bg-[#6366F1] text-white' :
@@ -225,7 +223,7 @@ export default function OnboardingWizard() {
                 {step === 0 && <Step1BusinessIdentity
                   businessName={businessName} setBusinessName={setBusinessName}
                   workType={workType} setWorkType={setWorkType}
-                  logoUrl={logoUrl} setLogoUrl={setLogoUrl}
+                  logoUrl={logoUrl}
                   uploadingLogo={uploadingLogo} onLogoUpload={handleLogoUpload}
                 />}
                 {step === 1 && <Step2GstCompliance
@@ -364,12 +362,12 @@ function WizardField({ label, hint, children }: { label: string; hint?: string; 
 }
 
 function Step1BusinessIdentity({
-  businessName, setBusinessName, workType, setWorkType, logoUrl, setLogoUrl,
+  businessName, setBusinessName, workType, setWorkType, logoUrl,
   uploadingLogo, onLogoUpload,
 }: {
   businessName: string; setBusinessName: (v: string) => void
   workType: string; setWorkType: (v: string) => void
-  logoUrl: string | null; setLogoUrl: (v: string | null) => void
+  logoUrl: string | null
   uploadingLogo: boolean; onLogoUpload: (file: File) => Promise<void>
 }) {
   const logoFileRef = useRef<HTMLInputElement>(null)

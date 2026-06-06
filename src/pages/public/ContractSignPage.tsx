@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ContractContent, ContractScopeItem, ContractDeliverable, ContractPaymentMilestone, ContractClause } from '@/features/contracts/schemas/contract.schema'
+import DocumentHeader from '@/components/documents/DocumentHeader'
 
 const publicApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL as string,
@@ -182,11 +183,23 @@ export default function ContractSignPage() {
 
         {/* Hero */}
         <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
+          <DocumentHeader
+            logoUrl={contract.user.logoUrl}
+            senderName={senderName}
+            senderEmail={contract.user.email}
+            docType="Contract"
+            docIdentifier={contract.title}
+            docDate={contract.createdAt}
+            statusBadge={
+              <span className={cn(
+                'text-[10px] font-bold px-2.5 py-0.5 rounded-full',
+                isAlreadySigned ? 'bg-[#ECFDF3] text-[#027A48]' : 'bg-[#F9F5FF] text-[#6941C6]',
+              )}>
+                {isAlreadySigned ? 'SIGNED' : contract.status}
+              </span>
+            }
+          />
           <div className="px-8 py-8 border-b border-[#F2F4F7]">
-            <div className="flex items-center gap-2 mb-3">
-              <FileSignature size={16} className="text-[#2563EB]" />
-              <span className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-widest">Contract</span>
-            </div>
             <h1 className="text-[22px] font-extrabold text-[#101828] leading-tight">{contract.title}</h1>
             <div className="flex flex-wrap items-center gap-3 mt-3 text-[12px] text-[#667085]">
               <span>From <span className="font-semibold text-[#344054]">{senderName}</span></span>

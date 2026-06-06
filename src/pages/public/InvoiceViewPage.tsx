@@ -15,6 +15,7 @@ async function fetchAttachments(invoiceId: string): Promise<Attachment[]> {
 }
 import { cn } from '@/lib/utils'
 import type { LineItem, GstType } from '@/features/invoices/schemas/invoice.schema'
+import DocumentHeader from '@/components/documents/DocumentHeader'
 
 const publicApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL as string,
@@ -220,27 +221,20 @@ export default function InvoiceViewPage() {
 
         {/* Header card */}
         <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
-          <div className="px-7 py-7 border-b border-[#F2F4F7]">
-            <div className="flex items-center gap-2 mb-3">
-              <FileText size={15} className="text-[#2563EB]" />
-              <span className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-widest">Invoice</span>
-              <span className={cn(
-                'ml-auto text-[11px] font-bold px-2.5 py-0.5 rounded-full',
-                STATUS_STYLES[invoice.status] ?? 'bg-[#F2F4F7] text-[#667085]',
-              )}>
+          <DocumentHeader
+            logoUrl={invoice.user.logoUrl}
+            senderName={senderName}
+            senderEmail={invoice.user.email}
+            gstNumber={invoice.user.gstNumber}
+            docType="Invoice"
+            docIdentifier={invoice.invoiceNumber}
+            docDate={invoice.createdAt}
+            statusBadge={
+              <span className={cn('text-[10px] font-bold px-2.5 py-0.5 rounded-full', STATUS_STYLES[invoice.status] ?? 'bg-[#F2F4F7] text-[#667085]')}>
                 {invoice.status}
               </span>
-            </div>
-            <h1 className="text-[22px] font-extrabold text-[#101828]">
-              {invoice.invoiceNumber}
-              {currency !== 'INR' && (
-                <span className="ml-2 inline-flex items-center text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#2563EB]">
-                  {currency}
-                </span>
-              )}
-            </h1>
-            <p className="text-[13px] text-[#667085] mt-1">{fmtDate(invoice.createdAt)}</p>
-          </div>
+            }
+          />
 
           {/* From / To */}
           <div className="grid grid-cols-2 divide-x divide-[#F2F4F7] border-b border-[#F2F4F7]">

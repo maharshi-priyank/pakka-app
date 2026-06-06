@@ -56,7 +56,7 @@ export const invoiceFormSchema = z.object({
   recurrenceCycle:    z.enum(RECURRENCE_CYCLES).optional(),
   recurrenceDay:      z.number().int().min(1).max(28).optional(),
   recurrenceEndDate:  z.string().optional(),
-  currency:           z.string().default('INR'),
+  currency:           z.string(),
   lutNumber:          z.string().optional(),
 })
 
