@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '@/lib/api'
 import { useQueryClient } from '@tanstack/react-query'
-import confetti from 'canvas-confetti'
-import { Check, ChevronRight } from 'lucide-react'
+import { Check, ChevronRight, Upload, Loader2, FileText, Receipt, PenLine, Sparkles } from 'lucide-react'
+import { useUploadLogo } from '@/features/settings/hooks/useProfile'
 
 const STORAGE_KEY = 'rupway_onboarding_v1'
 
@@ -63,6 +63,10 @@ export default function OnboardingWizard() {
   const [clientCompany,     setClientCompany]     = useState<string>(saved.clientCompany ?? '')
   const [clientId,          setClientId]          = useState<string | null>(saved.clientId ?? null)
   const [saving,            setSaving]            = useState(false)
+  const [showWelcome,       setShowWelcome]       = useState(false)
+  const [pendingDestination, setPendingDestination] = useState<'proposals' | 'contracts' | 'invoices' | 'dashboard'>('dashboard')
+
+  const { mutateAsync: uploadLogo, isPending: uploadingLogo } = useUploadLogo()
 
   // Persist wizard state on every change
   useEffect(() => {
@@ -89,6 +93,13 @@ export default function OnboardingWizard() {
 
   const goNext = useCallback(() => { setDirection(1);  setStep(s => s + 1) }, [])
   const goBack = useCallback(() => { setDirection(-1); setStep(s => s - 1) }, [])
+
+  const handleLogoUpload = async (file: File) => {
+    const url = await uploadLogo(file)
+    setLogoUrl(url)
+    await api.patch('/users/me', { logoUrl: url })
+    queryClient.invalidateQueries({ queryKey: ['profile'] })
+  }
 
   const saveStep1 = async () => {
     setSaving(true)
@@ -145,14 +156,12 @@ export default function OnboardingWizard() {
     } finally { setSaving(false) }
   }
 
-  const graduate = async (destination: 'proposals' | 'contracts' | 'invoices') => {
+  const graduate = async (destination: 'proposals' | 'contracts' | 'invoices' | 'dashboard') => {
     await api.patch('/users/me', { onboardingComplete: true })
     queryClient.invalidateQueries({ queryKey: ['profile'] })
     localStorage.removeItem(STORAGE_KEY)
-    confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })
-    setTimeout(() => {
-      navigate(`/app/${destination}/new${clientId ? `?clientId=${clientId}` : ''}`)
-    }, 600)
+    setShowWelcome(true)
+    setPendingDestination(destination)
   }
 
   const slideVariants = {
@@ -162,149 +171,176 @@ export default function OnboardingWizard() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-white dark:bg-[#0C0D10] flex">
+    <>
+      <div className="fixed inset-0 z-50 bg-white dark:bg-[#0C0D10] flex">
 
-      {/* ── Left panel (form) ── */}
-      <div className="w-full lg:w-[40%] flex flex-col h-full overflow-hidden">
+        {/* ── Left panel (form) ── */}
+        <div className="w-full lg:w-[40%] flex flex-col h-full overflow-hidden">
 
-        {/* Progress */}
-        <div className="px-10 pt-10 pb-6 shrink-0">
-          <div className="flex items-center mb-4">
-            {STEPS.map((s, i) => (
-              <div key={i} className="flex items-center flex-1 last:flex-none">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors ${
-                  i < step  ? 'bg-[#6366F1] text-white' :
-                  i === step ? 'bg-[#6366F1] text-white ring-4 ring-[#6366F1]/20' :
-                               'bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3]'
-                }`}>
-                  {i < step ? <Check size={12} strokeWidth={3} /> : i + 1}
+          {/* Progress */}
+          <div className="px-10 pt-10 pb-6 shrink-0">
+            <div className="flex items-center mb-4">
+              {STEPS.map((s, i) => (
+                <div key={i} className="flex items-center flex-1 last:flex-none">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors ${
+                    i < step  ? 'bg-[#6366F1] text-white' :
+                    i === step ? 'bg-[#6366F1] text-white ring-4 ring-[#6366F1]/20' :
+                                 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3]'
+                  }`}>
+                    {i < step ? <Check size={12} strokeWidth={3} /> : i + 1}
+                  </div>
+                  {i < STEPS.length - 1 && (
+                    <div className={`flex-1 h-0.5 ${i < step ? 'bg-[#6366F1]' : 'bg-[#F2F4F7] dark:bg-[#26283A]'}`} />
+                  )}
                 </div>
-                {i < STEPS.length - 1 && (
-                  <div className={`flex-1 h-0.5 ${i < step ? 'bg-[#6366F1]' : 'bg-[#F2F4F7] dark:bg-[#26283A]'}`} />
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
+            <p className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-widest">
+              Step {step + 1} of {STEPS.length}
+            </p>
+            <p className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8] mt-0.5">
+              {STEPS[step].label}
+            </p>
           </div>
-          <p className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-widest">
-            Step {step + 1} of {STEPS.length}
-          </p>
-          <p className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8] mt-0.5">
-            {STEPS[step].label}
-          </p>
+
+          {/* Step content */}
+          <div className="flex-1 overflow-y-auto px-10">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={step}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+              >
+                {step === 0 && <Step1BusinessIdentity
+                  businessName={businessName} setBusinessName={setBusinessName}
+                  workType={workType} setWorkType={setWorkType}
+                  logoUrl={logoUrl} setLogoUrl={setLogoUrl}
+                  uploadingLogo={uploadingLogo} onLogoUpload={handleLogoUpload}
+                />}
+                {step === 1 && <Step2GstCompliance
+                  gstRegistered={gstRegistered} setGstRegistered={setGstRegistered}
+                  gstin={gstin} setGstin={setGstin}
+                  intlClients={intlClients} setIntlClients={setIntlClients}
+                  lutNumber={lutNumber} setLutNumber={setLutNumber}
+                  defaultHsnSac={defaultHsnSac} setDefaultHsnSac={setDefaultHsnSac}
+                />}
+                {step === 2 && <Step3GetPaid
+                  bankName={bankName} setBankName={setBankName}
+                  bankAccountName={bankAccountName} setBankAccountName={setBankAccountName}
+                  bankAccountNumber={bankAccountNumber} setBankAccountNumber={setBankAccountNumber}
+                  bankIfsc={bankIfsc} setBankIfsc={setBankIfsc}
+                  upiId={upiId} setUpiId={setUpiId}
+                  razorpayKeyId={razorpayKeyId} setRazorpayKeyId={setRazorpayKeyId}
+                  razorpayKeySecret={razorpayKeySecret} setRazorpayKeySecret={setRazorpayKeySecret}
+                />}
+                {step === 3 && <Step4AddClient
+                  name={clientName} setName={setClientName}
+                  email={clientEmail} setEmail={setClientEmail}
+                  phone={clientPhone} setPhone={setClientPhone}
+                  company={clientCompany} setCompany={setClientCompany}
+                />}
+                {step === 4 && <Step5Graduation clientName={clientName} onChoose={graduate} />}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* CTA footer */}
+          <div className="px-10 py-8 shrink-0 border-t border-[#F2F4F7] dark:border-[#26283A]">
+            {step === 0 && (
+              <button
+                onClick={saveStep1}
+                disabled={!businessName.trim() || saving}
+                className="w-full bg-[#0D1117] dark:bg-[#6366F1] text-white py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.97] transition-all"
+              >
+                {saving ? 'Saving…' : 'Continue'} <ChevronRight size={16} />
+              </button>
+            )}
+            {step === 1 && (
+              <div className="flex gap-3">
+                <button onClick={goBack} className="px-5 py-3 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors">← Back</button>
+                <button onClick={saveStep2} disabled={saving} className="flex-1 bg-[#0D1117] dark:bg-[#6366F1] text-white py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-all">
+                  {saving ? 'Saving…' : 'Continue'} <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+            {step === 2 && (
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <button onClick={goBack} className="px-5 py-3 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors">← Back</button>
+                  <button onClick={() => saveStep3(false)} disabled={saving} className="flex-1 bg-[#0D1117] dark:bg-[#6366F1] text-white py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-all">
+                    {saving ? 'Saving…' : 'Continue'} <ChevronRight size={16} />
+                  </button>
+                </div>
+                <button onClick={() => saveStep3(true)} className="w-full text-center text-[12px] text-[#98A2B3] hover:text-[#667085] transition-colors py-1">
+                  I'll add this later
+                </button>
+                <p className="text-center text-[11px] text-[#D0D5DD]">
+                  Without bank/UPI details, clients won't see payment instructions on your invoices.
+                </p>
+              </div>
+            )}
+            {step === 3 && (
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <button onClick={goBack} className="px-5 py-3 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors">← Back</button>
+                  <button onClick={saveStep4} disabled={!clientName.trim() || saving} className="flex-1 bg-[#0D1117] dark:bg-[#6366F1] text-white py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.97] transition-all">
+                    {saving ? 'Saving…' : 'Add client & continue'} <ChevronRight size={16} />
+                  </button>
+                </div>
+                <button
+                  onClick={() => goNext()}
+                  className="w-full text-center text-[12px] text-[#98A2B3] hover:text-[#667085] transition-colors py-1"
+                >
+                  Skip — I'll add clients later
+                </button>
+              </div>
+            )}
+            {/* Step 4 (index 4) — no CTA footer, cards are the CTAs */}
+          </div>
         </div>
 
-        {/* Step content */}
-        <div className="flex-1 overflow-y-auto px-10">
-          <AnimatePresence mode="wait" custom={direction}>
+        {/* ── Right panel (live preview, desktop only) ── */}
+        <div className="hidden lg:flex flex-1 bg-[#F4F6FB] dark:bg-[#13141A] border-l border-[#EAECF0] dark:border-[#26283A] items-center justify-center p-12">
+          <AnimatePresence mode="wait">
             <motion.div
               key={step}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="w-full max-w-md"
             >
-              {step === 0 && <Step1BusinessIdentity
-                businessName={businessName} setBusinessName={setBusinessName}
-                workType={workType} setWorkType={setWorkType}
-                logoUrl={logoUrl} setLogoUrl={setLogoUrl}
-              />}
-              {step === 1 && <Step2GstCompliance
-                gstRegistered={gstRegistered} setGstRegistered={setGstRegistered}
-                gstin={gstin} setGstin={setGstin}
-                intlClients={intlClients} setIntlClients={setIntlClients}
-                lutNumber={lutNumber} setLutNumber={setLutNumber}
-                defaultHsnSac={defaultHsnSac} setDefaultHsnSac={setDefaultHsnSac}
-              />}
-              {step === 2 && <Step3GetPaid
-                bankName={bankName} setBankName={setBankName}
-                bankAccountName={bankAccountName} setBankAccountName={setBankAccountName}
-                bankAccountNumber={bankAccountNumber} setBankAccountNumber={setBankAccountNumber}
-                bankIfsc={bankIfsc} setBankIfsc={setBankIfsc}
-                upiId={upiId} setUpiId={setUpiId}
-                razorpayKeyId={razorpayKeyId} setRazorpayKeyId={setRazorpayKeyId}
-                razorpayKeySecret={razorpayKeySecret} setRazorpayKeySecret={setRazorpayKeySecret}
-              />}
-              {step === 3 && <Step4AddClient
-                name={clientName} setName={setClientName}
-                email={clientEmail} setEmail={setClientEmail}
-                phone={clientPhone} setPhone={setClientPhone}
-                company={clientCompany} setCompany={setClientCompany}
-              />}
-              {step === 4 && <Step5Graduation clientName={clientName} onChoose={graduate} />}
+              {step === 0 && <PreviewBusinessIdentity businessName={businessName} logoUrl={logoUrl} />}
+              {step === 1 && <PreviewGstCompliance gstin={gstin} defaultHsnSac={defaultHsnSac} />}
+              {step === 2 && <PreviewGetPaid upiId={upiId} razorpayKeyId={razorpayKeyId} />}
+              {step === 3 && <PreviewClientCard name={clientName} company={clientCompany} email={clientEmail} />}
+              {step === 4 && <PreviewGraduation />}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* CTA footer */}
-        <div className="px-10 py-8 shrink-0 border-t border-[#F2F4F7] dark:border-[#26283A]">
-          {step === 0 && (
-            <button
-              onClick={saveStep1}
-              disabled={!businessName.trim() || saving}
-              className="w-full bg-[#0D1117] dark:bg-[#6366F1] text-white py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.97] transition-all"
-            >
-              {saving ? 'Saving…' : 'Continue'} <ChevronRight size={16} />
-            </button>
-          )}
-          {step === 1 && (
-            <div className="flex gap-3">
-              <button onClick={goBack} className="px-5 py-3 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors">← Back</button>
-              <button onClick={saveStep2} disabled={saving} className="flex-1 bg-[#0D1117] dark:bg-[#6366F1] text-white py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-all">
-                {saving ? 'Saving…' : 'Continue'} <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
-          {step === 2 && (
-            <div className="space-y-3">
-              <div className="flex gap-3">
-                <button onClick={goBack} className="px-5 py-3 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors">← Back</button>
-                <button onClick={() => saveStep3(false)} disabled={saving} className="flex-1 bg-[#0D1117] dark:bg-[#6366F1] text-white py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-all">
-                  {saving ? 'Saving…' : 'Continue'} <ChevronRight size={16} />
-                </button>
-              </div>
-              <button onClick={() => saveStep3(true)} className="w-full text-center text-[12px] text-[#98A2B3] hover:text-[#667085] transition-colors py-1">
-                I'll add this later
-              </button>
-              <p className="text-center text-[11px] text-[#D0D5DD]">
-                Without bank/UPI details, clients won't see payment instructions on your invoices.
-              </p>
-            </div>
-          )}
-          {step === 3 && (
-            <div className="flex gap-3">
-              <button onClick={goBack} className="px-5 py-3 rounded-xl border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors">← Back</button>
-              <button onClick={saveStep4} disabled={!clientName.trim() || saving} className="flex-1 bg-[#0D1117] dark:bg-[#6366F1] text-white py-3 rounded-xl text-[14px] font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.97] transition-all">
-                {saving ? 'Saving…' : 'Continue'} <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
-          {/* Step 4 (index 4) — no CTA footer, cards are the CTAs */}
-        </div>
       </div>
 
-      {/* ── Right panel (live preview, desktop only) ── */}
-      <div className="hidden lg:flex flex-1 bg-[#F4F6FB] dark:bg-[#13141A] border-l border-[#EAECF0] dark:border-[#26283A] items-center justify-center p-12">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="w-full max-w-md"
-          >
-            {step === 0 && <PreviewBusinessIdentity businessName={businessName} logoUrl={logoUrl} />}
-            {step === 1 && <PreviewGstCompliance gstin={gstin} defaultHsnSac={defaultHsnSac} />}
-            {step === 2 && <PreviewGetPaid upiId={upiId} razorpayKeyId={razorpayKeyId} />}
-            {step === 3 && <PreviewClientCard name={clientName} company={clientCompany} email={clientEmail} />}
-            {step === 4 && <PreviewGraduation />}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-    </div>
+      <AnimatePresence>
+        {showWelcome && (
+          <WelcomeModal
+            businessName={businessName}
+            onAction={(dest) => {
+              setShowWelcome(false)
+              if (dest === 'dashboard') {
+                navigate('/app/dashboard')
+              } else {
+                navigate(`/app/${dest}/new${clientId ? `?clientId=${clientId}` : ''}`)
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
@@ -322,11 +358,23 @@ function WizardField({ label, hint, children }: { label: string; hint?: string; 
 
 function Step1BusinessIdentity({
   businessName, setBusinessName, workType, setWorkType, logoUrl, setLogoUrl,
+  uploadingLogo, onLogoUpload,
 }: {
   businessName: string; setBusinessName: (v: string) => void
   workType: string; setWorkType: (v: string) => void
   logoUrl: string | null; setLogoUrl: (v: string | null) => void
+  uploadingLogo: boolean; onLogoUpload: (file: File) => Promise<void>
 }) {
+  const logoFileRef = useRef<HTMLInputElement>(null)
+
+  const handleLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    await onLogoUpload(file)
+    // Reset input so the same file can be re-selected
+    e.target.value = ''
+  }
+
   const WORK_TYPES = [
     { value: 'developer',  label: 'Developer' },
     { value: 'designer',   label: 'Designer' },
@@ -350,6 +398,47 @@ function Step1BusinessIdentity({
           className="form-input w-full text-[14px]"
         />
       </WizardField>
+
+      {/* Logo upload */}
+      <WizardField label="Your logo">
+        <input
+          ref={logoFileRef}
+          type="file"
+          accept=".png,.svg,.jpg,.jpeg,.webp"
+          className="hidden"
+          onChange={handleLogoFile}
+        />
+        {logoUrl ? (
+          <div className="flex items-center gap-3">
+            <img src={logoUrl} className="h-14 w-auto max-w-[160px] object-contain rounded-lg" alt="Logo preview" />
+            <button
+              type="button"
+              onClick={() => logoFileRef.current?.click()}
+              disabled={uploadingLogo}
+              className="px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            >
+              {uploadingLogo ? <Loader2 size={12} className="animate-spin" /> : null}
+              Change
+            </button>
+          </div>
+        ) : (
+          <div
+            onClick={() => !uploadingLogo && logoFileRef.current?.click()}
+            className={`border-2 border-dashed border-[#D0D5DD] rounded-xl p-6 text-center cursor-pointer hover:border-[#6366F1] transition-colors ${uploadingLogo ? 'opacity-60 cursor-not-allowed' : ''}`}
+          >
+            {uploadingLogo ? (
+              <Loader2 size={24} className="animate-spin text-[#6366F1] mx-auto mb-2" />
+            ) : (
+              <Upload size={24} className="text-[#98A2B3] mx-auto mb-2" />
+            )}
+            <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
+              {uploadingLogo ? 'Uploading…' : 'Upload your logo'}
+            </p>
+            <p className="text-[11px] text-[#98A2B3] mt-0.5">(PNG or SVG with transparent background)</p>
+          </div>
+        )}
+      </WizardField>
+
       <WizardField label="What kind of work do you do?">
         <div className="flex flex-wrap gap-2 pt-1">
           {WORK_TYPES.map(t => (
@@ -526,7 +615,7 @@ function Step4AddClient(props: {
 
 function Step5Graduation({ clientName, onChoose }: {
   clientName: string
-  onChoose: (type: 'proposals' | 'contracts' | 'invoices') => void
+  onChoose: (type: 'proposals' | 'contracts' | 'invoices' | 'dashboard') => void
 }) {
   const CARDS = [
     { type: 'proposals'  as const, title: 'Proposal', desc: 'Share your scope, pricing, and terms. Client can accept online.', color: 'from-[#EFF6FF] to-[#DBEAFE]' },
@@ -552,6 +641,12 @@ function Step5Graduation({ clientName, onChoose }: {
             <p className="text-[12px] text-[#667085] mt-0.5">{card.desc}</p>
           </button>
         ))}
+        <button
+          onClick={() => onChoose('dashboard')}
+          className="w-full text-center text-[12px] text-[#98A2B3] hover:text-[#667085] transition-colors pt-2"
+        >
+          Skip — go to dashboard
+        </button>
       </div>
     </div>
   )
@@ -670,5 +765,77 @@ function PreviewGraduation() {
         </div>
       ))}
     </div>
+  )
+}
+
+// ─── Welcome modal ────────────────────────────────────────────────────────────
+
+function WelcomeModal({
+  businessName,
+  onAction,
+}: {
+  businessName: string
+  onAction: (dest: 'proposals' | 'contracts' | 'invoices' | 'dashboard') => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm flex items-center justify-center p-6"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 24, scale: 0.97 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="bg-white dark:bg-[#16171D] rounded-3xl shadow-2xl max-w-md w-full p-8"
+      >
+        {/* Icon */}
+        <div className="w-14 h-14 rounded-2xl bg-[#EEF2FF] dark:bg-[#2A2D4A] flex items-center justify-center mb-6">
+          <Sparkles size={28} className="text-[#6366F1]" />
+        </div>
+
+        {/* Heading */}
+        <h2 className="text-[24px] font-extrabold text-[#101828] dark:text-[#ECEEF3] leading-tight">
+          {businessName ? `${businessName} is ready.` : 'Your workspace is ready.'}
+        </h2>
+        <p className="text-[14px] text-[#667085] dark:text-[#8B92A8] mt-2 leading-relaxed">
+          You can now send professional proposals, sign contracts, and collect payments — all from one place. Everything your clients see will carry your brand.
+        </p>
+
+        {/* Action list */}
+        <div className="mt-6 space-y-2">
+          {[
+            { dest: 'proposals'  as const, icon: FileText,  label: 'Create your first proposal', desc: 'Share scope and pricing' },
+            { dest: 'invoices'   as const, icon: Receipt,   label: 'Send an invoice',             desc: 'Bill for work done' },
+            { dest: 'contracts'  as const, icon: PenLine,   label: 'Draft a contract',            desc: 'Get it signed online' },
+          ].map(({ dest, icon: Icon, label, desc }) => (
+            <button
+              key={dest}
+              onClick={() => onAction(dest)}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-[#EAECF0] dark:border-[#2A2C3D] hover:border-[#6366F1] hover:bg-[#F5F3FF] dark:hover:bg-[#1E1F30] transition-all text-left group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#F4F6FB] dark:bg-[#21222D] flex items-center justify-center shrink-0 group-hover:bg-[#EEF2FF] transition-colors">
+                <Icon size={16} className="text-[#667085] group-hover:text-[#6366F1] transition-colors" />
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{label}</p>
+                <p className="text-[11px] text-[#98A2B3]">{desc}</p>
+              </div>
+              <ChevronRight size={14} className="ml-auto text-[#D0D5DD] group-hover:text-[#6366F1] transition-colors" />
+            </button>
+          ))}
+        </div>
+
+        {/* Dashboard link */}
+        <button
+          onClick={() => onAction('dashboard')}
+          className="w-full mt-4 text-center text-[12px] text-[#98A2B3] hover:text-[#667085] transition-colors py-1"
+        >
+          Go to dashboard
+        </button>
+      </motion.div>
+    </motion.div>
   )
 }
