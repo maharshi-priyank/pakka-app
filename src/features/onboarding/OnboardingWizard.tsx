@@ -162,7 +162,7 @@ export default function OnboardingWizard() {
     } finally { setSaving(false) }
   }
 
-  const graduate = async (destination: 'proposals' | 'contracts' | 'invoices' | 'dashboard') => {
+  const graduate = async (_destination: 'proposals' | 'contracts' | 'invoices' | 'dashboard') => {
     await api.patch('/users/me', { onboardingComplete: true })
     queryClient.invalidateQueries({ queryKey: ['profile'] })
     localStorage.removeItem(STORAGE_KEY)
