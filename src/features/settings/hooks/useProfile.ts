@@ -24,6 +24,11 @@ export interface UserProfile {
   googleCalendarConnected: boolean
   outlookConnected:        boolean
   createdAt:               string
+  defaultHsnSac:           string | null
+  defaultLutNumber:        string | null
+  razorpayKeyId:           string | null
+  razorpayKeySecret:       string | null
+  onboardingComplete:      boolean
 }
 
 export function useProfile() {

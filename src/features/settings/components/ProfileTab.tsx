@@ -2,17 +2,29 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Camera, Check, Loader2, Building2, User, Receipt, Upload, Zap, MapPin } from 'lucide-react'
+import { Camera, Check, Loader2, Building2, User, Receipt, Upload, Zap, MapPin, ShieldCheck, CreditCard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useProfile, useUpdateProfile, useUploadLogo, useRedeemPromo } from '../hooks/useProfile'
 import { useOnboardingTour } from '@/hooks/useOnboardingTour'
 
 const profileSchema = z.object({
-  name:         z.string().min(1, 'Name is required'),
-  businessName: z.string().optional(),
-  businessType: z.string().optional(),
-  gstNumber:    z.string().optional(),
-  panNumber:    z.string().optional(),
+  name:              z.string().min(1, 'Name is required'),
+  businessName:      z.string().optional(),
+  businessType:      z.string().optional(),
+  gstNumber:         z.string().optional(),
+  panNumber:         z.string().optional(),
+  // Compliance
+  defaultHsnSac:     z.string().optional(),
+  defaultLutNumber:  z.string().optional(),
+  // Payment
+  bankName:          z.string().optional(),
+  bankAccountName:   z.string().optional(),
+  bankAccountNumber: z.string().optional(),
+  bankIfsc:          z.string().optional(),
+  upiId:             z.string().optional(),
+  // Razorpay
+  razorpayKeyId:     z.string().optional(),
+  razorpayKeySecret: z.string().optional(),
 })
 
 type ProfileForm = z.infer<typeof profileSchema>
@@ -56,11 +68,20 @@ export default function ProfileTab() {
   useEffect(() => {
     if (profile) {
       reset({
-        name:         profile.name         ?? '',
-        businessName: profile.businessName ?? '',
-        businessType: profile.businessType ?? '',
-        gstNumber:    profile.gstNumber    ?? '',
-        panNumber:    profile.panNumber    ?? '',
+        name:              profile.name              ?? '',
+        businessName:      profile.businessName      ?? '',
+        businessType:      profile.businessType      ?? '',
+        gstNumber:         profile.gstNumber         ?? '',
+        panNumber:         profile.panNumber         ?? '',
+        defaultHsnSac:     profile.defaultHsnSac     ?? '',
+        defaultLutNumber:  profile.defaultLutNumber  ?? '',
+        bankName:          profile.bankName          ?? '',
+        bankAccountName:   profile.bankAccountName   ?? '',
+        bankAccountNumber: profile.bankAccountNumber ?? '',
+        bankIfsc:          profile.bankIfsc          ?? '',
+        upiId:             profile.upiId             ?? '',
+        razorpayKeyId:     profile.razorpayKeyId     ?? '',
+        razorpayKeySecret: '',  // never populated from API (stripped server-side)
       })
       setLogoPreview(profile.logoUrl ?? null)
     }
@@ -68,11 +89,21 @@ export default function ProfileTab() {
 
   const onSubmit = async (values: ProfileForm) => {
     await updateProfile({
-      name:         values.name,
-      businessName: values.businessName || null,
-      businessType: values.businessType || null,
-      gstNumber:    values.gstNumber    || null,
-      panNumber:    values.panNumber    || null,
+      name:              values.name,
+      businessName:      values.businessName      || null,
+      businessType:      values.businessType      || null,
+      gstNumber:         values.gstNumber         || null,
+      panNumber:         values.panNumber         || null,
+      defaultHsnSac:     values.defaultHsnSac     || null,
+      defaultLutNumber:  values.defaultLutNumber  || null,
+      bankName:          values.bankName          || null,
+      bankAccountName:   values.bankAccountName   || null,
+      bankAccountNumber: values.bankAccountNumber || null,
+      bankIfsc:          values.bankIfsc          || null,
+      upiId:             values.upiId             || null,
+      razorpayKeyId:     values.razorpayKeyId     || null,
+      // Only send razorpayKeySecret if user typed something (non-empty string)
+      ...(values.razorpayKeySecret ? { razorpayKeySecret: values.razorpayKeySecret } : {}),
     })
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
@@ -303,6 +334,78 @@ export default function ProfileTab() {
               }}
             />
           </Field>
+        </div>
+      </div>
+
+      {/* Compliance defaults */}
+      <div className="card p-6 space-y-5">
+        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
+          <ShieldCheck size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Invoice Defaults</h3>
+          <span className="ml-auto text-[11px] text-[#98A2B3] dark:text-[#545C74]">Auto-fills on new invoices</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field
+            label="Default SAC / HSN Code"
+            hint="Required on GST invoices. Auto-fills on every new line item."
+          >
+            <input
+              {...register('defaultHsnSac')}
+              placeholder="e.g. 998313"
+              maxLength={8}
+              className="form-input w-full font-mono text-[13px] tracking-wide"
+            />
+          </Field>
+          <Field
+            label="LUT Reference Number"
+            hint="For export invoices (zero-rated). Filed with GSTN."
+          >
+            <input
+              {...register('defaultLutNumber')}
+              placeholder="e.g. AD220522001234H"
+              className="form-input w-full font-mono text-[13px]"
+            />
+          </Field>
+        </div>
+      </div>
+
+      {/* Payment details */}
+      <div className="card p-6 space-y-5">
+        <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
+          <CreditCard size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
+          <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Payment Details</h3>
+          <span className="ml-auto text-[11px] text-[#98A2B3] dark:text-[#545C74]">Shown on invoices</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Bank Name">
+            <input {...register('bankName')} placeholder="HDFC Bank" className="form-input w-full" />
+          </Field>
+          <Field label="Account Holder Name">
+            <input {...register('bankAccountName')} placeholder="Your legal name" className="form-input w-full" />
+          </Field>
+          <Field label="Account Number">
+            <input {...register('bankAccountNumber')} placeholder="000123456789" className="form-input w-full font-mono" />
+          </Field>
+          <Field label="IFSC Code">
+            <input {...register('bankIfsc')} placeholder="HDFC0001234" className="form-input w-full font-mono uppercase" />
+          </Field>
+          <Field label="UPI ID" hint="e.g. yourname@okicici — clients pay you directly here">
+            <input {...register('upiId')} placeholder="yourname@okicici" className="form-input w-full" />
+          </Field>
+        </div>
+        <div className="pt-3 border-t border-[#F2F4F7] dark:border-[#26283A] space-y-4">
+          <p className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] flex items-center gap-1.5">
+            Razorpay Keys <span className="text-[11px] text-[#98A2B3] font-normal">(for online payment links)</span>
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Key ID" hint="Starts with rzp_live_ or rzp_test_">
+              <input {...register('razorpayKeyId')} placeholder="rzp_live_…" className="form-input w-full font-mono text-[12px]" />
+            </Field>
+            <Field label="Key Secret">
+              <input {...register('razorpayKeySecret')} type="password" placeholder="••••••••••••••••" className="form-input w-full font-mono text-[12px]" />
+            </Field>
+          </div>
+          <p className="text-[11px] text-[#98A2B3]">Find your keys in Razorpay Dashboard → Settings → API Keys.</p>
         </div>
       </div>
 
