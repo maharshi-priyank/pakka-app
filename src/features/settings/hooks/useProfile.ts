@@ -23,6 +23,8 @@ export interface UserProfile {
   upiQrUrl:                string | null
   googleCalendarConnected: boolean
   outlookConnected:        boolean
+  clickUpConnected:        boolean
+  clickUpWorkspaceId:      string | null
   createdAt:               string
   defaultHsnSac:           string | null
   defaultLutNumber:        string | null

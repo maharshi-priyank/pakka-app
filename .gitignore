@@ -7,25 +7,29 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+node_modules/
+dist/
+dist-ssr/
+
+# Environment variables — keep all .env variants out except the example
+.env
+.env.*
+!.env.example
 *.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.env
-.env.local
-dist/
-node_modules/
 
 # PWA dev artifacts
-dev-dist
+dev-dist/
+
+# OS
+Thumbs.db
