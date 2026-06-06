@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronRight, Upload, Loader2, FileText, Receipt, PenLine, Sparkles } from 'lucide-react'
 import { useUploadLogo } from '@/features/settings/hooks/useProfile'
+import { toast } from 'sonner'
 
 const STORAGE_KEY = 'rupway_onboarding_v1'
 
@@ -95,10 +96,16 @@ export default function OnboardingWizard() {
   const goBack = useCallback(() => { setDirection(-1); setStep(s => s - 1) }, [])
 
   const handleLogoUpload = async (file: File) => {
-    const url = await uploadLogo(file)
-    setLogoUrl(url)
-    await api.patch('/users/me', { logoUrl: url })
-    queryClient.invalidateQueries({ queryKey: ['profile'] })
+    try {
+      const url = await uploadLogo(file)
+      setLogoUrl(url)
+      await api.patch('/users/me', { logoUrl: url })
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      toast.success('Logo uploaded')
+    } catch (err) {
+      console.error('Logo upload failed:', err)
+      toast.error('Logo upload failed — please try again')
+    }
   }
 
   const saveStep1 = async () => {

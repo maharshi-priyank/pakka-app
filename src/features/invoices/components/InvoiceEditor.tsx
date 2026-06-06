@@ -38,6 +38,8 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
 
   const displayInvoice = saved ?? invoice
 
+  const { data: profile } = useProfile()
+
   const {
     register, control, handleSubmit, watch,
     formState: { errors },
@@ -87,7 +89,6 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const recurrenceCycle = watch('recurrenceCycle')
   const watchedClientId = watch('clientId') ?? ''
 
-  const { data: profile }      = useProfile()
   const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
 
   const subtotal  = lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate)), 0)
