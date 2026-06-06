@@ -40,6 +40,7 @@ export const lineItemSchema = z.object({
   qty:         z.number({ message: 'Required' }).min(0),
   rate:        z.number({ message: 'Required' }).min(0),
   gstRate:     z.number().min(0).max(28),
+  hsnSac:      z.string().optional(),
 })
 
 export const invoiceFormSchema = z.object({
@@ -55,6 +56,8 @@ export const invoiceFormSchema = z.object({
   recurrenceCycle:    z.enum(RECURRENCE_CYCLES).optional(),
   recurrenceDay:      z.number().int().min(1).max(28).optional(),
   recurrenceEndDate:  z.string().optional(),
+  currency:           z.string().default('INR'),
+  lutNumber:          z.string().optional(),
 })
 
 export type LineItem        = z.infer<typeof lineItemSchema>
@@ -97,6 +100,8 @@ export interface Invoice {
   contract:           InvoiceContract | null
   projectId:          string | null
   project:            { id: string; name: string } | null
+  currency:           string | null
+  lutNumber:          string | null
 }
 
 export interface InvoiceListResponse {
