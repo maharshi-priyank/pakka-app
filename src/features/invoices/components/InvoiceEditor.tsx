@@ -183,8 +183,8 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
 
             <div className="px-5 py-4 space-y-3">
               {/* Column headers */}
-              <div className="grid grid-cols-[72px_1fr_80px_100px_80px_32px] gap-2 text-[10px] font-semibold text-[#98A2B3] uppercase tracking-wider px-1">
-                <span className="text-[10px] font-semibold text-[#98A2B3] uppercase">SAC/HSN</span>
+              <div className="grid grid-cols-[72px_1fr_80px_100px_80px_32px] gap-2 text-xs font-medium text-[#667085] uppercase tracking-wide px-1">
+                <span>SAC/HSN</span>
                 <span>Description</span>
                 <span className="text-right">Qty</span>
                 <span className="text-right">Rate ({currencySymbol})</span>
@@ -199,7 +199,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
                   : 0
 
                 return (
-                  <div key={field.id} className="space-y-1">
+                  <div key={field.id} className="space-y-1 rounded-lg hover:bg-[#F9FAFB] transition-colors duration-150 -mx-1 px-1 py-0.5">
                     <div className="grid grid-cols-[72px_1fr_80px_100px_80px_32px] gap-2 items-start">
                       <input
                         {...register(`lineItems.${idx}.hsnSac`)}

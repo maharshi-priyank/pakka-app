@@ -59,9 +59,12 @@ export default function ActivityWidget() {
             </div>
           ))
         ) : (activity?.length ?? 0) === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10">
-            <Bell size={28} className="text-[#D0D5DD] mb-2" />
-            <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74]">No activity yet — add your first lead to get started</p>
+          <div className="flex flex-col items-center justify-center py-12 text-center px-6">
+            <div className="w-12 h-12 rounded-2xl bg-[#F2F4F7] dark:bg-[#21222D] flex items-center justify-center mb-3">
+              <FileText size={22} className="text-[#98A2B3] dark:text-[#545C74]" strokeWidth={1.5} />
+            </div>
+            <p className="text-[13.5px] font-semibold text-[#344054] dark:text-[#C2C8D8]">No activity yet</p>
+            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">Add your first lead to get started</p>
           </div>
         ) : activity!.map((a, i) => {
           const { icon: Icon, iconBg, iconColor } = activityMeta(a.type)

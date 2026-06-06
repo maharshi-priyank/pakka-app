@@ -310,8 +310,8 @@ export default function DashboardPage() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-[17px] font-bold text-[#0D1117] dark:text-[#ECEEF3] tracking-tight">Dashboard</h1>
-          <p className="text-[12px] text-[#9CA3AF] dark:text-[#545C74] mt-0.5">Here's what's happening with your business</p>
+          <h1 className="text-[17px] font-semibold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Dashboard</h1>
+          <p className="text-[12px] text-[#667085] dark:text-[#545C74] mt-0.5">Here's what's happening with your business</p>
         </div>
         <div className="flex items-center gap-2">
           {editMode && hidden.length > 0 && (
