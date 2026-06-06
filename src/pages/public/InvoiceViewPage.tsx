@@ -3,7 +3,7 @@ import { useParams, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import {
-  CheckCircle2, AlertCircle, IndianRupee, Lock, FileText, Calendar, Download,
+  CheckCircle2, AlertCircle, Lock, FileText, Calendar, Download,
   Building2, Smartphone, FileArchive, FileImage, File as FileIcon,
 } from 'lucide-react'
 import { humanSize } from '@/features/attachments/useAttachments'
@@ -45,6 +45,8 @@ interface PublicInvoice {
   lineItems: LineItem[]; subtotal: number; gstAmount: number; total: number
   gstType: GstType; tdsRate: number | null; dueDate: string | null; paidAt: string | null
   createdAt: string
+  currency: string
+  lutNumber: string | null
   user: PublicUser; client: PublicClient | null
 }
 
@@ -53,12 +55,16 @@ async function fetchInvoice(id: string): Promise<PublicInvoice> {
   return data.data
 }
 
-function fmt(v: number) {
-  return Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'AED ',
+}
+function fmtCurrency(v: number, currency: string) {
+  const sym = CURRENCY_SYMBOLS[currency] ?? currency + ' '
+  return `${sym}${Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -119,6 +125,9 @@ export default function InvoiceViewPage() {
   const senderName = invoice.user.businessName ?? invoice.user.name
   const isPaid     = invoice.status === 'PAID'
   const isOverdue  = invoice.status === 'OVERDUE'
+
+  const currency = invoice.currency ?? 'INR'
+  const isExport = currency !== 'INR'
 
   const tdsAmount = invoice.tdsRate
     ? (Number(invoice.subtotal) * Number(invoice.tdsRate)) / 100
@@ -222,7 +231,14 @@ export default function InvoiceViewPage() {
                 {invoice.status}
               </span>
             </div>
-            <h1 className="text-[22px] font-extrabold text-[#101828]">{invoice.invoiceNumber}</h1>
+            <h1 className="text-[22px] font-extrabold text-[#101828]">
+              {invoice.invoiceNumber}
+              {currency !== 'INR' && (
+                <span className="ml-2 inline-flex items-center text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EFF6FF] text-[#2563EB]">
+                  {currency}
+                </span>
+              )}
+            </h1>
             <p className="text-[13px] text-[#667085] mt-1">{fmtDate(invoice.createdAt)}</p>
           </div>
 
@@ -279,7 +295,8 @@ export default function InvoiceViewPage() {
           </div>
 
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_60px_90px_70px_90px] gap-3 px-7 py-2.5 bg-[#FAFAFA] border-b border-[#F2F4F7] text-[10px] font-semibold text-[#98A2B3] uppercase tracking-wider">
+          <div className="grid grid-cols-[70px_1fr_60px_90px_70px_90px] gap-3 px-7 py-2.5 bg-[#FAFAFA] border-b border-[#F2F4F7] text-[10px] font-semibold text-[#98A2B3] uppercase tracking-wider">
+            <span>SAC/HSN</span>
             <span>Description</span>
             <span className="text-right">Qty</span>
             <span className="text-right">Rate</span>
@@ -289,23 +306,25 @@ export default function InvoiceViewPage() {
 
           {invoice.lineItems.map((item, idx) => {
             const lineTotal = Number(item.qty) * Number(item.rate)
-            const lineGst   = invoice.gstType !== 'EXEMPT' ? (lineTotal * Number(item.gstRate)) / 100 : 0
+            const lineGst   = !isExport && invoice.gstType !== 'EXEMPT'
+              ? (lineTotal * Number(item.gstRate)) / 100 : 0
             return (
               <div
                 key={idx}
                 className={cn(
-                  'grid grid-cols-[1fr_60px_90px_70px_90px] gap-3 px-7 py-3.5 text-[13px]',
+                  'grid grid-cols-[70px_1fr_60px_90px_70px_90px] gap-3 px-7 py-3.5 text-[13px]',
                   idx < invoice.lineItems.length - 1 ? 'border-b border-[#F2F4F7]' : '',
                 )}
               >
+                <span className="text-[11px] text-[#98A2B3] font-mono self-center">{item.hsnSac ?? '—'}</span>
                 <span className="text-[#344054] font-medium">{item.description}</span>
                 <span className="text-right text-[#667085]">{item.qty}</span>
-                <span className="text-right text-[#667085]">₹{fmt(item.rate)}</span>
+                <span className="text-right text-[#667085]">{fmtCurrency(item.rate, currency)}</span>
                 <span className="text-right text-[#667085]">
-                  {invoice.gstType !== 'EXEMPT' ? `${item.gstRate}%` : '—'}
+                  {isExport || invoice.gstType === 'EXEMPT' ? 'Nil' : `${item.gstRate}%`}
                 </span>
                 <span className="text-right font-semibold text-[#101828]">
-                  ₹{fmt(lineTotal + lineGst)}
+                  {fmtCurrency(lineTotal + lineGst, currency)}
                 </span>
               </div>
             )
@@ -315,33 +334,33 @@ export default function InvoiceViewPage() {
           <div className="px-7 py-5 bg-[#FAFAFA] border-t border-[#EAECF0] space-y-2">
             <div className="flex justify-between text-[13px]">
               <span className="text-[#667085]">Subtotal</span>
-              <span className="font-medium text-[#344054]">₹{fmt(Number(invoice.subtotal))}</span>
+              <span className="font-medium text-[#344054]">{fmtCurrency(Number(invoice.subtotal), currency)}</span>
             </div>
-            {Number(invoice.gstAmount) > 0 && (
+            {!isExport && Number(invoice.gstAmount) > 0 && (
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#667085]">
                   {invoice.gstType === 'IGST' ? 'IGST' : 'CGST + SGST'}
                 </span>
-                <span className="font-medium text-[#344054]">₹{fmt(Number(invoice.gstAmount))}</span>
+                <span className="font-medium text-[#344054]">{fmtCurrency(Number(invoice.gstAmount), currency)}</span>
+              </div>
+            )}
+            {isExport && (
+              <div className="flex justify-between text-[13px]">
+                <span className="text-[#667085]">IGST</span>
+                <span className="font-medium text-[#027A48]">Nil</span>
               </div>
             )}
             {tdsAmount > 0 && (
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#667085]">TDS ({invoice.tdsRate}%)</span>
-                <span className="font-medium text-[#D92D20]">−₹{fmt(tdsAmount)}</span>
+                <span className="font-medium text-[#D92D20]">−{fmtCurrency(tdsAmount, currency)}</span>
               </div>
             )}
             <div className="flex items-center justify-between pt-3 border-t border-[#EAECF0]">
               <span className="text-[16px] font-bold text-[#101828]">Total due</span>
-              <div className="flex items-center gap-1">
-                <IndianRupee size={14} strokeWidth={3} className={isPaid ? 'text-[#027A48]' : 'text-[#101828]'} />
-                <span className={cn(
-                  'text-[22px] font-extrabold',
-                  isPaid ? 'text-[#027A48]' : isOverdue ? 'text-[#D92D20]' : 'text-[#101828]',
-                )}>
-                  {fmt(Number(invoice.total))}
-                </span>
-              </div>
+              <span className={cn('text-[22px] font-extrabold', isPaid ? 'text-[#027A48]' : 'text-[#101828]')}>
+                {fmtCurrency(Number(invoice.total), currency)}
+              </span>
             </div>
           </div>
         </div>
@@ -388,6 +407,17 @@ export default function InvoiceViewPage() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* LUT / Zero-rated export declaration */}
+        {isExport && (
+          <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl px-7 py-5">
+            <p className="text-[12px] font-semibold text-[#027A48] mb-1">Zero-Rated Export Supply</p>
+            <p className="text-[12px] text-[#027A48] leading-relaxed">
+              Export of Services — Zero Rated Supply under Bond/LUT as per Section 16(3) of IGST Act 2017.
+              {invoice.lutNumber ? ` LUT No: ${invoice.lutNumber}.` : ''} IGST: Nil.
+            </p>
           </div>
         )}
 
