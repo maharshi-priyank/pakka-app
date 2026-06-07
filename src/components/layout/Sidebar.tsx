@@ -2,18 +2,20 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
-  Receipt, Building2, Settings, X, CalendarDays, ClipboardList, Zap, BarChart3, FolderKanban, GripVertical, Mail,
+  Receipt, Building2, Settings, CalendarDays, ClipboardList, Zap, BarChart3, FolderKanban, Mail,
   ChevronLeft, LogOut,
 } from 'lucide-react'
-import {
-  DndContext, closestCenter, PointerSensor, KeyboardSensor,
-  useSensor, useSensors, type DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  SortableContext, useSortable, verticalListSortingStrategy,
-  arrayMove, sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+// Customise sidebar imports — disabled until feature is ready
+// import { X } from 'lucide-react'
+// import {
+//   DndContext, closestCenter, PointerSensor, KeyboardSensor,
+//   useSensor, useSensors, type DragEndEvent,
+// } from '@dnd-kit/core'
+// import {
+//   SortableContext, useSortable, verticalListSortingStrategy,
+//   arrayMove, sortableKeyboardCoordinates,
+// } from '@dnd-kit/sortable'
+// import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
@@ -56,29 +58,30 @@ function loadOrder(): string[] {
   }
 }
 
-type NavItem = typeof ALL_NAV_ITEMS[0]
+// type NavItem = typeof ALL_NAV_ITEMS[0]
 
-function SortableNavRow({ item }: { item: NavItem }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
-  return (
-    <div
-      ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 select-none cursor-default"
-    >
-      <button
-        {...attributes}
-        {...listeners}
-        className="text-gray-300 hover:text-gray-500 transition-colors cursor-grab active:cursor-grabbing touch-none"
-        tabIndex={-1}
-      >
-        <GripVertical size={14} />
-      </button>
-      <item.icon size={14} className="text-gray-400 shrink-0" />
-      <span className="text-[13px] font-medium text-gray-600">{item.label}</span>
-    </div>
-  )
-}
+// Customise sidebar — SortableNavRow disabled until feature is ready
+// function SortableNavRow({ item }: { item: NavItem }) {
+//   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
+//   return (
+//     <div
+//       ref={setNodeRef}
+//       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
+//       className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 select-none cursor-default"
+//     >
+//       <button
+//         {...attributes}
+//         {...listeners}
+//         className="text-gray-300 hover:text-gray-500 transition-colors cursor-grab active:cursor-grabbing touch-none"
+//         tabIndex={-1}
+//       >
+//         <GripVertical size={14} />
+//       </button>
+//       <item.icon size={14} className="text-gray-400 shrink-0" />
+//       <span className="text-[13px] font-medium text-gray-600">{item.label}</span>
+//     </div>
+//   )
+// }
 
 interface Props {
   onClose?: () => void
@@ -86,8 +89,8 @@ interface Props {
 }
 
 export default function Sidebar({ onClose, onCollapse }: Props) {
-  const [order, setOrder] = useState<string[]>(loadOrder)
-  const [customizing, setCustomizing] = useState(false)
+  const [order] = useState<string[]>(loadOrder)
+  // const [customizing, setCustomizing] = useState(false) // disabled — Customise feature not ready
 
   const { user } = useAuthStore()
   const name = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
@@ -100,26 +103,25 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
 
   const orderedItems = order.map(id => ALL_NAV_ITEMS.find(n => n.id === id)!).filter(Boolean)
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  )
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (over && active.id !== over.id) {
-      const oldIdx = order.indexOf(active.id as string)
-      const newIdx = order.indexOf(over.id as string)
-      const newOrder = arrayMove(order, oldIdx, newIdx)
-      setOrder(newOrder)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newOrder))
-    }
-  }
-
-  function resetOrder() {
-    localStorage.removeItem(STORAGE_KEY)
-    setOrder(DEFAULT_ORDER)
-  }
+  // Customise sidebar logic — disabled until feature is ready
+  // const sensors = useSensors(
+  //   useSensor(PointerSensor),
+  //   useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  // )
+  // function handleDragEnd(event: DragEndEvent) {
+  //   const { active, over } = event
+  //   if (over && active.id !== over.id) {
+  //     const oldIdx = order.indexOf(active.id as string)
+  //     const newIdx = order.indexOf(over.id as string)
+  //     const newOrder = arrayMove(order, oldIdx, newIdx)
+  //     setOrder(newOrder)
+  //     localStorage.setItem(STORAGE_KEY, JSON.stringify(newOrder))
+  //   }
+  // }
+  // function resetOrder() {
+  //   localStorage.removeItem(STORAGE_KEY)
+  //   setOrder(DEFAULT_ORDER)
+  // }
 
   return (
     <aside className="w-[240px] shrink-0 bg-white flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-gray-100">
