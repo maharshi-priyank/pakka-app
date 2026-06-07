@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import AutomationsList from '@/features/automations/components/AutomationsList'
 import WorkflowsList from '@/features/automations/components/WorkflowsList'
+import AIAutomationModal from '@/features/automations/components/AIAutomationModal'
 
 const TABS = [
   { key: 'workflows', label: 'My Workflows' },
@@ -10,7 +11,8 @@ const TABS = [
 type TabKey = typeof TABS[number]['key']
 
 export default function AutomationsPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('workflows')
+  const [activeTab, setActiveTab]   = useState<TabKey>('workflows')
+  const [showAiModal, setShowAiModal] = useState(false)
 
   return (
     <div className="space-y-5 max-w-[860px]">
@@ -20,6 +22,13 @@ export default function AutomationsPage() {
           Build custom workflows or enable built-in automations to run without lifting a finger.
         </p>
       </div>
+
+      {showAiModal && (
+        <AIAutomationModal
+          onClose={() => setShowAiModal(false)}
+          onDone={() => { setShowAiModal(false); setActiveTab('workflows') }}
+        />
+      )}
 
       {/* Tab bar */}
       <div className="flex gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
@@ -39,7 +48,7 @@ export default function AutomationsPage() {
         ))}
       </div>
 
-      {activeTab === 'workflows' && <WorkflowsList />}
+      {activeTab === 'workflows' && <WorkflowsList onGenerateWithAI={() => setShowAiModal(true)} />}
       {activeTab === 'builtin'   && <AutomationsList />}
     </div>
   )

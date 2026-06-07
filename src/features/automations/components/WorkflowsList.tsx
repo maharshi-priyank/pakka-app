@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Zap, Edit2, Trash2, GitBranch } from 'lucide-react'
+import { Plus, Zap, Edit2, Trash2, GitBranch, Sparkles } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import {
   useWorkflows, useCreateWorkflow, useUpdateWorkflow, useDeleteWorkflow,
@@ -146,7 +146,11 @@ function WorkflowCard({ wf }: { wf: AutomationWorkflow }) {
 
 // ─── Main list ────────────────────────────────────────────────────────────────
 
-export default function WorkflowsList() {
+interface Props {
+  onGenerateWithAI?: () => void
+}
+
+export default function WorkflowsList({ onGenerateWithAI }: Props) {
   const { data: workflows, isLoading } = useWorkflows()
   const [showModal, setShowModal]      = useState(false)
 
@@ -171,12 +175,22 @@ export default function WorkflowsList() {
         <p className="text-[13px] text-[#667085] dark:text-[#8B92A8]">
           {workflows?.length ?? 0} workflow{(workflows?.length ?? 0) !== 1 ? 's' : ''}
         </p>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
-        >
-          <Plus size={14} /> New Workflow
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors"
+          >
+            <Plus size={14} /> New Workflow
+          </button>
+          {onGenerateWithAI && (
+            <button
+              onClick={onGenerateWithAI}
+              className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[13px] font-semibold hover:from-violet-700 hover:to-indigo-700 transition-all shadow-sm"
+            >
+              <Sparkles size={14} /> Generate with AI
+            </button>
+          )}
+        </div>
       </div>
 
       {!workflows?.length ? (

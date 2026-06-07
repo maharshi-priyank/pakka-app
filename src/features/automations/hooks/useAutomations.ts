@@ -74,6 +74,26 @@ export function useToggleAutomation() {
   })
 }
 
+export function useGenerateAutomation() {
+  return useMutation({
+    mutationFn: async (prompt: string) => {
+      const { data } = await api.post<{ data: { rules: AutomationRule[] } }>('/automations/ai-generate', { prompt })
+      return data.data.rules
+    },
+  })
+}
+
+export function useCreateFromAI() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (rules: Partial<AutomationRule>[]) => {
+      const { data } = await api.post<{ data: unknown[] }>('/automations/ai-create', { rules })
+      return data.data
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['workflows'] }),
+  })
+}
+
 export function useAutomationExecutions(ruleId: string) {
   return useQuery({
     queryKey: ['automations', ruleId, 'executions'],
