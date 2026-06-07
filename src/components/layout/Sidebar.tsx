@@ -28,7 +28,7 @@ const ALL_NAV_ITEMS = [
   { id: 'contracts',   icon: PenLine,         label: 'Contracts',    href: '/app/contracts',   tourId: 'tour-contracts' },
   { id: 'invoices',    icon: Receipt,         label: 'Invoices',     href: '/app/invoices',    tourId: 'tour-invoices' },
   { id: 'reports',     icon: BarChart3,       label: 'Reports',      href: '/app/reports',     tourId: undefined },
-  { id: 'meetings',    icon: CalendarDays,    label: 'Meetings',     href: '/app/meetings',    tourId: undefined },
+  { id: 'calendar',    icon: CalendarDays,    label: 'Calendar',     href: '/app/calendar',    tourId: undefined },
   { id: 'forms',       icon: ClipboardList,   label: 'Forms',        href: '/app/forms',       tourId: undefined },
   { id: 'automations', icon: Zap,             label: 'Automations',  href: '/app/automations', tourId: undefined },
 ]
@@ -37,7 +37,7 @@ const ALL_NAV_ITEMS = [
 const SECTIONS = [
   { label: null,           ids: ['dashboard', 'leads', 'clients', 'projects'] },
   { label: 'TOOLS',        ids: ['proposals', 'contracts', 'invoices', 'reports'] },
-  { label: 'PRODUCTIVITY', ids: ['meetings', 'forms', 'automations'] },
+  { label: 'PRODUCTIVITY', ids: ['calendar', 'forms', 'automations'] },
 ]
 
 const DEFAULT_ORDER = ALL_NAV_ITEMS.map(i => i.id)

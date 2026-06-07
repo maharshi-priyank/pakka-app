@@ -20,7 +20,7 @@ const MORE_ITEMS = [
   { icon: Building2,     label: 'Clients',     href: '/app/clients' },
   { icon: FolderKanban,  label: 'Projects',    href: '/app/projects' },
   { icon: BarChart3,     label: 'Reports',     href: '/app/reports' },
-  { icon: CalendarDays,  label: 'Meetings',    href: '/app/meetings' },
+  { icon: CalendarDays,  label: 'Calendar',    href: '/app/calendar' },
   { icon: ClipboardList, label: 'Forms',       href: '/app/forms' },
   { icon: Zap,           label: 'Automations', href: '/app/automations' },
   { icon: Settings,      label: 'Settings',    href: '/app/settings' },

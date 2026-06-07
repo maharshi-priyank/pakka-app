@@ -198,11 +198,15 @@ export const router = createBrowserRouter([
             },
           },
           {
-            path: '/app/meetings',
+            path: '/app/calendar',
             lazy: async () => {
-              const { default: Component } = await import('@/pages/app/MeetingsPage')
+              const { default: Component } = await import('@/pages/app/CalendarPage')
               return { Component }
             },
+          },
+          {
+            path: '/app/meetings',
+            element: <Navigate to="/app/calendar" replace />,
           },
           {
             path: '/app/forms',
