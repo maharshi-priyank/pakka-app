@@ -25,6 +25,8 @@ export interface UserProfile {
   outlookConnected:        boolean
   clickUpConnected:        boolean
   clickUpWorkspaceId:      string | null
+  flodeskConnected:        boolean
+  canvaConnected:          boolean
   createdAt:               string
   defaultHsnSac:           string | null
   defaultLutNumber:        string | null

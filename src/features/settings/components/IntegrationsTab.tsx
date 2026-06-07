@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { CalendarDays, CheckCircle2, AlertCircle, Loader2, Mail, RefreshCw } from 'lucide-react'
+import { AlertCircle, Loader2, RefreshCw, ExternalLink, X, Send } from 'lucide-react'
+import canvaSvg from '@/assets/canva.svg'
+import flodeskSvg from '@/assets/flowdesk.svg'
+import outlookSvg from '@/assets/outlook.svg'
 import { api } from '@/lib/api'
 import { useProfile } from '../hooks/useProfile'
 import { useConnectClickUp, useDisconnectClickUp, useSyncClickUp } from '../hooks/useClickUp'
+import { useConnectFlodesk, useDisconnectFlodesk } from '../hooks/useFlodesk'
+import { useConnectCanva, useDisconnectCanva } from '../hooks/useCanva'
 
 function useConnectGoogle() {
   return useMutation({
@@ -11,12 +16,9 @@ function useConnectGoogle() {
       const { data } = await api.get<{ data: { authUrl: string } }>('/auth/google/connect')
       return data.data.authUrl
     },
-    onSuccess: (authUrl) => {
-      window.location.href = authUrl
-    },
+    onSuccess: (authUrl) => { window.location.href = authUrl },
   })
 }
-
 function useDisconnectGoogle() {
   const qc = useQueryClient()
   return useMutation({
@@ -24,19 +26,15 @@ function useDisconnectGoogle() {
     onSuccess:  () => qc.invalidateQueries({ queryKey: ['profile'] }),
   })
 }
-
 function useConnectOutlook() {
   return useMutation({
     mutationFn: async () => {
       const { data } = await api.get<{ data: { authUrl: string } }>('/auth/microsoft/connect')
       return data.data.authUrl
     },
-    onSuccess: (authUrl) => {
-      window.location.href = authUrl
-    },
+    onSuccess: (authUrl) => { window.location.href = authUrl },
   })
 }
-
 function useDisconnectOutlook() {
   const qc = useQueryClient()
   return useMutation({
@@ -45,179 +43,453 @@ function useDisconnectOutlook() {
   })
 }
 
-interface IntegrationCardProps {
-  icon:        React.ReactNode
-  iconBg:      string
-  title:       string
-  description: string
-  isLoading:   boolean
-  isConnected: boolean
-  connectLabel: string
-  onConnect:   () => void
-  onDisconnect: () => void
-  connectPending:    boolean
-  disconnectPending: boolean
-  extraAction?: React.ReactNode
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
+function BrandIcon({ src, alt }: { src: string; alt: string }) {
+  return <img src={src} alt={alt} className="w-7 h-7 object-contain" />
 }
 
-function IntegrationCard({
-  icon, iconBg, title, description,
-  isLoading, isConnected,
-  connectLabel, onConnect, onDisconnect,
-  connectPending, disconnectPending,
-  extraAction,
-}: IntegrationCardProps) {
+// ── Toggle ────────────────────────────────────────────────────────────────────
+
+function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
+  return (
+    <button
+      role="switch"
+      aria-checked={checked}
+      onClick={onChange}
+      disabled={disabled}
+      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
+        checked ? 'bg-[#6366F1]' : 'bg-[#D0D5DD] dark:bg-[#3D4258]'
+      }`}
+    >
+      <span
+        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform duration-200 ${
+          checked ? 'translate-x-4' : 'translate-x-0.5'
+        }`}
+      />
+    </button>
+  )
+}
+
+// ── Integration Card ──────────────────────────────────────────────────────────
+
+type Category = 'all' | 'productivity' | 'communication' | 'design'
+
+interface IntegrationDef {
+  id:          string
+  icon:        React.ReactNode
+  title:       string
+  description: string
+  category:    Category
+  isConnected: boolean
+  isLoading:   boolean
+  connectPending:    boolean
+  disconnectPending: boolean
+  onConnect:   () => void
+  onDisconnect: () => void
+  extraAction?: React.ReactNode
+  learnMoreUrl?: string
+  // Flodesk: API key flow
+  apiKeyFlow?: boolean
+  onApiKeyConnect?: (key: string) => void
+}
+
+function IntegrationCard(props: IntegrationDef) {
   const [confirmDisconnect, setConfirmDisconnect] = useState(false)
+  const [showApiInput, setShowApiInput]           = useState(false)
+  const [apiKey, setApiKey]                       = useState('')
+
+  const pending = props.connectPending || props.disconnectPending
+
+  function handleToggle() {
+    if (props.isLoading || pending) return
+    if (props.isConnected) {
+      if (confirmDisconnect) {
+        props.onDisconnect()
+        setConfirmDisconnect(false)
+      } else {
+        setConfirmDisconnect(true)
+      }
+    } else {
+      if (props.apiKeyFlow) {
+        setShowApiInput(true)
+      } else {
+        props.onConnect()
+      }
+    }
+  }
+
+  function handleApiKeySave() {
+    if (!apiKey.trim()) return
+    props.onApiKeyConnect?.(apiKey.trim())
+    setApiKey('')
+    setShowApiInput(false)
+  }
 
   return (
-    <div className="card p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
-            {icon}
+    <div className="bg-white dark:bg-[#13141C] border border-[#EAECF0] dark:border-[#2A2B35] rounded-2xl flex flex-col overflow-hidden hover:shadow-md dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-shadow duration-200">
+      {/* Card body */}
+      <div className="p-5 flex-1">
+        {/* Top row: icon + toggle */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="w-11 h-11 flex items-center justify-center">
+            {props.icon}
           </div>
-          <div>
-            <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
-            <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5 max-w-sm">{description}</p>
-            {isConnected && (
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 size={13} className="text-[#027A48] dark:text-[#34D399]" />
-                  <span className="text-[12px] font-semibold text-[#027A48] dark:text-[#34D399]">Connected</span>
-                </div>
-                {extraAction}
+          <div className="flex flex-col items-end gap-1">
+            {props.isLoading || pending ? (
+              <Loader2 size={16} className="animate-spin text-[#98A2B3] mt-1" />
+            ) : (
+              <Toggle
+                checked={props.isConnected}
+                onChange={handleToggle}
+                disabled={props.isLoading || pending}
+              />
+            )}
+            {confirmDisconnect && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <button
+                  onClick={() => setConfirmDisconnect(false)}
+                  className="text-[11px] text-[#667085] hover:text-[#344054] dark:text-[#8B92A8] dark:hover:text-[#C2C8D8] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { props.onDisconnect(); setConfirmDisconnect(false) }}
+                  disabled={props.disconnectPending}
+                  className="flex items-center gap-1 text-[11px] font-semibold text-[#D92D20] dark:text-red-400 disabled:opacity-50"
+                >
+                  {props.disconnectPending ? <Loader2 size={10} className="animate-spin" /> : <AlertCircle size={10} />}
+                  Confirm
+                </button>
               </div>
             )}
           </div>
         </div>
 
-        <div className="shrink-0">
-          {isLoading ? (
-            <div className="w-8 h-8 flex items-center justify-center">
-              <Loader2 size={16} className="animate-spin text-[#98A2B3]" />
-            </div>
-          ) : isConnected ? (
-            confirmDisconnect ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setConfirmDisconnect(false)}
-                  className="text-[12px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => { onDisconnect(); setConfirmDisconnect(false) }}
-                  disabled={disconnectPending}
-                  className="px-3 py-1.5 rounded-lg bg-[#FEF3F2] dark:bg-red-950/40 text-[#D92D20] dark:text-red-400 text-[12px] font-semibold hover:bg-[#FEE2E2] dark:hover:bg-red-950/60 transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                >
-                  {disconnectPending ? <Loader2 size={12} className="animate-spin" /> : <AlertCircle size={12} />}
-                  Confirm disconnect
-                </button>
-              </div>
-            ) : (
+        {/* Title + description */}
+        <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-1">{props.title}</p>
+        <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] leading-relaxed">{props.description}</p>
+
+        {/* Connected badge */}
+        {props.isConnected && (
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399] text-[11px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#12B76A] dark:bg-[#34D399]" />
+              Connected
+            </span>
+            {props.extraAction}
+          </div>
+        )}
+
+        {/* API key input (Flodesk) */}
+        {showApiInput && !props.isConnected && (
+          <div className="mt-3 space-y-2">
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleApiKeySave()}
+              placeholder="Paste your API key"
+              className="w-full px-3 py-2 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] bg-[#F9FAFB] dark:bg-[#1E1F2B] text-[12px] text-[#101828] dark:text-[#ECEEF3] placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1]"
+              autoFocus
+            />
+            <div className="flex gap-2">
               <button
-                onClick={() => setConfirmDisconnect(true)}
-                className="px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
+                onClick={handleApiKeySave}
+                disabled={props.connectPending || !apiKey.trim()}
+                className="flex-1 py-1.5 rounded-lg bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5"
               >
-                Disconnect
+                {props.connectPending ? <Loader2 size={12} className="animate-spin" /> : null}
+                Save
               </button>
-            )
-          ) : (
-            <button
-              onClick={onConnect}
-              disabled={connectPending}
-              className="px-4 py-1.5 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-60 flex items-center gap-1.5"
-            >
-              {connectPending ? <Loader2 size={12} className="animate-spin" /> : null}
-              {connectLabel}
-            </button>
-          )}
-        </div>
+              <button
+                onClick={() => { setShowApiInput(false); setApiKey('') }}
+                className="px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2B] transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#EAECF0] dark:border-[#2A2B35] px-5 py-3">
+        {props.learnMoreUrl ? (
+          <a
+            href={props.learnMoreUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6366F1] dark:text-[#818CF8] hover:text-[#4F46E5] dark:hover:text-[#A5B4FC] transition-colors"
+          >
+            View integration
+            <ExternalLink size={11} />
+          </a>
+        ) : (
+          <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258] select-none">View integration</span>
+        )}
       </div>
     </div>
   )
 }
 
-function ClickUpIcon() {
+// ── Tab filter ────────────────────────────────────────────────────────────────
+
+// ── Request Integration Modal ─────────────────────────────────────────────────
+
+function RequestIntegrationModal({ onClose }: { onClose: () => void }) {
+  const [tool, setTool]         = useState('')
+  const [useCase, setUseCase]   = useState('')
+  const [submitted, setSubmitted] = useState(false)
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!tool.trim()) return
+    const subject = encodeURIComponent(`Integration Request: ${tool.trim()}`)
+    const body    = encodeURIComponent(
+      `Hi Pakka team,\n\nI'd like to request an integration with: ${tool.trim()}\n\nUse case:\n${useCase.trim() || 'Not specified'}\n\nThanks!`
+    )
+    window.open(`mailto:support@pakka.in?subject=${subject}&body=${body}`)
+    setSubmitted(true)
+  }
+
   return (
-    <svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2.667 23.111l4.31-3.288c2.25 3.038 4.643 4.421 7.254 4.421 2.598 0 4.964-1.372 7.181-4.384l4.343 3.244C22.697 27.42 19.381 29.333 14.23 29.333c-5.163 0-8.512-1.94-11.563-6.222z" fill="#8930FD"/>
-      <path d="M14.218 2.667l-9.44 8.63 3.045 3.332 6.395-5.847 6.36 5.836 3.059-3.321-9.419-8.63z" fill="#49CCF9"/>
-    </svg>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white dark:bg-[#13141C] rounded-2xl shadow-2xl w-full max-w-md p-6 border border-[#EAECF0] dark:border-[#2A2B35]">
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <h3 className="text-[16px] font-bold text-[#101828] dark:text-[#ECEEF3]">Request an integration</h3>
+            <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Tell us which tool you want connected to Pakka.</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2B] transition-colors">
+            <X size={16} className="text-[#667085]" />
+          </button>
+        </div>
+
+        {submitted ? (
+          <div className="text-center py-6">
+            <div className="w-12 h-12 rounded-full bg-[#ECFDF3] dark:bg-emerald-950/40 flex items-center justify-center mx-auto mb-3">
+              <Send size={20} className="text-[#027A48] dark:text-[#34D399]" />
+            </div>
+            <p className="text-[14px] font-semibold text-[#101828] dark:text-[#ECEEF3]">Request sent!</p>
+            <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-1">We'll review your request and get back to you.</p>
+            <button
+              onClick={onClose}
+              className="mt-4 px-4 py-2 rounded-lg bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#4F46E5] transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1.5">
+                Tool name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={tool}
+                onChange={(e) => setTool(e.target.value)}
+                placeholder="e.g. Notion, Zapier, Stripe..."
+                className="w-full px-3 py-2.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] bg-[#F9FAFB] dark:bg-[#1E1F2B] text-[13px] text-[#101828] dark:text-[#ECEEF3] placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-colors"
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1.5">
+                How would you use it? <span className="text-[#98A2B3] font-normal">(optional)</span>
+              </label>
+              <textarea
+                value={useCase}
+                onChange={(e) => setUseCase(e.target.value)}
+                placeholder="Describe your use case..."
+                rows={3}
+                className="w-full px-3 py-2.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] bg-[#F9FAFB] dark:bg-[#1E1F2B] text-[13px] text-[#101828] dark:text-[#ECEEF3] placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] transition-colors resize-none"
+              />
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-2.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2B] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!tool.trim()}
+                className="flex-1 py-2.5 rounded-lg bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#4F46E5] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Send size={13} />
+                Send request
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
   )
 }
 
+const TABS: { id: Category | 'all'; label: string }[] = [
+  { id: 'all',           label: 'View all' },
+  { id: 'productivity',  label: 'Productivity' },
+  { id: 'communication', label: 'Communication' },
+  { id: 'design',        label: 'Design' },
+]
+
+// ── Main component ────────────────────────────────────────────────────────────
+
 export default function IntegrationsTab() {
+  const [activeTab, setActiveTab]         = useState<Category | 'all'>('all')
+  const [showRequestModal, setShowRequestModal] = useState(false)
+
   const { data: profile, isLoading } = useProfile()
-  const connectGoogle    = useConnectGoogle()
-  const disconnectGoogle = useDisconnectGoogle()
+  const connectGoogle     = useConnectGoogle()
+  const disconnectGoogle  = useDisconnectGoogle()
   const connectOutlook    = useConnectOutlook()
   const disconnectOutlook = useDisconnectOutlook()
   const connectClickUp    = useConnectClickUp()
   const disconnectClickUp = useDisconnectClickUp()
   const syncClickUp       = useSyncClickUp()
+  const connectFlodesk    = useConnectFlodesk()
+  const disconnectFlodesk = useDisconnectFlodesk()
+  const connectCanva      = useConnectCanva()
+  const disconnectCanva   = useDisconnectCanva()
+
+  const integrations: IntegrationDef[] = [
+    {
+      id:          'google',
+      icon:        <BrandIcon src="/brand-icons/google-calendar.svg" alt="Google Calendar" />,
+      title:       'Google Calendar',
+      description: 'Auto-generate Google Meet links and send calendar invites to clients when scheduling calls.',
+      category:    'productivity',
+      isConnected: profile?.googleCalendarConnected ?? false,
+      isLoading,
+      connectPending:    connectGoogle.isPending,
+      disconnectPending: disconnectGoogle.isPending,
+      onConnect:   () => connectGoogle.mutate(),
+      onDisconnect: () => disconnectGoogle.mutate(),
+      learnMoreUrl: 'https://calendar.google.com',
+    },
+    {
+      id:          'outlook',
+      icon:        <BrandIcon src={outlookSvg} alt="Outlook" />,
+      title:       'Outlook Calendar',
+      description: 'Auto-generate Microsoft Teams links and send calendar invites. Connects via your Microsoft 365 account.',
+      category:    'productivity',
+      isConnected: profile?.outlookConnected ?? false,
+      isLoading,
+      connectPending:    connectOutlook.isPending,
+      disconnectPending: disconnectOutlook.isPending,
+      onConnect:   () => connectOutlook.mutate(),
+      onDisconnect: () => disconnectOutlook.mutate(),
+      learnMoreUrl: 'https://outlook.live.com/calendar',
+    },
+    {
+      id:          'clickup',
+      icon:        <BrandIcon src="/brand-icons/icons8-clickup.svg" alt="ClickUp" />,
+      title:       'ClickUp',
+      description: 'Import ClickUp lists as projects, sync time entries, and pull workspace members as clients.',
+      category:    'productivity',
+      isConnected: profile?.clickUpConnected ?? false,
+      isLoading,
+      connectPending:    connectClickUp.isPending,
+      disconnectPending: disconnectClickUp.isPending,
+      onConnect:   () => connectClickUp.mutate(),
+      onDisconnect: () => disconnectClickUp.mutate(),
+      extraAction: (
+        <button
+          onClick={() => syncClickUp.mutate()}
+          disabled={syncClickUp.isPending}
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6366F1] dark:text-[#818CF8] hover:text-[#4F46E5] transition-colors disabled:opacity-50"
+        >
+          {syncClickUp.isPending ? <Loader2 size={10} className="animate-spin" /> : <RefreshCw size={10} />}
+          {syncClickUp.isPending ? 'Syncing…' : 'Sync Now'}
+        </button>
+      ),
+      learnMoreUrl: 'https://clickup.com',
+    },
+    {
+      id:          'flodesk',
+      icon:        <BrandIcon src={flodeskSvg} alt="Flodesk" />,
+      title:       'Flodesk',
+      description: 'Sync clients, leads, and paying customers to Flodesk subscriber segments for email marketing.',
+      category:    'communication',
+      isConnected: profile?.flodeskConnected ?? false,
+      isLoading,
+      connectPending:    connectFlodesk.isPending,
+      disconnectPending: disconnectFlodesk.isPending,
+      onConnect:   () => {},
+      onDisconnect: () => disconnectFlodesk.mutate(),
+      apiKeyFlow:  true,
+      onApiKeyConnect: (key) => connectFlodesk.mutate(key),
+      learnMoreUrl: 'https://flodesk.com',
+    },
+    {
+      id:          'canva',
+      icon:        <BrandIcon src={canvaSvg} alt="Canva" />,
+      title:       'Canva',
+      description: 'Browse and attach your Canva designs directly inside proposals and contracts.',
+      category:    'design',
+      isConnected: profile?.canvaConnected ?? false,
+      isLoading,
+      connectPending:    connectCanva.isPending,
+      disconnectPending: disconnectCanva.isPending,
+      onConnect:   () => connectCanva.mutate(),
+      onDisconnect: () => disconnectCanva.mutate(),
+      learnMoreUrl: 'https://canva.com',
+    },
+  ]
+
+  const filtered = activeTab === 'all'
+    ? integrations
+    : integrations.filter((i) => i.category === activeTab)
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Integrations</h3>
-        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Connect third-party services to enhance your workflow.</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Integrations and connected apps</h3>
+          <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Supercharge your workflow and connect the tools you use every day.</p>
+        </div>
+        <button
+          onClick={() => setShowRequestModal(true)}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2B] transition-colors"
+        >
+          + Request integration
+        </button>
       </div>
 
-      <IntegrationCard
-        icon={<CalendarDays size={18} className="text-[#027A48] dark:text-[#34D399]" />}
-        iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40"
-        title="Google Calendar"
-        description="Auto-generate Google Meet links and send calendar invites to clients when scheduling calls from leads or client drawers."
-        isLoading={isLoading}
-        isConnected={profile?.googleCalendarConnected ?? false}
-        connectLabel="Connect Google Calendar"
-        onConnect={() => connectGoogle.mutate()}
-        onDisconnect={() => disconnectGoogle.mutate()}
-        connectPending={connectGoogle.isPending}
-        disconnectPending={disconnectGoogle.isPending}
-      />
-
-      <IntegrationCard
-        icon={<Mail size={18} className="text-[#0078D4]" />}
-        iconBg="bg-[#EFF6FF] dark:bg-blue-950/40"
-        title="Outlook Calendar"
-        description="Auto-generate Microsoft Teams meeting links and send calendar invites to clients when scheduling calls. Connects via your Microsoft 365 account."
-        isLoading={isLoading}
-        isConnected={profile?.outlookConnected ?? false}
-        connectLabel="Connect Outlook"
-        onConnect={() => connectOutlook.mutate()}
-        onDisconnect={() => disconnectOutlook.mutate()}
-        connectPending={connectOutlook.isPending}
-        disconnectPending={disconnectOutlook.isPending}
-      />
-
-      <IntegrationCard
-        icon={<ClickUpIcon />}
-        iconBg="bg-[#F3EEFF] dark:bg-purple-950/40"
-        title="ClickUp"
-        description="Import your ClickUp lists as projects, sync time entries, and pull workspace members as clients. One-click manual sync keeps your data up to date."
-        isLoading={isLoading}
-        isConnected={profile?.clickUpConnected ?? false}
-        connectLabel="Connect ClickUp"
-        onConnect={() => connectClickUp.mutate()}
-        onDisconnect={() => disconnectClickUp.mutate()}
-        connectPending={connectClickUp.isPending}
-        disconnectPending={disconnectClickUp.isPending}
-        extraAction={
+      {/* Tabs */}
+      <div className="flex items-center gap-1 border-b border-[#EAECF0] dark:border-[#2A2B35]">
+        {TABS.map((tab) => (
           <button
-            onClick={() => syncClickUp.mutate()}
-            disabled={syncClickUp.isPending}
-            className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6941C6] dark:text-[#A78BFA] hover:text-[#53389E] dark:hover:text-[#C4B5FD] transition-colors disabled:opacity-50"
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-3 py-2 text-[13px] font-medium transition-colors border-b-2 -mb-px ${
+              activeTab === tab.id
+                ? 'border-[#6366F1] text-[#6366F1] dark:text-[#818CF8] dark:border-[#818CF8]'
+                : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]'
+            }`}
           >
-            {syncClickUp.isPending
-              ? <Loader2 size={12} className="animate-spin" />
-              : <RefreshCw size={12} />
-            }
-            {syncClickUp.isPending ? 'Syncing…' : 'Sync Now'}
+            {tab.label}
           </button>
-        }
-      />
+        ))}
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filtered.map((integration) => (
+          <IntegrationCard key={integration.id} {...integration} />
+        ))}
+      </div>
+
+      {showRequestModal && (
+        <RequestIntegrationModal onClose={() => setShowRequestModal(false)} />
+      )}
     </div>
   )
 }
