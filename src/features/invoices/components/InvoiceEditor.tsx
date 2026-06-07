@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { invoiceFormSchema, RECURRENCE_CYCLE_LABELS, type InvoiceFormData, type Invoice } from '../schemas/invoice.schema'
 import { useCreateInvoice, useUpdateInvoice, useSendInvoice, useMarkPaid } from '../hooks/useInvoices'
 import RecordPaymentModal from './RecordPaymentModal'
+import InvoiceFilesPanel from './InvoiceFilesPanel'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 
@@ -493,6 +494,13 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
 
         </div>
       </div>
+
+      {/* Deliverables */}
+      {invoice && invoice.status !== 'DRAFT' && (
+        <div className="max-w-3xl mx-auto px-6 pb-6 pt-2 w-full">
+          <InvoiceFilesPanel invoice={invoice} />
+        </div>
+      )}
 
       {/* Action bar */}
       <div className="shrink-0 border-t border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] px-6 py-3 flex items-center justify-between gap-3">

@@ -2,7 +2,6 @@ import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useInvoice } from '@/features/invoices/hooks/useInvoices'
 import InvoiceEditor from '@/features/invoices/components/InvoiceEditor'
-import InvoiceFilesPanel from '@/features/invoices/components/InvoiceFilesPanel'
 import type { Invoice } from '@/features/invoices/schemas/invoice.schema'
 import { useProject } from '@/features/projects/hooks/useProjects'
 
@@ -75,21 +74,13 @@ export default function InvoiceEditorPage() {
 
       {/* Editor takes the available height; deliverables panel scrolls below on non-draft invoices */}
       <div className="flex-1 overflow-y-auto">
-        <div className={isNew || !invoice || invoice.status === 'DRAFT' ? 'h-full' : ''}>
-          <InvoiceEditor
-            invoice={!isNew ? invoice : undefined}
-            defaultProjectId={isNew ? urlProjectId : undefined}
-            defaultClientId={isNew ? urlClientId : undefined}
-            onSaved={handleSaved}
-            onDiscard={() => effectiveProjectId ? navigate(`/app/projects/${effectiveProjectId}`) : navigate('/app/invoices')}
-          />
-        </div>
-
-        {!isNew && invoice && invoice.status !== 'DRAFT' && (
-          <div className="max-w-3xl mx-auto px-6 pb-8 pt-2">
-            <InvoiceFilesPanel invoice={invoice} />
-          </div>
-        )}
+        <InvoiceEditor
+          invoice={!isNew ? invoice : undefined}
+          defaultProjectId={isNew ? urlProjectId : undefined}
+          defaultClientId={isNew ? urlClientId : undefined}
+          onSaved={handleSaved}
+          onDiscard={() => effectiveProjectId ? navigate(`/app/projects/${effectiveProjectId}`) : navigate('/app/invoices')}
+        />
       </div>
     </div>
   )
