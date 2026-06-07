@@ -1,19 +1,7 @@
 import { useState } from 'react'
 import { X, Sparkles, Loader2, Zap, Check, ChevronRight, AlertCircle, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
-import { useGenerateAutomation, useCreateFromAI } from '../hooks/useAutomations'
-
-interface GeneratedRule {
-  name:          string
-  description:   string
-  category:      string
-  triggerType:   string
-  triggerConfig: Record<string, unknown>
-  actionType:    string
-  actionConfig:  Record<string, unknown>
-  delayValue:    number
-  delayUnit:     string
-}
+import { useGenerateAutomation, useCreateFromAI, type GeneratedRule } from '../hooks/useAutomations'
 
 const TRIGGER_LABELS: Record<string, string> = {
   'lead.created':       'New lead created',

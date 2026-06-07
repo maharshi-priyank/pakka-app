@@ -74,10 +74,22 @@ export function useToggleAutomation() {
   })
 }
 
+export interface GeneratedRule {
+  name:          string
+  description:   string
+  category:      string
+  triggerType:   string
+  triggerConfig: Record<string, unknown>
+  actionType:    string
+  actionConfig:  Record<string, unknown>
+  delayValue:    number
+  delayUnit:     string
+}
+
 export function useGenerateAutomation() {
   return useMutation({
     mutationFn: async (prompt: string) => {
-      const { data } = await api.post<{ data: { rules: AutomationRule[] } }>('/automations/ai-generate', { prompt })
+      const { data } = await api.post<{ data: { rules: GeneratedRule[] } }>('/automations/ai-generate', { prompt })
       return data.data.rules
     },
   })
