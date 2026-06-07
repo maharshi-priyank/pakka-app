@@ -12,6 +12,8 @@ import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { useClient, useUpdateClient, useRegeneratePortalToken } from '@/features/clients/hooks/useClients'
 import type { ClientProject } from '@/features/clients/hooks/useClients'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
+import ClientNotesTab from '@/features/clients/components/ClientNotesTab'
+import ClientAttachmentsTab from '@/features/clients/components/ClientAttachmentsTab'
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT:     'bg-[#F2F4F7] dark:bg-[#21222D] text-[#344054] dark:text-[#8B92A8]',
@@ -41,7 +43,7 @@ const SOURCE_LABELS: Record<string, string> = {
   linkedin: 'LinkedIn', cold_outreach: 'Cold outreach', other: 'Other',
 }
 
-type Tab = 'proposals' | 'contracts' | 'invoices' | 'leads' | 'projects' | 'timeline'
+type Tab = 'proposals' | 'contracts' | 'invoices' | 'leads' | 'projects' | 'timeline' | 'notes' | 'attachments'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -173,8 +175,10 @@ export default function ClientPage() {
     { key: 'contracts', label: 'Contracts', count: (client.contracts ?? []).length },
     { key: 'invoices',  label: 'Invoices',  count: (client.invoices  ?? []).length },
     { key: 'leads',     label: 'Leads',     count: leads.length },
-    { key: 'projects',  label: 'Projects',  count: (client.projects  ?? []).length },
-    { key: 'timeline',  label: 'Timeline',  count: (client.proposals ?? []).length + (client.contracts ?? []).length + (client.invoices ?? []).length + leads.length },
+    { key: 'projects',     label: 'Projects',     count: (client.projects  ?? []).length },
+    { key: 'timeline',     label: 'Timeline',     count: (client.proposals ?? []).length + (client.contracts ?? []).length + (client.invoices ?? []).length + leads.length },
+    { key: 'notes',        label: 'Notes',        count: 0 },
+    { key: 'attachments',  label: 'Attachments',  count: 0 },
   ] : []
 
   return (
@@ -374,6 +378,14 @@ export default function ClientPage() {
 
             {activeTab === 'timeline' && (
               <TimelineTab client={client} />
+            )}
+
+            {activeTab === 'notes' && (
+              <ClientNotesTab clientId={client.id} />
+            )}
+
+            {activeTab === 'attachments' && (
+              <ClientAttachmentsTab clientId={client.id} />
             )}
           </div>
 

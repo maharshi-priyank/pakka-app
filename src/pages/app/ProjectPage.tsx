@@ -14,6 +14,7 @@ import {
   type ProjectStatus,
 } from '@/features/projects/hooks/useProjects'
 import ProjectFilesPanel from '@/features/projects/components/ProjectFilesPanel'
+import ProjectNotesTab from '@/features/projects/components/ProjectNotesTab'
 
 const STATUS_COLORS: Record<ProjectStatus, string> = {
   ACTIVE:    'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400',
@@ -205,7 +206,7 @@ function StatCard({ label, value, sub, icon: Icon, accent = false }: {
 
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'time' | 'files'
+type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'time' | 'files' | 'notes'
 
 const TABS: Array<{ value: Tab; label: string }> = [
   { value: 'overview',   label: 'Overview' },
@@ -214,6 +215,7 @@ const TABS: Array<{ value: Tab; label: string }> = [
   { value: 'invoices',   label: 'Invoices' },
   { value: 'time',       label: 'Time & Expenses' },
   { value: 'files',      label: 'Files' },
+  { value: 'notes',      label: 'Notes & Brief' },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -559,6 +561,12 @@ export default function ProjectPage() {
         {tab === 'files' && (
           <div className="max-w-2xl">
             <ProjectFilesPanel projectId={project.id} />
+          </div>
+        )}
+
+        {tab === 'notes' && (
+          <div className="max-w-2xl">
+            <ProjectNotesTab projectId={project.id} brief={project.description ?? null} />
           </div>
         )}
 
