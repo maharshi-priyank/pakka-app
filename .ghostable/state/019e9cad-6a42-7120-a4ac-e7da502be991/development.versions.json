@@ -1,0 +1,16 @@
+{
+  "schema": "ghostable.env-versions.v1",
+  "projectId": "019e9cad-6a42-7120-a4ac-e7da502be991",
+  "environment": "development",
+  "updatedAt": "2026-06-06T11:58:45.057Z",
+  "source": "pull",
+  "versions": {
+    "GOOGLE_CLIENT_ID": 1,
+    "GOOGLE_CLIENT_SECRET": 1,
+    "GOOGLE_REDIRECT_URI": 1,
+    "VITE_API_URL": 1,
+    "VITE_APP_URL": 1,
+    "VITE_SUPABASE_ANON_KEY": 1,
+    "VITE_SUPABASE_URL": 1
+  }
+}
