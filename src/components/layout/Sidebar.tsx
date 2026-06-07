@@ -137,7 +137,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
       </div>
 
       {/* Nav — scrollable */}
-      <div className="flex-1 py-3 px-3 overflow-y-auto min-h-0">
+      <div className="flex-1 py-3 pl-4 pr-3 overflow-y-auto min-h-0">
         {SECTIONS.map((section, si) => {
           const sectionItems = orderedItems.filter(item => section.ids.includes(item.id))
           if (sectionItems.length === 0) return null
@@ -183,7 +183,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
       </div>
 
       {/* Bottom actions */}
-      <div className="border-t border-gray-100 px-3 py-3 space-y-0.5 shrink-0">
+      <div className="border-t border-gray-100 pl-4 pr-3 py-3 space-y-0.5 shrink-0">
         <NavLink
           to="/app/email-templates"
           onClick={onClose}
