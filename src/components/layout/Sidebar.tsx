@@ -221,6 +221,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
           )}
         </NavLink>
 
+        {/* Customise button — disabled until sidebar customisation is ready
         <button
           onClick={() => setCustomizing(true)}
           className="flex items-center gap-3 px-3 py-2 rounded-xl w-full text-[13px] font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-all"
@@ -228,6 +229,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
           <GripVertical size={14} className="text-gray-300 shrink-0" />
           Customise
         </button>
+        */}
 
         <div className="h-px bg-gray-100 my-1.5" />
 
@@ -244,7 +246,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
         </button>
       </div>
 
-      {/* Customise overlay */}
+      {/* Customise overlay — disabled until sidebar customisation is ready
       {customizing && (
         <div className="absolute inset-0 bg-white flex flex-col z-50 border-r border-gray-100">
           <div className="h-[60px] flex items-center justify-between px-5 border-b border-gray-100 shrink-0">
@@ -277,6 +279,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
           </div>
         </div>
       )}
+      */}
     </aside>
   )
 }
