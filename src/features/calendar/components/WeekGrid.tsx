@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react'
 import {
   startOfWeek, addDays, format, parseISO, isSameDay, isToday,
-  getHours, getMinutes, getDay,
+  getHours, getMinutes,
 } from 'date-fns'
 import type { CalendarEvent } from '../types'
 import { EVENT_COLORS } from '../types'
