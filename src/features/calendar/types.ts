@@ -6,7 +6,7 @@ export type CalendarEventType =
 
 export type CalendarEventSource = 'pakka' | 'google' | 'outlook'
 
-export type CalendarView = 'day' | 'week' | 'month'
+export type CalendarView = 'day' | 'week' | 'month' | 'upcoming'
 
 export interface CalendarEvent {
   id:           string

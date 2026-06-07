@@ -2,6 +2,7 @@ import {
   startOfDay,   endOfDay,
   startOfWeek,  endOfWeek,
   startOfMonth, endOfMonth,
+  addDays,
 } from 'date-fns'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
@@ -24,6 +25,8 @@ function getRange(view: CalendarView, cursor: Date): { from: Date; to: Date } {
         to:   endOfWeek(monthEnd,     { weekStartsOn: 1 }),
       }
     }
+    case 'upcoming':
+      return { from: startOfDay(new Date()), to: addDays(startOfDay(new Date()), 30) }
   }
 }
 
