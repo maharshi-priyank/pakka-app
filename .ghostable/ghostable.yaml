@@ -1,0 +1,12 @@
+id: 019e9cad-6a42-7120-a4ac-e7da502be991
+name: Rupway-app
+environments:
+  development:
+    type: development
+  local:
+    type: local
+  production:
+    type: production
+  testing:
+    type: testing
+deployment_provider: other

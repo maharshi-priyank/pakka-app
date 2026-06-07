@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { CalendarDays, CheckCircle2, AlertCircle, Loader2, Mail } from 'lucide-react'
+import { CalendarDays, CheckCircle2, AlertCircle, Loader2, Mail, RefreshCw } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useProfile } from '../hooks/useProfile'
+import { useConnectClickUp, useDisconnectClickUp, useSyncClickUp } from '../hooks/useClickUp'
 
 function useConnectGoogle() {
   return useMutation({
@@ -56,6 +57,7 @@ interface IntegrationCardProps {
   onDisconnect: () => void
   connectPending:    boolean
   disconnectPending: boolean
+  extraAction?: React.ReactNode
 }
 
 function IntegrationCard({
@@ -63,6 +65,7 @@ function IntegrationCard({
   isLoading, isConnected,
   connectLabel, onConnect, onDisconnect,
   connectPending, disconnectPending,
+  extraAction,
 }: IntegrationCardProps) {
   const [confirmDisconnect, setConfirmDisconnect] = useState(false)
 
@@ -77,9 +80,12 @@ function IntegrationCard({
             <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
             <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5 max-w-sm">{description}</p>
             {isConnected && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <CheckCircle2 size={13} className="text-[#027A48] dark:text-[#34D399]" />
-                <span className="text-[12px] font-semibold text-[#027A48] dark:text-[#34D399]">Connected</span>
+              <div className="flex items-center gap-3 mt-2 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 size={13} className="text-[#027A48] dark:text-[#34D399]" />
+                  <span className="text-[12px] font-semibold text-[#027A48] dark:text-[#34D399]">Connected</span>
+                </div>
+                {extraAction}
               </div>
             )}
           </div>
@@ -132,12 +138,24 @@ function IntegrationCard({
   )
 }
 
+function ClickUpIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.667 23.111l4.31-3.288c2.25 3.038 4.643 4.421 7.254 4.421 2.598 0 4.964-1.372 7.181-4.384l4.343 3.244C22.697 27.42 19.381 29.333 14.23 29.333c-5.163 0-8.512-1.94-11.563-6.222z" fill="#8930FD"/>
+      <path d="M14.218 2.667l-9.44 8.63 3.045 3.332 6.395-5.847 6.36 5.836 3.059-3.321-9.419-8.63z" fill="#49CCF9"/>
+    </svg>
+  )
+}
+
 export default function IntegrationsTab() {
   const { data: profile, isLoading } = useProfile()
   const connectGoogle    = useConnectGoogle()
   const disconnectGoogle = useDisconnectGoogle()
   const connectOutlook    = useConnectOutlook()
   const disconnectOutlook = useDisconnectOutlook()
+  const connectClickUp    = useConnectClickUp()
+  const disconnectClickUp = useDisconnectClickUp()
+  const syncClickUp       = useSyncClickUp()
 
   return (
     <div className="space-y-4">
@@ -172,6 +190,33 @@ export default function IntegrationsTab() {
         onDisconnect={() => disconnectOutlook.mutate()}
         connectPending={connectOutlook.isPending}
         disconnectPending={disconnectOutlook.isPending}
+      />
+
+      <IntegrationCard
+        icon={<ClickUpIcon />}
+        iconBg="bg-[#F3EEFF] dark:bg-purple-950/40"
+        title="ClickUp"
+        description="Import your ClickUp lists as projects, sync time entries, and pull workspace members as clients. One-click manual sync keeps your data up to date."
+        isLoading={isLoading}
+        isConnected={profile?.clickUpConnected ?? false}
+        connectLabel="Connect ClickUp"
+        onConnect={() => connectClickUp.mutate()}
+        onDisconnect={() => disconnectClickUp.mutate()}
+        connectPending={connectClickUp.isPending}
+        disconnectPending={disconnectClickUp.isPending}
+        extraAction={
+          <button
+            onClick={() => syncClickUp.mutate()}
+            disabled={syncClickUp.isPending}
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6941C6] dark:text-[#A78BFA] hover:text-[#53389E] dark:hover:text-[#C4B5FD] transition-colors disabled:opacity-50"
+          >
+            {syncClickUp.isPending
+              ? <Loader2 size={12} className="animate-spin" />
+              : <RefreshCw size={12} />
+            }
+            {syncClickUp.isPending ? 'Syncing…' : 'Sync Now'}
+          </button>
+        }
       />
     </div>
   )
