@@ -10,6 +10,7 @@ import { invoiceFormSchema, RECURRENCE_CYCLE_LABELS, type InvoiceFormData, type 
 import { useCreateInvoice, useUpdateInvoice, useSendInvoice, useMarkPaid } from '../hooks/useInvoices'
 import RecordPaymentModal from './RecordPaymentModal'
 import InvoiceFilesPanel from './InvoiceFilesPanel'
+import FieldInfoPopover from '@/features/ai/components/FieldInfoPopover'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 
@@ -190,7 +191,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
                 <span>Description</span>
                 <span className="text-right">Qty</span>
                 <span className="text-right">Rate ({currencySymbol})</span>
-                <span className="text-right">GST %</span>
+                <span className="text-right flex items-center justify-end gap-1">GST % <FieldInfoPopover field="gstRate" /></span>
                 <span />
               </div>
 
@@ -358,7 +359,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
               </div>
             ) : (
               <div>
-                <label className="form-label">GST type</label>
+                <label className="form-label flex items-center gap-1">GST type <FieldInfoPopover field="gstType" /></label>
                 <Controller
                   control={control}
                   name="gstType"
@@ -374,7 +375,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
             )}
 
             <div>
-              <label className="form-label">TDS rate (%)</label>
+              <label className="form-label flex items-center gap-1">TDS rate (%) <FieldInfoPopover field="tdsRate" /></label>
               <input
                 {...register('tdsRate', { valueAsNumber: true })}
                 disabled={!canEdit}

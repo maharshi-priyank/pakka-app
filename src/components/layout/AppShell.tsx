@@ -4,6 +4,7 @@ import Sidebar from './Sidebar'
 import BottomNav from './BottomNav'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { SidebarContext } from '@/contexts/SidebarContext'
+import FloatingAssistant from '@/features/ai/components/FloatingAssistant'
 
 const OnboardingWizard = lazy(() => import('@/features/onboarding/OnboardingWizard'))
 
@@ -56,6 +57,9 @@ export default function AppShell() {
             <OnboardingWizard />
           </Suspense>
         )}
+
+        {/* ── AI floating assistant ─────────────────────────────── */}
+        <FloatingAssistant />
       </div>
     </SidebarContext.Provider>
   )
