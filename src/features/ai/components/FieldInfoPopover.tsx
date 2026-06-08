@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { Info } from 'lucide-react'
 
 type Field = 'gstType' | 'tdsRate' | 'gstRate'
 
-const CONTENT: Record<Field, { title: string; body: JSX.Element; aiQuestion: string }> = {
+const CONTENT: Record<Field, { title: string; body: ReactNode; aiQuestion: string }> = {
   gstType: {
     title: 'What is GST Type?',
     aiQuestion: 'When should I use IGST vs CGST+SGST on my invoice?',
