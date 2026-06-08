@@ -3,7 +3,6 @@ import { supabase } from '@/lib/supabase'
 import { LogOut, ChevronDown, Sun, Moon, Search, PanelLeft } from 'lucide-react'
 import NotificationBell from '@/features/notifications/components/NotificationBell'
 import CalendarBell     from '@/features/meetings/components/CalendarBell'
-import { generateInitials } from '@/lib/utils'
 import { useThemeToggle } from '@/hooks/useThemeToggle'
 
 interface Props {
@@ -16,8 +15,7 @@ export default function Topbar({ onMenuToggle, onDesktopSidebarToggle, desktopSi
   const { user } = useAuthStore()
   const { isDark, toggle } = useThemeToggle()
 
-  const name     = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
-  const initials = generateInitials(name)
+  const name      = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
   const firstName = name.split(' ')[0]
 
   async function handleSignOut() {

@@ -85,10 +85,9 @@ function loadOrder(): string[] {
 
 interface Props {
   onClose?: () => void
-  onCollapse?: () => void
 }
 
-export default function Sidebar({ onClose, onCollapse }: Props) {
+export default function Sidebar({ onClose }: Props) {
   const [order] = useState<string[]>(loadOrder)
   // const [customizing, setCustomizing] = useState(false) // disabled — Customise feature not ready
 

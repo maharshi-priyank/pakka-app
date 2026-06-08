@@ -22,7 +22,7 @@ export default function AppShell() {
         {/* ── Desktop sidebar (lg+) ──────────────────────────────── */}
         {desktopSidebarVisible && (
           <div className="hidden lg:block">
-            <Sidebar onCollapse={() => setDesktopSidebarVisible(false)} />
+            <Sidebar />
           </div>
         )}
 
