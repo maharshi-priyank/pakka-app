@@ -22,7 +22,7 @@ function CreateFormModal({ onClose }: CreateModalProps) {
     if (!title.trim()) return
     const form = await mutateAsync({ title: title.trim(), description: desc.trim() || undefined })
     onClose()
-    navigate(`/app/forms/${form.id}`)
+    navigate(`/forms/${form.id}`)
   }
 
   return (
@@ -132,7 +132,7 @@ function FormCard({ form }: { form: IntakeForm }) {
           {copied ? <><CheckCheck size={13} /> Copied!</> : <><Copy size={13} /> Copy link</>}
         </button>
         <button
-          onClick={() => navigate(`/app/forms/${form.id}`)}
+          onClick={() => navigate(`/forms/${form.id}`)}
           className="flex items-center gap-1.5 text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors ml-auto"
         >
           <Pencil size={12} /> Edit

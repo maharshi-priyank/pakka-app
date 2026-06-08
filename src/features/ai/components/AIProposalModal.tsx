@@ -71,7 +71,7 @@ export default function AIProposalModal({ onClose, defaultLeadId }: Props) {
       })
       toast.success('Draft proposal created')
       onClose()
-      navigate(`/app/proposals/${proposal.id}`)
+      navigate(`/proposals/${proposal.id}`)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Could not create proposal'
       toast.error(msg)

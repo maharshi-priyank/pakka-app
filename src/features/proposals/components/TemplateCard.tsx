@@ -126,7 +126,7 @@ export default function TemplateCard({ template, mode, onUse, onPreview, isPrevi
           {mode === 'manage' && !template.isSystem && (
             <>
               <button
-                onClick={e => { e.stopPropagation(); navigate(`/app/proposals/templates/${template.id}/edit`) }}
+                onClick={e => { e.stopPropagation(); navigate(`/proposals/templates/${template.id}/edit`) }}
                 className="w-6 h-6 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#6366F1] transition-colors"
                 title="Edit template content"
               >

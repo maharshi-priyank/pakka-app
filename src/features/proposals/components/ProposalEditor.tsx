@@ -307,7 +307,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
           {contractId && (
             <button
               type="button"
-              onClick={() => navigate(`/app/contracts/${contractId}`)}
+              onClick={() => navigate(`/contracts/${contractId}`)}
               className="flex items-center gap-1 text-[12px] font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 shrink-0 transition-colors"
             >
               View contract <ArrowRight size={11} />

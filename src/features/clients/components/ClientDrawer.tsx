@@ -69,7 +69,7 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
           )}
           <div className="flex items-center gap-2 ml-4">
             <button
-              onClick={() => { onClose(); navigate(`/app/clients/${clientId}`) }}
+              onClick={() => { onClose(); navigate(`/clients/${clientId}`) }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#EAECF0] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"
             >
               <ExternalLink size={12} /> Full page

@@ -154,7 +154,7 @@ export function useCreateWorkflow() {
     },
     onSuccess: (wf) => {
       qc.invalidateQueries({ queryKey: ['workflows'] })
-      navigate(`/app/automations/${wf.id}`)
+      navigate(`/automations/${wf.id}`)
     },
   })
 }

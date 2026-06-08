@@ -143,7 +143,7 @@ export default function TemplatePickerModal({ open, onClose, defaultLead, defaul
     if (defaultProjectId) params.set('projectId', defaultProjectId)
     if (defaultClientId)  params.set('clientId',  defaultClientId)
     const qs = params.toString()
-    navigate(`/app/proposals/new${qs ? `?${qs}` : ''}`, { state: { template, lead: defaultLead ?? undefined } })
+    navigate(`/proposals/new${qs ? `?${qs}` : ''}`, { state: { template, lead: defaultLead ?? undefined } })
   }
 
   if (!open) return null

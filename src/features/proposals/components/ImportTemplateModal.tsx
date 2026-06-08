@@ -88,7 +88,7 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
     if (!parsed) return
     const totalAmount = parsed.lineItems.reduce((sum, li) => sum + li.qty * li.rate, 0)
     onClose()
-    navigate('/app/proposals/new', {
+    navigate('/proposals/new', {
       state: {
         template: {
           id:          '__imported__',

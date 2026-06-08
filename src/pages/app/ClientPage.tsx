@@ -186,7 +186,7 @@ export default function ClientPage() {
 
       {/* Back */}
       <button
-        onClick={() => navigate('/app/clients')}
+        onClick={() => navigate('/clients')}
         className="flex items-center gap-1.5 text-[12.5px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors font-medium"
       >
         <ArrowLeft size={14} />
@@ -295,7 +295,7 @@ export default function ClientPage() {
                 {client.proposals.map(p => (
                   <tr
                     key={p.id}
-                    onClick={() => navigate(`/app/proposals/${p.id}`)}
+                    onClick={() => navigate(`/proposals/${p.id}`)}
                     className="group cursor-pointer hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2A] transition-colors"
                   >
                     <td className="px-4 py-3 text-[12.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] group-hover:text-[#6366F1] transition-colors">{p.title}</td>
@@ -316,7 +316,7 @@ export default function ClientPage() {
                 {client.contracts.map(c => (
                   <tr
                     key={c.id}
-                    onClick={() => navigate(`/app/contracts/${c.id}`)}
+                    onClick={() => navigate(`/contracts/${c.id}`)}
                     className="group cursor-pointer hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2A] transition-colors"
                   >
                     <td className="px-4 py-3 text-[12.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] group-hover:text-[#6366F1] transition-colors">{c.title}</td>
@@ -336,7 +336,7 @@ export default function ClientPage() {
                 {client.invoices.map(inv => (
                   <tr
                     key={inv.id}
-                    onClick={() => navigate(`/app/invoices/${inv.id}`)}
+                    onClick={() => navigate(`/invoices/${inv.id}`)}
                     className="group cursor-pointer hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2A] transition-colors"
                   >
                     <td className="px-4 py-3 text-[12.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] group-hover:text-[#6366F1] transition-colors font-mono">{inv.invoiceNumber}</td>
@@ -373,7 +373,7 @@ export default function ClientPage() {
             )}
 
             {activeTab === 'projects' && (
-              <ProjectsTab projects={client.projects ?? []} onNavigate={id => navigate(`/app/projects/${id}`)} />
+              <ProjectsTab projects={client.projects ?? []} onNavigate={id => navigate(`/projects/${id}`)} />
             )}
 
             {activeTab === 'timeline' && (

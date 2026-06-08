@@ -137,7 +137,7 @@ export default function ContractsPage() {
             </p>
           )}
         </div>
-        <button onClick={() => navigate('/app/contracts/new')} className="btn-primary">
+        <button onClick={() => navigate('/contracts/new')} className="btn-primary">
           <Plus size={14} strokeWidth={2.5} />
           New Contract
         </button>
@@ -247,7 +247,7 @@ export default function ContractsPage() {
             {hasSearch ? 'Try a different search term.' : statusFilter === 'ALL' ? 'Create a contract manually or generate one from an accepted proposal.' : 'Try a different filter.'}
           </p>
           {!hasSearch && statusFilter === 'ALL' && (
-            <button onClick={() => navigate('/app/contracts/new')} className="btn-primary mt-4 text-[13px]">
+            <button onClick={() => navigate('/contracts/new')} className="btn-primary mt-4 text-[13px]">
               <Plus size={13} strokeWidth={2.5} /> New Contract
             </button>
           )}
@@ -263,12 +263,12 @@ export default function ContractsPage() {
           sortBy={sortBy}
           sortDir={sortDir}
           onSort={handleSort}
-          onOpen={(c: Contract) => navigate(`/app/contracts/${c.id}`)}
+          onOpen={(c: Contract) => navigate(`/contracts/${c.id}`)}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {displayed.map(c => (
-            <ContractCard key={c.id} contract={c} onClick={(c: Contract) => navigate(`/app/contracts/${c.id}`)} />
+            <ContractCard key={c.id} contract={c} onClick={(c: Contract) => navigate(`/contracts/${c.id}`)} />
           ))}
         </div>
       )}

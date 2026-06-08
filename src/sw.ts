@@ -106,7 +106,7 @@ self.addEventListener('push', (event) => {
     payload = { title: 'ClearWork', body: event.data.text() }
   }
 
-  const { title, body, url = '/app/dashboard', tag, type } = payload
+  const { title, body, url = '/dashboard', tag, type } = payload
 
   event.waitUntil(
     self.registration.showNotification(title, {
@@ -123,7 +123,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const targetUrl = (event.notification.data?.url as string) ?? '/app/dashboard'
+  const targetUrl = (event.notification.data?.url as string) ?? '/dashboard'
 
   event.waitUntil(
     (async () => {

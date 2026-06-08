@@ -41,7 +41,7 @@ export default function ActivityWidget() {
             </span>
             <span className="text-[11px] text-[#667085] dark:text-[#8B92A8] font-medium">Live</span>
           </div>
-          <a href="/app/leads" className="flex items-center gap-1 text-[12.5px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">
+          <a href="/leads" className="flex items-center gap-1 text-[12.5px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">
             View all <ArrowUpRight size={13} strokeWidth={2.5} />
           </a>
         </div>

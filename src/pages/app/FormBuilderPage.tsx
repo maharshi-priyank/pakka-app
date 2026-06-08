@@ -353,7 +353,7 @@ export default function FormBuilderPage() {
     <div className="space-y-5 max-w-[780px]">
       {/* Back */}
       <button
-        onClick={() => navigate('/app/forms')}
+        onClick={() => navigate('/forms')}
         className="flex items-center gap-1.5 text-[12.5px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors font-medium"
       >
         <ArrowLeft size={14} /> Forms

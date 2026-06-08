@@ -259,7 +259,7 @@ export default function ScheduleCallModal({
           <div className="mx-6 mt-4 flex items-start gap-2.5 bg-[#FFFAEB] dark:bg-amber-950/30 border border-[#FEF0C7] dark:border-amber-800/40 rounded-xl px-4 py-3">
             <AlertTriangle size={14} className="text-[#B54708] shrink-0 mt-0.5" />
             <p className="text-[12px] text-[#B54708] dark:text-amber-400">
-              <Link to="/app/settings?tab=integrations" className="font-semibold underline" onClick={onClose}>
+              <Link to="/settings?tab=integrations" className="font-semibold underline" onClick={onClose}>
                 Connect Google Calendar or Outlook
               </Link>{' '}
               in Settings to auto-generate a meeting link when scheduling calls.

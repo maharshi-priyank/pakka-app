@@ -21,7 +21,7 @@ export default function InvoiceEditorPage() {
   const effectiveProjectName = projectFromUrl?.name ?? invoice?.project?.name ?? null
 
   function handleSaved(inv: Invoice) {
-    navigate(`/app/invoices/${inv.id}`, { replace: true })
+    navigate(`/invoices/${inv.id}`, { replace: true })
   }
 
   if (!isNew && isLoading) {
@@ -37,14 +37,14 @@ export default function InvoiceEditorPage() {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] shrink-0">
         <button
-          onClick={() => effectiveProjectId ? navigate(`/app/projects/${effectiveProjectId}`) : navigate('/app/invoices')}
+          onClick={() => effectiveProjectId ? navigate(`/projects/${effectiveProjectId}`) : navigate('/invoices')}
           className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
         >
           <ArrowLeft size={14} strokeWidth={2} />
         </button>
         {effectiveProjectId && effectiveProjectName ? (
           <>
-            <Link to={`/app/projects/${effectiveProjectId}`} className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
+            <Link to={`/projects/${effectiveProjectId}`} className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
               {effectiveProjectName}
             </Link>
             <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
@@ -79,7 +79,7 @@ export default function InvoiceEditorPage() {
           defaultProjectId={isNew ? urlProjectId : undefined}
           defaultClientId={isNew ? urlClientId : undefined}
           onSaved={handleSaved}
-          onDiscard={() => effectiveProjectId ? navigate(`/app/projects/${effectiveProjectId}`) : navigate('/app/invoices')}
+          onDiscard={() => effectiveProjectId ? navigate(`/projects/${effectiveProjectId}`) : navigate('/invoices')}
         />
       </div>
     </div>

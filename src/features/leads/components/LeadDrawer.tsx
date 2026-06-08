@@ -301,7 +301,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
                 <div className="flex items-center gap-2">
                   {lead.clientId && lead.client ? (
                     <Link
-                      to={`/app/clients/${lead.clientId}`}
+                      to={`/clients/${lead.clientId}`}
                       className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-emerald-200 dark:border-emerald-800/50 text-[12px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 transition-colors"
                     >
                       <CheckCircle2 size={13} />

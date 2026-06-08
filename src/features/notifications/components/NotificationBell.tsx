@@ -50,10 +50,10 @@ function NotifIcon({ type }: { type: string }) {
 }
 
 const ENTITY_ROUTES: Record<string, (id: string) => string> = {
-  invoice:  id => `/app/invoices/${id}`,
-  proposal: id => `/app/proposals/${id}`,
-  contract: id => `/app/contracts/${id}`,
-  lead:     () => `/app/leads`,
+  invoice:  id => `/invoices/${id}`,
+  proposal: id => `/proposals/${id}`,
+  contract: id => `/contracts/${id}`,
+  lead:     () => `/leads`,
 }
 
 function NotifRow({ n, onRead, onClose }: { n: AppNotification; onRead: (id: string) => void; onClose: () => void }) {

@@ -86,7 +86,7 @@ export default function ProposalsPage() {
 
   async function handleConvertToContract(p: Proposal) {
     const contract = await convertMutation.mutateAsync(p.id)
-    navigate(`/app/contracts/${contract.id}`)
+    navigate(`/contracts/${contract.id}`)
   }
 
   function handleSort(field: SortField) {
@@ -177,7 +177,7 @@ export default function ProposalsPage() {
             <LayoutTemplate size={14} />
             <span className="hidden sm:inline">From Template</span>
           </button>
-          <button onClick={() => navigate('/app/proposals/new')} className="btn-primary">
+          <button onClick={() => navigate('/proposals/new')} className="btn-primary">
             <Plus size={14} strokeWidth={2.5} />
             New Proposal
           </button>
@@ -298,7 +298,7 @@ export default function ProposalsPage() {
               {hasSearch ? 'Try a different search term.' : statusFilter === 'ALL' ? 'Create your first proposal to get started.' : 'Try a different status filter.'}
             </p>
             {!hasSearch && statusFilter === 'ALL' && (
-              <button onClick={() => navigate('/app/proposals/new')} className="btn-primary mt-4 text-[13px]">
+              <button onClick={() => navigate('/proposals/new')} className="btn-primary mt-4 text-[13px]">
                 <Plus size={13} strokeWidth={2.5} /> New Proposal
               </button>
             )}
@@ -314,7 +314,7 @@ export default function ProposalsPage() {
             sortBy={sortBy}
             sortDir={sortDir}
             onSort={handleSort}
-            onOpen={p => navigate(`/app/proposals/${p.id}`)}
+            onOpen={p => navigate(`/proposals/${p.id}`)}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -322,7 +322,7 @@ export default function ProposalsPage() {
               <ProposalCard
                 key={p.id}
                 proposal={p}
-                onClick={openP => navigate(`/app/proposals/${openP.id}`)}
+                onClick={openP => navigate(`/proposals/${openP.id}`)}
                 onConvertToContract={handleConvertToContract}
                 onSaveAsTemplate={p => setSaveTemplateFor(p)}
               />

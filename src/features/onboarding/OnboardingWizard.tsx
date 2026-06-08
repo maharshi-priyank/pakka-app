@@ -337,9 +337,9 @@ export default function OnboardingWizard() {
             onAction={(dest) => {
               setShowWelcome(false)
               if (dest === 'dashboard') {
-                navigate('/app/dashboard')
+                navigate('/dashboard')
               } else {
-                navigate(`/app/${dest}/new${clientId ? `?clientId=${clientId}` : ''}`)
+                navigate(`/${dest}/new${clientId ? `?clientId=${clientId}` : ''}`)
               }
             }}
           />

@@ -111,7 +111,7 @@ export function useBillEntries() {
       qc.invalidateQueries({ queryKey: [KEY] })
       qc.invalidateQueries({ queryKey: ['invoices'] })
       toast.success('Invoice created from time entries')
-      navigate(`/app/invoices/${invoice.id}`)
+      navigate(`/invoices/${invoice.id}`)
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to create invoice'),
   })

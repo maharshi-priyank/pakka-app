@@ -236,7 +236,7 @@ export default function ProjectPage() {
     setDeleting(true)
     try {
       await deleteProject(id!)
-      navigate('/app/projects')
+      navigate('/projects')
     } finally {
       setDeleting(false)
     }
@@ -258,7 +258,7 @@ export default function ProjectPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <p className="text-[14px] text-[#344054] dark:text-[#C2C8D8] font-semibold">Project not found</p>
-        <button onClick={() => navigate('/app/projects')} className="mt-3 text-[12px] text-[#2563EB] font-medium">
+        <button onClick={() => navigate('/projects')} className="mt-3 text-[12px] text-[#2563EB] font-medium">
           Back to Projects
         </button>
       </div>
@@ -275,7 +275,7 @@ export default function ProjectPage() {
 
       {/* Back */}
       <button
-        onClick={() => navigate('/app/projects')}
+        onClick={() => navigate('/projects')}
         className="flex items-center gap-1.5 text-[12.5px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
       >
         <ArrowLeft size={14} /> Projects
@@ -401,11 +401,11 @@ export default function ProjectPage() {
                 <p className="text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide mb-3">Linked records</p>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {[
-                    { label: 'Proposals',  count: project._count?.proposals ?? 0,   icon: FileText, path: '/app/proposals'  },
-                    { label: 'Contracts',  count: project._count?.contracts ?? 0,   icon: PenLine,  path: '/app/contracts'  },
-                    { label: 'Invoices',   count: project._count?.invoices ?? 0,    icon: Receipt,  path: '/app/invoices'   },
-                    { label: 'Time log',   count: project._count?.timeEntries ?? 0, icon: Clock,    path: `/app/time?projectId=${id}`       },
-                    { label: 'Expenses',   count: project._count?.expenses ?? 0,    icon: Wallet,   path: `/app/expenses?projectId=${id}`   },
+                    { label: 'Proposals',  count: project._count?.proposals ?? 0,   icon: FileText, path: '/proposals'  },
+                    { label: 'Contracts',  count: project._count?.contracts ?? 0,   icon: PenLine,  path: '/contracts'  },
+                    { label: 'Invoices',   count: project._count?.invoices ?? 0,    icon: Receipt,  path: '/invoices'   },
+                    { label: 'Time log',   count: project._count?.timeEntries ?? 0, icon: Clock,    path: `/time?projectId=${id}`       },
+                    { label: 'Expenses',   count: project._count?.expenses ?? 0,    icon: Wallet,   path: `/expenses?projectId=${id}`   },
                   ].map(({ label, count, icon: Icon, path }) => (
                     <Link
                       key={label}
@@ -480,8 +480,8 @@ export default function ProjectPage() {
           <RecordTable
             empty={project.proposals.length === 0}
             emptyLabel="No proposals linked to this project"
-            emptyAction={{ label: 'New Proposal', href: `/app/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-            addAction={{ label: 'New Proposal', href: `/app/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            emptyAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            addAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
           >
             <table className="w-full text-[13px]">
               <thead>
@@ -491,7 +491,7 @@ export default function ProjectPage() {
               </thead>
               <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
                 {project.proposals.map(p => (
-                  <tr key={p.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/app/proposals/${p.id}`)}>
+                  <tr key={p.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/proposals/${p.id}`)}>
                     <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{p.title}</Td>
                     <Td><StatusBadge status={p.status} /></Td>
                     <Td>{formatCurrency(Number(p.totalAmount))}</Td>
@@ -507,8 +507,8 @@ export default function ProjectPage() {
           <RecordTable
             empty={project.contracts.length === 0}
             emptyLabel="No contracts linked to this project"
-            emptyAction={{ label: 'New Contract', href: `/app/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-            addAction={{ label: 'New Contract', href: `/app/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            emptyAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            addAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
           >
             <table className="w-full text-[13px]">
               <thead>
@@ -518,7 +518,7 @@ export default function ProjectPage() {
               </thead>
               <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
                 {project.contracts.map(c => (
-                  <tr key={c.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/app/contracts/${c.id}`)}>
+                  <tr key={c.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/contracts/${c.id}`)}>
                     <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{c.title}</Td>
                     <Td><StatusBadge status={c.status} /></Td>
                     <Td className="text-[#667085] dark:text-[#8B92A8]">{c.sentAt ? formatDate(c.sentAt) : '—'}</Td>
@@ -534,8 +534,8 @@ export default function ProjectPage() {
           <RecordTable
             empty={project.invoices.length === 0}
             emptyLabel="No invoices linked to this project"
-            emptyAction={{ label: 'New Invoice', href: `/app/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-            addAction={{ label: 'New Invoice', href: `/app/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            emptyAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+            addAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
           >
             <table className="w-full text-[13px]">
               <thead>
@@ -545,7 +545,7 @@ export default function ProjectPage() {
               </thead>
               <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
                 {project.invoices.map(inv => (
-                  <tr key={inv.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/app/invoices/${inv.id}`)}>
+                  <tr key={inv.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/invoices/${inv.id}`)}>
                     <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{inv.invoiceNumber}</Td>
                     <Td><StatusBadge status={inv.status} /></Td>
                     <Td>{formatCurrency(Number(inv.total))}</Td>
@@ -577,7 +577,7 @@ export default function ProjectPage() {
               title="Time Entries"
               empty={project.timeEntries.length === 0}
               emptyLabel="No time logged"
-              emptyAction={{ label: 'Log Time', href: `/app/time?projectId=${id}` }}
+              emptyAction={{ label: 'Log Time', href: `/time?projectId=${id}` }}
             >
               <table className="w-full text-[13px]">
                 <thead>
@@ -602,7 +602,7 @@ export default function ProjectPage() {
               title="Expenses"
               empty={project.expenses.length === 0}
               emptyLabel="No expenses logged"
-              emptyAction={{ label: 'Add Expense', href: `/app/expenses?projectId=${id}` }}
+              emptyAction={{ label: 'Add Expense', href: `/expenses?projectId=${id}` }}
             >
               <table className="w-full text-[13px]">
                 <thead>

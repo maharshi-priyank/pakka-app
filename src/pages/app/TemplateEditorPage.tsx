@@ -18,7 +18,7 @@ export default function TemplateEditorPage() {
       {
         onSuccess: () => {
           toast.success('Template saved')
-          navigate('/app/proposals', { state: { tab: 'templates' } })
+          navigate('/proposals', { state: { tab: 'templates' } })
         },
       },
     )
@@ -45,13 +45,13 @@ export default function TemplateEditorPage() {
       {/* Breadcrumb bar */}
       <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] shrink-0">
         <button
-          onClick={() => navigate('/app/proposals', { state: { tab: 'templates' } })}
+          onClick={() => navigate('/proposals', { state: { tab: 'templates' } })}
           className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
         >
           <ArrowLeft size={14} strokeWidth={2} />
         </button>
         <Link
-          to="/app/proposals"
+          to="/proposals"
           state={{ tab: 'templates' }}
           className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
         >
@@ -59,7 +59,7 @@ export default function TemplateEditorPage() {
         </Link>
         <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
         <Link
-          to="/app/proposals"
+          to="/proposals"
           state={{ tab: 'templates' }}
           className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
         >
@@ -75,7 +75,7 @@ export default function TemplateEditorPage() {
         defaultTemplate={template}
         templateMode={{ id: template.id, name: template.name }}
         onSaveTemplate={handleSaveTemplate}
-        onDiscard={() => navigate('/app/proposals', { state: { tab: 'templates' } })}
+        onDiscard={() => navigate('/proposals', { state: { tab: 'templates' } })}
       />
     </div>
   )

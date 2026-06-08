@@ -156,9 +156,9 @@ export function useConvertLeadToClient() {
       qc.invalidateQueries({ queryKey: ['projects'] })
       toast.success(`${result.client.name} added as a client`)
       if (result.project) {
-        navigate(`/app/projects/${result.project.id}`)
+        navigate(`/projects/${result.project.id}`)
       } else {
-        navigate(`/app/clients/${result.client.id}`)
+        navigate(`/clients/${result.client.id}`)
       }
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to convert lead'),

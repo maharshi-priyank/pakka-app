@@ -64,7 +64,7 @@ export default function PrioritiesStrip() {
           title={`${stats!.overdueCount} invoice${stats!.overdueCount !== 1 ? 's' : ''} overdue`}
           sub={`${formatCurrency(stats!.overdueAmount)} pending collection`}
           ctaLabel="View invoices"
-          onClick={() => navigate('/app/invoices')}
+          onClick={() => navigate('/invoices')}
         />
       )}
       {hasProposals && (
@@ -76,7 +76,7 @@ export default function PrioritiesStrip() {
           title={`${stats!.openProposals} proposal${stats!.openProposals !== 1 ? 's' : ''} awaiting response`}
           sub="Sent or viewed by client"
           ctaLabel="Follow up"
-          onClick={() => navigate('/app/proposals')}
+          onClick={() => navigate('/proposals')}
         />
       )}
       {hasMeetings && (
@@ -88,7 +88,7 @@ export default function PrioritiesStrip() {
           title={`${todayMeetings.length} meeting${todayMeetings.length !== 1 ? 's' : ''} today`}
           sub={todayMeetings.map(m => m.title).slice(0, 2).join(' · ')}
           ctaLabel="View meetings"
-          onClick={() => navigate('/app/meetings')}
+          onClick={() => navigate('/meetings')}
         />
       )}
     </div>

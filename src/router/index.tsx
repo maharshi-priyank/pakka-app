@@ -24,7 +24,7 @@ function PublicRoute() {
   const { session, isLoading } = useAuthStore()
 
   if (isLoading) return null
-  if (session) return <Navigate to="/app/dashboard" replace />
+  if (session) return <Navigate to="/dashboard" replace />
 
   return <Outlet />
 }
@@ -32,7 +32,7 @@ function PublicRoute() {
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/app/dashboard" replace />,
+    element: <Navigate to="/dashboard" replace />,
   },
   {
     element: <PublicRoute />,
@@ -100,186 +100,186 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           {
-            path: '/app/dashboard',
+            path: '/dashboard',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/DashboardPage')
               return { Component }
             },
           },
           {
-            path: '/app/leads',
+            path: '/leads',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/LeadsPage')
               return { Component }
             },
           },
           {
-            path: '/app/proposals',
+            path: '/proposals',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ProposalsPage')
               return { Component }
             },
           },
           {
-            path: '/app/proposals/new',
+            path: '/proposals/new',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ProposalEditorPage')
               return { Component }
             },
           },
           {
-            path: '/app/proposals/:id',
+            path: '/proposals/:id',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ProposalEditorPage')
               return { Component }
             },
           },
           {
-            path: '/app/proposals/templates/:id/edit',
+            path: '/proposals/templates/:id/edit',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/TemplateEditorPage')
               return { Component }
             },
           },
           {
-            path: '/app/contracts',
+            path: '/contracts',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ContractsPage')
               return { Component }
             },
           },
           {
-            path: '/app/contracts/new',
+            path: '/contracts/new',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ContractEditorPage')
               return { Component }
             },
           },
           {
-            path: '/app/contracts/:id',
+            path: '/contracts/:id',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ContractEditorPage')
               return { Component }
             },
           },
           {
-            path: '/app/invoices',
+            path: '/invoices',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/InvoicesPage')
               return { Component }
             },
           },
           {
-            path: '/app/invoices/new',
+            path: '/invoices/new',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/InvoiceEditorPage')
               return { Component }
             },
           },
           {
-            path: '/app/invoices/:id',
+            path: '/invoices/:id',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/InvoiceEditorPage')
               return { Component }
             },
           },
           {
-            path: '/app/clients',
+            path: '/clients',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ClientsPage')
               return { Component }
             },
           },
           {
-            path: '/app/clients/:id',
+            path: '/clients/:id',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ClientPage')
               return { Component }
             },
           },
           {
-            path: '/app/calendar',
+            path: '/calendar',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/CalendarPage')
               return { Component }
             },
           },
           {
-            path: '/app/meetings',
-            element: <Navigate to="/app/calendar" replace />,
+            path: '/meetings',
+            element: <Navigate to="/calendar" replace />,
           },
           {
-            path: '/app/forms',
+            path: '/forms',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/FormsPage')
               return { Component }
             },
           },
           {
-            path: '/app/forms/:id',
+            path: '/forms/:id',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/FormBuilderPage')
               return { Component }
             },
           },
           {
-            path: '/app/automations',
+            path: '/automations',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/AutomationsPage')
               return { Component }
             },
           },
           {
-            path: '/app/automations/:id',
+            path: '/automations/:id',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/WorkflowBuilderPage')
               return { Component }
             },
           },
           {
-            path: '/app/reports',
+            path: '/reports',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ReportsPage')
               return { Component }
             },
           },
           {
-            path: '/app/time',
+            path: '/time',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/TimePage')
               return { Component }
             },
           },
           {
-            path: '/app/expenses',
+            path: '/expenses',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ExpensesPage')
               return { Component }
             },
           },
           {
-            path: '/app/settings',
+            path: '/settings',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/SettingsPage')
               return { Component }
             },
           },
           {
-            path: '/app/projects',
+            path: '/projects',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ProjectsPage')
               return { Component }
             },
           },
           {
-            path: '/app/projects/:id',
+            path: '/projects/:id',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ProjectPage')
               return { Component }
             },
           },
           {
-            path: '/app/email-templates',
+            path: '/email-templates',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/EmailTemplatesPage')
               return { Component }

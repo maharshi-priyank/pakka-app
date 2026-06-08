@@ -109,7 +109,7 @@ function WorkflowCard({ wf }: { wf: AutomationWorkflow }) {
       {/* Actions */}
       <div className="flex items-center gap-2 pt-1 border-t border-[#F2F4F7] dark:border-[#26283A]">
         <button
-          onClick={() => navigate(`/app/automations/${wf.id}`)}
+          onClick={() => navigate(`/automations/${wf.id}`)}
           className="flex items-center gap-1.5 text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:text-[#6366F1] dark:hover:text-[#818CF8] transition-colors"
         >
           <Edit2 size={12} /> Edit

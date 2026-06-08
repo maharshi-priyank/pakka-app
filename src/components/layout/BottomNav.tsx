@@ -9,21 +9,21 @@ import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 
 const PRIMARY_TABS = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/app/dashboard' },
-  { icon: Users,           label: 'Leads',     href: '/app/leads' },
-  { icon: FileText,        label: 'Proposals', href: '/app/proposals' },
-  { icon: Receipt,         label: 'Invoices',  href: '/app/invoices' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+  { icon: Users,           label: 'Leads',     href: '/leads' },
+  { icon: FileText,        label: 'Proposals', href: '/proposals' },
+  { icon: Receipt,         label: 'Invoices',  href: '/invoices' },
 ]
 
 const MORE_ITEMS = [
-  { icon: PenLine,       label: 'Contracts',   href: '/app/contracts' },
-  { icon: Building2,     label: 'Clients',     href: '/app/clients' },
-  { icon: FolderKanban,  label: 'Projects',    href: '/app/projects' },
-  { icon: BarChart3,     label: 'Reports',     href: '/app/reports' },
-  { icon: CalendarDays,  label: 'Calendar',    href: '/app/calendar' },
-  { icon: ClipboardList, label: 'Forms',       href: '/app/forms' },
-  { icon: Zap,           label: 'Automations', href: '/app/automations' },
-  { icon: Settings,      label: 'Settings',    href: '/app/settings' },
+  { icon: PenLine,       label: 'Contracts',   href: '/contracts' },
+  { icon: Building2,     label: 'Clients',     href: '/clients' },
+  { icon: FolderKanban,  label: 'Projects',    href: '/projects' },
+  { icon: BarChart3,     label: 'Reports',     href: '/reports' },
+  { icon: CalendarDays,  label: 'Calendar',    href: '/calendar' },
+  { icon: ClipboardList, label: 'Forms',       href: '/forms' },
+  { icon: Zap,           label: 'Automations', href: '/automations' },
+  { icon: Settings,      label: 'Settings',    href: '/settings' },
 ]
 
 export default function BottomNav() {

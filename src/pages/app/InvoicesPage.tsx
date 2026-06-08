@@ -127,7 +127,7 @@ export default function InvoicesPage() {
             </p>
           )}
         </div>
-        <button onClick={() => navigate('/app/invoices/new')} className="btn-primary">
+        <button onClick={() => navigate('/invoices/new')} className="btn-primary">
           <Plus size={14} strokeWidth={2.5} />
           New Invoice
         </button>
@@ -241,7 +241,7 @@ export default function InvoicesPage() {
             {hasSearch ? 'Try a different search term.' : statusFilter === 'ALL' ? 'Create an invoice manually or generate one from a signed contract.' : 'Try a different filter.'}
           </p>
           {!hasSearch && statusFilter === 'ALL' && (
-            <button onClick={() => navigate('/app/invoices/new')} className="btn-primary mt-4 text-[13px]">
+            <button onClick={() => navigate('/invoices/new')} className="btn-primary mt-4 text-[13px]">
               <Plus size={13} strokeWidth={2.5} /> New Invoice
             </button>
           )}
@@ -257,12 +257,12 @@ export default function InvoicesPage() {
           sortBy={sortBy}
           sortDir={sortDir}
           onSort={handleSort}
-          onOpen={(inv: Invoice) => navigate(`/app/invoices/${inv.id}`)}
+          onOpen={(inv: Invoice) => navigate(`/invoices/${inv.id}`)}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {displayed.map(inv => (
-            <InvoiceCard key={inv.id} invoice={inv} onClick={(i: Invoice) => navigate(`/app/invoices/${i.id}`)} />
+            <InvoiceCard key={inv.id} invoice={inv} onClick={(i: Invoice) => navigate(`/invoices/${i.id}`)} />
           ))}
         </div>
       )}

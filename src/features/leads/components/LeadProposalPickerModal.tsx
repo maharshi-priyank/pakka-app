@@ -19,7 +19,7 @@ export default function LeadProposalPickerModal({ lead, onClose }: Props) {
 
   function handleBlank() {
     onClose()
-    navigate('/app/proposals/new', { state: { lead } })
+    navigate('/proposals/new', { state: { lead } })
   }
 
   if (showAI) {

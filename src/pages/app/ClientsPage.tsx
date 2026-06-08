@@ -59,7 +59,7 @@ export default function ClientsPage() {
             <ClientCard
               key={client.id}
               client={client}
-              onClick={() => navigate(`/app/clients/${client.id}`)}
+              onClick={() => navigate(`/clients/${client.id}`)}
             />
           ))}
         </div>

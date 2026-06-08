@@ -96,7 +96,7 @@ export default function CalendarBell() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
             <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Upcoming Calls</span>
             <button
-              onClick={() => { setOpen(false); navigate('/app/meetings') }}
+              onClick={() => { setOpen(false); navigate('/meetings') }}
               className="text-[11.5px] text-[#6366F1] font-semibold hover:text-[#4F46E5] transition-colors"
             >
               View all

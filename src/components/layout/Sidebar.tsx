@@ -22,17 +22,17 @@ import { useAuthStore } from '@/store/authStore'
 import { generateInitials } from '@/lib/utils'
 
 const ALL_NAV_ITEMS = [
-  { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',   href: '/app/dashboard',   tourId: 'tour-dashboard' },
-  { id: 'leads',       icon: Users,           label: 'Leads',        href: '/app/leads',       tourId: 'tour-leads' },
-  { id: 'clients',     icon: Building2,       label: 'Clients',      href: '/app/clients',     tourId: 'tour-clients' },
-  { id: 'projects',    icon: FolderKanban,    label: 'Projects',     href: '/app/projects',    tourId: undefined },
-  { id: 'proposals',   icon: FileText,        label: 'Proposals',    href: '/app/proposals',   tourId: 'tour-proposals' },
-  { id: 'contracts',   icon: PenLine,         label: 'Contracts',    href: '/app/contracts',   tourId: 'tour-contracts' },
-  { id: 'invoices',    icon: Receipt,         label: 'Invoices',     href: '/app/invoices',    tourId: 'tour-invoices' },
-  { id: 'reports',     icon: BarChart3,       label: 'Reports',      href: '/app/reports',     tourId: undefined },
-  { id: 'calendar',    icon: CalendarDays,    label: 'Calendar',     href: '/app/calendar',    tourId: undefined },
-  { id: 'forms',       icon: ClipboardList,   label: 'Forms',        href: '/app/forms',       tourId: undefined },
-  { id: 'automations', icon: Zap,             label: 'Automations',  href: '/app/automations', tourId: undefined },
+  { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',   href: '/dashboard',   tourId: 'tour-dashboard' },
+  { id: 'leads',       icon: Users,           label: 'Leads',        href: '/leads',       tourId: 'tour-leads' },
+  { id: 'clients',     icon: Building2,       label: 'Clients',      href: '/clients',     tourId: 'tour-clients' },
+  { id: 'projects',    icon: FolderKanban,    label: 'Projects',     href: '/projects',    tourId: undefined },
+  { id: 'proposals',   icon: FileText,        label: 'Proposals',    href: '/proposals',   tourId: 'tour-proposals' },
+  { id: 'contracts',   icon: PenLine,         label: 'Contracts',    href: '/contracts',   tourId: 'tour-contracts' },
+  { id: 'invoices',    icon: Receipt,         label: 'Invoices',     href: '/invoices',    tourId: 'tour-invoices' },
+  { id: 'reports',     icon: BarChart3,       label: 'Reports',      href: '/reports',     tourId: undefined },
+  { id: 'calendar',    icon: CalendarDays,    label: 'Calendar',     href: '/calendar',    tourId: undefined },
+  { id: 'forms',       icon: ClipboardList,   label: 'Forms',        href: '/forms',       tourId: undefined },
+  { id: 'automations', icon: Zap,             label: 'Automations',  href: '/automations', tourId: undefined },
 ]
 
 // Section groups — defines labels and order for the nav
@@ -187,7 +187,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
       {/* Bottom actions */}
       <div className="border-t border-gray-100 pl-4 pr-3 py-3 space-y-0.5 shrink-0">
         <NavLink
-          to="/app/email-templates"
+          to="/email-templates"
           onClick={onClose}
           className={({ isActive }) =>
             cn(
@@ -205,7 +205,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
         </NavLink>
 
         <NavLink
-          to="/app/settings"
+          to="/settings"
           id="tour-settings"
           onClick={onClose}
           className={({ isActive }) =>

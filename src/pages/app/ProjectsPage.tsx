@@ -396,7 +396,7 @@ export default function ProjectsPage() {
             <ProjectCard
               key={p.id}
               project={p}
-              onClick={() => navigate(`/app/projects/${p.id}`)}
+              onClick={() => navigate(`/projects/${p.id}`)}
             />
           ))}
         </div>
