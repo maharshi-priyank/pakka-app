@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
-import { X, RotateCcw, Send } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, RotateCcw, CornerRightUp } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useAIChat } from '../hooks/useAIChat'
+import { useAutoResizeTextarea } from '@/components/hooks/use-auto-resize-textarea'
 
 const SUGGESTIONS = [
   'When do I need GST registration?',
@@ -11,37 +13,45 @@ const SUGGESTIONS = [
 
 const GREETING = "Hi! I can help with GST, TDS, invoicing, contracts, tax filing — anything about running your freelance business in India. What's on your mind?"
 
+const INPUT_MIN_HEIGHT = 36
+
 export default function FloatingAssistant() {
   const [open, setOpen] = useState(false)
   const { messages, isLoading, send, reset } = useAIChat()
-  const [input, setInput]   = useState('')
-  const bottomRef           = useRef<HTMLDivElement>(null)
-  const inputRef            = useRef<HTMLInputElement>(null)
+  const [input, setInput] = useState('')
+
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
+    minHeight: INPUT_MIN_HEIGHT,
+    maxHeight: 120,
+  })
 
   useEffect(() => {
     function handler(e: Event) {
       const msg = (e as CustomEvent<{ message?: string }>).detail?.message
       setOpen(true)
-      if (msg) {
-        setTimeout(() => send(msg), 80)
-      }
+      if (msg) setTimeout(() => send(msg), 80)
     }
     window.addEventListener('open-assistant', handler)
     return () => window.removeEventListener('open-assistant', handler)
   }, [send])
 
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 150)
-  }, [open])
+    if (open) setTimeout(() => textareaRef.current?.focus(), 150)
+  }, [open, textareaRef])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isLoading])
+    // scroll to bottom on new messages
+    if (textareaRef.current) {
+      const container = textareaRef.current.closest('.messages-scroll')
+      if (container) container.scrollTop = container.scrollHeight
+    }
+  }, [messages, isLoading, textareaRef])
 
   function handleSend() {
-    if (!input.trim()) return
+    if (!input.trim() || isLoading) return
     send(input)
     setInput('')
+    adjustHeight(true)
   }
 
   function handleKey(e: React.KeyboardEvent) {
@@ -54,6 +64,7 @@ export default function FloatingAssistant() {
   function handleReset() {
     reset()
     setInput('')
+    adjustHeight(true)
   }
 
   return (
@@ -61,8 +72,10 @@ export default function FloatingAssistant() {
 
       {/* Chat box */}
       {open && (
-        <div className="w-[340px] max-h-[520px] flex flex-col bg-white rounded-2xl shadow-2xl border border-[#E2E8F0] overflow-hidden"
-          style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08)' }}>
+        <div
+          className="w-[340px] max-h-[520px] flex flex-col bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden"
+          style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08)' }}
+        >
 
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-[#F1F5F9] shrink-0">
@@ -87,7 +100,7 @@ export default function FloatingAssistant() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-[#F8FAFC]">
+          <div className="messages-scroll flex-1 overflow-y-auto p-3 space-y-3 bg-[#F8FAFC]">
 
             {/* Greeting */}
             <div className="flex gap-2 items-start">
@@ -97,7 +110,7 @@ export default function FloatingAssistant() {
               </div>
             </div>
 
-            {/* Suggestions — only show when no messages yet */}
+            {/* Suggestions — only when no messages yet */}
             {messages.length === 0 && (
               <div className="flex flex-wrap gap-1.5 pl-8">
                 {SUGGESTIONS.map(s => (
@@ -124,58 +137,82 @@ export default function FloatingAssistant() {
               ) : (
                 <div key={i} className="flex gap-2 items-start">
                   <div className="w-6 h-6 rounded-md bg-[#F0FDF4] flex items-center justify-center text-[11px] shrink-0 mt-0.5">✦</div>
-                  <div className={`rounded-[0_10px_10px_10px] px-3 py-2 text-[12px] leading-relaxed shadow-sm max-w-[260px] whitespace-pre-wrap ${
+                  <div className={cn(
+                    'rounded-[0_10px_10px_10px] px-3 py-2 text-[12px] leading-relaxed shadow-sm max-w-[260px] whitespace-pre-wrap',
                     msg.isError
                       ? 'bg-[#FFF1F1] border border-[#FECACA] text-[#991B1B]'
-                      : 'bg-white border border-[#E2E8F0] text-[#374151]'
-                  }`}>
+                      : 'bg-white border border-[#E2E8F0] text-[#374151]',
+                  )}>
                     {msg.content}
                   </div>
                 </div>
               )
             ))}
 
-            {/* Loading */}
+            {/* AI thinking indicator */}
             {isLoading && (
               <div className="flex gap-2 items-start">
                 <div className="w-6 h-6 rounded-md bg-[#F0FDF4] flex items-center justify-center text-[11px] shrink-0 mt-0.5">✦</div>
-                <div className="bg-white border border-[#E2E8F0] rounded-[0_10px_10px_10px] px-3 py-2 shadow-sm">
-                  <div className="flex gap-1 items-center h-4">
-                    {[0, 1, 2].map(i => (
-                      <span key={i} className="w-1.5 h-1.5 bg-[#CBD5E1] rounded-full animate-bounce"
-                        style={{ animationDelay: `${i * 150}ms` }} />
-                    ))}
-                  </div>
+                <div className="bg-white border border-[#E2E8F0] rounded-[0_10px_10px_10px] px-3 py-2.5 shadow-sm flex items-center gap-1.5">
+                  <div
+                    className="w-3 h-3 bg-[#0F172A] rounded-sm animate-spin"
+                    style={{ animationDuration: '2s' }}
+                  />
+                  <span className="text-[11px] text-[#94A3B8]">Thinking...</span>
                 </div>
               </div>
             )}
 
-            <div ref={bottomRef} />
+            <div className="h-1" />
           </div>
 
-          {/* Input */}
-          <div className="px-3 py-2.5 border-t border-[#E2E8F0] bg-white flex gap-2 items-center shrink-0">
-            <input
-              ref={inputRef}
+          {/* Input area */}
+          <div className="px-3 py-2.5 border-t border-[#E2E8F0] bg-white flex gap-2 items-end shrink-0">
+            <textarea
+              ref={textareaRef}
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={e => { setInput(e.target.value); adjustHeight() }}
               onKeyDown={handleKey}
               placeholder="Ask anything..."
-              className="flex-1 bg-[#F8FAFC] border border-[#E2E8F0] rounded-full px-4 py-2 text-[12px] text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#94A3B8] transition-colors"
+              disabled={isLoading}
+              rows={1}
+              className={cn(
+                'flex-1 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl px-3 py-2',
+                'text-[12px] text-[#0F172A] placeholder:text-[#94A3B8]',
+                'outline-none focus:border-[#94A3B8] transition-colors',
+                'resize-none leading-[1.4] overflow-hidden',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+              )}
+              style={{ minHeight: `${INPUT_MIN_HEIGHT}px`, maxHeight: '120px' }}
             />
+
+            {/* Send / loading button */}
             <button
               type="button"
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="w-8 h-8 bg-[#0F172A] text-white rounded-full flex items-center justify-center shrink-0 hover:bg-[#1E293B] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className={cn(
+                'w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mb-0.5 transition-all',
+                isLoading
+                  ? 'bg-transparent cursor-default'
+                  : 'bg-[#0F172A] text-white hover:bg-[#1E293B] disabled:opacity-40 disabled:cursor-not-allowed',
+              )}
+              aria-label={isLoading ? 'AI is thinking' : 'Send message'}
             >
-              <Send size={13} strokeWidth={2} />
+              {isLoading ? (
+                <div
+                  className="w-3.5 h-3.5 bg-[#0F172A] rounded-sm animate-spin"
+                  style={{ animationDuration: '2s' }}
+                />
+              ) : (
+                <CornerRightUp size={13} strokeWidth={2} />
+              )}
             </button>
           </div>
         </div>
       )}
 
-      {/* Floating button — dark bg, white icon */}
+      {/* Floating button */}
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
