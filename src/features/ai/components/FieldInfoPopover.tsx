@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Info } from 'lucide-react'
 
 type Field = 'gstType' | 'tdsRate' | 'gstRate'
@@ -87,18 +88,41 @@ interface Props {
 }
 
 export default function FieldInfoPopover({ field }: Props) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [open, setOpen]       = useState(false)
+  const [coords, setCoords]   = useState({ top: 0, left: 0 })
+  const btnRef                = useRef<HTMLButtonElement>(null)
+  const popoverRef            = useRef<HTMLDivElement>(null)
   const { title, body, aiQuestion } = CONTENT[field]
+
+  function openPopover() {
+    if (!btnRef.current) return
+    const rect = btnRef.current.getBoundingClientRect()
+    // Position below the button, left-aligned; clamp to viewport right edge
+    const left = Math.min(rect.left, window.innerWidth - 276)
+    setCoords({ top: rect.bottom + 6, left })
+    setOpen(true)
+  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const target = e.target as Node
+      if (
+        popoverRef.current && !popoverRef.current.contains(target) &&
+        btnRef.current     && !btnRef.current.contains(target)
+      ) {
         setOpen(false)
       }
     }
     if (open) document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  // Close on scroll so the popover doesn't float away from its button
+  useEffect(() => {
+    if (!open) return
+    const close = () => setOpen(false)
+    window.addEventListener('scroll', close, true)
+    return () => window.removeEventListener('scroll', close, true)
   }, [open])
 
   function openAI() {
@@ -107,18 +131,23 @@ export default function FieldInfoPopover({ field }: Props) {
   }
 
   return (
-    <div ref={ref} className="relative inline-flex items-center">
+    <span className="inline-flex items-center">
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen(v => !v)}
+        onClick={openPopover}
         className="w-[15px] h-[15px] rounded-full bg-[#EEF2FF] border border-[#C7D2FE] text-[#6366F1] flex items-center justify-center hover:bg-[#E0E7FF] transition-colors shrink-0"
         aria-label={`Info about ${field}`}
       >
         <Info size={9} strokeWidth={2.5} />
       </button>
 
-      {open && (
-        <div className="absolute left-0 top-6 z-50 w-[260px] bg-white border border-[#E2E8F0] rounded-xl shadow-xl p-4 space-y-3">
+      {open && createPortal(
+        <div
+          ref={popoverRef}
+          style={{ position: 'fixed', top: coords.top, left: coords.left, zIndex: 9999 }}
+          className="w-[260px] bg-white border border-[#E2E8F0] rounded-xl shadow-xl p-4 space-y-3"
+        >
           <p className="text-[13px] font-bold text-[#0F172A]">{title}</p>
           {body}
           <button
@@ -128,8 +157,9 @@ export default function FieldInfoPopover({ field }: Props) {
           >
             Ask AI about this →
           </button>
-        </div>
+        </div>,
+        document.body,
       )}
-    </div>
+    </span>
   )
 }

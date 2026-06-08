@@ -124,7 +124,11 @@ export default function FloatingAssistant() {
               ) : (
                 <div key={i} className="flex gap-2 items-start">
                   <div className="w-6 h-6 rounded-md bg-[#F0FDF4] flex items-center justify-center text-[11px] shrink-0 mt-0.5">✦</div>
-                  <div className="bg-white border border-[#E2E8F0] rounded-[0_10px_10px_10px] px-3 py-2 text-[12px] text-[#374151] leading-relaxed shadow-sm max-w-[260px] whitespace-pre-wrap">
+                  <div className={`rounded-[0_10px_10px_10px] px-3 py-2 text-[12px] leading-relaxed shadow-sm max-w-[260px] whitespace-pre-wrap ${
+                    msg.isError
+                      ? 'bg-[#FFF1F1] border border-[#FECACA] text-[#991B1B]'
+                      : 'bg-white border border-[#E2E8F0] text-[#374151]'
+                  }`}>
                     {msg.content}
                   </div>
                 </div>

@@ -1,14 +1,17 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { api } from '@/lib/api'
 
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
+  isError?: boolean
 }
 
 export function useAIChat() {
   const [messages,  setMessages]  = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  // successfulMessages only contains real AI replies — never error stubs
+  const successfulMessages = useRef<ChatMessage[]>([])
 
   const send = useCallback(async (text: string) => {
     const trimmed = text.trim()
@@ -19,7 +22,7 @@ export function useAIChat() {
     setIsLoading(true)
 
     try {
-      const history = messages.map(m => ({
+      const history = successfulMessages.current.map(m => ({
         role:    m.role === 'assistant' ? 'model' : 'user',
         content: m.content,
       }))
@@ -27,18 +30,27 @@ export function useAIChat() {
         message: trimmed,
         history,
       })
-      setMessages(prev => [...prev, { role: 'assistant', content: data.data.reply }])
-    } catch {
+      const reply = data.data.reply
+      const assistantMsg: ChatMessage = { role: 'assistant', content: reply }
+      successfulMessages.current = [...successfulMessages.current, userMsg, assistantMsg]
+      setMessages(prev => [...prev, assistantMsg])
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { error?: { message?: string } } } })
+        ?.response?.data?.error?.message ?? 'Something went wrong. Please try again.'
       setMessages(prev => [...prev, {
         role:    'assistant',
-        content: 'Sorry, something went wrong. Please try again.',
+        content: detail,
+        isError: true,
       }])
     } finally {
       setIsLoading(false)
     }
-  }, [messages, isLoading])
+  }, [isLoading])
 
-  const reset = useCallback(() => setMessages([]), [])
+  const reset = useCallback(() => {
+    setMessages([])
+    successfulMessages.current = []
+  }, [])
 
   return { messages, isLoading, send, reset }
 }
