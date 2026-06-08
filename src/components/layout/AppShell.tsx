@@ -17,7 +17,7 @@ export default function AppShell() {
 
   return (
     <SidebarContext.Provider value={{ visible: desktopSidebarVisible, setVisible: setDesktopSidebarVisible }}>
-      <div className="flex h-screen overflow-hidden bg-[#F4F6FA] dark:bg-[#0C0D10] transition-colors">
+      <div className="flex h-screen overflow-hidden transition-colors">
 
         {/* ── Desktop sidebar (lg+) ──────────────────────────────── */}
         {desktopSidebarVisible && (

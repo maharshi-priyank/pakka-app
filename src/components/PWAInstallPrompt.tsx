@@ -162,7 +162,7 @@ export default function PWAInstallPrompt() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
             onClick={e => e.stopPropagation()}
-            className="relative bg-white dark:bg-[#13141A] rounded-2xl shadow-2xl w-full max-w-sm p-5"
+            className="relative glass-modal rounded-2xl w-full max-w-sm p-5"
           >
             <div className="flex items-start justify-between mb-4">
               <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">

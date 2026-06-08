@@ -25,7 +25,7 @@ export default function Topbar({ onMenuToggle, onDesktopSidebarToggle, desktopSi
   }
 
   return (
-    <header className="h-[56px] lg:h-[60px] bg-white dark:bg-[#13141A] border-b border-[#EAECF0] dark:border-[#26283A] flex items-center gap-3 px-4 lg:px-5 shrink-0 transition-colors">
+    <header className="h-[56px] lg:h-[60px] bg-transparent dark:bg-transparent border-b border-black/[0.06] dark:border-[#26283A] flex items-center gap-3 px-4 lg:px-5 shrink-0 transition-colors">
 
       {/* Desktop sidebar toggle */}
       <button

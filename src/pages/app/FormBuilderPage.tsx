@@ -67,7 +67,7 @@ function SortableFieldRow({ field, onChange, onRemove }: SortableFieldRowProps) 
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="card p-4 flex gap-3 group">
+    <div ref={setNodeRef} style={style} className="card-glass p-4 flex gap-3 group">
       {/* Drag handle */}
       <button
         {...attributes}
@@ -554,7 +554,7 @@ export default function FormBuilderPage() {
       {showEmbed && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowEmbed(false)} />
-          <div className="relative bg-white dark:bg-[#13141A] rounded-2xl shadow-2xl dark:shadow-black/60 w-full max-w-[540px] p-6 space-y-4">
+          <div className="relative glass-modal rounded-2xl w-full max-w-[540px] p-6 space-y-4">
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
               <div>

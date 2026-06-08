@@ -122,7 +122,7 @@ export default function AIModal({ mode, phase, onClose, onExtract, children }: P
       {/* Modal */}
       <div
         className={cn(
-          'relative bg-white dark:bg-[#13141A] rounded-2xl shadow-2xl w-full transition-all duration-300 anim-modal-in',
+          'relative glass-modal rounded-2xl w-full transition-all duration-300 anim-modal-in',
           phase === 'review' ? 'max-w-3xl' : 'max-w-[580px]',
         )}
         onClick={e => e.stopPropagation()}

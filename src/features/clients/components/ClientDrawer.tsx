@@ -52,7 +52,7 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
       <div className="absolute inset-0 bg-black/20 anim-fade" onClick={onClose} />
-      <div className="relative w-full max-w-[520px] bg-white dark:bg-[#13141A] h-full flex flex-col shadow-2xl overflow-hidden anim-slide-right">
+      <div className="relative w-full max-w-[520px] glass-modal h-full flex flex-col overflow-hidden anim-slide-right">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#EAECF0] dark:border-[#26283A] shrink-0">
@@ -92,7 +92,7 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
           ) : client ? (
             <>
               {/* Contact info */}
-              <div className="card p-4 space-y-2.5">
+              <div className="card-glass p-4 space-y-2.5">
                 {client.email && (
                   <InfoRow icon={Mail} label={client.email} />
                 )}
@@ -162,7 +162,7 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
               )}
 
               {client.proposals.length === 0 && client.contracts.length === 0 && client.invoices.length === 0 && (
-                <div className="card p-6 text-center">
+                <div className="card-glass p-6 text-center">
                   <Building2 size={28} className="text-[#D0D5DD] dark:text-[#3D4258] mx-auto mb-2" />
                   <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74]">No proposals, contracts, or invoices yet.</p>
                 </div>
@@ -174,7 +174,7 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
                   <Link2 size={13} className="text-[#667085] dark:text-[#8B92A8]" />
                   <h3 className="text-[12px] font-bold text-[#344054] dark:text-[#C2C8D8] uppercase tracking-wide">Client Portal</h3>
                 </div>
-                <div className="card p-4 space-y-3">
+                <div className="card-glass p-4 space-y-3">
                   {portalUrl ? (
                     <>
                       <p className="text-[11.5px] text-[#667085] dark:text-[#8B92A8] font-mono bg-[#F4F5F8] dark:bg-[#21222D] rounded-lg px-3 py-2 truncate select-all">
@@ -237,7 +237,7 @@ function InfoRow({ icon: Icon, label, mono }: { icon: React.ComponentType<{ size
 
 function StatCard({ icon: Icon, label, count, color, bg }: { icon: React.ComponentType<{ size?: number; className?: string }>; label: string; count: number; color: string; bg: string }) {
   return (
-    <div className="card p-3 text-center space-y-1.5">
+    <div className="card-glass p-3 text-center space-y-1.5">
       <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center mx-auto', bg)}>
         <Icon size={14} className={color} />
       </div>
@@ -254,7 +254,7 @@ function Section({ title, icon: Icon, children }: { title: string; icon: React.C
         <Icon size={13} className="text-[#667085] dark:text-[#8B92A8]" />
         <h3 className="text-[12px] font-bold text-[#344054] dark:text-[#C2C8D8] uppercase tracking-wide">{title}</h3>
       </div>
-      <div className="card divide-y divide-[#F2F4F7] dark:divide-[#26283A]">{children}</div>
+      <div className="card-glass divide-y divide-[#F2F4F7] dark:divide-[#26283A]">{children}</div>
     </div>
   )
 }
@@ -279,7 +279,7 @@ function RelationRow({ title, sub, right, status }: { title: string; sub: string
 function LoadingSkeleton() {
   return (
     <div className="space-y-5">
-      <div className="card p-4 space-y-3">
+      <div className="card-glass p-4 space-y-3">
         {[1, 2, 3].map(i => <Skeleton key={i} className="h-4 w-full" />)}
       </div>
       <div className="grid grid-cols-3 gap-3">
@@ -287,7 +287,7 @@ function LoadingSkeleton() {
       </div>
       <div className="space-y-2">
         <Skeleton className="h-4 w-24" />
-        <div className="card divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
+        <div className="card-glass divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
           {[1, 2].map(i => <Skeleton key={i} className="h-14 rounded-none" />)}
         </div>
       </div>

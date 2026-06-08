@@ -107,7 +107,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[460px] bg-white dark:bg-[#13141A] shadow-xl flex flex-col anim-slide-right">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[460px] glass-modal flex flex-col anim-slide-right">
 
         {/* Header */}
         <div className="flex items-start justify-between px-6 pt-5 pb-4 border-b border-[#F1F3F8] dark:border-[#26283A]">

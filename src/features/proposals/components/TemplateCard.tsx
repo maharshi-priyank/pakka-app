@@ -52,7 +52,7 @@ export default function TemplateCard({ template, mode, onUse, onPreview, isPrevi
 
   if (editing) {
     return (
-      <div className="card p-4 space-y-3 ring-2 ring-[#6366F1]/40">
+      <div className="card-glass p-4 space-y-3 ring-2 ring-[#6366F1]/40">
         <input
           value={editName}
           onChange={e => setEditName(e.target.value)}

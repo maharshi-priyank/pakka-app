@@ -88,7 +88,7 @@ function StatCard({
   loading?: boolean
 }) {
   return (
-    <div className="card p-5">
+    <div className="card-glass p-5">
       <div className="flex items-start justify-between mb-3">
         <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center', iconBg)}>
           <Icon size={16} className={iconColor} strokeWidth={2} />
@@ -169,7 +169,7 @@ function RevenueTab({ range }: { range: DateRange }) {
 
       {/* Chart */}
       {!isLoading && rows.length > 0 && (
-        <div className="card p-5">
+        <div className="card-glass p-5">
           <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-4">Monthly Trend</h3>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={rows} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -202,7 +202,7 @@ function RevenueTab({ range }: { range: DateRange }) {
       )}
 
       {/* Table */}
-      <div className="card overflow-hidden">
+      <div className="glass-table">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Monthly Breakdown</h3>
           <button onClick={handleExport} className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">
@@ -275,7 +275,7 @@ function GstTab({ range }: { range: DateRange }) {
         <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">GST shown for all raised invoices in period (accrual basis). Exempt invoices have zero GST.</p>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="glass-table">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">GST Summary by Month</h3>
           <button onClick={handleExport} className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">
@@ -353,7 +353,7 @@ function ClientsTab({ range }: { range: DateRange }) {
         <StatCard label="Total Outstanding"      value={formatCurrency(totalOutstanding)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"     iconColor="text-[#D92D20] dark:text-red-400"  icon={FileText}    loading={isLoading} />
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="glass-table">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Revenue by Client</h3>
           <button onClick={handleExport} className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">
@@ -425,7 +425,7 @@ function ExpensesTab({ range }: { range: DateRange }) {
       </div>
 
       {!isLoading && byCategory.length > 0 && (
-        <div className="card p-5">
+        <div className="card-glass p-5">
           <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-4">Spend by Category</h3>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={byCategory} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -458,7 +458,7 @@ function ExpensesTab({ range }: { range: DateRange }) {
         </div>
       )}
 
-      <div className="card overflow-hidden">
+      <div className="glass-table">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">By Category</h3>
           <button onClick={handleExport} className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">
@@ -545,7 +545,7 @@ function TimeTab({ range }: { range: DateRange }) {
       </div>
 
       {!isLoading && (byClient.length > 0 || monthly.length > 0) && (
-        <div className="card p-5">
+        <div className="card-glass p-5">
           {byClient.length > 0 && (
             <>
               <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-4">Hours by Client</h3>
@@ -582,7 +582,7 @@ function TimeTab({ range }: { range: DateRange }) {
         </div>
       )}
 
-      <div className="card overflow-hidden">
+      <div className="glass-table">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">By Client</h3>
           <button onClick={handleExport} className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">

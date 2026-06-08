@@ -153,7 +153,7 @@ export default function TemplatePickerModal({ open, onClose, defaultLead, defaul
       <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4">
         <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={onClose} />
         <div className={cn(
-          'relative z-10 w-full bg-white dark:bg-[#13141A] rounded-2xl shadow-2xl overflow-hidden anim-modal-in flex flex-col max-h-[80vh]',
+          'relative z-10 w-full glass-modal rounded-2xl overflow-hidden anim-modal-in flex flex-col max-h-[80vh]',
           previewTemplate ? 'max-w-4xl' : 'max-w-3xl',
         )}>
 

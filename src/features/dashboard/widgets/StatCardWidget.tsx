@@ -58,7 +58,7 @@ export default function StatCardWidget({ type }: { type: StatType }) {
   const Icon = m.icon
 
   return (
-    <div className="card p-5 h-full hover:shadow-md transition-shadow">
+    <div className="card-glass p-5 h-full hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', m.iconBg)}>
           <Icon size={18} className={m.iconColor} strokeWidth={2} />

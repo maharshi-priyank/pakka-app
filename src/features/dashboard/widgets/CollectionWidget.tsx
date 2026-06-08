@@ -18,7 +18,7 @@ export default function CollectionWidget() {
   const overduePct = total > 0 ? (overdueAmount / total) * 100 : 0
 
   return (
-    <div className="card p-5 h-full hover:shadow-md transition-shadow">
+    <div className="card-glass p-5 h-full hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#F0FDF4] dark:bg-emerald-950/40">
           <Wallet size={18} className="text-[#16A34A] dark:text-[#34D399]" strokeWidth={2} />

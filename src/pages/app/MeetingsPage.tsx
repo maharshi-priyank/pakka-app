@@ -131,7 +131,7 @@ export default function MeetingsPage() {
         ))}
       </div>
 
-      <div className="card overflow-hidden">
+      <div className="glass-table">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A] last:border-0">

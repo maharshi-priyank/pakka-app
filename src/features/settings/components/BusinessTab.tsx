@@ -72,7 +72,7 @@ export default function BusinessTab() {
   if (isLoading) {
     return (
       <div className="space-y-5">
-        <div className="card p-6 space-y-4">
+        <div className="card-glass p-6 space-y-4">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="space-y-1.5">
               <Skeleton className="h-3 w-24" />
@@ -88,7 +88,7 @@ export default function BusinessTab() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
       {/* Bank details */}
-      <div className="card p-6 space-y-5">
+      <div className="card-glass p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <Landmark size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Bank Account</h3>
@@ -124,7 +124,7 @@ export default function BusinessTab() {
       </div>
 
       {/* UPI */}
-      <div className="card p-6 space-y-5">
+      <div className="card-glass p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <Smartphone size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">UPI</h3>
@@ -179,7 +179,7 @@ export default function BusinessTab() {
       </div>
 
       {/* Razorpay (placeholder) */}
-      <div className="card p-6">
+      <div className="card-glass p-6">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] mb-4">
           <CreditCard size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Razorpay</h3>
@@ -208,7 +208,7 @@ export default function BusinessTab() {
       </div>
 
       {/* Brand info card */}
-      <div className="card p-4 flex items-start gap-3 bg-[#F8F9FC] dark:bg-[#1A1B23]">
+      <div className="card-glass p-4 flex items-start gap-3 bg-[#F8F9FC] dark:bg-[#1A1B23]">
         <Building2 size={15} className="text-[#667085] dark:text-[#8B92A8] mt-0.5 shrink-0" />
         <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">
           Bank account and UPI details are printed on every invoice you send. Keep them accurate so clients can pay you directly.

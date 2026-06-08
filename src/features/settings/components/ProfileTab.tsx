@@ -130,14 +130,14 @@ export default function ProfileTab() {
   if (isLoading) {
     return (
       <div className="space-y-5">
-        <div className="card p-6 flex items-center gap-5">
+        <div className="card-glass p-6 flex items-center gap-5">
           <Skeleton className="w-20 h-20 rounded-2xl" />
           <div className="space-y-2">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-3 w-48" />
           </div>
         </div>
-        <div className="card p-6 space-y-4">
+        <div className="card-glass p-6 space-y-4">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="space-y-1.5">
               <Skeleton className="h-3 w-24" />
@@ -156,7 +156,7 @@ export default function ProfileTab() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
       {/* Logo card */}
-      <div className="card p-6">
+      <div className="card-glass p-6">
         <div className="flex items-center gap-5">
           {/* Avatar */}
           <div className="relative shrink-0">
@@ -217,7 +217,7 @@ export default function ProfileTab() {
       </div>
 
       {/* Onboarding tour */}
-      <div className="card p-6">
+      <div className="card-glass p-6">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A] mb-4">
           <MapPin size={14} className="text-[#2563EB]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Product Tour</h3>
@@ -236,7 +236,7 @@ export default function ProfileTab() {
       </div>
 
       {/* Promo code */}
-      <div className="card p-6">
+      <div className="card-glass p-6">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A] mb-4">
           <Zap size={14} className="text-[#6366F1] dark:text-[#818CF8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Promo Code</h3>
@@ -265,7 +265,7 @@ export default function ProfileTab() {
       </div>
 
       {/* Personal info */}
-      <div className="card p-6 space-y-5">
+      <div className="card-glass p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <User size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Personal Details</h3>
@@ -282,7 +282,7 @@ export default function ProfileTab() {
       </div>
 
       {/* Business info */}
-      <div className="card p-6 space-y-5">
+      <div className="card-glass p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <Building2 size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Business Details</h3>
@@ -304,7 +304,7 @@ export default function ProfileTab() {
       </div>
 
       {/* Tax info */}
-      <div className="card p-6 space-y-5">
+      <div className="card-glass p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <Receipt size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Tax & Compliance</h3>
@@ -338,7 +338,7 @@ export default function ProfileTab() {
       </div>
 
       {/* Compliance defaults */}
-      <div className="card p-6 space-y-5">
+      <div className="card-glass p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <ShieldCheck size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Invoice Defaults</h3>
@@ -370,7 +370,7 @@ export default function ProfileTab() {
       </div>
 
       {/* Payment details */}
-      <div className="card p-6 space-y-5">
+      <div className="card-glass p-6 space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-[#F2F4F7] dark:border-[#26283A]">
           <CreditCard size={14} className="text-[#667085] dark:text-[#8B92A8]" strokeWidth={2} />
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Payment Details</h3>

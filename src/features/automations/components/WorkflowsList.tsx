@@ -66,7 +66,7 @@ function WorkflowCard({ wf }: { wf: AutomationWorkflow }) {
   const stepCount    = wf.steps?.length ?? 0
 
   return (
-    <div className="card p-5 flex flex-col gap-3">
+    <div className="card-glass p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate">{wf.name}</p>
@@ -158,7 +158,7 @@ export default function WorkflowsList({ onGenerateWithAI }: Props) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3].map(i => (
-          <div key={i} className="card p-5 space-y-3">
+          <div key={i} className="card-glass p-5 space-y-3">
             <div className="animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] h-4 w-40 rounded" />
             <div className="animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] h-3 w-56 rounded" />
           </div>

@@ -52,7 +52,7 @@ export default function WinRateWidget() {
   const percent  = decided > 0 ? Math.round((accepted / decided) * 100) : 0
 
   return (
-    <div className="card p-5 h-full hover:shadow-md transition-shadow">
+    <div className="card-glass p-5 h-full hover:shadow-lg transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#EEF2FF] dark:bg-[#1E2040]">
           <ThumbsUp size={18} className="text-[#6366F1]" strokeWidth={2} />

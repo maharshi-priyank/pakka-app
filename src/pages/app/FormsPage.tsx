@@ -88,7 +88,7 @@ function FormCard({ form }: { form: IntakeForm }) {
   }
 
   return (
-    <div className="card p-5 flex flex-col gap-4">
+    <div className="card-glass p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate">{form.title}</h3>

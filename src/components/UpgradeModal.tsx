@@ -61,7 +61,7 @@ export default function UpgradeModal() {
     <>
       <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={closeUpgradeModal} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="w-full max-w-[640px] bg-white dark:bg-[#13141A] rounded-2xl shadow-2xl border border-[#EAECF0] dark:border-[#26283A] pointer-events-auto anim-modal-in">
+        <div className="w-full max-w-[640px] glass-modal rounded-2xl pointer-events-auto anim-modal-in">
 
           {/* Header */}
           <div className="flex items-start justify-between px-6 pt-6 pb-4">

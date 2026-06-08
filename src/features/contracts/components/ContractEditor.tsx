@@ -261,7 +261,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
                 emptyText="Add scope items"
               >
                 {scopeArray.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-4 space-y-2">
+                  <div key={field.id} className="card-glass p-4 space-y-2">
                     <div className="flex items-start gap-2">
                       <GripVertical size={14} className="text-[#D0D5DD] mt-2.5 shrink-0" />
                       <div className="flex-1 space-y-2">
@@ -292,7 +292,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
                 emptyText="List all deliverables"
               >
                 {deliverablesArr.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-3 flex items-center gap-2">
+                  <div key={field.id} className="card-glass p-3 flex items-center gap-2">
                     <CheckSquare size={13} className="text-[#2563EB] shrink-0" />
                     <input
                       {...register(`content.deliverables.${idx}.item`)}
@@ -318,7 +318,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
                 emptyText="List exclusions"
               >
                 {exclusions.map((_, idx) => (
-                  <div key={idx} className="card p-3 flex items-center gap-2">
+                  <div key={idx} className="card-glass p-3 flex items-center gap-2">
                     <XCircle size={13} className="text-[#D92D20] shrink-0" />
                     <input
                       {...register(`content.exclusions.${idx}` as never)}
@@ -375,7 +375,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
                 emptyText="Add payment milestones"
               >
                 {paymentArr.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-3 space-y-2">
+                  <div key={field.id} className="card-glass p-3 space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-full bg-[#EFF6FF] border-2 border-[#2563EB] flex items-center justify-center shrink-0">
                         <span className="text-[9px] font-bold text-[#2563EB]">{idx + 1}</span>
@@ -421,7 +421,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
               emptyText="Add contract clauses"
             >
               {clausesArr.fields.map((field, idx) => (
-                <div key={field.id} className="card p-4 space-y-2">
+                <div key={field.id} className="card-glass p-4 space-y-2">
                   <div className="flex items-start gap-2">
                     <GripVertical size={14} className="text-[#D0D5DD] mt-2.5 shrink-0 cursor-grab" />
                     <div className="flex items-center gap-2 shrink-0">
@@ -517,7 +517,7 @@ function CSection({ title, description, children }: {
   title: string; description?: string; children: React.ReactNode
 }) {
   return (
-    <div className="card p-5 space-y-4">
+    <div className="card-glass p-5 space-y-4">
       <div>
         <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
         {description && <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{description}</p>}

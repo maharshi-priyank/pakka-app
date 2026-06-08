@@ -49,7 +49,7 @@ export default function RecordPaymentModal({ invoice, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-[#1A1B23] rounded-2xl shadow-2xl w-full max-w-md border border-[#EAECF0] dark:border-[#26283A]">
+      <div className="relative glass-modal rounded-2xl w-full max-w-md">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#EAECF0] dark:border-[#26283A]">

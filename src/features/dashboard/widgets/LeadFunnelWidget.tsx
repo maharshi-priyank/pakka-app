@@ -50,7 +50,7 @@ export default function LeadFunnelWidget() {
   const maxCount = Math.max(...STAGES.map(s => items.filter(l => l.stage === s.key).length), 1)
 
   return (
-    <div className="card overflow-hidden h-full hover:shadow-md transition-shadow">
+    <div className="card-glass overflow-hidden h-full hover:shadow-lg transition-shadow">
       <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
         <div>
           <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Lead Pipeline</h2>

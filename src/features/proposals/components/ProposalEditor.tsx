@@ -419,7 +419,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 emptyText="Add scope items — what you'll actually do"
               >
                 {scopeArray.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-4 space-y-2">
+                  <div key={field.id} className="card-glass p-4 space-y-2">
                     <div className="flex items-start gap-2">
                       <GripVertical size={14} className="text-[#D0D5DD] mt-2.5 shrink-0 cursor-grab" />
                       <div className="flex-1 space-y-2">
@@ -450,7 +450,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 emptyText="List what you'll hand over at the end"
               >
                 {deliverablesArray.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-3 flex items-center gap-2">
+                  <div key={field.id} className="card-glass p-3 flex items-center gap-2">
                     <CheckSquare size={13} className="text-[#2563EB] shrink-0" />
                     <input
                       {...register(`content.deliverables.${idx}.item`)}
@@ -476,7 +476,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 emptyText="List what's out of scope"
               >
                 {exclusions.map((_, idx) => (
-                  <div key={idx} className="card p-3 flex items-center gap-2">
+                  <div key={idx} className="card-glass p-3 flex items-center gap-2">
                     <XCircle size={13} className="text-[#D92D20] shrink-0" />
                     <input
                       {...register(`content.exclusions.${idx}` as never)}
@@ -509,7 +509,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                   const lineGst   = watchedGstType !== 'EXEMPT' ? lineTotal * Number(gstRate) / 100 : 0
 
                   return (
-                    <div key={field.id} className="card p-3 space-y-2">
+                    <div key={field.id} className="card-glass p-3 space-y-2">
                       <div className="flex items-center gap-2">
                         <input
                           {...register(`content.lineItems.${idx}.description`)}
@@ -568,7 +568,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
 
                 {/* Totals */}
                 {lineItemsArray.fields.length > 0 && (
-                  <div className="card p-4 bg-[#FAFAFA] dark:bg-[#1A1B23] space-y-2">
+                  <div className="card-glass p-4 bg-[#FAFAFA] dark:bg-[#1A1B23] space-y-2">
                     <div className="flex justify-between text-[12px] text-[#667085] dark:text-[#8B92A8]">
                       <span>Subtotal</span>
                       <span className="font-medium text-[#344054] dark:text-[#C2C8D8]">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
@@ -623,7 +623,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 emptyText="Break payments into milestone-linked instalments"
               >
                 {paymentScheduleArray.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-3 space-y-2">
+                  <div key={field.id} className="card-glass p-3 space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-full bg-[#EFF6FF] border-2 border-[#2563EB] flex items-center justify-center shrink-0">
                         <span className="text-[9px] font-bold text-[#2563EB]">{idx + 1}</span>
@@ -671,7 +671,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
               emptyText="Add project phases"
             >
               {milestonesArray.fields.map((field, idx) => (
-                <div key={field.id} className="card p-4 flex items-start gap-3">
+                <div key={field.id} className="card-glass p-4 flex items-start gap-3">
                   <div className="flex flex-col items-center shrink-0 mt-1">
                     <div className="w-6 h-6 rounded-full bg-[#EFF6FF] border-2 border-[#2563EB] flex items-center justify-center">
                       <span className="text-[10px] font-bold text-[#2563EB]">{idx + 1}</span>
@@ -730,7 +730,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 emptyText="Add 1–3 past projects relevant to this client"
               >
                 {caseStudiesArray.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-4 space-y-3">
+                  <div key={field.id} className="card-glass p-4 space-y-3">
                     <div className="flex items-start gap-2">
                       <div className="flex-1 space-y-2">
                         <input
@@ -772,7 +772,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 emptyText="Answer questions clients always ask before signing"
               >
                 {faqArray.fields.map((field, idx) => (
-                  <div key={field.id} className="card p-4 space-y-2">
+                  <div key={field.id} className="card-glass p-4 space-y-2">
                     <div className="flex items-start gap-2">
                       <div className="flex-1 space-y-2">
                         <input
@@ -974,7 +974,7 @@ function Section({ title, description, children }: {
   title: string; description?: string; children: React.ReactNode
 }) {
   return (
-    <div className="card p-5 space-y-4">
+    <div className="card-glass p-5 space-y-4">
       <div>
         <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">{title}</p>
         {description && <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{description}</p>}

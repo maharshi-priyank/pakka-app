@@ -79,7 +79,7 @@ function ClientCard({ client, onClick }: { client: Client; onClick: () => void }
   return (
     <button
       onClick={onClick}
-      className="card p-5 text-left hover:shadow-md hover:border-[#D0D5DD] dark:hover:border-[#333649] transition-all group"
+      className="card-glass p-5 text-left hover:shadow-md hover:border-[#D0D5DD] dark:hover:border-[#333649] transition-all group"
     >
       <div className="flex items-start gap-3 mb-4">
         <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] dark:bg-blue-950/40 flex items-center justify-center shrink-0 border border-[#DBEAFE] dark:border-blue-900/40">
@@ -146,7 +146,7 @@ function LoadingGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="card p-5 space-y-4">
+        <div key={i} className="card-glass p-5 space-y-4">
           <div className="flex items-center gap-3">
             <Skeleton className="w-10 h-10 rounded-xl" />
             <div className="space-y-1.5 flex-1">
@@ -168,7 +168,7 @@ function LoadingGrid() {
 function EmptyState({ search, onAdd }: { search: string; onAdd: () => void }) {
   if (search) {
     return (
-      <div className="card p-10 text-center">
+      <div className="card-glass p-10 text-center">
         <Search size={32} className="text-[#D0D5DD] dark:text-[#3D4258] mx-auto mb-3" />
         <p className="text-[14px] font-semibold text-[#101828] dark:text-[#ECEEF3]">No clients found</p>
         <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74] mt-1">No results for "{search}". Try a different search.</p>
@@ -177,7 +177,7 @@ function EmptyState({ search, onAdd }: { search: string; onAdd: () => void }) {
   }
 
   return (
-    <div className="card p-10 text-center">
+    <div className="card-glass p-10 text-center">
       <div className="w-14 h-14 rounded-2xl bg-[#EFF6FF] dark:bg-blue-950/40 flex items-center justify-center mx-auto mb-4">
         <Users size={24} className="text-[#2563EB] dark:text-[#60A5FA]" />
       </div>

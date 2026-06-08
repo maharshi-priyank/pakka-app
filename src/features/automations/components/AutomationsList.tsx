@@ -31,7 +31,7 @@ export default function AutomationsList() {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="card overflow-hidden">
+          <div key={i} className="glass-table">
             <div className="px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
               <Skeleton className="h-4 w-40" />
             </div>
@@ -75,7 +75,7 @@ export default function AutomationsList() {
         const activeInCat = rules.filter((r) => r.isActive).length
 
         return (
-          <div key={cat} className="card overflow-hidden">
+          <div key={cat} className="glass-table">
             <button
               className="w-full flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A] hover:bg-[#FAFBFF] dark:hover:bg-[#1A1B23] transition-colors"
               onClick={() => toggleCategory(cat)}

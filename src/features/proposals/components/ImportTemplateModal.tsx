@@ -109,7 +109,7 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] anim-fade" onClick={handleClose} />
-      <div className="relative z-10 w-full max-w-lg bg-white dark:bg-[#13141A] rounded-2xl shadow-2xl overflow-hidden anim-modal-in flex flex-col max-h-[85vh]">
+      <div className="relative z-10 w-full max-w-lg glass-modal rounded-2xl overflow-hidden anim-modal-in flex flex-col max-h-[85vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#EAECF0] dark:border-[#26283A] shrink-0">

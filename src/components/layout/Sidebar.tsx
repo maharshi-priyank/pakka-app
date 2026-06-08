@@ -124,7 +124,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
   // }
 
   return (
-    <aside className="w-[240px] shrink-0 bg-white flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-gray-100">
+    <aside className="w-[240px] shrink-0 bg-transparent flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-black/[0.06]">
 
       {/* Logo */}
       <div className="h-[60px] flex items-center px-5 shrink-0">
@@ -154,8 +154,8 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
                       cn(
                         'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all duration-100',
                         isActive
-                          ? 'bg-gray-100 text-gray-900 font-semibold'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                          ? 'bg-white/70 backdrop-blur-sm text-gray-900 font-semibold shadow-sm border border-white/80'
+                          : 'text-gray-500 hover:bg-white/40 hover:text-gray-800',
                       )
                     }
                   >
@@ -185,7 +185,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
           className={({ isActive }) =>
             cn(
               'flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all duration-100',
-              isActive ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              isActive ? 'bg-white/70 backdrop-blur-sm text-gray-900 font-semibold shadow-sm border border-white/80' : 'text-gray-500 hover:bg-white/40 hover:text-gray-800',
             )
           }
         >
@@ -204,7 +204,7 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
           className={({ isActive }) =>
             cn(
               'flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all duration-100',
-              isActive ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              isActive ? 'bg-white/70 backdrop-blur-sm text-gray-900 font-semibold shadow-sm border border-white/80' : 'text-gray-500 hover:bg-white/40 hover:text-gray-800',
             )
           }
         >

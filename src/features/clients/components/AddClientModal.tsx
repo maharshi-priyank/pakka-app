@@ -41,7 +41,7 @@ export default function AddClientModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] p-4 anim-fade">
-      <div className="bg-white dark:bg-[#13141A] rounded-2xl shadow-xl w-full max-w-lg anim-modal-in">
+      <div className="glass-modal rounded-2xl w-full max-w-lg anim-modal-in">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#EAECF0] dark:border-[#26283A]">
           <h2 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Add Client</h2>
