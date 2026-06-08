@@ -27,7 +27,7 @@ const CONTENT: Record<Field, { title: string; body: JSX.Element; aiQuestion: str
           </div>
         </div>
         <p className="text-[11px] text-[#92400E] bg-[#FFFBEB] rounded-lg px-3 py-2">
-          💡 ClearWork auto-detects this from your client's address.
+          ClearWork auto-detects this from your client's address.
         </p>
       </div>
     ),
@@ -51,7 +51,7 @@ const CONTENT: Record<Field, { title: string; body: JSX.Element; aiQuestion: str
           </div>
         </div>
         <p className="text-[11px] text-[#1E3A5F] bg-[#EFF6FF] rounded-lg px-3 py-2">
-          💡 TDS is not your loss — you get it back when you file your ITR as advance tax already paid.
+          TDS is not your loss — you get it back when you file your ITR as advance tax already paid.
         </p>
       </div>
     ),
@@ -75,7 +75,7 @@ const CONTENT: Record<Field, { title: string; body: JSX.Element; aiQuestion: str
           </div>
         </div>
         <p className="text-[11px] text-[#166534] bg-[#F0FDF4] rounded-lg px-3 py-2">
-          💡 If you're registered for GST, you must charge 18% on most professional services.
+          If you're registered for GST, you must charge 18% on most professional services.
         </p>
       </div>
     ),
