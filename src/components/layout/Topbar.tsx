@@ -1,9 +1,9 @@
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
-import { generateInitials } from '@/lib/utils'
 import { LogOut, ChevronDown, Sun, Moon, Search, PanelLeft } from 'lucide-react'
 import NotificationBell from '@/features/notifications/components/NotificationBell'
 import CalendarBell     from '@/features/meetings/components/CalendarBell'
+import { generateInitials } from '@/lib/utils'
 import { useThemeToggle } from '@/hooks/useThemeToggle'
 
 interface Props {
@@ -76,11 +76,8 @@ export default function Topbar({ onMenuToggle, onDesktopSidebarToggle, desktopSi
 
         <div className="w-px h-5 bg-[#EAECF0] dark:bg-[#26283A] mx-1" />
 
-        {/* User pill */}
-        <button className="flex items-center gap-2 h-9 pl-1 pr-2 lg:pr-2.5 rounded-lg hover:bg-[#F5F6FA] dark:hover:bg-[#1A1B23] transition-colors group">
-          <div className="w-7 h-7 rounded-full bg-[#2563EB] flex items-center justify-center text-white text-[11px] font-bold select-none shrink-0">
-            {initials}
-          </div>
+        {/* User pill — no avatar */}
+        <button className="flex items-center gap-2 h-9 pl-2 pr-2 lg:pr-2.5 rounded-lg hover:bg-[#F5F6FA] dark:hover:bg-[#1A1B23] transition-colors group">
           <div className="hidden sm:block text-left">
             <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] leading-none">{firstName}</p>
             <p className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74] leading-none mt-0.5">Agency owner</p>

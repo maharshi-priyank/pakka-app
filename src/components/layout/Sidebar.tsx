@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
   Receipt, Building2, Settings, CalendarDays, ClipboardList, Zap, BarChart3, FolderKanban, Mail,
-  ChevronLeft, LogOut,
+  LogOut,
 } from 'lucide-react'
 // Customise sidebar imports — disabled until feature is ready
 // import { X } from 'lucide-react'
@@ -126,16 +126,9 @@ export default function Sidebar({ onClose, onCollapse }: Props) {
   return (
     <aside className="w-[240px] shrink-0 bg-white flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-gray-100">
 
-      {/* Logo + collapse */}
-      <div className="h-[60px] flex items-center justify-between px-5 shrink-0">
+      {/* Logo */}
+      <div className="h-[60px] flex items-center px-5 shrink-0">
         <img src="/logo/clearwork_full_dark.png" alt="ClearWork" style={{ height: 26, width: 'auto', display: 'block' }} />
-        <button
-          onClick={onCollapse ?? onClose}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-          title="Collapse sidebar"
-        >
-          <ChevronLeft size={15} strokeWidth={2} />
-        </button>
       </div>
 
       {/* Nav — scrollable */}
