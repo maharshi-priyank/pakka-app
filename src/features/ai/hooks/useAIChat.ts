@@ -23,11 +23,11 @@ export function useAIChat() {
         role:    m.role === 'assistant' ? 'model' : 'user',
         content: m.content,
       }))
-      const { data } = await api.post<{ reply: string }>('/ai/chat', {
+      const { data } = await api.post<{ data: { reply: string } }>('/ai/chat', {
         message: trimmed,
         history,
       })
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+      setMessages(prev => [...prev, { role: 'assistant', content: data.data.reply }])
     } catch {
       setMessages(prev => [...prev, {
         role:    'assistant',
