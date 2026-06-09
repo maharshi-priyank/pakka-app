@@ -26,8 +26,8 @@ const serviceSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   icon: z.string(),
-  priceFrom: z.coerce.number().min(0),
-  deliveryDays: z.coerce.number().min(1),
+  priceFrom: z.number().min(0),
+  deliveryDays: z.number().min(1),
   tags: z.array(z.string()),
 })
 
@@ -38,7 +38,7 @@ const portfolioSchema = z.object({
   outcome: z.string().optional(),
   thumbnailUrl: z.string().optional(),
   liveUrl: z.string().optional(),
-  tags: z.array(z.string()).default([]),
+  tags: z.array(z.string()),
 })
 
 const formSchema = z.object({
@@ -128,7 +128,11 @@ export default function PublicProfileTab() {
       publicLanguages: profile.publicLanguages.join(', '),
       publicSkills: profile.publicSkills.join(', '),
       publicServices: profile.publicServices,
-      publicPortfolio: profile.publicPortfolio,
+      publicPortfolio: profile.publicPortfolio.map((p) => ({
+        ...p,
+        thumbnailUrl: p.thumbnailUrl ?? undefined,
+        liveUrl: p.liveUrl ?? undefined,
+      })),
     })
   }, [profile, reset])
 
