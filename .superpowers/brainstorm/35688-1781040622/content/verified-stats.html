@@ -1,0 +1,148 @@
+<h2>Verified Stats Block</h2>
+<p class="subtitle">Real numbers auto-pulled from ClearWork — projects, earnings, repeat rate, response time. How should this block look in the sidebar?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+      <div style="background:white;border-radius:12px;border:1px solid #EAECF0;overflow:hidden;">
+        <div style="padding:12px 14px;border-bottom:1px solid #F2F4F7;display:flex;align-items:center;gap:6px;">
+          <div style="width:16px;height:16px;background:#EEF2FF;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;">✓</div>
+          <div style="font-size:10px;font-weight:700;color:#344054;">VERIFIED STATS</div>
+          <div style="margin-left:auto;font-size:8px;color:#667085;background:#F2F4F7;padding:1px 6px;border-radius:8px;">by ClearWork</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+          <div style="padding:12px;border-right:1px solid #F2F4F7;border-bottom:1px solid #F2F4F7;">
+            <div style="font-size:18px;font-weight:800;color:#101828;">34</div>
+            <div style="font-size:9px;color:#667085;margin-top:1px;">Projects done</div>
+          </div>
+          <div style="padding:12px;border-bottom:1px solid #F2F4F7;">
+            <div style="font-size:18px;font-weight:800;color:#101828;">₹12L+</div>
+            <div style="font-size:9px;color:#667085;margin-top:1px;">Total earned</div>
+          </div>
+          <div style="padding:12px;border-right:1px solid #F2F4F7;">
+            <div style="font-size:18px;font-weight:800;color:#101828;">67%</div>
+            <div style="font-size:9px;color:#667085;margin-top:1px;">Repeat clients</div>
+          </div>
+          <div style="padding:12px;">
+            <div style="font-size:18px;font-weight:800;color:#101828;">&lt;2hr</div>
+            <div style="font-size:9px;color:#667085;margin-top:1px;">Avg response</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — 2×2 Grid</h3>
+      <p>Clean grid of numbers. All stats equal weight. Simple, scannable, no hierarchy. Neutral tone.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+      <div style="background:white;border-radius:12px;border:1px solid #EAECF0;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#6366F1,#818CF8);padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">
+            <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);">VERIFIED BY CLEARWORK</div>
+            <div style="width:12px;height:12px;background:rgba(255,255,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;">✓</div>
+          </div>
+          <div style="display:flex;gap:16px;">
+            <div>
+              <div style="font-size:20px;font-weight:800;color:white;">34</div>
+              <div style="font-size:8px;color:rgba(255,255,255,0.7);">Projects</div>
+            </div>
+            <div>
+              <div style="font-size:20px;font-weight:800;color:white;">₹12L+</div>
+              <div style="font-size:8px;color:rgba(255,255,255,0.7);">Earned</div>
+            </div>
+            <div>
+              <div style="font-size:20px;font-weight:800;color:white;">67%</div>
+              <div style="font-size:8px;color:rgba(255,255,255,0.7);">Repeat</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:9px;color:#667085;">Proposal acceptance</div>
+            <div style="font-size:11px;font-weight:700;color:#101828;">89%</div>
+          </div>
+          <div style="height:4px;background:#F2F4F7;border-radius:2px;overflow:hidden;">
+            <div style="width:89%;height:100%;background:#6366F1;border-radius:2px;"></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
+            <div style="font-size:9px;color:#667085;">Avg response time</div>
+            <div style="font-size:11px;font-weight:700;color:#101828;">&lt;2 hrs</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:9px;color:#667085;">Member since</div>
+            <div style="font-size:11px;font-weight:700;color:#101828;">Jan 2023</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Hero Numbers + Details</h3>
+      <p>Indigo header with the big 3 stats. Below: acceptance rate with progress bar + response time + member since. Most visual impact.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+      <div style="background:white;border-radius:12px;border:1px solid #EAECF0;overflow:hidden;">
+        <div style="padding:12px 14px;border-bottom:1px solid #F2F4F7;display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:10px;font-weight:700;color:#344054;">VERIFIED STATS</div>
+          <div style="display:flex;align-items:center;gap:3px;font-size:8px;color:#6366F1;font-weight:600;background:#EEF2FF;padding:2px 6px;border-radius:8px;">
+            <span>✓</span><span>ClearWork verified</span>
+          </div>
+        </div>
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:8px;">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:24px;height:24px;background:#EEF2FF;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;">📁</div>
+              <div style="font-size:10px;color:#344054;">Projects completed</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#101828;">34</div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:24px;height:24px;background:#F0FDF4;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;">💰</div>
+              <div style="font-size:10px;color:#344054;">Total earned</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#101828;">₹12L+</div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:24px;height:24px;background:#FFF4EC;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;">🔁</div>
+              <div style="font-size:10px;color:#344054;">Repeat clients</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#101828;">67%</div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:24px;height:24px;background:#EEF2FF;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;">✓</div>
+              <div style="font-size:10px;color:#344054;">Proposal acceptance</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#101828;">89%</div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:24px;height:24px;background:#F2F4F7;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;">⚡</div>
+              <div style="font-size:10px;color:#344054;">Avg response</div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#101828;">&lt;2 hrs</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Icon List</h3>
+      <p>Each stat is a row: icon + label + value. All 5 stats shown equally. Easy to read, no visual hierarchy. Feels like a checklist.</p>
+    </div>
+  </div>
+
+</div>

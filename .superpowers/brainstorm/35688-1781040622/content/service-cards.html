@@ -1,0 +1,140 @@
+<h2>Service Cards Design</h2>
+<p class="subtitle">How should each service look in the sidebar? This is what clients see to decide whether to reach out.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+
+        <div style="background:white;border-radius:10px;padding:14px;border:1px solid #EAECF0;">
+          <div style="font-size:13px;font-weight:700;color:#101828;">Brand Identity</div>
+          <div style="font-size:11px;color:#667085;margin-top:3px;line-height:1.5;">Logo, brand guidelines, color palette & typography system.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+            <div style="font-size:12px;font-weight:700;color:#6366F1;">From ₹15,000</div>
+            <button style="background:#6366F1;color:white;border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">Get in touch</button>
+          </div>
+        </div>
+
+        <div style="background:white;border-radius:10px;padding:14px;border:1px solid #EAECF0;">
+          <div style="font-size:13px;font-weight:700;color:#101828;">UI/UX Design</div>
+          <div style="font-size:11px;color:#667085;margin-top:3px;line-height:1.5;">App & web design, wireframes, prototypes in Figma.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+            <div style="font-size:12px;font-weight:700;color:#6366F1;">From ₹25,000</div>
+            <button style="background:#6366F1;color:white;border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">Get in touch</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Simple Card</h3>
+      <p>Name + description + price + CTA. Clean and minimal. No extra details.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+
+        <div style="background:white;border-radius:10px;padding:14px;border:1px solid #EAECF0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:8px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:16px;">🎨</div>
+            <div style="font-size:13px;font-weight:700;color:#101828;">Brand Identity</div>
+          </div>
+          <div style="font-size:11px;color:#667085;line-height:1.5;margin-bottom:8px;">Logo, brand guidelines, color palette & typography system for startups and businesses.</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;">
+            <span style="background:#F2F4F7;color:#667085;padding:2px 8px;border-radius:10px;font-size:10px;">Logo</span>
+            <span style="background:#F2F4F7;color:#667085;padding:2px 8px;border-radius:10px;font-size:10px;">Guidelines</span>
+            <span style="background:#F2F4F7;color:#667085;padding:2px 8px;border-radius:10px;font-size:10px;">Typography</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:11px;color:#98A2B3;">Starting from</div>
+              <div style="font-size:15px;font-weight:800;color:#101828;">₹15,000</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;color:#667085;">⏱ 7–10 days</span>
+              <button style="background:#6366F1;color:white;border:none;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">Get in touch</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:white;border-radius:10px;padding:14px;border:1px solid #EAECF0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:8px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:16px;">📱</div>
+            <div style="font-size:13px;font-weight:700;color:#101828;">UI/UX Design</div>
+          </div>
+          <div style="font-size:11px;color:#667085;line-height:1.5;margin-bottom:8px;">App & web design, wireframes and clickable prototypes in Figma.</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;">
+            <span style="background:#F2F4F7;color:#667085;padding:2px 8px;border-radius:10px;font-size:10px;">Figma</span>
+            <span style="background:#F2F4F7;color:#667085;padding:2px 8px;border-radius:10px;font-size:10px;">Mobile</span>
+            <span style="background:#F2F4F7;color:#667085;padding:2px 8px;border-radius:10px;font-size:10px;">Web</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:11px;color:#98A2B3;">Starting from</div>
+              <div style="font-size:15px;font-weight:800;color:#101828;">₹25,000</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;color:#667085;">⏱ 14–21 days</span>
+              <button style="background:#6366F1;color:white;border:none;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">Get in touch</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Rich Card</h3>
+      <p>Icon + name + description + deliverable tags + price + delivery time + CTA. Full picture at a glance.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+
+        <div style="background:white;border-radius:10px;border:1px solid #EAECF0;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);padding:14px 14px 10px;">
+            <div style="font-size:13px;font-weight:700;color:#101828;">Brand Identity</div>
+            <div style="font-size:11px;color:#4338CA;margin-top:2px;font-weight:600;">From ₹15,000 · 7–10 days</div>
+          </div>
+          <div style="padding:10px 14px 14px;">
+            <div style="font-size:11px;color:#667085;line-height:1.5;margin-bottom:8px;">Logo, brand guidelines, color palette & typography system.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px;">
+              <div style="font-size:9px;color:#344054;display:flex;align-items:center;gap:4px;"><span style="color:#10B981;">✓</span> Logo design</div>
+              <div style="font-size:9px;color:#344054;display:flex;align-items:center;gap:4px;"><span style="color:#10B981;">✓</span> Brand guidelines</div>
+              <div style="font-size:9px;color:#344054;display:flex;align-items:center;gap:4px;"><span style="color:#10B981;">✓</span> Color palette</div>
+              <div style="font-size:9px;color:#344054;display:flex;align-items:center;gap:4px;"><span style="color:#10B981;">✓</span> Typography</div>
+            </div>
+            <button style="width:100%;background:#6366F1;color:white;border:none;padding:7px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">Get in touch →</button>
+          </div>
+        </div>
+
+        <div style="background:white;border-radius:10px;border:1px solid #EAECF0;overflow:hidden;">
+          <div style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);padding:14px 14px 10px;">
+            <div style="font-size:13px;font-weight:700;color:#101828;">UI/UX Design</div>
+            <div style="font-size:11px;color:#4338CA;margin-top:2px;font-weight:600;">From ₹25,000 · 14–21 days</div>
+          </div>
+          <div style="padding:10px 14px 14px;">
+            <div style="font-size:11px;color:#667085;line-height:1.5;margin-bottom:8px;">App & web design, wireframes & Figma prototypes.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px;">
+              <div style="font-size:9px;color:#344054;display:flex;align-items:center;gap:4px;"><span style="color:#10B981;">✓</span> Wireframes</div>
+              <div style="font-size:9px;color:#344054;display:flex;align-items:center;gap:4px;"><span style="color:#10B981;">✓</span> UI Design</div>
+              <div style="font-size:9px;color:#344054;display:flex;align-items:center;gap:4px;"><span style="color:#10B981;">✓</span> Prototype</div>
+              <div style="font-size:9px;color:#344054;display:flex;align-items:center;gap:4px;"><span style="color:#10B981;">✓</span> Handoff</div>
+            </div>
+            <button style="width:100%;background:#6366F1;color:white;border:none;padding:7px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;">Get in touch →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Package Card</h3>
+      <p>Gradient header with price upfront, checklist of deliverables, full-width CTA. Feels like a proper service package.</p>
+    </div>
+  </div>
+
+</div>

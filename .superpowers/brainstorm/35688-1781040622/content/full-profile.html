@@ -1,0 +1,166 @@
+<h2>Full Profile Page Layout</h2>
+<p class="subtitle">How should the sections sit below the hero? Pick the overall page structure.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+
+      <!-- Hero -->
+      <div style="background:#0A0E1A;border-radius:10px;overflow:hidden;margin-bottom:10px;">
+        <div style="height:56px;background:linear-gradient(135deg,#6366F1,#8B5CF6);position:relative;">
+          <div style="position:absolute;bottom:-22px;left:16px;width:44px;height:44px;border-radius:50%;background:#1E2040;border:2px solid #0A0E1A;display:flex;align-items:center;justify-content:center;color:#818CF8;font-weight:700;font-size:14px;">M</div>
+        </div>
+        <div style="padding:28px 16px 14px;">
+          <div style="color:#F5F5F5;font-weight:700;font-size:13px;">Maharshi Vaghela</div>
+          <div style="color:#94A3B8;font-size:10px;">UI/UX Designer · Ahmedabad</div>
+          <div style="display:flex;gap:12px;margin-top:8px;">
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:12px;">34</div><div style="color:#64748B;font-size:9px;">Projects</div></div>
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:12px;">₹12L+</div><div style="color:#64748B;font-size:9px;">Earned</div></div>
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:12px;">67%</div><div style="color:#64748B;font-size:9px;">Repeat</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single column sections -->
+      <div style="background:white;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #EAECF0;">
+        <div style="font-size:10px;font-weight:700;color:#344054;margin-bottom:6px;">SERVICES</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="background:#F9FAFB;border-radius:6px;padding:8px;border:1px solid #EAECF0;font-size:10px;color:#344054;">Brand Identity — from ₹15,000</div>
+          <div style="background:#F9FAFB;border-radius:6px;padding:8px;border:1px solid #EAECF0;font-size:10px;color:#344054;">UI/UX Design — from ₹25,000</div>
+        </div>
+      </div>
+
+      <div style="background:white;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #EAECF0;">
+        <div style="font-size:10px;font-weight:700;color:#344054;margin-bottom:6px;">PORTFOLIO</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div style="background:#EEF2FF;border-radius:6px;height:48px;"></div>
+          <div style="background:#F0FDF4;border-radius:6px;height:48px;"></div>
+        </div>
+      </div>
+
+      <div style="background:white;border-radius:8px;padding:12px;border:1px solid #EAECF0;">
+        <div style="font-size:10px;font-weight:700;color:#344054;margin-bottom:4px;">ABOUT</div>
+        <div style="font-size:9px;color:#667085;line-height:1.5;">5+ years · Startups & agencies · Figma · Brand strategy</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Single Column</h3>
+      <p>All sections stacked vertically. Clean scroll experience. Mobile-first feel. Simple and focused.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+
+      <!-- Hero -->
+      <div style="background:#0A0E1A;border-radius:10px;overflow:hidden;margin-bottom:10px;">
+        <div style="height:56px;background:linear-gradient(135deg,#6366F1,#8B5CF6);position:relative;">
+          <div style="position:absolute;bottom:-22px;left:16px;width:44px;height:44px;border-radius:50%;background:#1E2040;border:2px solid #0A0E1A;display:flex;align-items:center;justify-content:center;color:#818CF8;font-weight:700;font-size:14px;">M</div>
+        </div>
+        <div style="padding:28px 16px 14px;">
+          <div style="color:#F5F5F5;font-weight:700;font-size:13px;">Maharshi Vaghela</div>
+          <div style="color:#94A3B8;font-size:10px;">UI/UX Designer · Ahmedabad</div>
+          <div style="display:flex;gap:12px;margin-top:8px;">
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:12px;">34</div><div style="color:#64748B;font-size:9px;">Projects</div></div>
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:12px;">₹12L+</div><div style="color:#64748B;font-size:9px;">Earned</div></div>
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:12px;">67%</div><div style="color:#64748B;font-size:9px;">Repeat</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two column layout -->
+      <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:8px;">
+
+        <!-- Left sidebar -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:white;border-radius:8px;padding:10px;border:1px solid #EAECF0;">
+            <div style="font-size:9px;font-weight:700;color:#344054;margin-bottom:5px;">SERVICES</div>
+            <div style="font-size:9px;color:#6366F1;font-weight:600;padding:4px 0;border-bottom:1px solid #F2F4F7;">Brand Identity</div>
+            <div style="font-size:9px;color:#6366F1;font-weight:600;padding:4px 0;">UI/UX Design</div>
+          </div>
+          <div style="background:white;border-radius:8px;padding:10px;border:1px solid #EAECF0;">
+            <div style="font-size:9px;font-weight:700;color:#344054;margin-bottom:5px;">SKILLS</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px;">
+              <span style="background:#EEF2FF;color:#6366F1;padding:2px 6px;border-radius:10px;font-size:8px;">Figma</span>
+              <span style="background:#EEF2FF;color:#6366F1;padding:2px 6px;border-radius:10px;font-size:8px;">Branding</span>
+              <span style="background:#EEF2FF;color:#6366F1;padding:2px 6px;border-radius:10px;font-size:8px;">UI/UX</span>
+            </div>
+          </div>
+          <div style="background:white;border-radius:8px;padding:10px;border:1px solid #EAECF0;">
+            <div style="font-size:9px;font-weight:700;color:#344054;margin-bottom:4px;">ABOUT</div>
+            <div style="font-size:8px;color:#667085;line-height:1.5;">5+ years working with startups & agencies across India.</div>
+          </div>
+        </div>
+
+        <!-- Right main -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:white;border-radius:8px;padding:10px;border:1px solid #EAECF0;">
+            <div style="font-size:9px;font-weight:700;color:#344054;margin-bottom:6px;">PORTFOLIO</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+              <div style="background:#EEF2FF;border-radius:5px;height:40px;"></div>
+              <div style="background:#F0FDF4;border-radius:5px;height:40px;"></div>
+              <div style="background:#FEF3F2;border-radius:5px;height:40px;"></div>
+              <div style="background:#FFFAEB;border-radius:5px;height:40px;"></div>
+            </div>
+          </div>
+          <div style="background:white;border-radius:8px;padding:10px;border:1px solid #EAECF0;">
+            <div style="font-size:9px;font-weight:700;color:#344054;margin-bottom:4px;">VERIFIED STATS</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <div style="background:#F9FAFB;border-radius:5px;padding:6px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#101828;">89%</div><div style="font-size:8px;color:#667085;">Acceptance rate</div></div>
+              <div style="background:#F9FAFB;border-radius:5px;padding:6px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#101828;">&lt;2hr</div><div style="font-size:8px;color:#667085;">Response time</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Sidebar + Main</h3>
+      <p>Left sidebar for services/skills/about. Right main area for portfolio and stats. Desktop-optimised, more info visible at once.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F4F6FB;padding:16px;border-radius:8px;font-family:Inter,sans-serif;">
+
+      <!-- Hero -->
+      <div style="background:#0A0E1A;border-radius:10px;overflow:hidden;margin-bottom:10px;">
+        <div style="height:56px;background:linear-gradient(135deg,#6366F1,#8B5CF6);position:relative;">
+          <div style="position:absolute;bottom:-22px;left:16px;width:44px;height:44px;border-radius:50%;background:#1E2040;border:2px solid #0A0E1A;display:flex;align-items:center;justify-content:center;color:#818CF8;font-weight:700;font-size:14px;">M</div>
+        </div>
+        <div style="padding:28px 16px 14px;">
+          <div style="color:#F5F5F5;font-weight:700;font-size:13px;">Maharshi Vaghela</div>
+          <div style="color:#94A3B8;font-size:10px;">UI/UX Designer · Ahmedabad</div>
+          <div style="display:flex;gap:12px;margin-top:8px;">
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:12px;">34</div><div style="color:#64748B;font-size:9px;">Projects</div></div>
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:16px;">₹12L+</div><div style="color:#64748B;font-size:9px;">Earned</div></div>
+            <div style="text-align:center;"><div style="color:#F5F5F5;font-weight:700;font-size:12px;">67%</div><div style="color:#64748B;font-size:9px;">Repeat</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabbed layout -->
+      <div style="background:white;border-radius:8px;border:1px solid #EAECF0;overflow:hidden;">
+        <div style="display:flex;border-bottom:1px solid #EAECF0;">
+          <div style="padding:8px 12px;font-size:9px;font-weight:700;color:#6366F1;border-bottom:2px solid #6366F1;">Portfolio</div>
+          <div style="padding:8px 12px;font-size:9px;font-weight:600;color:#94A3B8;">Services</div>
+          <div style="padding:8px 12px;font-size:9px;font-weight:600;color:#94A3B8;">About</div>
+          <div style="padding:8px 12px;font-size:9px;font-weight:600;color:#94A3B8;">Stats</div>
+        </div>
+        <div style="padding:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;">
+            <div style="background:#EEF2FF;border-radius:5px;height:44px;"></div>
+            <div style="background:#F0FDF4;border-radius:5px;height:44px;"></div>
+            <div style="background:#FEF3F2;border-radius:5px;height:44px;"></div>
+          </div>
+          <div style="margin-top:8px;font-size:9px;color:#667085;text-align:center;">Tap tabs to explore services, about & verified stats</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Tabbed Sections</h3>
+      <p>Hero stays fixed, content organises into tabs — Portfolio / Services / About / Stats. Clean, mobile-friendly, one focus at a time.</p>
+    </div>
+  </div>
+
+</div>
