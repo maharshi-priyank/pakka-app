@@ -11,14 +11,14 @@ import { supabase } from '@/lib/supabase'
 const PRIMARY_TABS = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
   { icon: Users,           label: 'Leads',     href: '/leads' },
-  { icon: FileText,        label: 'Proposals', href: '/proposals' },
-  { icon: Receipt,         label: 'Invoices',  href: '/invoices' },
+  { icon: Building2,       label: 'Clients',   href: '/clients' },
+  { icon: FolderKanban,    label: 'Projects',  href: '/projects' },
 ]
 
 const MORE_ITEMS = [
+  { icon: FileText,      label: 'Proposals',   href: '/proposals' },
+  { icon: Receipt,       label: 'Invoices',    href: '/invoices' },
   { icon: PenLine,       label: 'Contracts',   href: '/contracts' },
-  { icon: Building2,     label: 'Clients',     href: '/clients' },
-  { icon: FolderKanban,  label: 'Projects',    href: '/projects' },
   { icon: BarChart3,     label: 'Reports',     href: '/reports' },
   { icon: CalendarDays,  label: 'Calendar',    href: '/calendar' },
   { icon: ClipboardList, label: 'Forms',       href: '/forms' },
