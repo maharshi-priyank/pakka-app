@@ -18,7 +18,7 @@ import PortalProposalCard from '@/features/portal/components/PortalProposalCard'
 import PortalContractCard from '@/features/portal/components/PortalContractCard'
 import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
 
-const APP_URL = import.meta.env.VITE_APP_URL as string
+const APP_URL = (import.meta.env.VITE_APP_URL as string | undefined) || window.location.origin
 
 type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings' | 'projects' | 'files'
 
