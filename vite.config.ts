@@ -19,8 +19,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
       },
       manifest: {
-        name: 'Clinekt — Client workflow for Indian freelancers',
-        short_name: 'Clinekt',
+        name: 'ClearWork — Business toolkit for Indian freelancers',
+        short_name: 'ClearWork',
         description:
           'Run your entire freelance business on one platform. GST invoices, e-signed contracts, UPI payments, WhatsApp reminders — all in one place.',
         theme_color: '#000000',
@@ -28,7 +28,7 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/app/dashboard',
+        start_url: '/dashboard',
         lang: 'en-IN',
         categories: ['business', 'productivity', 'finance'],
         icons: [
