@@ -17,7 +17,7 @@ export interface InvoiceSnap {
   invoiceNumber: string
   status: string
   total: string | number
-  amountPaid: string | number
+  amountPaid?: string | number
   dueDate?: string | null
   createdAt?: string
   clientName?: string
@@ -34,8 +34,8 @@ export default function InvoiceQuickView({ invoice, onClose }: Props) {
   if (!invoice) return null
 
   const total   = Number(invoice.total)
-  const paid    = Number(invoice.amountPaid)
-  const balance = total - paid
+  const paid    = invoice.amountPaid != null ? Number(invoice.amountPaid) : null
+  const balance = paid != null ? total - paid : null
 
   return (
     <QuickViewModal
@@ -58,12 +58,14 @@ export default function InvoiceQuickView({ invoice, onClose }: Props) {
             {formatCurrency(total).replace('₹', '')}
           </span>
         } />
-        <QVField label="Amount Paid" value={formatCurrency(paid)} />
-        <QVField label="Balance Due" value={
-          <span className={balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
-            {formatCurrency(balance)}
-          </span>
-        } />
+        {paid != null && <QVField label="Amount Paid" value={formatCurrency(paid)} />}
+        {balance != null && (
+          <QVField label="Balance Due" value={
+            <span className={balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
+              {formatCurrency(balance)}
+            </span>
+          } />
+        )}
         <QVField label="Due Date" value={invoice.dueDate ? formatDate(invoice.dueDate) : null} />
         {invoice.createdAt && <QVField label="Issued On" value={formatDate(invoice.createdAt)} />}
         {invoice.clientName && <QVField label="Client" value={invoice.clientName} />}

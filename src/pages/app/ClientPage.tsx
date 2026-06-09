@@ -342,7 +342,7 @@ export default function ClientPage() {
                 {client.invoices.map(inv => (
                   <tr
                     key={inv.id}
-                    onClick={() => setQvInvoice({ id: inv.id, invoiceNumber: inv.invoiceNumber, status: inv.status, total: inv.total, amountPaid: inv.amountPaid ?? '0', dueDate: inv.dueDate, clientName: client.name })}
+                    onClick={() => setQvInvoice({ id: inv.id, invoiceNumber: inv.invoiceNumber, status: inv.status, total: inv.total, amountPaid: '0', dueDate: inv.dueDate, clientName: client.name })}
                     className="group cursor-pointer hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2A] transition-colors"
                   >
                     <td className="px-4 py-3 text-[12.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] group-hover:text-[#6366F1] transition-colors font-mono">{inv.invoiceNumber}</td>
