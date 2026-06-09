@@ -1,8 +1,12 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { FileArchive, FileText, FileImage, File, Trash2, Upload, Loader2, Paperclip } from 'lucide-react'
-import { useAttachments, useUploadAttachment, useDeleteAttachment, humanSize } from '@/features/attachments/useAttachments'
+import { useAttachments, useUploadAttachment, useDeleteAttachment, useLinkCanvaDesign, humanSize } from '@/features/attachments/useAttachments'
+import { useProfile } from '@/features/settings/hooks/useProfile'
+import CanvaPickerModal from '@/components/CanvaPickerModal'
+import canvaSvg from '@/assets/canva.svg'
 
 function fileIcon(mimeType: string) {
+  if (mimeType === 'application/x-canva')  return <img src={canvaSvg} alt="Canva" className="w-4 h-4 rounded shrink-0" />
   if (mimeType.startsWith('image/'))       return <FileImage   size={14} className="text-[#667085] shrink-0" />
   if (mimeType === 'application/pdf')      return <FileText    size={14} className="text-[#D92D20] shrink-0" />
   if (/zip|tar|rar/.test(mimeType))        return <FileArchive size={14} className="text-[#F79009] shrink-0" />
@@ -13,11 +17,14 @@ interface Props { clientId: string }
 
 export default function ClientAttachmentsTab({ clientId }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const parent   = { clientId }
+  const [showCanvaPicker, setShowCanvaPicker] = useState(false)
+  const parent = { clientId }
 
   const { data: attachments = [], isLoading } = useAttachments(parent)
-  const uploadMutation = useUploadAttachment(parent)
-  const deleteMutation = useDeleteAttachment(parent)
+  const uploadMutation    = useUploadAttachment(parent)
+  const deleteMutation    = useDeleteAttachment(parent)
+  const linkCanvaDesign   = useLinkCanvaDesign(parent)
+  const { data: profile } = useProfile()
 
   function handleFiles(files: FileList | null) {
     if (!files) return
@@ -51,6 +58,18 @@ export default function ClientAttachmentsTab({ clientId }: Props) {
       </div>
       <input ref={inputRef} type="file" multiple className="sr-only" onChange={e => handleFiles(e.target.files)} />
 
+      {/* Add from Canva */}
+      {profile?.canvaConnected && (
+        <button
+          type="button"
+          onClick={() => setShowCanvaPicker(true)}
+          className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl border-2 border-dashed border-[#D0D5DD] dark:border-[#3A3C4A] text-[12.5px] font-medium text-[#667085] dark:text-[#8B92A8] hover:border-[#7B2FBE] hover:text-[#7B2FBE] hover:bg-[#F3EEFF] dark:hover:bg-[#1A1228] transition-all"
+        >
+          <img src={canvaSvg} alt="Canva" className="w-4 h-4 rounded" />
+          Add from Canva
+        </button>
+      )}
+
       {/* File list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
@@ -67,15 +86,14 @@ export default function ClientAttachmentsTab({ clientId }: Props) {
             <div key={a.id} className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A]">
               {fileIcon(a.mimeType)}
               <div className="flex-1 min-w-0">
-                <a
-                  href={a.fileUrl ?? '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[12.5px] font-semibold text-[#344054] dark:text-[#C5CAD6] hover:text-indigo-600 dark:hover:text-indigo-400 truncate block transition-colors"
-                >
-                  {a.fileName}
-                </a>
-                <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">{humanSize(a.fileSize)}</p>
+                {a.mimeType === 'application/x-canva' && a.fileUrl ? (
+                  <a href={a.fileUrl} target="_blank" rel="noreferrer" className="text-[12.5px] font-semibold text-[#6366F1] hover:underline truncate block">{a.fileName}</a>
+                ) : (
+                  <a href={a.fileUrl ?? '#'} target="_blank" rel="noopener noreferrer" className="text-[12.5px] font-semibold text-[#344054] dark:text-[#C5CAD6] hover:text-indigo-600 dark:hover:text-indigo-400 truncate block transition-colors">
+                    {a.fileName}
+                  </a>
+                )}
+                <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">{a.mimeType === 'application/x-canva' ? 'Canva design' : humanSize(a.fileSize)}</p>
               </div>
               <button
                 onClick={() => deleteMutation.mutate(a.id)}
@@ -87,6 +105,14 @@ export default function ClientAttachmentsTab({ clientId }: Props) {
             </div>
           ))}
         </div>
+      )}
+
+      {showCanvaPicker && (
+        <CanvaPickerModal
+          onClose={() => setShowCanvaPicker(false)}
+          isPicking={linkCanvaDesign.isPending}
+          onSelect={(design) => linkCanvaDesign.mutate(design, { onSuccess: () => setShowCanvaPicker(false) })}
+        />
       )}
     </div>
   )

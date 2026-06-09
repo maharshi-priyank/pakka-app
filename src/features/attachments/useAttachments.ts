@@ -4,6 +4,7 @@ import { api } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import type { Attachment, AttachmentParent, PortalAttachment } from './types'
+import type { CanvaDesign } from '@/features/settings/hooks/useCanva'
 
 export function humanSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
@@ -82,6 +83,28 @@ export function useUploadAttachment(parent: AttachmentParent, opts?: { gateInvoi
       toast.success('File uploaded')
     },
     onError: (err: Error) => toast.error(err.message || 'Upload failed'),
+  })
+}
+
+export function useLinkCanvaDesign(parent: AttachmentParent) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (design: CanvaDesign) => {
+      const body = {
+        ...parentQuery(parent),
+        fileName: design.title || 'Canva Design',
+        fileUrl:  design.viewUrl,
+        fileSize: 0,
+        mimeType: 'application/x-canva',
+      }
+      const { data } = await api.post<{ data: Attachment }>('/attachments', body)
+      return data.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['attachments', parentKey(parent)] })
+      toast.success('Canva design linked')
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to link design'),
   })
 }
 
