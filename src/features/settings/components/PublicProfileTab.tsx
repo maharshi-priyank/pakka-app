@@ -156,10 +156,11 @@ export default function PublicProfileTab() {
     setTimeout(() => setSaved(false), 2000)
   }
 
-  const profileUrl = `clearwork.in/u/${username || profile?.publicUsername || ''}`
+  const baseUrl = window.location.origin
+  const profileUrl = `${baseUrl}/u/${username || profile?.publicUsername || ''}`
 
   const copyUrl = () => {
-    navigator.clipboard.writeText(`https://${profileUrl}`)
+    navigator.clipboard.writeText(profileUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -183,7 +184,7 @@ export default function PublicProfileTab() {
             <div className="text-[13px] font-bold text-[#101828]">Public Profile</div>
             <div className="text-[11px] text-[#667085] mt-0.5">
               Share a professional profile page at{' '}
-              <span className="font-semibold text-[#344054]">clearwork.in/u/[username]</span>
+              <span className="font-semibold text-[#344054]">{window.location.host}/u/[username]</span>
             </div>
           </div>
           <label className="relative inline-flex cursor-pointer items-center">
@@ -196,7 +197,7 @@ export default function PublicProfileTab() {
         {enabled && profile?.publicUsername && (
           <div className="mt-3 flex items-center gap-2 bg-[#F4F6FB] rounded-lg px-3 py-2">
             <Globe size={12} className="text-[#6366F1] shrink-0" />
-            <span className="text-[11px] text-[#344054] flex-1 truncate font-mono">{profileUrl}</span>
+            <span className="text-[11px] text-[#344054] flex-1 truncate font-mono">{profileUrl.replace(/^https?:\/\//, '')}</span>
             <div className="flex items-center gap-1">
               <button
                 type="button"
@@ -206,7 +207,7 @@ export default function PublicProfileTab() {
                 {copied ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
               </button>
               <a
-                href={`https://${profileUrl}`}
+                href={profileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#667085] hover:text-[#6366F1] transition-colors"
@@ -228,7 +229,7 @@ export default function PublicProfileTab() {
             <div>
               <div className="flex items-center border border-[#D0D5DD] rounded-lg overflow-hidden focus-within:border-[#6366F1]">
                 <span className="px-3 text-[11px] text-[#98A2B3] bg-[#F9FAFB] border-r border-[#D0D5DD] py-2.5 shrink-0">
-                  clearwork.in/u/
+                  {window.location.host}/u/
                 </span>
                 <input
                   {...register('publicUsername')}
