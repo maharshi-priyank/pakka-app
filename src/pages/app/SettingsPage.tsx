@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { User, Building2, Bell, Puzzle } from 'lucide-react'
+import { User, Building2, Bell, Puzzle, Globe } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ProfileTab from '@/features/settings/components/ProfileTab'
 import BusinessTab from '@/features/settings/components/BusinessTab'
 import NotificationsTab from '@/features/notifications/components/NotificationsTab'
 import IntegrationsTab from '@/features/settings/components/IntegrationsTab'
+import PublicProfileTab from '@/features/settings/components/PublicProfileTab'
 
 const TABS = [
-  { key: 'profile',       label: 'Profile',       icon: User      },
-  { key: 'business',      label: 'Business',      icon: Building2 },
-  { key: 'notifications', label: 'Notifications', icon: Bell      },
-  { key: 'integrations',  label: 'Integrations',  icon: Puzzle    },
+  { key: 'profile',       label: 'Profile',        icon: User      },
+  { key: 'business',      label: 'Business',       icon: Building2 },
+  { key: 'public',        label: 'Public Profile', icon: Globe     },
+  { key: 'notifications', label: 'Notifications',  icon: Bell      },
+  { key: 'integrations',  label: 'Integrations',   icon: Puzzle    },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
@@ -53,6 +55,7 @@ export default function SettingsPage() {
 
       {activeTab === 'profile'       && <ProfileTab />}
       {activeTab === 'business'      && <BusinessTab />}
+      {activeTab === 'public'        && <PublicProfileTab />}
       {activeTab === 'notifications' && <NotificationsTab />}
       {activeTab === 'integrations'  && <IntegrationsTab />}
 

@@ -93,6 +93,14 @@ export const router = createBrowserRouter([
       return { Component }
     },
   },
+  // ── Public freelancer profile (no auth required) ────────────────────────────
+  {
+    path: '/u/:username',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/public/PublicProfilePage')
+      return { Component }
+    },
+  },
   {
     element: <ProtectedRoute />,
     children: [
