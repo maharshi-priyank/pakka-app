@@ -421,14 +421,14 @@ export default function InvoiceViewPage() {
             <div className="px-7 py-4 border-b border-[#F2F4F7]">
               <h2 className="text-[14px] font-bold text-[#101828]">Pay via Bank Transfer / UPI</h2>
             </div>
-            <div className="px-7 py-5 flex items-start gap-6">
-              <div className="flex-1 space-y-3">
+            <div className="px-7 py-5 flex items-center gap-8">
+              <div className="flex-1 min-w-0 space-y-4">
                 {invoice.user.upiId && (
                   <div className="flex items-start gap-2.5">
                     <Smartphone size={14} className="text-[#667085] mt-0.5 shrink-0" />
                     <div>
                       <p className="text-[11px] font-semibold text-[#98A2B3] uppercase tracking-wider">UPI ID</p>
-                      <p className="text-[13px] font-semibold text-[#101828] mt-0.5">{invoice.user.upiId}</p>
+                      <p className="text-[13px] font-semibold text-[#101828] mt-0.5 break-all">{invoice.user.upiId}</p>
                     </div>
                   </div>
                 )}
@@ -452,11 +452,16 @@ export default function InvoiceViewPage() {
                 )}
               </div>
               {invoice.user.upiQrUrl && (
-                <img
-                  src={invoice.user.upiQrUrl}
-                  alt="UPI QR Code"
-                  className="w-[110px] h-[110px] rounded-xl border border-[#EAECF0] object-contain shrink-0"
-                />
+                <div className="shrink-0 flex flex-col items-center gap-2">
+                  <div className="p-2 bg-white rounded-2xl border border-[#EAECF0] shadow-sm">
+                    <img
+                      src={invoice.user.upiQrUrl}
+                      alt="UPI QR Code"
+                      className="w-[148px] h-[148px] rounded-lg object-contain block"
+                    />
+                  </div>
+                  <p className="text-[10.5px] font-semibold text-[#98A2B3] uppercase tracking-wider">Scan to pay</p>
+                </div>
               )}
             </div>
           </div>
