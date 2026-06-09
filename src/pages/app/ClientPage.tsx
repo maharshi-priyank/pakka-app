@@ -496,7 +496,8 @@ function MiniTable({ headers, children, empty, emptyMsg }: {
   }
   return (
     <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] overflow-hidden">
-      <table className="w-full">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[480px]">
         <thead>
           <tr className="border-b border-[#F2F4F7] dark:border-[#26283A]">
             {headers.map(h => (
@@ -508,6 +509,7 @@ function MiniTable({ headers, children, empty, emptyMsg }: {
           {children}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

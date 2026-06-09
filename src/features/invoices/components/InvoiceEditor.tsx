@@ -214,7 +214,8 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
               <h3 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Line items</h3>
             </div>
 
-            <div className="px-5 py-4 space-y-3">
+            <div className="overflow-x-auto">
+            <div className="px-5 py-4 space-y-3 min-w-[480px]">
               {/* Column headers */}
               <div className="grid grid-cols-[72px_1fr_80px_100px_80px_32px] gap-2 text-xs font-medium text-[#667085] uppercase tracking-wide px-1">
                 <span>SAC/HSN</span>
@@ -304,6 +305,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
                   <Plus size={13} strokeWidth={2.5} /> Add line item
                 </button>
               )}
+            </div>
             </div>
 
             {/* Totals */}

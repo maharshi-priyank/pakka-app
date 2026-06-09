@@ -68,12 +68,12 @@ export default function FloatingAssistant() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-20 right-4 lg:bottom-5 lg:right-5 z-50 flex flex-col items-end gap-3">
 
       {/* Chat box */}
       {open && (
         <div
-          className="w-[340px] max-h-[520px] flex flex-col bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden"
+          className="w-[calc(100vw-2rem)] max-w-[340px] max-h-[520px] flex flex-col bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden"
           style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08)' }}
         >
 

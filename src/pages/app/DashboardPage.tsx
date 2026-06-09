@@ -82,7 +82,7 @@ function WidgetContent({ id }: { id: string }) {
 // ─── Col span helpers ─────────────────────────────────────────────────────────
 
 function colSpanClass(cols: 1 | 2 | 4) {
-  if (cols === 4) return 'col-span-2 lg:col-span-4'
+  if (cols === 4) return 'col-span-2 md:col-span-3 lg:col-span-4'
   if (cols === 2) return 'col-span-2'
   return 'col-span-1'
 }
@@ -345,8 +345,8 @@ export default function DashboardPage() {
         )}
 
         {/* Greeting */}
-        <div className="shrink-0">
-          <h1 className="text-[18px] md:text-[22px] font-bold text-[#101828] dark:text-[#ECEEF3] tracking-tight leading-none">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[18px] md:text-[22px] font-bold text-[#101828] dark:text-[#ECEEF3] tracking-tight leading-none truncate">
             {getGreeting(firstName)}
           </h1>
           <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74] mt-1">What are you working on?</p>
@@ -370,7 +370,7 @@ export default function DashboardPage() {
 
         {/* Right actions */}
         <div className="flex items-center gap-1 shrink-0">
-          <CalendarBell />
+          <div className="hidden sm:flex"><CalendarBell /></div>
           <NotificationBell />
           <button
             onClick={toggleTheme}
@@ -383,31 +383,33 @@ export default function DashboardPage() {
             {initials}
           </div>
 
-          {/* Customise widgets */}
-          <div className="w-px h-5 bg-gray-200 dark:bg-[#26283A] mx-1" />
-          {editMode && hidden.length > 0 && (
-            <button
-              onClick={() => setShowAddPanel(true)}
-              className="flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold text-[#6366F1] bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg hover:bg-[#E0E7FF] transition-colors"
-            >
-              <Plus size={13} strokeWidth={2.5} />
-              Add
-            </button>
-          )}
-          <button
-            onClick={() => { if (editMode) setShowAddPanel(false); setEditMode(v => !v) }}
-            className={cn(
-              'flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold rounded-lg transition-colors border',
-              editMode
-                ? 'text-white bg-[#0D1117] dark:bg-[#6366F1] border-[#0D1117] dark:border-[#6366F1] hover:bg-[#1a1d2e]'
-                : 'text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] border-[#EAECF0] dark:border-[#3D4258] hover:bg-[#F4F5F8] shadow-sm',
+          {/* Customise widgets — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-1">
+            <div className="w-px h-5 bg-gray-200 dark:bg-[#26283A] mx-1" />
+            {editMode && hidden.length > 0 && (
+              <button
+                onClick={() => setShowAddPanel(true)}
+                className="flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold text-[#6366F1] bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg hover:bg-[#E0E7FF] transition-colors"
+              >
+                <Plus size={13} strokeWidth={2.5} />
+                Add
+              </button>
             )}
-          >
-            {editMode
-              ? <><Check size={13} strokeWidth={2.5} /> Done</>
-              : <><GripVertical size={13} strokeWidth={2} /> Customise</>
-            }
-          </button>
+            <button
+              onClick={() => { if (editMode) setShowAddPanel(false); setEditMode(v => !v) }}
+              className={cn(
+                'flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold rounded-lg transition-colors border',
+                editMode
+                  ? 'text-white bg-[#0D1117] dark:bg-[#6366F1] border-[#0D1117] dark:border-[#6366F1] hover:bg-[#1a1d2e]'
+                  : 'text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] border-[#EAECF0] dark:border-[#3D4258] hover:bg-[#F4F5F8] shadow-sm',
+              )}
+            >
+              {editMode
+                ? <><Check size={13} strokeWidth={2.5} /> Done</>
+                : <><GripVertical size={13} strokeWidth={2} /> Customise</>
+              }
+            </button>
+          </div>
         </div>
       </div>
 
@@ -434,7 +436,7 @@ export default function DashboardPage() {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={visibleOrder} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {visibleOrder.map(id => {
               const meta = getWidgetMeta(id)
               if (!meta) return null
@@ -453,7 +455,7 @@ export default function DashboardPage() {
 
             {/* Empty state */}
             {visibleOrder.length === 0 && (
-              <div className="col-span-2 lg:col-span-4 flex flex-col items-center justify-center py-20 text-center">
+              <div className="col-span-2 md:col-span-3 lg:col-span-4 flex flex-col items-center justify-center py-20 text-center">
                 <div className="w-14 h-14 rounded-2xl bg-[#F4F5F8] flex items-center justify-center mb-4">
                   <GripVertical size={24} className="text-[#D0D5DD]" />
                 </div>

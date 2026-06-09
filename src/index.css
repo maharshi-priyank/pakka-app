@@ -87,6 +87,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color-scheme: light;
+    overflow-x: hidden;
   }
 
   html.dark {
@@ -102,6 +103,7 @@
     background-attachment: fixed;
     color: var(--text-2);
     font-size: 14px;
+    overflow-x: hidden;
     line-height: 1.5;
     transition: background-color 0.15s, color 0.15s;
   }
