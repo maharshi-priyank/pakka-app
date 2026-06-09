@@ -1,10 +1,11 @@
 import * as Icons from 'lucide-react'
 import { Clock, ArrowRight } from 'lucide-react'
-import type { LucideProps } from 'lucide-react'
 import type { PublicProfileData, PublicPortfolioItem } from '../hooks/usePublicProfile'
 
+type SimpleIcon = React.ComponentType<{ size?: number; className?: string }>
+
 function ServiceIcon({ name, size = 20 }: { name: string; size?: number }) {
-  const Icon = (Icons as Record<string, React.ComponentType<LucideProps>>)[name]
+  const Icon = (Icons as unknown as Record<string, SimpleIcon>)[name]
   return Icon ? (
     <Icon size={size} className="text-[#6366F1]" />
   ) : (

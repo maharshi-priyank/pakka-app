@@ -13,7 +13,7 @@ export interface PublicService {
   description: string
   tags: string[]
   priceFrom: number
-  deliveryDays: string
+  deliveryDays: number
 }
 
 export interface PublicPortfolioItem {

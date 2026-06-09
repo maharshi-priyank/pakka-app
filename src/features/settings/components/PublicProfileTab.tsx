@@ -25,10 +25,10 @@ const serviceSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
   description: z.string().optional(),
-  icon: z.string().default('Briefcase'),
-  priceFrom: z.number().min(0).default(0),
-  deliveryDays: z.number().min(1).default(7),
-  tags: z.array(z.string()).default([]),
+  icon: z.string(),
+  priceFrom: z.coerce.number().min(0),
+  deliveryDays: z.coerce.number().min(1),
+  tags: z.array(z.string()),
 })
 
 const portfolioSchema = z.object({
@@ -145,8 +145,8 @@ export default function PublicProfileTab() {
       publicSkills: values.publicSkills
         ? values.publicSkills.split(',').map((s) => s.trim()).filter(Boolean)
         : [],
-      publicServices: values.publicServices as MyPublicProfile['publicServices'],
-      publicPortfolio: values.publicPortfolio as MyPublicProfile['publicPortfolio'],
+      publicServices: values.publicServices as unknown as MyPublicProfile['publicServices'],
+      publicPortfolio: values.publicPortfolio as unknown as MyPublicProfile['publicPortfolio'],
     })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)

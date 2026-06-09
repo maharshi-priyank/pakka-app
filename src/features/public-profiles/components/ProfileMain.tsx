@@ -12,13 +12,15 @@ import {
   ArrowRight,
   ArrowUpRight,
 } from 'lucide-react'
-import type { LucideProps } from 'lucide-react'
+
 import type { PublicProfileData, PublicPortfolioItem } from '../hooks/usePublicProfile'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
+type SimpleIcon = React.ComponentType<{ size?: number; className?: string }>
+
 function ServiceIcon({ name }: { name: string }) {
-  const Icon = (Icons as Record<string, React.ComponentType<LucideProps>>)[name]
+  const Icon = (Icons as unknown as Record<string, SimpleIcon>)[name]
   return Icon ? (
     <Icon size={16} className="text-[#6366F1]" />
   ) : (
