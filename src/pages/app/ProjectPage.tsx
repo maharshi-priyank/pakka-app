@@ -15,6 +15,9 @@ import {
 } from '@/features/projects/hooks/useProjects'
 import ProjectFilesPanel from '@/features/projects/components/ProjectFilesPanel'
 import ProjectNotesTab from '@/features/projects/components/ProjectNotesTab'
+import InvoiceQuickView, { type InvoiceSnap } from '@/features/invoices/components/InvoiceQuickView'
+import ProposalQuickView, { type ProposalSnap } from '@/features/proposals/components/ProposalQuickView'
+import ContractQuickView, { type ContractSnap } from '@/features/contracts/components/ContractQuickView'
 
 const STATUS_COLORS: Record<ProjectStatus, string> = {
   ACTIVE:    'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400',
@@ -227,6 +230,9 @@ export default function ProjectPage() {
   const [showEdit,  setShowEdit]  = useState(false)
   const [showDel,   setShowDel]   = useState(false)
   const [deleting,  setDeleting]  = useState(false)
+  const [qvInvoice,   setQvInvoice]   = useState<InvoiceSnap | null>(null)
+  const [qvProposal,  setQvProposal]  = useState<ProposalSnap | null>(null)
+  const [qvContract,  setQvContract]  = useState<ContractSnap | null>(null)
 
   const { data: project, isLoading } = useProject(id!)
   const { data: stats,   isLoading: statsLoading } = useProjectStats(id!)
@@ -491,7 +497,7 @@ export default function ProjectPage() {
               </thead>
               <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
                 {project.proposals.map(p => (
-                  <tr key={p.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/proposals/${p.id}`)}>
+                  <tr key={p.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvProposal({ id: p.id, title: p.title, status: p.status, totalAmount: p.totalAmount, createdAt: p.createdAt })}>
                     <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{p.title}</Td>
                     <Td><StatusBadge status={p.status} /></Td>
                     <Td>{formatCurrency(Number(p.totalAmount))}</Td>
@@ -518,7 +524,7 @@ export default function ProjectPage() {
               </thead>
               <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
                 {project.contracts.map(c => (
-                  <tr key={c.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/contracts/${c.id}`)}>
+                  <tr key={c.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvContract({ id: c.id, title: c.title, status: c.status, sentAt: c.sentAt, signedAt: c.signedAt })}>
                     <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{c.title}</Td>
                     <Td><StatusBadge status={c.status} /></Td>
                     <Td className="text-[#667085] dark:text-[#8B92A8]">{c.sentAt ? formatDate(c.sentAt) : '—'}</Td>
@@ -545,7 +551,7 @@ export default function ProjectPage() {
               </thead>
               <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
                 {project.invoices.map(inv => (
-                  <tr key={inv.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => navigate(`/invoices/${inv.id}`)}>
+                  <tr key={inv.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvInvoice({ id: inv.id, invoiceNumber: inv.invoiceNumber, status: inv.status, total: inv.total, amountPaid: inv.amountPaid, dueDate: inv.dueDate })}>
                     <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{inv.invoiceNumber}</Td>
                     <Td><StatusBadge status={inv.status} /></Td>
                     <Td>{formatCurrency(Number(inv.total))}</Td>
@@ -624,6 +630,11 @@ export default function ProjectPage() {
           </div>
         )}
       </div>
+
+      {/* Quick-view modals — preview before editing */}
+      <InvoiceQuickView  invoice={qvInvoice}   onClose={() => setQvInvoice(null)} />
+      <ProposalQuickView proposal={qvProposal} onClose={() => setQvProposal(null)} />
+      <ContractQuickView contract={qvContract} onClose={() => setQvContract(null)} />
 
       {/* Edit Modal */}
       {showEdit && (

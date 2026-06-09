@@ -14,6 +14,9 @@ import type { ClientProject } from '@/features/clients/hooks/useClients'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 import ClientNotesTab from '@/features/clients/components/ClientNotesTab'
 import ClientAttachmentsTab from '@/features/clients/components/ClientAttachmentsTab'
+import InvoiceQuickView, { type InvoiceSnap } from '@/features/invoices/components/InvoiceQuickView'
+import ProposalQuickView, { type ProposalSnap } from '@/features/proposals/components/ProposalQuickView'
+import ContractQuickView, { type ContractSnap } from '@/features/contracts/components/ContractQuickView'
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT:     'bg-[#F2F4F7] dark:bg-[#21222D] text-[#344054] dark:text-[#8B92A8]',
@@ -147,6 +150,9 @@ export default function ClientPage() {
   const [editOpen,     setEditOpen]     = useState(false)
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const [copied,       setCopied]       = useState(false)
+  const [qvInvoice,    setQvInvoice]    = useState<InvoiceSnap | null>(null)
+  const [qvProposal,   setQvProposal]   = useState<ProposalSnap | null>(null)
+  const [qvContract,   setQvContract]   = useState<ContractSnap | null>(null)
 
   const { data: client, isLoading } = useClient(id!)
   const regenerate = useRegeneratePortalToken()
@@ -295,7 +301,7 @@ export default function ClientPage() {
                 {client.proposals.map(p => (
                   <tr
                     key={p.id}
-                    onClick={() => navigate(`/proposals/${p.id}`)}
+                    onClick={() => setQvProposal({ id: p.id, title: p.title, status: p.status, totalAmount: p.totalAmount, createdAt: p.createdAt, clientName: client.name })}
                     className="group cursor-pointer hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2A] transition-colors"
                   >
                     <td className="px-4 py-3 text-[12.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] group-hover:text-[#6366F1] transition-colors">{p.title}</td>
@@ -316,7 +322,7 @@ export default function ClientPage() {
                 {client.contracts.map(c => (
                   <tr
                     key={c.id}
-                    onClick={() => navigate(`/contracts/${c.id}`)}
+                    onClick={() => setQvContract({ id: c.id, title: c.title, status: c.status, createdAt: c.createdAt, clientName: client.name })}
                     className="group cursor-pointer hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2A] transition-colors"
                   >
                     <td className="px-4 py-3 text-[12.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] group-hover:text-[#6366F1] transition-colors">{c.title}</td>
@@ -336,7 +342,7 @@ export default function ClientPage() {
                 {client.invoices.map(inv => (
                   <tr
                     key={inv.id}
-                    onClick={() => navigate(`/invoices/${inv.id}`)}
+                    onClick={() => setQvInvoice({ id: inv.id, invoiceNumber: inv.invoiceNumber, status: inv.status, total: inv.total, amountPaid: inv.amountPaid ?? '0', dueDate: inv.dueDate, clientName: client.name })}
                     className="group cursor-pointer hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2A] transition-colors"
                   >
                     <td className="px-4 py-3 text-[12.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] group-hover:text-[#6366F1] transition-colors font-mono">{inv.invoiceNumber}</td>
@@ -433,6 +439,11 @@ export default function ClientPage() {
           <p className="text-[14px] text-[#98A2B3]">Client not found.</p>
         </div>
       )}
+
+      {/* Quick-view modals — preview before editing */}
+      <InvoiceQuickView  invoice={qvInvoice}   onClose={() => setQvInvoice(null)} />
+      <ProposalQuickView proposal={qvProposal} onClose={() => setQvProposal(null)} />
+      <ContractQuickView contract={qvContract} onClose={() => setQvContract(null)} />
 
       {editOpen && client && (
         <EditClientModal
