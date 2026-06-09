@@ -11,8 +11,8 @@ export default function InvoiceEditorPage() {
   const [searchParams] = useSearchParams()
   const isNew = !id || id === 'new'
 
-  const urlProjectId = searchParams.get('projectId') ?? undefined
-  const urlClientId  = searchParams.get('clientId')  ?? undefined
+  const urlProjectId = searchParams.get('projectId') || undefined
+  const urlClientId  = searchParams.get('clientId')  || undefined
   const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: invoice, isLoading } = useInvoice(isNew ? null : id ?? null)

@@ -24,8 +24,8 @@ export default function ProposalEditorPage() {
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [showAI,             setShowAI]             = useState(false)
 
-  const urlProjectId = searchParams.get('projectId') ?? undefined
-  const urlClientId  = searchParams.get('clientId')  ?? undefined
+  const urlProjectId = searchParams.get('projectId') || undefined
+  const urlClientId  = searchParams.get('clientId')  || undefined
   const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: proposal, isLoading } = useProposal(isNew ? null : id ?? null)

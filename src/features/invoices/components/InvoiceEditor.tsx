@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -12,6 +12,7 @@ import RecordPaymentModal from './RecordPaymentModal'
 import InvoiceFilesPanel from './InvoiceFilesPanel'
 import FieldInfoPopover from '@/features/ai/components/FieldInfoPopover'
 import { useProjects } from '@/features/projects/hooks/useProjects'
+import { useClients } from '@/features/clients/hooks/useClients'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 
 const GST_RATE_OPTIONS = [0, 5, 12, 18, 28]
@@ -43,7 +44,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const { data: profile } = useProfile()
 
   const {
-    register, control, handleSubmit, watch,
+    register, control, handleSubmit, watch, setValue,
     formState: { errors },
   } = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceFormSchema),
@@ -91,7 +92,17 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const recurrenceCycle = watch('recurrenceCycle')
   const watchedClientId = watch('clientId') ?? ''
 
+  const { data: clientsData } = useClients()
   const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
+
+  const clientSynced = useRef(false)
+  useEffect(() => {
+    if (clientSynced.current || !clientsData?.clients?.length || !defaultClientId) return
+    if (clientsData.clients.some(c => c.id === defaultClientId)) {
+      setValue('clientId', defaultClientId)
+      clientSynced.current = true
+    }
+  }, [clientsData?.clients?.length])
 
   const subtotal  = lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate)), 0)
   const gstAmount = gstType === 'EXEMPT'
@@ -175,6 +186,25 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
               )}>
                 {displayInvoice.status}
               </span>
+            </div>
+          )}
+
+          {/* Client selector */}
+          {isNew && (
+            <div>
+              <label className="form-label">Client *</label>
+              <select
+                {...register('clientId')}
+                disabled={!canEdit}
+                className="form-input w-full max-w-xs"
+              >
+                <option value="">— Select a client —</option>
+                {(clientsData?.clients ?? []).map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}{c.company ? ` · ${c.company}` : ''}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 

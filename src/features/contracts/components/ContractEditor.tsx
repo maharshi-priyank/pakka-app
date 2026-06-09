@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -14,6 +14,7 @@ import {
 import type { Contract, SendContractResponse } from '../schemas/contract.schema'
 import { useCreateContract, useUpdateContract, useSendContract } from '../hooks/useContracts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
+import { useClients } from '@/features/clients/hooks/useClients'
 
 type Tab = 'parties' | 'scope' | 'financials' | 'clauses'
 
@@ -83,7 +84,17 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
   const paymentArr      = useFieldArray({ control, name: 'content.paymentSchedule' })
 
   const watchedClientId = watch('clientId') ?? ''
+  const { data: clientsData } = useClients()
   const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
+
+  const clientSynced = useRef(false)
+  useEffect(() => {
+    if (clientSynced.current || !clientsData?.clients?.length || !defaultClientId) return
+    if (clientsData.clients.some(c => c.id === defaultClientId)) {
+      setValue('clientId', defaultClientId)
+      clientSynced.current = true
+    }
+  }, [clientsData?.clients?.length])
 
   const exclusions = (watch('content.exclusions') ?? []) as string[]
   function addExclusion() { setValue('content.exclusions' as never, [...exclusions, ''] as never) }
@@ -166,6 +177,22 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
           {/* ══ PARTIES ════════════════════════════════════════════════════════ */}
           {activeTab === 'parties' && (
             <>
+              {!isEdit && (
+                <CSection title="Client" description="Who is this contract for?">
+                  <select
+                    {...register('clientId')}
+                    className="form-input w-full max-w-xs"
+                  >
+                    <option value="">— Select a client —</option>
+                    {(clientsData?.clients ?? []).map(cl => (
+                      <option key={cl.id} value={cl.id}>
+                        {cl.name}{cl.company ? ` · ${cl.company}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </CSection>
+              )}
+
               <CSection title="Contract details" description="Title and preamble">
                 <div className="space-y-4">
                   <div>

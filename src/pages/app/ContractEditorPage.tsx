@@ -12,8 +12,8 @@ export default function ContractEditorPage() {
   const [searchParams] = useSearchParams()
   const isNew = !id || id === 'new'
 
-  const urlProjectId = searchParams.get('projectId') ?? undefined
-  const urlClientId  = searchParams.get('clientId')  ?? undefined
+  const urlProjectId = searchParams.get('projectId') || undefined
+  const urlClientId  = searchParams.get('clientId')  || undefined
   const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: contract, isLoading } = useContract(isNew ? null : id ?? null)
