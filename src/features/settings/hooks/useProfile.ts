@@ -27,6 +27,7 @@ export interface UserProfile {
   clickUpWorkspaceId:      string | null
   flodeskConnected:        boolean
   canvaConnected:          boolean
+  googleFormsConnected:    boolean
   createdAt:               string
   defaultHsnSac:           string | null
   defaultLutNumber:        string | null

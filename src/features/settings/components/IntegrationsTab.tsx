@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AlertCircle, Loader2, RefreshCw, ExternalLink, X, Send } from 'lucide-react'
+import { AlertCircle, Loader2, RefreshCw, ExternalLink, X, Send, Copy, Check, BookOpen } from 'lucide-react'
 import canvaSvg from '@/assets/canva.svg'
 import flodeskSvg from '@/assets/flowdesk.svg'
 import outlookSvg from '@/assets/outlook.svg'
+import googleFormsSvg from '@/assets/forms.svg'
 import { api } from '@/lib/api'
 import { useProfile } from '../hooks/useProfile'
 import { useConnectClickUp, useDisconnectClickUp, useSyncClickUp } from '../hooks/useClickUp'
 import { useConnectFlodesk, useDisconnectFlodesk } from '../hooks/useFlodesk'
 import { useConnectCanva, useDisconnectCanva } from '../hooks/useCanva'
+import { useConnectGoogleForms, useDisconnectGoogleForms, useGoogleFormsSetup } from '../hooks/useGoogleForms'
 
 function useConnectGoogle() {
   return useMutation({
@@ -233,8 +235,6 @@ function IntegrationCard(props: IntegrationDef) {
   )
 }
 
-// ── Tab filter ────────────────────────────────────────────────────────────────
-
 // ── Request Integration Modal ─────────────────────────────────────────────────
 
 function RequestIntegrationModal({ onClose }: { onClose: () => void }) {
@@ -332,6 +332,151 @@ function RequestIntegrationModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+// ── Google Forms Setup Modal ──────────────────────────────────────────────────
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold border border-[#EAECF0] dark:border-[#3D4258] text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2B] transition-colors"
+    >
+      {copied ? <Check size={11} className="text-[#12B76A]" /> : <Copy size={11} />}
+      {copied ? 'Copied' : 'Copy'}
+    </button>
+  )
+}
+
+function GoogleFormsSetupModal({ onClose }: { onClose: () => void }) {
+  const { data, isLoading } = useGoogleFormsSetup(true)
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white dark:bg-[#13141C] rounded-2xl shadow-2xl w-full max-w-lg border border-[#EAECF0] dark:border-[#2A2B35] max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-start justify-between p-6 pb-4 sticky top-0 bg-white dark:bg-[#13141C] z-10 border-b border-[#EAECF0] dark:border-[#2A2B35]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#F0FDF4] dark:bg-emerald-950/40">
+              <img src={googleFormsSvg} alt="Google Forms" className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Google Forms — Setup Guide</h3>
+              <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">One-time setup per form. Takes ~2 minutes.</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2B] transition-colors">
+            <X size={16} className="text-[#667085]" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 size={20} className="animate-spin text-[#6366F1]" />
+            </div>
+          ) : (
+            <>
+              {/* Step 1 */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[#6366F1] text-white text-[10px] font-bold flex items-center justify-center shrink-0">1</span>
+                  <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3]">Open your Google Form</p>
+                </div>
+                <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] pl-7">
+                  Go to <a href="https://forms.google.com" target="_blank" rel="noopener noreferrer" className="text-[#6366F1] hover:underline">forms.google.com</a> and open the form you want to connect.
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[#6366F1] text-white text-[10px] font-bold flex items-center justify-center shrink-0">2</span>
+                  <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3]">Open the Script Editor</p>
+                </div>
+                <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] pl-7">
+                  Click the <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">⋮ More options</span> menu (top-right) → <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">Script editor</span>.
+                </p>
+              </div>
+
+              {/* Step 3 — Script snippet */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[#6366F1] text-white text-[10px] font-bold flex items-center justify-center shrink-0">3</span>
+                  <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3]">Paste this script</p>
+                </div>
+                <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] pl-7">
+                  Replace all existing code in the editor with the snippet below, then click <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">Save</span> (Ctrl+S).
+                </p>
+                <div className="ml-7 rounded-xl border border-[#EAECF0] dark:border-[#2A2B35] overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-2 bg-[#F9FAFB] dark:bg-[#1A1B26] border-b border-[#EAECF0] dark:border-[#2A2B35]">
+                    <span className="text-[11px] font-semibold text-[#667085] dark:text-[#8B92A8]">Apps Script</span>
+                    {data && <CopyButton text={data.scriptSnippet} />}
+                  </div>
+                  <pre className="p-3 text-[11px] text-[#344054] dark:text-[#C2C8D8] font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap break-all bg-white dark:bg-[#13141C]">
+                    {data?.scriptSnippet ?? ''}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Step 4 — Trigger */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[#6366F1] text-white text-[10px] font-bold flex items-center justify-center shrink-0">4</span>
+                  <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3]">Add a form-submit trigger</p>
+                </div>
+                <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] pl-7">
+                  In the Script editor, click <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">Triggers</span> (clock icon in the sidebar) → <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">+ Add Trigger</span>.<br />
+                  Set: <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">Function = onFormSubmit</span>, <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">Event type = On form submit</span>. Save.
+                </p>
+              </div>
+
+              {/* Webhook URL reference */}
+              <div className="rounded-xl border border-[#EAECF0] dark:border-[#2A2B35] p-4 bg-[#F9FAFB] dark:bg-[#1A1B26] space-y-2">
+                <p className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Your unique webhook URL</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-[11px] text-[#6366F1] dark:text-[#818CF8] font-mono break-all">
+                    {data?.webhookUrl ?? ''}
+                  </code>
+                  {data && <CopyButton text={data.webhookUrl} />}
+                </div>
+                <p className="text-[11px] text-[#98A2B3] dark:text-[#5A6078]">This URL is already embedded in the script above. Keep it private.</p>
+              </div>
+
+              {/* Done */}
+              <div className="rounded-xl border border-[#D1FAE5] dark:border-emerald-900/50 bg-[#ECFDF3] dark:bg-emerald-950/30 p-4">
+                <p className="text-[12px] font-semibold text-[#027A48] dark:text-[#34D399]">All set!</p>
+                <p className="text-[12px] text-[#065F46] dark:text-[#6EE7B7] mt-0.5">
+                  Every new Google Form submission will automatically create a lead in Pakka. Repeat steps 2–4 for any other forms you want to connect.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="px-6 pb-6">
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 rounded-xl bg-[#6366F1] text-white text-[13px] font-semibold hover:bg-[#4F46E5] transition-colors"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Tab filter ────────────────────────────────────────────────────────────────
+
 const TABS: { id: Category | 'all'; label: string }[] = [
   { id: 'all',           label: 'View all' },
   { id: 'productivity',  label: 'Productivity' },
@@ -342,21 +487,24 @@ const TABS: { id: Category | 'all'; label: string }[] = [
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function IntegrationsTab() {
-  const [activeTab, setActiveTab]         = useState<Category | 'all'>('all')
+  const [activeTab, setActiveTab]               = useState<Category | 'all'>('all')
   const [showRequestModal, setShowRequestModal] = useState(false)
+  const [showSetupModal, setShowSetupModal]     = useState(false)
 
   const { data: profile, isLoading } = useProfile()
-  const connectGoogle     = useConnectGoogle()
-  const disconnectGoogle  = useDisconnectGoogle()
-  const connectOutlook    = useConnectOutlook()
-  const disconnectOutlook = useDisconnectOutlook()
-  const connectClickUp    = useConnectClickUp()
-  const disconnectClickUp = useDisconnectClickUp()
-  const syncClickUp       = useSyncClickUp()
-  const connectFlodesk    = useConnectFlodesk()
-  const disconnectFlodesk = useDisconnectFlodesk()
-  const connectCanva      = useConnectCanva()
-  const disconnectCanva   = useDisconnectCanva()
+  const connectGoogle        = useConnectGoogle()
+  const disconnectGoogle     = useDisconnectGoogle()
+  const connectOutlook       = useConnectOutlook()
+  const disconnectOutlook    = useDisconnectOutlook()
+  const connectClickUp       = useConnectClickUp()
+  const disconnectClickUp    = useDisconnectClickUp()
+  const syncClickUp          = useSyncClickUp()
+  const connectFlodesk       = useConnectFlodesk()
+  const disconnectFlodesk    = useDisconnectFlodesk()
+  const connectCanva         = useConnectCanva()
+  const disconnectCanva      = useDisconnectCanva()
+  const connectGoogleForms   = useConnectGoogleForms()
+  const disconnectGoogleForms = useDisconnectGoogleForms()
 
   const integrations: IntegrationDef[] = [
     {
@@ -441,6 +589,29 @@ export default function IntegrationsTab() {
       onDisconnect: () => disconnectCanva.mutate(),
       learnMoreUrl: 'https://canva.com',
     },
+    {
+      id:          'google-forms',
+      icon:        <BrandIcon src={googleFormsSvg} alt="Google Forms" />,
+      title:       'Google Forms',
+      description: 'Send Google Form responses directly to Pakka to create leads or client inquiries automatically.',
+      category:    'productivity',
+      isConnected: profile?.googleFormsConnected ?? false,
+      isLoading,
+      connectPending:    connectGoogleForms.isPending,
+      disconnectPending: disconnectGoogleForms.isPending,
+      onConnect:   () => connectGoogleForms.mutate(),
+      onDisconnect: () => disconnectGoogleForms.mutate(),
+      extraAction: (
+        <button
+          onClick={() => setShowSetupModal(true)}
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6366F1] dark:text-[#818CF8] hover:text-[#4F46E5] transition-colors"
+        >
+          <BookOpen size={10} />
+          Setup guide
+        </button>
+      ),
+      learnMoreUrl: 'https://forms.google.com',
+    },
   ]
 
   const filtered = activeTab === 'all'
@@ -489,6 +660,9 @@ export default function IntegrationsTab() {
 
       {showRequestModal && (
         <RequestIntegrationModal onClose={() => setShowRequestModal(false)} />
+      )}
+      {showSetupModal && (
+        <GoogleFormsSetupModal onClose={() => setShowSetupModal(false)} />
       )}
     </div>
   )
