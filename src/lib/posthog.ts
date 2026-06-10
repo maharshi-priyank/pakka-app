@@ -1,8 +1,10 @@
 import posthog from 'posthog-js'
 
 export function initPostHog() {
-  posthog.init('phc_xSXNoxHAsWWSdrFotWYZoaDKJ4MK9j2WvDoDXrNMMKdc', {
-    api_host: 'https://us.i.posthog.com',
+  const key = import.meta.env.VITE_POSTHOG_KEY as string | undefined
+  if (!key) return
+  posthog.init(key, {
+    api_host: (import.meta.env.VITE_POSTHOG_HOST as string | undefined) ?? 'https://us.i.posthog.com',
     capture_pageview: false, // we fire manually on route change
     capture_pageleave: true,
     session_recording: {
