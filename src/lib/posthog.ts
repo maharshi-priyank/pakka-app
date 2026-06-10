@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import posthog, { type PostHogInterface } from 'posthog-js'
 
 export function initPostHog() {
   const key = import.meta.env.VITE_POSTHOG_KEY as string | undefined
@@ -11,8 +11,8 @@ export function initPostHog() {
       maskAllInputs: true, // mask sensitive form fields by default
       maskInputOptions: { password: true },
     },
-    loaded: (ph) => {
-      if (import.meta.env.DEV) ph.opt_out_capturing() // no noise from local dev
+    loaded: (instance: PostHogInterface) => {
+      if (import.meta.env.DEV) instance.opt_out_capturing() // no noise from local dev
     },
   })
 }
