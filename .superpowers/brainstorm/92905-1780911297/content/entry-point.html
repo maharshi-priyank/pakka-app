@@ -1,0 +1,58 @@
+<h2>Where should tax education live?</h2>
+<p class="subtitle">The invoice editor has GST type, GST %, and TDS rate fields — all bare with zero explanation. Where should users find help?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Inline — info icons next to each field</h3>
+      <p>Every tax field (GST type, TDS %, GST %) gets a small ⓘ icon. Click it → popover explains that specific field with a plain-English definition and example. Plus a floating "Ask AI" button at the bottom of the invoice form for open questions.</p>
+      <div style="margin-top:12px; padding:12px; background:#F8FAFC; border-radius:8px; font-size:12px; color:#475569;">
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+          <span style="font-weight:600; color:#1E293B;">GST Type</span>
+          <span style="width:16px;height:16px;border-radius:50%;background:#E0E7FF;color:#4F46E5;font-size:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;">i</span>
+        </div>
+        <div style="padding:8px; background:white; border:1px solid #E2E8F0; border-radius:6px; font-size:11px; color:#64748B;">
+          <strong style="color:#1E293B;">IGST</strong> — use when your client is in a <em>different state</em> than you.<br/>
+          <strong style="color:#1E293B;">CGST + SGST</strong> — use when client is in the <em>same state</em>.<br/>
+          <span style="color:#22C55E;">💡 ClearWork detects this automatically from the client's address.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Dedicated "Tax Help" side panel inside invoice editor</h3>
+      <p>A collapsible panel on the right side of the invoice editor. Contains a full mini-guide: what is GST, IGST vs CGST/SGST, TDS rates, with a live AI chat box at the bottom. User can toggle it open/closed.</p>
+      <div style="margin-top:12px; padding:12px; background:#F8FAFC; border-radius:8px; font-size:12px; color:#475569; display:flex; gap:8px;">
+        <div style="flex:1; background:white; border:1px solid #E2E8F0; border-radius:6px; padding:8px; font-size:11px;">
+          <div style="font-weight:600; color:#1E293B; margin-bottom:4px;">📋 Invoice fields</div>
+          <div style="color:#94A3B8; font-size:10px;">GST Type ▾</div>
+          <div style="color:#94A3B8; font-size:10px; margin-top:4px;">TDS Rate ▾</div>
+          <div style="color:#94A3B8; font-size:10px; margin-top:4px;">Items...</div>
+        </div>
+        <div style="width:130px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:6px; padding:8px; font-size:10px;">
+          <div style="font-weight:600; color:#1D4ED8; margin-bottom:4px;">📚 Tax Guide</div>
+          <div style="color:#3B82F6; margin-bottom:4px;">What is GST?</div>
+          <div style="color:#3B82F6; margin-bottom:4px;">IGST vs CGST?</div>
+          <div style="color:#3B82F6; margin-bottom:8px;">What is TDS?</div>
+          <div style="background:#DBEAFE; border-radius:4px; padding:4px; font-size:9px; color:#1E40AF;">Ask AI anything...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Global "Tax Assistant" — accessible from anywhere in the app</h3>
+      <p>A floating button (bottom-right corner, always visible) that opens a full-screen or drawer AI chat. Not specific to the invoice editor — users can ask tax questions from anywhere: dashboard, invoices list, settings. Like a mini tax advisor embedded in the app.</p>
+      <div style="margin-top:12px; padding:12px; background:#F8FAFC; border-radius:8px; font-size:12px; color:#475569; position:relative; min-height:80px;">
+        <div style="color:#94A3B8; font-size:11px;">Any page in ClearWork...</div>
+        <div style="position:absolute; bottom:8px; right:8px; width:36px; height:36px; background:linear-gradient(135deg,#6366F1,#4F46E5); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:16px; box-shadow:0 4px 12px rgba(99,102,241,0.4);">💬</div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,177 @@
+<h2>Full design — does this look right?</h2>
+<p class="subtitle">Two surfaces working together: ⓘ inline popovers on the invoice + the chat widget. Review each section.</p>
+
+<div class="section">
+  <div class="label">Surface 1 — Invoice editor: ⓘ info icons with popover</div>
+
+  <div class="mockup">
+    <div class="mockup-header">Invoice Editor · GST Type field — popover open</div>
+    <div class="mockup-body" style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+
+      <!-- Left: form -->
+      <div style="flex:1; min-width:200px; background:#F8FAFC; border-radius:8px; padding:16px; font-size:12px;">
+        <div style="font-weight:700; color:#0F172A; margin-bottom:14px; font-size:13px;">Invoice settings</div>
+
+        <!-- GST Type row -->
+        <div style="margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:5px; margin-bottom:5px;">
+            <label style="font-size:11px; font-weight:600; color:#374151;">GST Type</label>
+            <span style="width:15px;height:15px;border-radius:50%;background:#EEF2FF;color:#6366F1;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer; border:1px solid #C7D2FE;">i</span>
+          </div>
+          <select style="width:100%; padding:6px 10px; border:1px solid #D1D5DB; border-radius:7px; font-size:11px; background:white; color:#111827;">
+            <option>IGST (inter-state)</option>
+          </select>
+        </div>
+
+        <!-- TDS Rate row -->
+        <div style="margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:5px; margin-bottom:5px;">
+            <label style="font-size:11px; font-weight:600; color:#374151;">TDS Rate (%)</label>
+            <span style="width:15px;height:15px;border-radius:50%;background:#EEF2FF;color:#6366F1;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer; border:1px solid #C7D2FE;">i</span>
+          </div>
+          <select style="width:100%; padding:6px 10px; border:1px solid #D1D5DB; border-radius:7px; font-size:11px; background:white; color:#111827;">
+            <option>10% — Section 194J</option>
+          </select>
+        </div>
+
+        <!-- GST % per line -->
+        <div>
+          <div style="display:flex; align-items:center; gap:5px; margin-bottom:5px;">
+            <label style="font-size:11px; font-weight:600; color:#374151;">GST % per line item</label>
+            <span style="width:15px;height:15px;border-radius:50%;background:#EEF2FF;color:#6366F1;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer; border:1px solid #C7D2FE;">i</span>
+          </div>
+          <select style="width:100%; padding:6px 10px; border:1px solid #D1D5DB; border-radius:7px; font-size:11px; background:white; color:#111827;">
+            <option>18%</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right: popover -->
+      <div style="width:240px; background:white; border-radius:10px; border:1px solid #E2E8F0; box-shadow:0 8px 24px rgba(0,0,0,0.1); padding:14px; font-size:12px; position:relative;">
+        <div style="position:absolute; top:-6px; left:20px; width:12px; height:12px; background:white; border-left:1px solid #E2E8F0; border-top:1px solid #E2E8F0; transform:rotate(45deg);"></div>
+        <div style="font-weight:700; color:#0F172A; margin-bottom:8px; font-size:12px;">What is GST Type?</div>
+        <div style="color:#475569; font-size:11px; line-height:1.6; margin-bottom:10px;">
+          GST splits differently based on whether your client is in the <strong>same state</strong> or a <strong>different state</strong> than you.
+        </div>
+        <div style="background:#F8FAFC; border-radius:7px; padding:10px; font-size:11px; margin-bottom:10px;">
+          <div style="display:flex; gap:8px; margin-bottom:6px;">
+            <span style="background:#DBEAFE; color:#1D4ED8; border-radius:4px; padding:1px 6px; font-weight:600; font-size:10px; white-space:nowrap;">IGST</span>
+            <span style="color:#475569;">Client in <strong>different state</strong> — one combined tax</span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <span style="background:#DCF5E7; color:#15803D; border-radius:4px; padding:1px 6px; font-weight:600; font-size:10px; white-space:nowrap;">CGST+SGST</span>
+            <span style="color:#475569;">Client in <strong>same state</strong> — split equally</span>
+          </div>
+        </div>
+        <div style="background:#FFFBEB; border-radius:6px; padding:8px; font-size:10px; color:#92400E; margin-bottom:10px;">
+          💡 ClearWork auto-detects this from the client's address. You usually don't need to change it.
+        </div>
+        <button style="width:100%; padding:6px; background:white; border:1px solid #E2E8F0; border-radius:7px; font-size:10px; color:#6366F1; font-weight:600; cursor:pointer;">Ask AI about GST →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Surface 2 — Chat widget (global, all pages)</div>
+
+  <div class="mockup">
+    <div class="mockup-header">Chat widget — mid-conversation</div>
+    <div class="mockup-body" style="display:flex; justify-content:flex-end; align-items:flex-end; gap:12px; flex-wrap:wrap;">
+
+      <!-- Chat box -->
+      <div style="width:300px; background:white; border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.12); overflow:hidden; border:1px solid #E2E8F0;">
+
+        <!-- Header -->
+        <div style="background:white; border-bottom:1px solid #F1F5F9; padding:12px 14px; display:flex; align-items:center; gap:10px;">
+          <div style="width:32px;height:32px;border-radius:9px;background:#F0FDF4;display:flex;align-items:center;justify-content:center;font-size:16px;">✦</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#0F172A;">ClearWork Assistant</div>
+            <div style="font-size:10px;color:#10B981;display:flex;align-items:center;gap:4px;">
+              <span style="width:6px;height:6px;background:#10B981;border-radius:50%;display:inline-block;"></span>
+              Online · replies instantly
+            </div>
+          </div>
+          <div style="margin-left:auto; display:flex; gap:6px;">
+            <span style="font-size:11px; color:#94A3B8; cursor:pointer;">⟳</span>
+            <span style="font-size:14px; color:#94A3B8; cursor:pointer;">✕</span>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div style="padding:12px; background:#F8FAFC; min-height:180px; display:flex; flex-direction:column; gap:8px;">
+
+          <!-- AI greeting -->
+          <div style="display:flex; gap:8px; align-items:flex-start;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#F0FDF4;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✦</div>
+            <div style="background:white; border:1px solid #E2E8F0; border-radius:0 10px 10px 10px; padding:9px 11px; font-size:11px; color:#374151; line-height:1.5; max-width:220px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+              Hi! I can help with GST, TDS, invoicing, contracts, tax filing — anything about running your freelance business in India. What's on your mind?
+            </div>
+          </div>
+
+          <!-- Suggestion pills -->
+          <div style="display:flex; flex-wrap:wrap; gap:5px; padding-left:30px;">
+            <span style="background:white; color:#374151; border:1px solid #E2E8F0; border-radius:20px; padding:3px 10px; font-size:10px; cursor:pointer;">When do I need GST registration?</span>
+            <span style="background:white; color:#374151; border:1px solid #E2E8F0; border-radius:20px; padding:3px 10px; font-size:10px; cursor:pointer;">What is TDS 194J?</span>
+            <span style="background:white; color:#374151; border:1px solid #E2E8F0; border-radius:20px; padding:3px 10px; font-size:10px; cursor:pointer;">New vs old tax regime?</span>
+          </div>
+
+          <!-- User message -->
+          <div style="display:flex; justify-content:flex-end;">
+            <div style="background:#0F172A; color:white; border-radius:10px 10px 0 10px; padding:9px 11px; font-size:11px; line-height:1.5; max-width:200px;">
+              My client is from Mumbai and I'm in Delhi. Which GST should I use?
+            </div>
+          </div>
+
+          <!-- AI response -->
+          <div style="display:flex; gap:8px; align-items:flex-start;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#F0FDF4;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">✦</div>
+            <div style="background:white; border:1px solid #E2E8F0; border-radius:0 10px 10px 10px; padding:9px 11px; font-size:11px; color:#374151; line-height:1.6; max-width:220px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+              Since your client is in <strong>Mumbai (Maharashtra)</strong> and you're in <strong>Delhi</strong> — different states — you should use <span style="background:#DBEAFE; color:#1D4ED8; border-radius:3px; padding:1px 5px; font-weight:600; font-size:10px;">IGST @ 18%</span>.<br/><br/>
+              The full 18% goes to the central government. ClearWork auto-selects this based on your client's address. ✓
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div style="padding:10px; border-top:1px solid #E2E8F0; background:white; display:flex; gap:8px; align-items:center;">
+          <input style="flex:1; border:1px solid #E2E8F0; border-radius:20px; padding:7px 12px; font-size:11px; outline:none; background:#F8FAFC; color:#374151;" placeholder="Ask a follow-up..." />
+          <button style="background:#0F172A; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;">↑</button>
+        </div>
+      </div>
+
+      <!-- Floating button (closed state) -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+        <div style="font-size:10px; color:#94A3B8; white-space:nowrap;">Floating button</div>
+        <div style="width:46px; height:46px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 16px rgba(0,0,0,0.15); cursor:pointer; border:1px solid #E2E8F0;">✦</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">What's being built — summary</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:12px;">
+    <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:8px; padding:12px;">
+      <div style="font-weight:700; color:#15803D; margin-bottom:6px;">Frontend</div>
+      <ul style="color:#166534; margin:0; padding-left:16px; line-height:1.8; font-size:11px;">
+        <li><code>FloatingAssistant.tsx</code> — chat widget mounted in AppShell (all pages)</li>
+        <li><code>useAIChat</code> hook — conversation history, calls /ai/chat</li>
+        <li>ⓘ icons added to GST Type, TDS Rate, GST % fields in InvoiceEditor</li>
+        <li>Popover component with field explanation + "Ask AI →" link</li>
+      </ul>
+    </div>
+    <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px; padding:12px;">
+      <div style="font-weight:700; color:#1D4ED8; margin-bottom:6px;">Backend</div>
+      <ul style="color:#1E40AF; margin:0; padding-left:16px; line-height:1.8; font-size:11px;">
+        <li>New <code>POST /ai/chat</code> endpoint</li>
+        <li>Accepts <code>message</code> + <code>history[]</code> (multi-turn)</li>
+        <li>Gemini system prompt: India freelance business advisor</li>
+        <li>Returns <code>{ reply: string }</code></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<p style="text-align:center; font-size:12px; color:#94A3B8; margin-top:8px;">Does this design look right? Any changes before we write the spec?</p>

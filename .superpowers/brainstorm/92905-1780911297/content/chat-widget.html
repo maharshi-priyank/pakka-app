@@ -1,0 +1,177 @@
+<h2>Chat widget — which style feels right?</h2>
+<p class="subtitle">Floating button (bottom-right) that opens a chat box. Pick the design that fits ClearWork best.</p>
+
+<div class="cards">
+
+  <!-- Option A: Clean minimal -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F8FAFC; padding:16px; position:relative; min-height:320px; overflow:hidden;">
+
+      <!-- Invoice editor snippet -->
+      <div style="background:white; border:1px solid #E2E8F0; border-radius:8px; padding:12px; font-size:11px; color:#475569;">
+        <div style="font-weight:700; color:#0F172A; font-size:12px; margin-bottom:10px;">🧾 Invoice #INV-042</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="color:#374151; font-weight:600; font-size:11px;">GST Type</span>
+            <span style="width:14px;height:14px;border-radius:50%;background:#EEF2FF;color:#6366F1;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;">i</span>
+          </div>
+          <span style="background:#F1F5F9; border:1px solid #E2E8F0; border-radius:4px; padding:2px 8px; font-size:10px; color:#334155;">IGST ▾</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="color:#374151; font-weight:600; font-size:11px;">TDS Rate</span>
+            <span style="width:14px;height:14px;border-radius:50%;background:#EEF2FF;color:#6366F1;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;">i</span>
+          </div>
+          <span style="background:#F1F5F9; border:1px solid #E2E8F0; border-radius:4px; padding:2px 8px; font-size:10px; color:#334155;">10% ▾</span>
+        </div>
+      </div>
+
+      <!-- Chat box open state -->
+      <div style="position:absolute; bottom:48px; right:8px; width:200px; background:white; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.15); overflow:hidden; border:1px solid #E2E8F0;">
+        <div style="background:#0F172A; padding:10px 12px; display:flex; align-items:center; gap:8px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:#6366F1;display:flex;align-items:center;justify-content:center;font-size:12px;">✦</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:white;">ClearWork AI</div>
+            <div style="font-size:9px;color:#94A3B8;">Ask me anything</div>
+          </div>
+          <div style="margin-left:auto;color:#64748B;font-size:12px;cursor:pointer;">✕</div>
+        </div>
+        <div style="padding:10px; background:#F8FAFC; min-height:80px;">
+          <div style="background:white; border:1px solid #E2E8F0; border-radius:8px; padding:8px; font-size:10px; color:#475569; margin-bottom:6px;">
+            👋 Hi! Ask me anything about GST, TDS, invoicing, or running your freelance business.
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px;">
+            <span style="background:#EEF2FF;color:#6366F1;border-radius:20px;padding:2px 8px;font-size:9px;cursor:pointer;">What is IGST?</span>
+            <span style="background:#EEF2FF;color:#6366F1;border-radius:20px;padding:2px 8px;font-size:9px;cursor:pointer;">TDS on 194J?</span>
+          </div>
+        </div>
+        <div style="padding:8px; border-top:1px solid #E2E8F0; display:flex; gap:4px;">
+          <input style="flex:1;border:1px solid #E2E8F0;border-radius:6px;padding:4px 8px;font-size:10px;outline:none;" placeholder="Type a question..." />
+          <button style="background:#6366F1;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">↑</button>
+        </div>
+      </div>
+
+      <!-- Floating button -->
+      <div style="position:absolute; bottom:8px; right:8px; width:36px; height:36px; background:#0F172A; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:16px; box-shadow:0 4px 16px rgba(15,23,42,0.35); cursor:pointer;">✦</div>
+    </div>
+    <div class="card-body">
+      <h3>Dark header, sparkle icon</h3>
+      <p>Matches ClearWork's dark brand. Minimal, premium feel. Indigo suggestion pills.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Friendly gradient -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F8FAFC; padding:16px; position:relative; min-height:320px; overflow:hidden;">
+
+      <!-- Invoice editor snippet -->
+      <div style="background:white; border:1px solid #E2E8F0; border-radius:8px; padding:12px; font-size:11px; color:#475569;">
+        <div style="font-weight:700; color:#0F172A; font-size:12px; margin-bottom:10px;">🧾 Invoice #INV-042</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="color:#374151; font-weight:600; font-size:11px;">GST Type</span>
+            <span style="width:14px;height:14px;border-radius:50%;background:#FEF3C7;color:#D97706;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;">?</span>
+          </div>
+          <span style="background:#F1F5F9; border:1px solid #E2E8F0; border-radius:4px; padding:2px 8px; font-size:10px; color:#334155;">IGST ▾</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="color:#374151; font-weight:600; font-size:11px;">TDS Rate</span>
+            <span style="width:14px;height:14px;border-radius:50%;background:#FEF3C7;color:#D97706;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;">?</span>
+          </div>
+          <span style="background:#F1F5F9; border:1px solid #E2E8F0; border-radius:4px; padding:2px 8px; font-size:10px; color:#334155;">10% ▾</span>
+        </div>
+      </div>
+
+      <!-- Chat box open state -->
+      <div style="position:absolute; bottom:48px; right:8px; width:200px; background:white; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,0.15); overflow:hidden; border:1px solid #E2E8F0;">
+        <div style="background:linear-gradient(135deg,#6366F1 0%,#8B5CF6 100%); padding:10px 12px; display:flex; align-items:center; gap:8px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;">🤖</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:white;">Ask AI</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.75);">Tax & business help</div>
+          </div>
+          <div style="margin-left:auto;color:rgba(255,255,255,0.7);font-size:12px;cursor:pointer;">✕</div>
+        </div>
+        <div style="padding:10px; background:white; min-height:80px;">
+          <div style="background:#F5F3FF; border-radius:8px; padding:8px; font-size:10px; color:#5B21B6; margin-bottom:6px;">
+            Hi! I can help with GST, TDS, contracts, payments — anything freelance 👋
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px;">
+            <span style="background:#F5F3FF;color:#7C3AED;border-radius:20px;padding:2px 8px;font-size:9px;cursor:pointer;">Do I need GST registration?</span>
+            <span style="background:#F5F3FF;color:#7C3AED;border-radius:20px;padding:2px 8px;font-size:9px;cursor:pointer;">What is 194J?</span>
+          </div>
+        </div>
+        <div style="padding:8px; border-top:1px solid #F3F4F6; display:flex; gap:4px; background:#FAFAFA;">
+          <input style="flex:1;border:1px solid #E5E7EB;border-radius:8px;padding:4px 8px;font-size:10px;outline:none;background:white;" placeholder="Ask anything..." />
+          <button style="background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;border:none;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;">↑</button>
+        </div>
+      </div>
+
+      <!-- Floating button -->
+      <div style="position:absolute; bottom:8px; right:8px; width:36px; height:36px; background:linear-gradient(135deg,#6366F1,#8B5CF6); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; box-shadow:0 4px 16px rgba(99,102,241,0.45); cursor:pointer;">🤖</div>
+    </div>
+    <div class="card-body">
+      <h3>Purple gradient, robot icon</h3>
+      <p>Friendly and approachable. Signals "AI feature" clearly. Works well for non-technical users.</p>
+    </div>
+  </div>
+
+  <!-- Option C: White card, branded -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#F8FAFC; padding:16px; position:relative; min-height:320px; overflow:hidden;">
+
+      <!-- Invoice editor snippet -->
+      <div style="background:white; border:1px solid #E2E8F0; border-radius:8px; padding:12px; font-size:11px; color:#475569;">
+        <div style="font-weight:700; color:#0F172A; font-size:12px; margin-bottom:10px;">🧾 Invoice #INV-042</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="color:#374151; font-weight:600; font-size:11px;">GST Type</span>
+            <span style="width:14px;height:14px;border-radius:50%;background:#ECFDF5;color:#059669;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;">i</span>
+          </div>
+          <span style="background:#F1F5F9; border:1px solid #E2E8F0; border-radius:4px; padding:2px 8px; font-size:10px; color:#334155;">IGST ▾</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="color:#374151; font-weight:600; font-size:11px;">TDS Rate</span>
+            <span style="width:14px;height:14px;border-radius:50%;background:#ECFDF5;color:#059669;font-size:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;">i</span>
+          </div>
+          <span style="background:#F1F5F9; border:1px solid #E2E8F0; border-radius:4px; padding:2px 8px; font-size:10px; color:#334155;">10% ▾</span>
+        </div>
+      </div>
+
+      <!-- Chat box open state -->
+      <div style="position:absolute; bottom:48px; right:8px; width:200px; background:white; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.12); overflow:hidden; border:1px solid #E2E8F0;">
+        <div style="background:white; border-bottom:1px solid #E2E8F0; padding:10px 12px; display:flex; align-items:center; gap:8px;">
+          <div style="width:28px;height:28px;border-radius:8px;background:#ECFDF5;display:flex;align-items:center;justify-content:center;font-size:14px;">✦</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#0F172A;">ClearWork Assistant</div>
+            <div style="font-size:9px;color:#10B981;display:flex;align-items:center;gap:3px;"><span style="width:5px;height:5px;background:#10B981;border-radius:50%;display:inline-block;"></span> Online</div>
+          </div>
+          <div style="margin-left:auto;color:#94A3B8;font-size:12px;cursor:pointer;">✕</div>
+        </div>
+        <div style="padding:10px; background:#F8FAFC; min-height:80px;">
+          <div style="background:white; border:1px solid #E2E8F0; border-radius:8px 8px 8px 2px; padding:8px; font-size:10px; color:#475569; margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+            Hello! I can answer any question about GST, TDS, invoicing or your freelance business.
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px;">
+            <span style="background:white;color:#0F172A;border:1px solid #E2E8F0;border-radius:20px;padding:2px 8px;font-size:9px;cursor:pointer;">GST registration?</span>
+            <span style="background:white;color:#0F172A;border:1px solid #E2E8F0;border-radius:20px;padding:2px 8px;font-size:9px;cursor:pointer;">IGST vs CGST?</span>
+          </div>
+        </div>
+        <div style="padding:8px; border-top:1px solid #E2E8F0; display:flex; gap:4px;">
+          <input style="flex:1;border:1px solid #E2E8F0;border-radius:20px;padding:4px 10px;font-size:10px;outline:none;background:#F8FAFC;" placeholder="Type your question..." />
+          <button style="background:#0F172A;color:white;border:none;border-radius:50%;width:24px;height:24px;font-size:11px;cursor:pointer;flex-shrink:0;">↑</button>
+        </div>
+      </div>
+
+      <!-- Floating button -->
+      <div style="position:absolute; bottom:8px; right:8px; width:36px; height:36px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 4px 16px rgba(0,0,0,0.15); cursor:pointer; border:1px solid #E2E8F0;">✦</div>
+    </div>
+    <div class="card-body">
+      <h3>White card, "Online" status</h3>
+      <p>Feels like a real support chat (Intercom/Crisp style). Green online dot makes it feel live. Subtle and professional.</p>
+    </div>
+  </div>
+
+</div>

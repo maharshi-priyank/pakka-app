@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 import { load } from '@cashfreepayments/cashfree-js'
 import { api } from '@/lib/api'
 
@@ -34,12 +35,15 @@ export function useSubscriptionStatus() {
 }
 
 export function useCreateSubscription() {
+  const navigate = useNavigate()
   return useMutation({
     mutationFn: async (tier: 'SOLO' | 'STUDIO') => {
       const { checkoutUrl: sessionId } = await createSubscription(tier)
       const mode = (import.meta.env.VITE_CASHFREE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production'
       const cashfree = await load({ mode })
       await cashfree.subscriptionsCheckout({ subsSessionId: sessionId })
+      // If SDK resolves the promise (modal flow), navigate programmatically
+      navigate('/billing/success')
     },
     onError: () => {
       toast.error('Failed to start checkout. Please try again.')
