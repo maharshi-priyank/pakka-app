@@ -18,13 +18,13 @@ export default function BillingCancelPage() {
 
         <div className="flex gap-3">
           <button
-            onClick={() => navigate('/app/dashboard', { replace: true })}
+            onClick={() => navigate('/dashboard', { replace: true })}
             className="flex-1 h-11 bg-[#F4F5F8] text-[#344054] text-[13px] font-semibold rounded-xl hover:bg-[#EAECF0] transition-colors cursor-pointer"
           >
             Back to dashboard
           </button>
           <button
-            onClick={() => navigate('/app/settings?tab=billing', { replace: true })}
+            onClick={() => navigate('/settings?tab=billing', { replace: true })}
             className="flex-1 h-11 bg-[#6366F1] text-white text-[13px] font-semibold rounded-xl hover:bg-[#4F46E5] transition-colors cursor-pointer"
           >
             View plans

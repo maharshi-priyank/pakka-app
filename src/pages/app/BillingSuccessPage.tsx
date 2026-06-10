@@ -27,7 +27,7 @@ export default function BillingSuccessPage() {
           const planName = sub.plan === 'SOLO' ? 'Solo' : 'Studio'
           setTimeout(() => {
             toast.success(`You're on the ${planName} plan. Welcome!`)
-            navigate('/app/dashboard', { replace: true })
+            navigate('/dashboard', { replace: true })
           }, 1500)
           return
         }
@@ -83,7 +83,7 @@ export default function BillingSuccessPage() {
               Your payment was received. Plan activation may take a moment to reflect.
             </p>
             <button
-              onClick={() => navigate('/app/settings?tab=billing', { replace: true })}
+              onClick={() => navigate('/settings?tab=billing', { replace: true })}
               className="w-full h-11 bg-[#6366F1] text-white text-[13px] font-semibold rounded-xl hover:bg-[#4F46E5] transition-colors cursor-pointer"
             >
               Go to billing settings
