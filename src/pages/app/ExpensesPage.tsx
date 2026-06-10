@@ -19,6 +19,75 @@ import {
   type Expense, type CreateExpensePayload,
 } from '@/features/expenses/hooks/useExpenses'
 
+// ─── Date preset helpers ──────────────────────────────────────────────────────
+type DatePreset = 'all' | 'this-month' | 'last-month' | 'this-quarter' | 'this-fy' | 'last-fy' | 'custom'
+
+const DATE_PRESET_LABELS: Record<DatePreset, string> = {
+  'all':          'All time',
+  'this-month':   'This month',
+  'last-month':   'Last month',
+  'this-quarter': 'This quarter',
+  'this-fy':      'This FY',
+  'last-fy':      'Last FY',
+  'custom':       'Custom',
+}
+
+function toISO(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}
+
+function currentFYStart(): Date {
+  const now  = new Date()
+  const year = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1
+  return new Date(year, 3, 1)
+}
+
+function getIndianQuarterBounds(): { from: Date; to: Date } {
+  const now   = new Date()
+  const month = now.getMonth()
+  let qStart: number
+  if      (month >= 3 && month <= 5)  qStart = 3
+  else if (month >= 6 && month <= 8)  qStart = 6
+  else if (month >= 9 && month <= 11) qStart = 9
+  else                                 qStart = 0
+  const year = qStart === 0 ? now.getFullYear() : now.getFullYear()
+  const from = new Date(year, qStart, 1)
+  const to   = new Date(year, qStart + 3, 0)
+  return { from, to }
+}
+
+function presetToDates(preset: DatePreset): { from?: string; to?: string } {
+  const now = new Date()
+  switch (preset) {
+    case 'all': return {}
+    case 'this-month': {
+      const from = new Date(now.getFullYear(), now.getMonth(), 1)
+      return { from: toISO(from), to: toISO(now) }
+    }
+    case 'last-month': {
+      const from = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      const to   = new Date(now.getFullYear(), now.getMonth(), 0)
+      return { from: toISO(from), to: toISO(to) }
+    }
+    case 'this-quarter': {
+      const { from, to } = getIndianQuarterBounds()
+      return { from: toISO(from), to: toISO(to) }
+    }
+    case 'this-fy': {
+      const fyStart = currentFYStart()
+      const fyEnd   = new Date(fyStart.getFullYear() + 1, 2, 31)
+      return { from: toISO(fyStart), to: toISO(fyEnd) }
+    }
+    case 'last-fy': {
+      const fyStart     = currentFYStart()
+      const lastFyStart = new Date(fyStart.getFullYear() - 1, 3, 1)
+      const lastFyEnd   = new Date(fyStart.getFullYear(), 2, 31)
+      return { from: toISO(lastFyStart), to: toISO(lastFyEnd) }
+    }
+    default: return {}
+  }
+}
+
 // ─── Schema ────────────────────────────────────────────────────────────────────
 const expenseSchema = z.object({
   clientId:    z.string().optional(),
@@ -51,6 +120,9 @@ export default function ExpensesPage() {
 
   const [filter,     setFilter]     = useState<FilterTab>('all')
   const [clientFilter, setClientFilter] = useState('')
+  const [datePreset, setDatePreset] = useState<DatePreset>('all')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo,   setCustomTo]   = useState('')
   const [showForm,   setShowForm]   = useState(false)
   const [editExpense, setEditExpense] = useState<Expense | null>(null)
   const [selected,   setSelected]   = useState<Set<string>>(new Set())
@@ -63,10 +135,15 @@ export default function ExpensesPage() {
   const { data: projectsData } = useProjects()
   const projects = projectsData?.projects ?? []
   const { data: categoryList = [] } = useExpenseCategories()
+  const dateFilters: { from?: string; to?: string } = datePreset === 'custom'
+    ? { from: customFrom || undefined, to: customTo || undefined }
+    : presetToDates(datePreset)
   const { data: expenses = [], isLoading } = useExpenses({
     clientId:   clientFilter || undefined,
     isBillable: filter === 'unbilled' ? true : undefined,
     isBilled:   filter === 'unbilled' ? false : filter === 'billed' ? true : undefined,
+    from:       dateFilters.from,
+    to:         dateFilters.to,
   })
   const createExpense  = useCreateExpense()
   const updateExpense  = useUpdateExpense()
@@ -201,6 +278,7 @@ export default function ExpensesPage() {
   // ─── Totals ─────────────────────────────────────────────────────────────────
   const totalAmount    = expenses.reduce((s, e) => s + Number(e.amount), 0)
   const unbilledAmount = unbilledExpenses.reduce((s, e) => s + Number(e.amount), 0)
+  const gstPaid        = expenses.reduce((s, e) => s + (e.gstAmount != null ? Number(e.gstAmount) : 0), 0)
 
   return (
     <div className="space-y-5 max-w-[860px]">
@@ -212,12 +290,14 @@ export default function ExpensesPage() {
           <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
             {preselectedProjectId && projects.find(p => p.id === preselectedProjectId) ? (
               <>Logging for <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{projects.find(p => p.id === preselectedProjectId)?.name}</span></>
+            ) : (totalAmount > 0 || unbilledAmount > 0 || gstPaid > 0) ? (
+              <span className="flex flex-wrap gap-x-3">
+                {totalAmount > 0 && <span>₹{fmtAmount(totalAmount)} total</span>}
+                {unbilledAmount > 0 && <span>₹{fmtAmount(unbilledAmount)} unbilled</span>}
+                {gstPaid > 0 && <span>₹{fmtAmount(gstPaid)} GST paid</span>}
+              </span>
             ) : (
-              <>
-                {totalAmount > 0 && <>₹{fmtAmount(totalAmount)} total · </>}
-                {unbilledAmount > 0 && <>₹{fmtAmount(unbilledAmount)} unbilled</>}
-                {totalAmount === 0 && 'Log out-of-pocket costs and bill them back to clients'}
-              </>
+              'Log out-of-pocket costs and bill them back to clients'
             )}
           </p>
         </div>
@@ -442,30 +522,86 @@ export default function ExpensesPage() {
       )}
 
       {/* ── Filters ── */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-2">
-          {(['all', 'unbilled', 'billed'] as FilterTab[]).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={cn(
-                'px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all',
-                filter === tab
-                  ? 'bg-[#0D1117] dark:bg-[#6366F1] text-white'
-                  : 'bg-[#F3F4F6] dark:bg-[#21222D] text-[#6B7280] dark:text-[#8B92A8] hover:bg-[#E5E7EB] dark:hover:bg-[#26283A]',
-              )}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Billed status tabs */}
+          <div className="flex items-center gap-2">
+            {(['all', 'unbilled', 'billed'] as FilterTab[]).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all',
+                  filter === tab
+                    ? 'bg-[#0D1117] dark:bg-[#6366F1] text-white'
+                    : 'bg-[#F3F4F6] dark:bg-[#21222D] text-[#6B7280] dark:text-[#8B92A8] hover:bg-[#E5E7EB] dark:hover:bg-[#26283A]',
+                )}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Client filter */}
+          <DropdownSelect
+            value={clientFilter}
+            onChange={setClientFilter}
+            placeholder="All clients"
+            options={[{ value: '', label: 'All clients' }, ...clients.map(c => ({ value: c.id, label: c.name }))]}
+            className="w-full sm:w-auto"
+          />
+
+          {/* Date range */}
+          <select
+            value={datePreset}
+            onChange={e => setDatePreset(e.target.value as DatePreset)}
+            className="form-input text-[12px] py-1.5 w-full sm:w-auto"
+          >
+            {(Object.keys(DATE_PRESET_LABELS) as DatePreset[]).map(p => (
+              <option key={p} value={p}>{DATE_PRESET_LABELS[p]}</option>
+            ))}
+          </select>
+
+          {/* Export CSV */}
+          <button
+            onClick={() => exportCsv({
+              clientId:   clientFilter || undefined,
+              isBillable: filter === 'unbilled' ? true : undefined,
+              isBilled:   filter === 'unbilled' ? false : filter === 'billed' ? true : undefined,
+              ...dateFilters,
+            })}
+            disabled={expenses.length === 0 || exporting}
+            className={cn(
+              'ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border transition-colors',
+              'border-[#D0D5DD] dark:border-[#3D4258] text-[#344054] dark:text-[#C2C8D8]',
+              'hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] disabled:opacity-40 disabled:cursor-not-allowed',
+            )}
+          >
+            {exporting
+              ? <Loader2 size={12} className="animate-spin" />
+              : <Download size={12} />}
+            Export CSV
+          </button>
         </div>
-        <DropdownSelect
-          value={clientFilter}
-          onChange={setClientFilter}
-          placeholder="All clients"
-          options={[{ value: '', label: 'All clients' }, ...clients.map(c => ({ value: c.id, label: c.name }))]}
-          className="w-full sm:w-auto"
-        />
+
+        {/* Custom date inputs */}
+        {datePreset === 'custom' && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
+              type="date"
+              value={customFrom}
+              onChange={e => setCustomFrom(e.target.value)}
+              className="form-input text-[12px] py-1.5"
+            />
+            <span className="text-[12px] text-[#98A2B3]">to</span>
+            <input
+              type="date"
+              value={customTo}
+              onChange={e => setCustomTo(e.target.value)}
+              className="form-input text-[12px] py-1.5"
+            />
+          </div>
+        )}
       </div>
 
       {/* ── Expense list ── */}
