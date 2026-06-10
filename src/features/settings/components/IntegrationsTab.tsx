@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AlertCircle, Loader2, RefreshCw, ExternalLink, X, Send, Copy, Check, BookOpen } from 'lucide-react'
 import canvaSvg from '@/assets/canva.svg'
@@ -11,6 +12,10 @@ import { useConnectClickUp, useDisconnectClickUp, useSyncClickUp } from '../hook
 import { useConnectFlodesk, useDisconnectFlodesk } from '../hooks/useFlodesk'
 import { useConnectCanva, useDisconnectCanva } from '../hooks/useCanva'
 import { useConnectGoogleForms, useDisconnectGoogleForms, useGoogleFormsSetup } from '../hooks/useGoogleForms'
+import { useConnectGoogleDocs, useDisconnectGoogleDocs } from '../hooks/useGoogleDocs'
+import googleDocsSvg from '@/assets/google-docs.svg'
+import { useConnectGoogleSheets, useDisconnectGoogleSheets, useInitGoogleSheets } from '../hooks/useGoogleSheets'
+import googleSheetsSvg from '@/assets/google-sheets.svg'
 
 function useConnectGoogle() {
   return useMutation({
@@ -455,7 +460,7 @@ function GoogleFormsSetupModal({ onClose }: { onClose: () => void }) {
               <div className="rounded-xl border border-[#D1FAE5] dark:border-emerald-900/50 bg-[#ECFDF3] dark:bg-emerald-950/30 p-4">
                 <p className="text-[12px] font-semibold text-[#027A48] dark:text-[#34D399]">All set!</p>
                 <p className="text-[12px] text-[#065F46] dark:text-[#6EE7B7] mt-0.5">
-                  Every new Google Form submission will automatically create a lead in Pakka. Repeat steps 2–4 for any other forms you want to connect.
+                  Every new Google Form submission will automatically create a lead in ClearWork. Repeat steps 2–4 for any other forms you want to connect.
                 </p>
               </div>
             </>
@@ -503,8 +508,22 @@ export default function IntegrationsTab() {
   const disconnectFlodesk    = useDisconnectFlodesk()
   const connectCanva         = useConnectCanva()
   const disconnectCanva      = useDisconnectCanva()
-  const connectGoogleForms   = useConnectGoogleForms()
+  const connectGoogleForms    = useConnectGoogleForms()
   const disconnectGoogleForms = useDisconnectGoogleForms()
+  const connectGoogleDocs     = useConnectGoogleDocs()
+  const disconnectGoogleDocs  = useDisconnectGoogleDocs()
+  const connectGoogleSheets   = useConnectGoogleSheets()
+  const disconnectGoogleSheets = useDisconnectGoogleSheets()
+  const initGoogleSheets      = useInitGoogleSheets()
+
+  // After OAuth redirect, create the spreadsheet
+  const { search } = useLocation()
+  useEffect(() => {
+    const params = new URLSearchParams(search)
+    if (params.get('googleSheetsConnected') === 'true' && !profile?.googleSheetsConnected) {
+      initGoogleSheets.mutate()
+    }
+  }, [search, profile?.googleSheetsConnected])
 
   const integrations: IntegrationDef[] = [
     {
@@ -593,7 +612,7 @@ export default function IntegrationsTab() {
       id:          'google-forms',
       icon:        <BrandIcon src={googleFormsSvg} alt="Google Forms" />,
       title:       'Google Forms',
-      description: 'Send Google Form responses directly to Pakka to create leads or client inquiries automatically.',
+      description: 'Send Google Form responses directly to ClearWork to create leads or client inquiries automatically.',
       category:    'productivity',
       isConnected: profile?.googleFormsConnected ?? false,
       isLoading,
@@ -611,6 +630,45 @@ export default function IntegrationsTab() {
         </button>
       ),
       learnMoreUrl: 'https://forms.google.com',
+    },
+    {
+      id:          'google-docs',
+      icon:        <BrandIcon src={googleDocsSvg} alt="Google Docs" />,
+      title:       'Google Docs',
+      description: 'Import Google Docs as proposal templates and export proposals or contracts to your Google Drive.',
+      category:    'productivity',
+      isConnected: profile?.googleDocsConnected ?? false,
+      isLoading,
+      connectPending:    connectGoogleDocs.isPending,
+      disconnectPending: disconnectGoogleDocs.isPending,
+      onConnect:   () => connectGoogleDocs.mutate(),
+      onDisconnect: () => disconnectGoogleDocs.mutate(),
+      learnMoreUrl: 'https://docs.google.com',
+    },
+    {
+      id:          'google-sheets',
+      icon:        <BrandIcon src={googleSheetsSvg} alt="Google Sheets" />,
+      title:       'Google Sheets',
+      description: 'Auto-track leads, clients, invoices and proposals in a Google Sheet. Every ClearWork event syncs a row in real time.',
+      category:    'productivity',
+      isConnected: profile?.googleSheetsConnected ?? false,
+      isLoading:   isLoading || initGoogleSheets.isPending,
+      connectPending:    connectGoogleSheets.isPending,
+      disconnectPending: disconnectGoogleSheets.isPending,
+      onConnect:    () => connectGoogleSheets.mutate(),
+      onDisconnect: () => disconnectGoogleSheets.mutate(),
+      extraAction: profile?.googleSheetsConnected && profile.googleSheetsId ? (
+        <a
+          href={`https://docs.google.com/spreadsheets/d/${profile.googleSheetsId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6366F1] dark:text-[#818CF8] hover:text-[#4F46E5] transition-colors"
+        >
+          <ExternalLink size={10} />
+          Open Sheet
+        </a>
+      ) : undefined,
+      learnMoreUrl: 'https://sheets.google.com',
     },
   ]
 

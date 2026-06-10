@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { X, Upload, FileText, Loader2, LayoutTemplate, ChevronLeft, IndianRupee, Check } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
+import { X, Upload, FileText, Loader2, LayoutTemplate, ChevronLeft, IndianRupee, Check, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useParseTemplate, useCreateTemplate } from '../hooks/useProposalTemplates'
 import type { ParsedTemplate } from '../hooks/useProposalTemplates'
+import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useListDriveFiles, useFetchDocText } from '@/features/settings/hooks/useGoogleDocs'
 
 interface Props {
   open:               boolean
@@ -22,22 +24,34 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
   const parseMut          = useParseTemplate()
   const createMut         = useCreateTemplate()
   const fileInputRef      = useRef<HTMLInputElement>(null)
+  const { data: profile } = useProfile()
 
-  const [step,       setStep]       = useState<'upload' | 'review'>('upload')
-  const [file,       setFile]       = useState<File | null>(null)
-  const [context,    setContext]     = useState('')
-  const [parsed,     setParsed]     = useState<ParsedTemplate | null>(null)
-  const [name,       setName]       = useState('')
-  const [category,   setCategory]   = useState('')
-  const [isDragging, setIsDragging] = useState(false)
+  const [step,          setStep]          = useState<'upload' | 'review'>('upload')
+  const [importTab,     setImportTab]     = useState<'file' | 'gdocs'>('file')
+  const [file,          setFile]          = useState<File | null>(null)
+  const [context,       setContext]       = useState('')
+  const [parsed,        setParsed]        = useState<ParsedTemplate | null>(null)
+  const [name,          setName]          = useState('')
+  const [category,      setCategory]      = useState('')
+  const [isDragging,    setIsDragging]    = useState(false)
+  const [docsQuery,     setDocsQuery]     = useState('')
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null)
+
+  const { data: driveFiles, isLoading: filesLoading } = useListDriveFiles(
+    importTab === 'gdocs' && (profile?.googleDocsConnected ?? false) ? docsQuery : undefined,
+  )
+  const { data: docText, isLoading: textLoading } = useFetchDocText(selectedDocId)
 
   function reset() {
     setStep('upload')
+    setImportTab('file')
     setFile(null)
     setContext('')
     setParsed(null)
     setName('')
     setCategory('')
+    setDocsQuery('')
+    setSelectedDocId(null)
     parseMut.reset()
     createMut.reset()
   }
@@ -58,6 +72,17 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
     if (!file) return
     const fd = new FormData()
     fd.append('file', file)
+    if (context.trim()) fd.append('context', context.trim())
+    const result = await parseMut.mutateAsync(fd)
+    setParsed(result)
+    setName(result.title || '')
+    setStep('review')
+  }
+
+  async function handleParseFromDoc() {
+    if (!docText) return
+    const fd = new FormData()
+    fd.append('text', docText)
     if (context.trim()) fd.append('context', context.trim())
     const result = await parseMut.mutateAsync(fd)
     setParsed(result)
@@ -127,10 +152,10 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
             </div>
             <div>
               <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">
-                {step === 'upload' ? 'Import Template from File' : 'Review & Save'}
+                {step === 'upload' ? 'Import Template' : 'Review & Save'}
               </h2>
               <p className="text-[11.5px] text-[#667085] dark:text-[#8B92A8]">
-                {step === 'upload' ? 'Upload a PDF or DOCX proposal to extract its structure' : 'AI extracted the structure — review and save'}
+                {step === 'upload' ? 'Upload a file or pick a Google Doc — AI extracts the structure' : 'AI extracted the structure — review and save'}
               </p>
             </div>
           </div>
@@ -144,52 +169,154 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
 
           {step === 'upload' && (
             <>
-              {/* Drop zone */}
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={handleFileDrop}
-                className={cn(
-                  'flex flex-col items-center justify-center gap-3 p-8 rounded-xl border-2 border-dashed cursor-pointer transition-colors',
-                  isDragging
-                    ? 'border-[#6366F1] bg-[#EEF2FF] dark:bg-[#1E2040]'
-                    : file
-                      ? 'border-[#6366F1]/50 bg-[#F5F6FA] dark:bg-[#21222D]'
-                      : 'border-[#D0D5DD] dark:border-[#3D4258] hover:border-[#6366F1]/60 hover:bg-[#F5F6FA] dark:hover:bg-[#21222D]',
-                )}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.docx,.doc"
-                  className="hidden"
-                  onChange={e => setFile(e.target.files?.[0] ?? null)}
-                />
-                {file ? (
-                  <>
-                    <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center">
-                      <FileText size={18} className="text-[#6366F1]" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{file.name}</p>
-                      <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{(file.size / 1024).toFixed(0)} KB · Click to change</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-10 h-10 rounded-xl bg-[#F2F4F7] dark:bg-[#21222D] flex items-center justify-center">
-                      <Upload size={18} className="text-[#98A2B3] dark:text-[#545C74]" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Drop a file here, or click to upload</p>
-                      <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Supports PDF and DOCX</p>
-                    </div>
-                  </>
-                )}
+              {/* Source tabs */}
+              <div className="flex gap-1 p-1 bg-[#F2F4F7] dark:bg-[#21222D] rounded-lg">
+                <button
+                  onClick={() => setImportTab('file')}
+                  className={cn(
+                    'flex-1 flex items-center justify-center gap-1.5 h-8 rounded-md text-[12.5px] font-semibold transition-colors',
+                    importTab === 'file'
+                      ? 'bg-white dark:bg-[#13141A] text-[#344054] dark:text-[#C2C8D8] shadow-sm'
+                      : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+                  )}
+                >
+                  <Upload size={12} /> Upload File
+                </button>
+                <button
+                  onClick={() => setImportTab('gdocs')}
+                  className={cn(
+                    'flex-1 flex items-center justify-center gap-1.5 h-8 rounded-md text-[12.5px] font-semibold transition-colors',
+                    importTab === 'gdocs'
+                      ? 'bg-white dark:bg-[#13141A] text-[#344054] dark:text-[#C2C8D8] shadow-sm'
+                      : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+                  )}
+                >
+                  <FileText size={12} /> Google Docs
+                </button>
               </div>
 
-              {/* Context hint */}
+              {/* ── File upload tab ── */}
+              {importTab === 'file' && (
+                <>
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleFileDrop}
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-3 p-8 rounded-xl border-2 border-dashed cursor-pointer transition-colors',
+                      isDragging
+                        ? 'border-[#6366F1] bg-[#EEF2FF] dark:bg-[#1E2040]'
+                        : file
+                          ? 'border-[#6366F1]/50 bg-[#F5F6FA] dark:bg-[#21222D]'
+                          : 'border-[#D0D5DD] dark:border-[#3D4258] hover:border-[#6366F1]/60 hover:bg-[#F5F6FA] dark:hover:bg-[#21222D]',
+                    )}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.docx,.doc"
+                      className="hidden"
+                      onChange={e => setFile(e.target.files?.[0] ?? null)}
+                    />
+                    {file ? (
+                      <>
+                        <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center">
+                          <FileText size={18} className="text-[#6366F1]" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{file.name}</p>
+                          <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{(file.size / 1024).toFixed(0)} KB · Click to change</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 rounded-xl bg-[#F2F4F7] dark:bg-[#21222D] flex items-center justify-center">
+                          <Upload size={18} className="text-[#98A2B3] dark:text-[#545C74]" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Drop a file here, or click to upload</p>
+                          <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Supports PDF and DOCX</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {parseMut.isError && (
+                    <p className="text-[12px] text-[#D92D20]">Failed to parse file — ensure it is a text-based PDF or DOCX and try again.</p>
+                  )}
+                </>
+              )}
+
+              {/* ── Google Docs tab ── */}
+              {importTab === 'gdocs' && (
+                <>
+                  {!profile?.googleDocsConnected ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+                      <div className="w-10 h-10 rounded-xl bg-[#F2F4F7] dark:bg-[#21222D] flex items-center justify-center">
+                        <FileText size={18} className="text-[#98A2B3] dark:text-[#545C74]" />
+                      </div>
+                      <div>
+                        <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Google Docs not connected</p>
+                        <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Connect Google Docs in Settings to browse your Drive files.</p>
+                      </div>
+                      <Link
+                        to="/settings?tab=integrations"
+                        onClick={handleClose}
+                        className="h-8 px-3.5 rounded-lg bg-[#6366F1] text-white text-[12.5px] font-semibold hover:bg-[#4F46E5] transition-colors"
+                      >
+                        Go to Settings
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Search */}
+                      <div className="relative">
+                        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3] dark:text-[#545C74]" />
+                        <input
+                          value={docsQuery}
+                          onChange={e => { setDocsQuery(e.target.value); setSelectedDocId(null) }}
+                          className="w-full h-9 pl-8 pr-3 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] text-[#101828] dark:text-[#ECEEF3] bg-white dark:bg-[#21222D] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/30 focus:border-[#6366F1] placeholder:text-[#98A2B3] dark:placeholder:text-[#545C74]"
+                          placeholder="Search Google Docs…"
+                        />
+                      </div>
+
+                      {/* File list */}
+                      <div className="space-y-1 max-h-48 overflow-y-auto">
+                        {filesLoading ? (
+                          <div className="flex items-center justify-center py-6">
+                            <Loader2 size={16} className="animate-spin text-[#6366F1]" />
+                          </div>
+                        ) : !driveFiles?.length ? (
+                          <p className="text-center text-[12px] text-[#98A2B3] dark:text-[#545C74] py-6">No documents found</p>
+                        ) : (
+                          driveFiles.map((f) => (
+                            <button
+                              key={f.id}
+                              onClick={() => setSelectedDocId(f.id === selectedDocId ? null : f.id)}
+                              className={cn(
+                                'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors',
+                                selectedDocId === f.id
+                                  ? 'bg-[#EEF2FF] dark:bg-[#1E2040] text-[#6366F1]'
+                                  : 'hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] text-[#344054] dark:text-[#C2C8D8]',
+                              )}
+                            >
+                              <FileText size={14} className={selectedDocId === f.id ? 'text-[#6366F1]' : 'text-[#98A2B3] dark:text-[#545C74]'} />
+                              <span className="flex-1 text-[12.5px] font-medium truncate">{f.name}</span>
+                              {selectedDocId === f.id && textLoading && <Loader2 size={12} className="animate-spin text-[#6366F1] shrink-0" />}
+                              {selectedDocId === f.id && !textLoading && docText && <Check size={12} className="text-emerald-500 shrink-0" />}
+                            </button>
+                          ))
+                        )}
+                      </div>
+                      {parseMut.isError && (
+                        <p className="text-[12px] text-[#D92D20]">Failed to parse document — try again.</p>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* Context hint (shared) */}
               <div>
                 <label className="block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1.5">
                   Context hint <span className="text-[#98A2B3] dark:text-[#545C74] font-normal">(optional)</span>
@@ -202,10 +329,6 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
                   placeholder='e.g. "Branding proposal for Indian agencies, rates in INR"'
                 />
               </div>
-
-              {parseMut.isError && (
-                <p className="text-[12px] text-[#D92D20]">Failed to parse file — ensure it is a text-based PDF or DOCX and try again.</p>
-              )}
             </>
           )}
 
@@ -320,8 +443,11 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
           {step === 'upload' ? (
             <button
               type="button"
-              onClick={handleParse}
-              disabled={!file || parseMut.isPending}
+              onClick={importTab === 'gdocs' ? handleParseFromDoc : handleParse}
+              disabled={
+                parseMut.isPending ||
+                (importTab === 'file' ? !file : !docText || textLoading)
+              }
               className="h-8 px-4 rounded-lg bg-[#0D1117] dark:bg-[#6366F1] text-white text-[12.5px] font-semibold hover:bg-[#1a1d2e] dark:hover:bg-[#4F46E5] transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
               {parseMut.isPending ? (

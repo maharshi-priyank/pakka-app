@@ -28,6 +28,9 @@ export interface UserProfile {
   flodeskConnected:        boolean
   canvaConnected:          boolean
   googleFormsConnected:    boolean
+  googleDocsConnected:     boolean
+  googleSheetsConnected:   boolean
+  googleSheetsId:          string | null
   createdAt:               string
   defaultHsnSac:           string | null
   defaultLutNumber:        string | null

@@ -1,10 +1,13 @@
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { useContract } from '@/features/contracts/hooks/useContracts'
 import { useCreateInvoiceFromContract } from '@/features/invoices/hooks/useInvoices'
 import ContractEditor from '@/features/contracts/components/ContractEditor'
 import type { Contract } from '@/features/contracts/schemas/contract.schema'
 import { useProject } from '@/features/projects/hooks/useProjects'
+import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useExportContractToGoogleDocs } from '@/features/settings/hooks/useGoogleDocs'
+import googleDocsSvg from '@/assets/google-docs.svg'
 
 export default function ContractEditorPage() {
   const { id } = useParams<{ id: string }>()
@@ -17,7 +20,9 @@ export default function ContractEditorPage() {
   const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: contract, isLoading } = useContract(isNew ? null : id ?? null)
-  const generateInvoiceMutation = useCreateInvoiceFromContract()
+  const generateInvoiceMutation       = useCreateInvoiceFromContract()
+  const { data: profile }             = useProfile()
+  const exportToGoogleDocs            = useExportContractToGoogleDocs()
 
   const effectiveProjectId   = urlProjectId ?? contract?.projectId ?? undefined
   const effectiveProjectName = projectFromUrl?.name ?? contract?.project?.name ?? null
@@ -43,7 +48,7 @@ export default function ContractEditorPage() {
   return (
     <div className="flex flex-col h-[calc(100dvh-60px)] max-h-[calc(100dvh-136px)] lg:max-h-none max-w-full -mx-4 -my-4 lg:-mx-6 lg:-my-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] shrink-0">
+      <div className="flex items-center gap-2 px-6 py-3 border-b border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] shrink-0 min-w-0">
         <button
           onClick={() => effectiveProjectId ? navigate(`/projects/${effectiveProjectId}`) : navigate('/contracts')}
           className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
@@ -76,6 +81,31 @@ export default function ContractEditorPage() {
               {contract.status}
             </span>
           </>
+        )}
+
+        {/* Spacer */}
+        <span className="flex-1" />
+
+        {/* Export to Google Docs — only for saved contracts */}
+        {!isNew && contract && (
+          <button
+            onClick={() => {
+              if (!profile?.googleDocsConnected) {
+                window.location.href = '/settings?tab=integrations'
+                return
+              }
+              exportToGoogleDocs.mutate(contract.id)
+            }}
+            disabled={exportToGoogleDocs.isPending}
+            title={profile?.googleDocsConnected ? 'Export to Google Docs' : 'Connect Google Docs in Settings first'}
+            className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] transition-colors disabled:opacity-50 shrink-0"
+          >
+            {exportToGoogleDocs.isPending
+              ? <Loader2 size={12} className="animate-spin" />
+              : <img src={googleDocsSvg} alt="" className="w-3.5 h-3.5" />
+            }
+            Export to Docs
+          </button>
         )}
       </div>
 
