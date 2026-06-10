@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ph } from '@/lib/posthog'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import type {
@@ -76,7 +77,7 @@ export function useCreateContract() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: createContract,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }); toast.success('Contract created') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }); toast.success('Contract created'); ph.contractCreated() },
     onError: (err: Error) => toast.error(err.message || 'Failed to create contract'),
   })
 }
@@ -85,7 +86,7 @@ export function useCreateContractFromProposal() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: createFromProposal,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }); toast.success('Contract created from proposal') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }); toast.success('Contract created from proposal'); ph.contractCreated() },
     onError: (err: Error) => toast.error(err.message || 'Failed to create contract'),
   })
 }
@@ -103,7 +104,7 @@ export function useSendContract() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => sendContract(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }); toast.success('Contract sent for signing') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }); toast.success('Contract sent for signing'); ph.contractSent() },
     onError: (err: Error) => toast.error(err.message || 'Failed to send contract'),
   })
 }

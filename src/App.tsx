@@ -12,10 +12,12 @@ import UpgradeModal from '@/components/UpgradeModal'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import PWAUpdatePrompt from '@/components/PWAUpdatePrompt'
 import { setCurrentRouteName, setCustomAttribute } from '@/lib/newrelic'
+import { identifyUser, resetUser, trackPageview } from '@/lib/posthog'
 
-// Track route changes for New Relic SPA monitoring
+// Track route changes for New Relic + PostHog SPA monitoring
 router.subscribe(({ location }) => {
   setCurrentRouteName(location.pathname)
+  trackPageview(location.pathname)
 })
 
 // Module-level guard — sync at most once per authenticated user ID.
@@ -52,9 +54,11 @@ export default function App() {
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         syncUserWithApi(session.user.id)
         setCustomAttribute('userId', session.user.id)
+        identifyUser(session.user.id, { email: session.user.email })
       }
       if (event === 'SIGNED_OUT') {
         syncedUserId = null // reset so next login syncs again
+        resetUser()
       }
     })
 

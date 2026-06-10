@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { ph } from '@/lib/posthog'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import type { Invoice, InvoiceListResponse, InvoiceFormData, InvoiceStatus } from '../schemas/invoice.schema'
@@ -37,7 +38,7 @@ export function useCreateInvoice() {
       const { data } = await api.post<{ data: Invoice }>('/invoices', dto)
       return data.data
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: KEYS.all() }); toast.success('Invoice created') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: KEYS.all() }); toast.success('Invoice created'); ph.invoiceCreated() },
     onError: (err: Error) => toast.error(err.message || 'Failed to create invoice'),
   })
 }
@@ -83,7 +84,7 @@ export function useSendInvoice() {
     onSuccess: ({ invoice }) => {
       qc.setQueryData(KEYS.detail(invoice.id), invoice)
       qc.invalidateQueries({ queryKey: KEYS.all() })
-      toast.success('Invoice sent to client')
+      toast.success('Invoice sent to client'); ph.invoiceSent()
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to send invoice'),
   })
@@ -140,6 +141,7 @@ export function useRecordPayment() {
       qc.setQueryData(KEYS.detail(updated.id), updated)
       qc.invalidateQueries({ queryKey: KEYS.all() })
       toast.success(updated.status === 'PAID' ? 'Invoice marked as paid' : 'Payment recorded')
+      if (updated.status === 'PAID') ph.invoicePaid()
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to record payment'),
   })

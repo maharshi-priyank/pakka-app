@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, FileText, FileSignature, Receipt, Building2, Mail, Phone, MapPin, Hash, Link2, RotateCcw, Copy, CheckCheck, Video, ExternalLink } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { useClient, useRegeneratePortalToken } from '../hooks/useClients'
+import { ph } from '@/lib/posthog'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -41,6 +42,7 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
   function copyPortalLink() {
     if (!portalUrl) return
     navigator.clipboard.writeText(portalUrl)
+    ph.clientPortalCopied()
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

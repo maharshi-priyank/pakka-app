@@ -3,10 +3,12 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { initNewRelic } from './lib/newrelic.ts'
+import { initPostHog } from './lib/posthog.ts'
 import { NewRelicErrorBoundary } from './components/NewRelicErrorBoundary.tsx'
 
 // Must run before React mounts so the agent can instrument page load and AJAX
 initNewRelic()
+initPostHog()
 
 // Apply saved theme before first paint to avoid flash
 try {

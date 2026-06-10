@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ph } from '@/lib/posthog'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
@@ -89,7 +90,7 @@ export function useCreateLead() {
   const { openUpgradeModal } = useUiStore()
   return useMutation({
     mutationFn: createLead,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] }); toast.success('Lead added') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] }); toast.success('Lead added'); ph.leadCreated() },
     onError: (err: Error & { code?: string }) => {
       if (err.code === 'PLAN_LIMIT') openUpgradeModal('leads')
       else toast.error(err.message || 'Failed to add lead')
@@ -154,7 +155,7 @@ export function useConvertLeadToClient() {
       qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] })
       qc.invalidateQueries({ queryKey: ['clients'] })
       qc.invalidateQueries({ queryKey: ['projects'] })
-      toast.success(`${result.client.name} added as a client`)
+      toast.success(`${result.client.name} added as a client`); ph.leadConverted()
       if (result.project) {
         navigate(`/projects/${result.project.id}`)
       } else {

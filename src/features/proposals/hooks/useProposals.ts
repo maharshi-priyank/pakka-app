@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ph } from '@/lib/posthog'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { useUiStore } from '@/store/uiStore'
@@ -72,7 +73,7 @@ export function useCreateProposal() {
   const { openUpgradeModal } = useUiStore()
   return useMutation({
     mutationFn: createProposal,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: [PROPOSALS_QUERY_KEY] }); toast.success('Proposal created') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [PROPOSALS_QUERY_KEY] }); toast.success('Proposal created'); ph.proposalCreated() },
     onError: (err: Error & { code?: string }) => {
       if (err.code === 'PLAN_LIMIT') openUpgradeModal('proposals')
       else toast.error(err.message || 'Failed to create proposal')
@@ -93,7 +94,7 @@ export function useSendProposal() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => sendProposal(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: [PROPOSALS_QUERY_KEY] }); toast.success('Proposal sent to client') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [PROPOSALS_QUERY_KEY] }); toast.success('Proposal sent to client'); ph.proposalSent() },
     onError: (err: Error) => toast.error(err.message || 'Failed to send proposal'),
   })
 }
