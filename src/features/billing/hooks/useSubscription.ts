@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { load } from '@cashfreepayments/cashfree-js'
 import { api } from '@/lib/api'
 
 export interface SubscriptionState {
@@ -34,9 +35,11 @@ export function useSubscriptionStatus() {
 
 export function useCreateSubscription() {
   return useMutation({
-    mutationFn: (tier: 'SOLO' | 'STUDIO') => createSubscription(tier),
-    onSuccess: ({ checkoutUrl }) => {
-      window.location.href = checkoutUrl
+    mutationFn: async (tier: 'SOLO' | 'STUDIO') => {
+      const { checkoutUrl: sessionId } = await createSubscription(tier)
+      const mode = (import.meta.env.VITE_CASHFREE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production'
+      const cashfree = await load({ mode })
+      cashfree.subscriptions({ subscriptionSessionId: sessionId })
     },
     onError: () => {
       toast.error('Failed to start checkout. Please try again.')
