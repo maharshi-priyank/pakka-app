@@ -15,13 +15,13 @@ export interface CanvaDesign {
 export function useConnectCanva() {
   return useMutation({
     mutationFn: async () => {
-      const { data } = await api.get<{ data: { authUrl: string } }>('/auth/canva/connect')
+      const { data } = await api.post<{ data: { authUrl: string } }>('/auth/canva/connect')
       return data.data.authUrl
     },
     onSuccess: (authUrl) => {
       window.location.href = authUrl
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: () => toast.error('Failed to start Canva connection. Please try again.'),
   })
 }
 
