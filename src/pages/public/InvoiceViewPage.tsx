@@ -47,7 +47,8 @@ interface PublicInvoice {
   gstType: GstType; tdsRate: number | null; dueDate: string | null; paidAt: string | null
   createdAt: string
   currency: string
-  lutNumber: string | null
+  lutNumber:     string | null
+  hideBranding?: boolean
   user: PublicUser; client: PublicClient | null
 }
 
@@ -173,10 +174,12 @@ export default function InvoiceViewPage() {
               <Download size={12} strokeWidth={2} />
               Download PDF
             </button>
-            <div className="flex items-center gap-1.5 text-[11px] text-[#667085]">
-              <Lock size={11} strokeWidth={2} />
-              Secured by ClearWork
-            </div>
+            {!invoice.hideBranding && (
+              <div className="flex items-center gap-1.5 text-[11px] text-[#667085]">
+                <Lock size={11} strokeWidth={2} />
+                Secured by ClearWork
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -469,7 +472,8 @@ export default function InvoiceViewPage() {
 
         {/* Footer */}
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
-          Invoice by {senderName} · {invoice.user.email} · Powered by ClearWork
+          Invoice by {senderName} · {invoice.user.email}
+          {!invoice.hideBranding && ' · Powered by ClearWork'}
         </div>
       </div>
     </div>

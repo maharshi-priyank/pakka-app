@@ -146,9 +146,11 @@ export default function ClientPortalPage() {
               </>
             )}
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-[#98A2B3] font-medium">
-            <Shield size={11} /> Secured by ClearWork
-          </div>
+          {!data?.freelancer.hideBranding && (
+            <div className="flex items-center gap-1.5 text-[11px] text-[#98A2B3] font-medium">
+              <Shield size={11} /> Secured by ClearWork
+            </div>
+          )}
         </div>
       </header>
 
@@ -224,11 +226,13 @@ export default function ClientPortalPage() {
             </nav>
 
             {/* Footer */}
-            <div className="px-4 py-3 border-t border-[#F2F4F7]">
-              <p className="text-[10.5px] text-[#C9CDD4] flex items-center gap-1.5">
-                <Shield size={10} /> Secured & powered by ClearWork
-              </p>
-            </div>
+            {!data?.freelancer.hideBranding && (
+              <div className="px-4 py-3 border-t border-[#F2F4F7]">
+                <p className="text-[10.5px] text-[#C9CDD4] flex items-center gap-1.5">
+                  <Shield size={10} /> Secured & powered by ClearWork
+                </p>
+              </div>
+            )}
           </div>
         </aside>
 

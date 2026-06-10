@@ -76,8 +76,9 @@ export interface PortalData {
     company: string | null
   }
   freelancer: {
-    businessName: string | null
-    logoUrl:      string | null
+    businessName:  string | null
+    logoUrl:       string | null
+    hideBranding?: boolean
   }
   proposals: PortalProposal[]
   contracts: PortalContract[]

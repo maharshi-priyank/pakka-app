@@ -25,6 +25,7 @@ interface PublicContract {
   id: string; title: string; status: string; content: ContractContent
   signedAt: string | null; auditLog: Record<string, unknown> | null
   createdAt: string
+  hideBranding?: boolean
   user: PublicContractUser; client: PublicContractClient | null
 }
 
@@ -151,7 +152,7 @@ export default function ContractSignPage() {
             </button>
             <div className="flex items-center gap-1.5 text-[11px] text-[#667085]">
               <Lock size={11} strokeWidth={2} />
-              Secure · Powered by ClearWork
+              {contract.hideBranding ? 'Secure' : 'Secure · Powered by ClearWork'}
             </div>
           </div>
         </div>
@@ -428,7 +429,8 @@ export default function ContractSignPage() {
         )}
 
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
-          Contract by {senderName} · {contract.user.email} · Powered by ClearWork
+          Contract by {senderName} · {contract.user.email}
+          {!contract.hideBranding && ' · Powered by ClearWork'}
         </div>
       </div>
     </div>

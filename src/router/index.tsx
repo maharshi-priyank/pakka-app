@@ -101,6 +101,34 @@ export const router = createBrowserRouter([
       return { Component }
     },
   },
+  // ── Billing return pages (no auth shell, but user should be logged in) ───────
+  {
+    path: '/billing/success',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/app/BillingSuccessPage')
+      return { Component }
+    },
+  },
+  {
+    path: '/billing/cancelled',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/app/BillingCancelPage')
+      return { Component }
+    },
+  },
+  // ── Accept team invite (requires auth) ──────────────────────────────────────
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: '/accept-invite',
+        lazy: async () => {
+          const { default: Component } = await import('@/pages/app/AcceptInvitePage')
+          return { Component }
+        },
+      },
+    ],
+  },
   {
     element: <ProtectedRoute />,
     children: [

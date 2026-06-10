@@ -34,6 +34,7 @@ interface PublicProposalUser {
 
 interface PublicProposal extends Proposal {
   user:            PublicProposalUser
+  hideBranding?:   boolean
   depositAmount:   string | null
   depositPaid:     boolean
   depositPaidAt:   string | null
@@ -286,7 +287,9 @@ export default function ProposalViewPage() {
               <Download size={12} strokeWidth={2} />
               Download PDF
             </button>
-            <span className="text-[11px] text-[#98A2B3]">Powered by ClearWork</span>
+            {!proposal.hideBranding && (
+              <span className="text-[11px] text-[#98A2B3]">Powered by ClearWork</span>
+            )}
           </div>
         </div>
       </div>
@@ -774,7 +777,8 @@ export default function ProposalViewPage() {
 
         {/* Footer */}
         <div className="text-center py-4 text-[11px] text-[#D0D5DD]">
-          Sent by {senderName} · {proposal.user.email} · Powered by ClearWork
+          Sent by {senderName} · {proposal.user.email}
+          {!proposal.hideBranding && ' · Powered by ClearWork'}
         </div>
       </div>
     </div>

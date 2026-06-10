@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { User, Building2, Bell, Puzzle, Globe } from 'lucide-react'
+import { User, Building2, Bell, Puzzle, Globe, CreditCard, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ProfileTab from '@/features/settings/components/ProfileTab'
 import BusinessTab from '@/features/settings/components/BusinessTab'
 import NotificationsTab from '@/features/notifications/components/NotificationsTab'
 import IntegrationsTab from '@/features/settings/components/IntegrationsTab'
 import PublicProfileTab from '@/features/settings/components/PublicProfileTab'
+import BillingTab from '@/features/billing/components/BillingTab'
+import TeamTab from '@/features/team/components/TeamTab'
 
 const TABS = [
-  { key: 'profile',       label: 'Profile',        icon: User      },
-  { key: 'business',      label: 'Business',       icon: Building2 },
-  { key: 'public',        label: 'Public Profile', icon: Globe     },
-  { key: 'notifications', label: 'Notifications',  icon: Bell      },
-  { key: 'integrations',  label: 'Integrations',   icon: Puzzle    },
+  { key: 'profile',       label: 'Profile',        icon: User       },
+  { key: 'business',      label: 'Business',       icon: Building2  },
+  { key: 'public',        label: 'Public Profile', icon: Globe      },
+  { key: 'notifications', label: 'Notifications',  icon: Bell       },
+  { key: 'integrations',  label: 'Integrations',   icon: Puzzle     },
+  { key: 'billing',       label: 'Billing',        icon: CreditCard },
+  { key: 'team',          label: 'Team',           icon: Users      },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
@@ -41,7 +45,7 @@ export default function SettingsPage() {
             key={key}
             onClick={() => setActiveTab(key)}
             className={cn(
-              'flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold border-b-2 -mb-px transition-colors',
+              'flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold border-b-2 -mb-px transition-colors whitespace-nowrap',
               activeTab === key
                 ? 'border-[#6366F1] text-[#6366F1]'
                 : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
@@ -58,6 +62,8 @@ export default function SettingsPage() {
       {activeTab === 'public'        && <PublicProfileTab />}
       {activeTab === 'notifications' && <NotificationsTab />}
       {activeTab === 'integrations'  && <IntegrationsTab />}
+      {activeTab === 'billing'       && <BillingTab />}
+      {activeTab === 'team'          && <TeamTab />}
 
     </div>
   )
