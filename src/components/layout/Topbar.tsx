@@ -4,6 +4,7 @@ import { LogOut, ChevronDown, Sun, Moon, Search, PanelLeft } from 'lucide-react'
 import NotificationBell from '@/features/notifications/components/NotificationBell'
 import CalendarBell     from '@/features/meetings/components/CalendarBell'
 import { useThemeToggle } from '@/hooks/useThemeToggle'
+import { useProfile } from '@/features/settings/hooks/useProfile'
 
 interface Props {
   onMenuToggle?: () => void
@@ -14,9 +15,16 @@ interface Props {
 export default function Topbar({ onMenuToggle, onDesktopSidebarToggle, desktopSidebarVisible = true }: Props) {
   const { user } = useAuthStore()
   const { isDark, toggle } = useThemeToggle()
+  const { data: profile } = useProfile()
 
   const name      = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
   const firstName = name.split(' ')[0]
+
+  const plan = profile?.plan ?? 'FREE'
+  const planBadge =
+    plan === 'SOLO'   ? { label: 'Solo',   cls: 'bg-[#EEF2FF] text-[#6366F1]' } :
+    plan === 'STUDIO' ? { label: 'Studio', cls: 'bg-[#F3E8FF] text-[#7C3AED]' } :
+    null
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -77,7 +85,14 @@ export default function Topbar({ onMenuToggle, onDesktopSidebarToggle, desktopSi
         {/* User pill — no avatar */}
         <button className="flex items-center gap-2 h-9 pl-2 pr-2 lg:pr-2.5 rounded-lg hover:bg-[#F5F6FA] dark:hover:bg-[#1A1B23] transition-colors group">
           <div className="hidden sm:block text-left">
-            <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] leading-none">{firstName}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] leading-none">{firstName}</p>
+              {planBadge && (
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none ${planBadge.cls}`}>
+                  {planBadge.label}
+                </span>
+              )}
+            </div>
             <p className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74] leading-none mt-0.5">Agency owner</p>
           </div>
           <ChevronDown size={12} className="text-[#98A2B3] dark:text-[#545C74] hidden sm:block" strokeWidth={2.5} />
