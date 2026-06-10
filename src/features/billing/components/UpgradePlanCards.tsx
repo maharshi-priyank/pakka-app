@@ -1,4 +1,5 @@
 import { Check, Star, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useCurrentPricing } from '../hooks/useCurrentPricing'
 import { useCreateSubscription } from '../hooks/useSubscription'
@@ -9,6 +10,7 @@ const FEATURES = {
 }
 
 export default function UpgradePlanCards() {
+  const navigate = useNavigate()
   const { data: pricing, isLoading } = useCurrentPricing()
   const { mutate: subscribe, isPending } = useCreateSubscription()
 
@@ -65,7 +67,7 @@ export default function UpgradePlanCards() {
             ))}
           </ul>
           <button
-            onClick={() => subscribe('SOLO')}
+            onClick={() => subscribe('SOLO', { onSuccess: () => navigate('/billing/success') })}
             disabled={isPending}
             className={cn(
               'w-full h-10 rounded-lg text-[13px] font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer',
@@ -108,7 +110,7 @@ export default function UpgradePlanCards() {
             ))}
           </ul>
           <button
-            onClick={() => subscribe('STUDIO')}
+            onClick={() => subscribe('STUDIO', { onSuccess: () => navigate('/billing/success') })}
             disabled={isPending}
             className={cn(
               'w-full h-10 rounded-lg text-[13px] font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer',
