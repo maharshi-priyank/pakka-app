@@ -11,6 +11,7 @@ import {
   Clock,
   ArrowRight,
   ArrowUpRight,
+  MessageCircle,
 } from 'lucide-react'
 
 import type { PublicProfileData, PublicPortfolioItem } from '../hooks/usePublicProfile'
@@ -40,36 +41,40 @@ function formatEarned(n: number): string {
   return `₹${n}`
 }
 
-// ─── shared section row ───────────────────────────────────────────────────────
+// ─── Section header ───────────────────────────────────────────────────────────
 
-function SectionRow({
-  label,
-  sub,
-  children,
-}: {
-  label: React.ReactNode
-  sub?: React.ReactNode
-  children: React.ReactNode
-}) {
+function SectionHeader({ label, badge }: { label: string; badge?: React.ReactNode }) {
   return (
-    <div className="border-t border-[#F4F4F5] py-8 sm:py-10 grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-5 sm:gap-12 items-start">
-      <div className="shrink-0">
-        <div className="text-[20px] sm:text-[22px] font-black text-[#09090B] leading-tight">
-          {label}
-        </div>
-        {sub && <div className="mt-1">{sub}</div>}
-      </div>
-      <div>{children}</div>
+    <div className="flex items-center gap-3 mb-5">
+      <div className="w-1 h-5 bg-[#6366F1] rounded-full" />
+      <div className="text-[18px] sm:text-[20px] font-black text-[#09090B] leading-tight">{label}</div>
+      {badge}
     </div>
   )
 }
 
-// ─── portfolio card ────────────────────────────────────────────────────────────
+// ─── Stat tile ────────────────────────────────────────────────────────────────
+
+function StatTile({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+  return (
+    <div className="bg-white border border-[#EAECF0] rounded-xl p-4 flex items-start gap-3 shadow-sm">
+      <div className="w-9 h-9 rounded-lg bg-[#EEF2FF] flex items-center justify-center shrink-0">
+        {icon}
+      </div>
+      <div>
+        <div className="text-[22px] font-black text-[#09090B] leading-none tabular-nums mb-1">{value}</div>
+        <div className="text-[11px] text-[#A1A1AA] font-semibold uppercase tracking-wide">{label}</div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Portfolio card ────────────────────────────────────────────────────────────
 
 function PortfolioCard({ item }: { item: PublicPortfolioItem }) {
   return (
-    <div className="bg-white rounded-xl border border-[#E4E4E7] overflow-hidden hover:border-[#09090B] transition-all group">
-      <div className="h-[148px] bg-[#F4F4F5] relative overflow-hidden">
+    <div className="bg-white border border-[#EAECF0] rounded-xl overflow-hidden hover:border-[#6366F1]/40 hover:shadow-md transition-all group cursor-default shadow-sm">
+      <div className="h-[140px] bg-[#F4F4F5] relative overflow-hidden">
         {item.thumbnailUrl ? (
           <img
             src={item.thumbnailUrl}
@@ -82,7 +87,7 @@ function PortfolioCard({ item }: { item: PublicPortfolioItem }) {
           </div>
         )}
         {item.category && (
-          <div className="absolute top-2.5 left-2.5 bg-white/95 text-[#09090B] text-[11px] font-bold px-2 py-0.5 rounded-lg shadow-sm">
+          <div className="absolute top-2.5 left-2.5 bg-white/95 text-[#09090B] text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm">
             {item.category}
           </div>
         )}
@@ -146,140 +151,119 @@ export default function ProfileMain({ profile, onContact }: Props) {
         : `~${Math.round(profile.statsAvgResponseHrs / 24)} days`
 
   return (
-    <div className="pb-8">
+    <div className="pb-8 space-y-8 pt-8">
+
+      {/* ── Verified Stats ── */}
+      {hasStats && (
+        <div>
+          <SectionHeader
+            label="Stats"
+            badge={
+              <div className="flex items-center gap-1 text-[11px] text-[#6366F1] font-bold bg-[#EEF2FF] border border-[#C7D2FE] px-2.5 py-1 rounded-full">
+                <CheckCircle2 size={10} />
+                Verified
+              </div>
+            }
+          />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {profile.statsProjectsCompleted > 0 && (
+              <StatTile
+                icon={<TrendingUp size={16} className="text-[#6366F1]" />}
+                value={String(profile.statsProjectsCompleted)}
+                label="Projects"
+              />
+            )}
+            {profile.statsTotalEarned > 0 && (
+              <StatTile
+                icon={<Award size={16} className="text-[#6366F1]" />}
+                value={formatEarned(profile.statsTotalEarned)}
+                label="Earned"
+              />
+            )}
+            {profile.statsRepeatClientPct > 0 && (
+              <StatTile
+                icon={<Users size={16} className="text-[#6366F1]" />}
+                value={`${profile.statsRepeatClientPct}%`}
+                label="Repeat clients"
+              />
+            )}
+            {profile.statsAcceptanceRate > 0 && (
+              <StatTile
+                icon={<CheckCircle2 size={16} className="text-[#6366F1]" />}
+                value={`${profile.statsAcceptanceRate}%`}
+                label="Acceptance"
+              />
+            )}
+            {profile.statsAvgResponseHrs > 0 && (
+              <StatTile
+                icon={<Zap size={16} className="text-[#6366F1]" />}
+                value={responseLabel}
+                label="Response"
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── My Story ── */}
       {profile.publicBio && (
-        <SectionRow label="My Story">
-          <div className="space-y-3">
+        <div>
+          <SectionHeader label="My Story" />
+          <div className="bg-white border border-[#EAECF0] rounded-xl p-5 sm:p-6 space-y-3 shadow-sm">
             {profile.publicBio
               .split('\n')
               .filter(Boolean)
               .map((para, i) => (
-                <p key={i} className="text-[15px] text-[#3F3F46] leading-[1.75]">
+                <p key={i} className="text-[15px] text-[#3F3F46] leading-[1.8]">
                   {para}
                 </p>
               ))}
           </div>
-        </SectionRow>
+        </div>
       )}
 
       {/* ── About ── */}
-      <SectionRow label="About">
+      <div>
+        <SectionHeader label="About" />
         <div className="flex flex-wrap gap-2">
           {profile.publicCity && (
-            <span className="flex items-center gap-1.5 bg-[#F4F4F5] text-[#3F3F46] text-[13px] font-semibold px-3.5 py-2 rounded-full">
+            <span className="flex items-center gap-1.5 bg-white border border-[#EAECF0] text-[#3F3F46] text-[13px] font-semibold px-3.5 py-2 rounded-full shadow-sm">
               <MapPin size={13} className="text-[#6366F1]" />
               {profile.publicCity}
             </span>
           )}
-          <span className="flex items-center gap-1.5 bg-[#F4F4F5] text-[#3F3F46] text-[13px] font-semibold px-3.5 py-2 rounded-full">
+          <span className="flex items-center gap-1.5 bg-white border border-[#EAECF0] text-[#3F3F46] text-[13px] font-semibold px-3.5 py-2 rounded-full shadow-sm">
             <Calendar size={13} className="text-[#6366F1]" />
             On ClearWork since {memberSince}
           </span>
           {profile.publicLanguages.length > 0 && (
-            <span className="flex items-center gap-1.5 bg-[#F4F4F5] text-[#3F3F46] text-[13px] font-semibold px-3.5 py-2 rounded-full">
+            <span className="flex items-center gap-1.5 bg-white border border-[#EAECF0] text-[#3F3F46] text-[13px] font-semibold px-3.5 py-2 rounded-full shadow-sm">
               <Globe size={13} className="text-[#6366F1]" />
               {profile.publicLanguages.join(' · ')}
             </span>
           )}
         </div>
-      </SectionRow>
-
-      {/* ── Verified Stats ── */}
-      {hasStats && (
-        <SectionRow
-          label="Stats"
-          sub={
-            <div className="flex items-center gap-1 text-[11px] text-[#6366F1] font-bold mt-1">
-              <CheckCircle2 size={11} />
-              Verified
-            </div>
-          }
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-            {profile.statsProjectsCompleted > 0 && (
-              <div>
-                <TrendingUp size={13} className="text-[#A1A1AA] mb-1.5" />
-                <div className="text-[24px] font-black text-[#09090B] leading-none tabular-nums">
-                  {profile.statsProjectsCompleted}
-                </div>
-                <div className="text-[11px] text-[#A1A1AA] font-semibold uppercase tracking-wide mt-1">
-                  Projects
-                </div>
-              </div>
-            )}
-            {profile.statsTotalEarned > 0 && (
-              <div>
-                <Award size={13} className="text-[#A1A1AA] mb-1.5" />
-                <div className="text-[24px] font-black text-[#09090B] leading-none tabular-nums">
-                  {formatEarned(profile.statsTotalEarned)}
-                </div>
-                <div className="text-[11px] text-[#A1A1AA] font-semibold uppercase tracking-wide mt-1">
-                  Earned
-                </div>
-              </div>
-            )}
-            {profile.statsRepeatClientPct > 0 && (
-              <div>
-                <Users size={13} className="text-[#A1A1AA] mb-1.5" />
-                <div className="text-[24px] font-black text-[#09090B] leading-none tabular-nums">
-                  {profile.statsRepeatClientPct}%
-                </div>
-                <div className="text-[11px] text-[#A1A1AA] font-semibold uppercase tracking-wide mt-1">
-                  Repeat clients
-                </div>
-              </div>
-            )}
-            {profile.statsAcceptanceRate > 0 && (
-              <div>
-                <CheckCircle2 size={13} className="text-[#A1A1AA] mb-1.5" />
-                <div className="text-[24px] font-black text-[#09090B] leading-none tabular-nums">
-                  {profile.statsAcceptanceRate}%
-                </div>
-                <div className="text-[11px] text-[#A1A1AA] font-semibold uppercase tracking-wide mt-1">
-                  Acceptance
-                </div>
-              </div>
-            )}
-            {profile.statsAvgResponseHrs > 0 && (
-              <div>
-                <Zap size={13} className="text-[#A1A1AA] mb-1.5" />
-                <div className="text-[24px] font-black text-[#09090B] leading-none tabular-nums">
-                  {responseLabel}
-                </div>
-                <div className="text-[11px] text-[#A1A1AA] font-semibold uppercase tracking-wide mt-1">
-                  Response
-                </div>
-              </div>
-            )}
-          </div>
-        </SectionRow>
-      )}
+      </div>
 
       {/* ── Services ── */}
       {profile.publicServices.length > 0 && (
-        <SectionRow label="Services">
+        <div>
+          <SectionHeader label="Services" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {profile.publicServices.map((svc) => (
               <div
                 key={svc.id}
-                className="bg-white border border-[#E4E4E7] rounded-xl p-4 hover:border-[#09090B] transition-all cursor-default"
+                className="bg-white border border-[#EAECF0] rounded-xl p-4 hover:border-[#6366F1]/40 hover:shadow-md transition-all cursor-default shadow-sm"
               >
-                {/* Icon + name row */}
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-2.5 mb-2.5">
+                  <div className="w-9 h-9 rounded-lg bg-[#EEF2FF] flex items-center justify-center shrink-0">
                     <ServiceIcon name={svc.icon} />
                   </div>
                   <div className="text-[14px] font-black text-[#09090B] leading-snug">{svc.name}</div>
                 </div>
-                {/* Description */}
                 {svc.description && (
-                  <p className="text-[13px] text-[#71717A] leading-relaxed mb-3">
-                    {svc.description}
-                  </p>
+                  <p className="text-[13px] text-[#71717A] leading-relaxed mb-3">{svc.description}</p>
                 )}
-                {/* Tags */}
                 {svc.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {svc.tags.slice(0, 3).map((tag) => (
@@ -292,45 +276,70 @@ export default function ProfileMain({ profile, onContact }: Props) {
                     ))}
                   </div>
                 )}
-                {/* Price + delivery */}
                 <div className="flex items-center justify-between pt-3 border-t border-[#F4F4F5]">
                   <div>
-                    <div className="text-[10px] text-[#A1A1AA] font-semibold uppercase tracking-wide">
-                      Starting from
-                    </div>
-                    <div className="text-[18px] font-black text-[#09090B] leading-tight tabular-nums">
+                    <div className="text-[10px] text-[#A1A1AA] font-semibold uppercase tracking-wide">Starting from</div>
+                    <div className="text-[20px] font-black text-[#6366F1] leading-tight tabular-nums">
                       {formatPrice(svc.priceFrom)}
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 text-[12px] text-[#71717A] font-medium bg-[#F9F9F9] px-3 py-1.5 rounded-lg border border-[#E4E4E7]">
                     <Clock size={11} className="text-[#A1A1AA]" />
-                    {svc.deliveryDays}d
+                    {svc.deliveryDays}d delivery
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          {/* Hire CTA below service cards */}
           <button
             onClick={onContact}
-            className="mt-4 flex items-center gap-2 text-[13px] font-bold text-[#09090B] hover:text-[#6366F1] transition-colors cursor-pointer"
+            className="mt-4 flex items-center gap-2 text-[13px] font-bold text-[#71717A] hover:text-[#6366F1] transition-colors cursor-pointer"
           >
             Enquire about a service
             <ArrowRight size={14} />
           </button>
-        </SectionRow>
+        </div>
       )}
 
       {/* ── Portfolio ── */}
       {profile.publicPortfolio.length > 0 && (
-        <SectionRow label="Portfolio">
+        <div>
+          <SectionHeader label="Portfolio" />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {profile.publicPortfolio.slice(0, 6).map((item) => (
               <PortfolioCard key={item.id} item={item} />
             ))}
           </div>
-        </SectionRow>
+        </div>
       )}
+
+      {/* ── Hire CTA ── */}
+      <div className="bg-white border border-[#EAECF0] rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+        <div>
+          <div className="text-[18px] font-black text-[#09090B] mb-1">Ready to work together?</div>
+          <div className="text-[14px] text-[#71717A]">Send a message and get a response fast.</div>
+        </div>
+        <div className="flex gap-2.5 shrink-0">
+          {profile.publicWhatsapp && (
+            <a
+              href={`https://wa.me/${profile.publicWhatsapp.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-11 px-4 flex items-center gap-2 bg-white text-[#09090B] text-[13px] font-semibold rounded-xl border border-[#EAECF0] hover:border-[#09090B] transition-all cursor-pointer shadow-sm"
+            >
+              <MessageCircle size={15} />
+              WhatsApp
+            </a>
+          )}
+          <button
+            onClick={onContact}
+            className="h-11 px-6 flex items-center gap-2 bg-[#6366F1] text-white text-[13px] font-black rounded-xl hover:bg-[#4F46E5] transition-all cursor-pointer shadow-sm"
+          >
+            Send a message
+            <ArrowRight size={14} />
+          </button>
+        </div>
+      </div>
 
     </div>
   )

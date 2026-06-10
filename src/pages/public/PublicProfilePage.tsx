@@ -13,16 +13,16 @@ export default function PublicProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh bg-white flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#09090B] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-dvh bg-[#F4F6FB] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#6366F1] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   if (isError || !profile) {
     return (
-      <div className="min-h-dvh bg-white flex flex-col items-center justify-center gap-6 px-4 text-center">
-        <div className="w-20 h-20 rounded-3xl bg-[#F4F4F5] flex items-center justify-center">
+      <div className="min-h-dvh bg-[#F4F6FB] flex flex-col items-center justify-center gap-6 px-4 text-center">
+        <div className="w-20 h-20 rounded-3xl bg-white border border-[#EAECF0] flex items-center justify-center shadow-sm">
           <Search size={28} className="text-[#A1A1AA]" />
         </div>
         <div>
@@ -44,18 +44,18 @@ export default function PublicProfilePage() {
   }
 
   return (
-    <div className="min-h-dvh bg-white" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-dvh bg-[#F4F6FB]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       {/* Hero */}
       <ProfileHero profile={profile} onContact={() => setContactOpen(true)} />
 
-      {/* All sections — single scrollable page */}
+      {/* All sections */}
       <div className="max-w-5xl mx-auto px-5 sm:px-8">
         <ProfileMain profile={profile} onContact={() => setContactOpen(true)} />
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[#F4F4F5]">
+      <div className="border-t border-[#EAECF0] mt-4">
         <div className="max-w-5xl mx-auto px-5 sm:px-8 py-8 flex items-center justify-between">
           <div className="text-[12px] text-[#D4D4D8]">
             Powered by{' '}
@@ -73,7 +73,7 @@ export default function PublicProfilePage() {
       </div>
 
       {/* Mobile sticky CTA */}
-      <div className="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white/95 backdrop-blur border-t border-[#E4E4E7] px-4 py-3">
+      <div className="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-white/95 backdrop-blur border-t border-[#EAECF0] px-4 py-3">
         <div className="flex gap-2">
           {profile.publicWhatsapp && (
             <a
@@ -88,7 +88,7 @@ export default function PublicProfilePage() {
           )}
           <button
             onClick={() => setContactOpen(true)}
-            className="flex-1 h-12 bg-[#09090B] text-white text-[14px] font-black rounded-xl hover:bg-[#27272A] transition-all cursor-pointer"
+            className="flex-1 h-12 bg-[#6366F1] text-white text-[14px] font-black rounded-xl hover:bg-[#4F46E5] transition-all cursor-pointer"
           >
             Send a message
           </button>
