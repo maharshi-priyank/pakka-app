@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
@@ -23,6 +24,11 @@ export interface Expense {
   isBillable:  boolean
   isBilled:    boolean
   invoiceId:   string | null
+  vendor:      string | null
+  gstRate:     string | null
+  gstAmount:   string | null
+  tdsSection:  string | null
+  tdsRate:     string | null
   createdAt:   string
   updatedAt:   string
 }
@@ -36,6 +42,11 @@ export interface CreateExpensePayload {
   date:         string
   receiptUrl?:  string
   isBillable?:  boolean
+  vendor?:      string
+  gstRate?:     number
+  gstAmount?:   number
+  tdsSection?:  string
+  tdsRate?:     number
 }
 
 export interface UpdateExpensePayload {
@@ -49,6 +60,11 @@ export interface UpdateExpensePayload {
   isBillable?:  boolean
   isBilled?:    boolean
   invoiceId?:   string
+  vendor?:      string
+  gstRate?:     number
+  gstAmount?:   number
+  tdsSection?:  string
+  tdsRate?:     number
 }
 
 export interface ExpensesQuery {
@@ -73,6 +89,49 @@ export function useExpenses(params: ExpensesQuery = {}) {
     queryFn:  () => fetchExpenses(params),
     staleTime: 30_000,
   })
+}
+
+export function useExpenseCategories() {
+  return useQuery({
+    queryKey: [KEY, 'categories'],
+    queryFn:  async (): Promise<string[]> => {
+      const { data } = await api.get<{ data: string[] }>('/expenses/categories')
+      return data.data
+    },
+    staleTime: 5 * 60_000,
+  })
+}
+
+export function useExportExpenses() {
+  const [isPending, setIsPending] = useState(false)
+
+  const trigger = async (filters: ExpensesQuery) => {
+    setIsPending(true)
+    try {
+      const response = await api.get('/expenses/export', {
+        params:       filters,
+        responseType: 'blob',
+      })
+      const blob = new Blob([response.data], { type: 'text/csv' })
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      const label = filters.from && filters.to
+        ? `${filters.from}_to_${filters.to}`
+        : 'all'
+      a.href     = url
+      a.download = `expenses-${label}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      toast.error('Failed to export expenses')
+    } finally {
+      setIsPending(false)
+    }
+  }
+
+  return { trigger, isPending }
 }
 
 export function useCreateExpense() {
