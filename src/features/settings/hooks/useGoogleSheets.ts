@@ -3,7 +3,6 @@ import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
 export function useConnectGoogleSheets() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: async () => {
       // Step 1 — get OAuth URL and redirect
