@@ -6,7 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 import {
   Wallet, Plus, Trash2, Edit2, CheckSquare, Square as SquareIcon,
   IndianRupee, ChevronRight, Loader2, Receipt, Image, ExternalLink,
-  FolderKanban,
+  FolderKanban, Download,
 } from 'lucide-react'
 import DropdownSelect from '@/components/ui/DropdownSelect'
 import { cn } from '@/lib/utils'
@@ -15,11 +15,9 @@ import { useProjects } from '@/features/projects/hooks/useProjects'
 import {
   useExpenses, useCreateExpense, useUpdateExpense,
   useDeleteExpense, useBillExpenses, useUploadReceipt,
+  useExpenseCategories, useExportExpenses,
   type Expense, type CreateExpensePayload,
 } from '@/features/expenses/hooks/useExpenses'
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-const EXPENSE_CATEGORIES = ['Travel', 'Materials', 'Software', 'Food', 'Accommodation', 'Equipment', 'Other'] as const
 
 // ─── Schema ────────────────────────────────────────────────────────────────────
 const expenseSchema = z.object({
@@ -31,6 +29,12 @@ const expenseSchema = z.object({
   date:        z.string().min(1, 'Date required'),
   isBillable:  z.boolean(),
   receiptUrl:  z.string().optional(),
+  vendor:      z.string().optional(),
+  hasGst:      z.boolean(),
+  gstRate:     z.number().optional(),
+  gstAmount:   z.number().optional(),
+  tdsSection:  z.string().optional(),
+  tdsRate:     z.number().optional(),
 })
 type ExpenseForm = z.infer<typeof expenseSchema>
 
@@ -58,6 +62,7 @@ export default function ExpensesPage() {
   const clients = clientsData?.clients ?? []
   const { data: projectsData } = useProjects()
   const projects = projectsData?.projects ?? []
+  const { data: categoryList = [] } = useExpenseCategories()
   const { data: expenses = [], isLoading } = useExpenses({
     clientId:   clientFilter || undefined,
     isBillable: filter === 'unbilled' ? true : undefined,
@@ -68,13 +73,17 @@ export default function ExpensesPage() {
   const deleteExpense  = useDeleteExpense()
   const billExpenses   = useBillExpenses()
   const uploadReceipt  = useUploadReceipt()
+  const { trigger: exportCsv, isPending: exporting } = useExportExpenses()
 
   const {
     register, handleSubmit, reset, setValue, watch,
     formState: { errors },
-  } = useForm<ExpenseForm>({ resolver: zodResolver(expenseSchema), defaultValues: { isBillable: true } })
+  } = useForm<ExpenseForm>({ resolver: zodResolver(expenseSchema), defaultValues: { isBillable: true, hasGst: false } })
 
   const watchedReceiptUrl = watch('receiptUrl') ?? localReceiptUrl
+  const watchedAmount  = watch('amount')
+  const watchedHasGst  = watch('hasGst')
+  const watchedGstRate = watch('gstRate')
 
   function openNewForm() {
     setEditExpense(null)
@@ -83,6 +92,7 @@ export default function ExpensesPage() {
       category:   'Travel',
       date:       new Date().toISOString().slice(0, 10),
       isBillable: true,
+      hasGst:     false,
       amount:     undefined as any,
       projectId:  preselectedProjectId || undefined,
     })
@@ -92,6 +102,7 @@ export default function ExpensesPage() {
   function openEditForm(expense: Expense) {
     setEditExpense(expense)
     setLocalReceiptUrl(expense.receiptUrl ?? undefined)
+    const hasGst = expense.gstRate != null
     reset({
       clientId:    expense.clientId ?? undefined,
       projectId:   expense.projectId ?? undefined,
@@ -101,6 +112,12 @@ export default function ExpensesPage() {
       date:        expense.date.slice(0, 10),
       isBillable:  expense.isBillable,
       receiptUrl:  expense.receiptUrl ?? undefined,
+      vendor:      expense.vendor ?? undefined,
+      hasGst,
+      gstRate:     hasGst ? Number(expense.gstRate) : undefined,
+      gstAmount:   hasGst ? Number(expense.gstAmount) : undefined,
+      tdsSection:  expense.tdsSection ?? undefined,
+      tdsRate:     expense.tdsRate != null ? Number(expense.tdsRate) : undefined,
     })
     setShowForm(true)
   }
@@ -111,6 +128,16 @@ export default function ExpensesPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preselectedProjectId])
+
+  useEffect(() => {
+    if (watchedHasGst && watchedGstRate && watchedAmount) {
+      const computed = parseFloat((watchedAmount * watchedGstRate / 100).toFixed(2))
+      setValue('gstAmount', computed)
+    } else {
+      setValue('gstAmount', undefined)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedAmount, watchedHasGst, watchedGstRate])
 
   async function handleReceiptUpload(file: File) {
     setUploadingReceipt(true)
@@ -132,6 +159,11 @@ export default function ExpensesPage() {
       date:        data.date,
       receiptUrl:  data.receiptUrl || undefined,
       isBillable:  data.isBillable,
+      vendor:      data.vendor || undefined,
+      gstRate:     data.hasGst ? data.gstRate : undefined,
+      gstAmount:   data.hasGst ? data.gstAmount : undefined,
+      tdsSection:  data.tdsSection || undefined,
+      tdsRate:     data.tdsRate || undefined,
     }
     if (editExpense) {
       await updateExpense.mutateAsync({ id: editExpense.id, ...payload })
@@ -201,12 +233,19 @@ export default function ExpensesPage() {
             {editExpense ? 'Edit expense' : 'Log expense'}
           </h3>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            {/* Row 1: Category + Client */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="form-label">Category *</label>
-                <select {...register('category')} className="form-input w-full">
-                  {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <input
+                  {...register('category')}
+                  list="expense-category-list"
+                  className="form-input w-full"
+                  placeholder="e.g. Travel"
+                />
+                <datalist id="expense-category-list">
+                  {categoryList.map(c => <option key={c} value={c} />)}
+                </datalist>
                 {errors.category && <p className="form-error">{errors.category.message}</p>}
               </div>
               <div>
@@ -217,18 +256,40 @@ export default function ExpensesPage() {
                 </select>
               </div>
             </div>
-            <div>
-              <label className="form-label">Project <span className="font-normal text-[#98A2B3]">(optional)</span></label>
-              <select {...register('projectId')} className="form-input w-full">
-                <option value="">No project</option>
-                {projects.map(p => <option key={p.id} value={p.id}>{p.name}{p.client ? ` · ${p.client.name}` : ''}</option>)}
-              </select>
+
+            {/* Row 2: Vendor + Project */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="form-label">Vendor <span className="font-normal text-[#98A2B3]">(optional)</span></label>
+                <input
+                  {...register('vendor')}
+                  list="expense-vendor-list"
+                  className="form-input w-full"
+                  placeholder="e.g. AWS, Figma, Ravi Kumar"
+                />
+                <datalist id="expense-vendor-list">
+                  {[...new Set(expenses.map(e => e.vendor).filter(Boolean))].map(v => (
+                    <option key={v!} value={v!} />
+                  ))}
+                </datalist>
+              </div>
+              <div>
+                <label className="form-label">Project <span className="font-normal text-[#98A2B3]">(optional)</span></label>
+                <select {...register('projectId')} className="form-input w-full">
+                  <option value="">No project</option>
+                  {projects.map(p => <option key={p.id} value={p.id}>{p.name}{p.client ? ` · ${p.client.name}` : ''}</option>)}
+                </select>
+              </div>
             </div>
+
+            {/* Row 3: Description */}
             <div>
               <label className="form-label">Description *</label>
               <input {...register('description')} className="form-input w-full" placeholder="e.g. Cab to client site" />
               {errors.description && <p className="form-error">{errors.description.message}</p>}
             </div>
+
+            {/* Row 4: Amount + Date */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="form-label">Amount (₹) *</label>
@@ -241,6 +302,67 @@ export default function ExpensesPage() {
                 {errors.date && <p className="form-error">{errors.date.message}</p>}
               </div>
             </div>
+
+            {/* Row 5: GST checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                {...register('hasGst')}
+                id="hasGst"
+                type="checkbox"
+                className="w-4 h-4 accent-[#6366F1]"
+              />
+              <label htmlFor="hasGst" className="form-label mb-0 cursor-pointer">This expense includes GST</label>
+            </div>
+
+            {/* Row 6: GST Rate + GST Amount (conditional) */}
+            {watchedHasGst && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="form-label">GST Rate *</label>
+                  <select {...register('gstRate', { valueAsNumber: true })} className="form-input w-full">
+                    <option value="">Select rate</option>
+                    <option value={5}>5%</option>
+                    <option value={12}>12%</option>
+                    <option value={18}>18%</option>
+                    <option value={28}>28%</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">GST Amount (auto-computed)</label>
+                  <input
+                    type="number"
+                    value={watch('gstAmount') ?? ''}
+                    readOnly
+                    className="form-input w-full bg-[#F4F5F8] dark:bg-[#21222D] cursor-not-allowed text-[#667085]"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Row 7: TDS Section + TDS Rate */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="form-label">TDS Section <span className="font-normal text-[#98A2B3]">(optional)</span></label>
+                <input
+                  {...register('tdsSection')}
+                  className="form-input w-full"
+                  placeholder="194J"
+                />
+              </div>
+              <div>
+                <label className="form-label">TDS Rate % <span className="font-normal text-[#98A2B3]">(optional)</span></label>
+                <input
+                  {...register('tdsRate', { valueAsNumber: true })}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="form-input w-full"
+                  placeholder="10"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-[#98A2B3] -mt-1">Only for contractor payments where you deduct TDS</p>
 
             {/* Receipt upload */}
             <div>
