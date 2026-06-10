@@ -39,7 +39,7 @@ export function useCreateSubscription() {
       const { checkoutUrl: sessionId } = await createSubscription(tier)
       const mode = (import.meta.env.VITE_CASHFREE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production'
       const cashfree = await load({ mode })
-      cashfree.subscriptions({ subscriptionSessionId: sessionId })
+      await cashfree.subscriptionsCheckout({ subsSessionId: sessionId })
     },
     onError: () => {
       toast.error('Failed to start checkout. Please try again.')
