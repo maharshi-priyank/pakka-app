@@ -20,9 +20,10 @@ export default function AcceptInvitePage() {
     }
     accept(token, {
       onSuccess: () => setStatus('success'),
-      onError: (err: { response?: { data?: { message?: string } } }) => {
+      onError: (err: unknown) => {
         setStatus('error')
-        setMessage(err.response?.data?.message ?? 'Could not accept invite.')
+        const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        setMessage(msg ?? 'Could not accept invite.')
       },
     })
   }, [token]) // eslint-disable-line react-hooks/exhaustive-deps
