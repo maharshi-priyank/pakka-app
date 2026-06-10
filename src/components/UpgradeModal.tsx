@@ -1,5 +1,4 @@
 import { X, Check, Zap, Star, Loader2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { useUiStore } from '@/store/uiStore'
 import { cn } from '@/lib/utils'
 import { useCurrentPricing } from '@/features/billing/hooks/useCurrentPricing'
@@ -41,7 +40,6 @@ function PriceSkeleton() {
 }
 
 export default function UpgradeModal() {
-  const navigate = useNavigate()
   const { upgradeModal, closeUpgradeModal } = useUiStore()
   const { data: pricing, isLoading: pricingLoading } = useCurrentPricing()
   const { mutate: createSubscription, isPending } = useCreateSubscription()
@@ -151,7 +149,7 @@ export default function UpgradeModal() {
                 ))}
               </ul>
               <button
-                onClick={() => createSubscription('SOLO', { onSuccess: () => navigate('/billing/success') })}
+                onClick={() => createSubscription('SOLO', { onSuccess: () => { window.location.href = '/billing/success' } })}
                 disabled={isPending || pricingLoading}
                 className={cn(
                   'mt-4 w-full h-9 rounded-lg text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
@@ -186,7 +184,7 @@ export default function UpgradeModal() {
                 ))}
               </ul>
               <button
-                onClick={() => createSubscription('STUDIO', { onSuccess: () => navigate('/billing/success') })}
+                onClick={() => createSubscription('STUDIO', { onSuccess: () => { window.location.href = '/billing/success' } })}
                 disabled={isPending || pricingLoading}
                 className={cn(
                   'mt-4 w-full h-9 rounded-lg text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer',
