@@ -4,9 +4,9 @@ import { useCanvaDesigns, type CanvaDesign } from '@/features/settings/hooks/use
 import canvaSvg from '@/assets/canva.svg'
 
 interface Props {
-  onSelect: (design: CanvaDesign) => void
-  onClose:  () => void
-  isPicking?: boolean
+  onSelect:   (design: CanvaDesign) => void
+  onClose:    () => void
+  isPicking?: boolean   // true while the export + upload is in progress
 }
 
 export default function CanvaPickerModal({ onSelect, onClose, isPicking }: Props) {
@@ -95,9 +95,16 @@ export default function CanvaPickerModal({ onSelect, onClose, isPicking }: Props
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-[#EAECF0] dark:border-[#2A2B35] flex items-center justify-between">
-          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">
-            {!isLoading && designs.length > 0 && `${designs.length} design${designs.length !== 1 ? 's' : ''}`}
-          </p>
+          {isPicking ? (
+            <div className="flex items-center gap-2 text-[12px] text-[#6366F1] dark:text-[#818CF8]">
+              <Loader2 size={13} className="animate-spin" />
+              Exporting PDF — this takes a few seconds…
+            </div>
+          ) : (
+            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">
+              {!isLoading && designs.length > 0 && `${designs.length} design${designs.length !== 1 ? 's' : ''} · Attaches as PDF`}
+            </p>
+          )}
           <a
             href="https://www.canva.com/design"
             target="_blank"

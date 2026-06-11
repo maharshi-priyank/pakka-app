@@ -90,21 +90,26 @@ export function useLinkCanvaDesign(parent: AttachmentParent) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (design: CanvaDesign) => {
+      // Export design as PDF on the server → get a public Supabase URL
+      const { data: exportData } = await api.post<{ data: { fileUrl: string } }>(
+        `/canva/designs/${design.id}/export`,
+        { title: design.title },
+      )
       const body = {
         ...parentQuery(parent),
-        fileName: design.title || 'Canva Design',
-        fileUrl:  design.viewUrl,
+        fileName: `${design.title || 'Canva Design'}.pdf`,
+        fileUrl:  exportData.data.fileUrl,
         fileSize: 0,
-        mimeType: 'application/x-canva',
+        mimeType: 'application/pdf',
       }
       const { data } = await api.post<{ data: Attachment }>('/attachments', body)
       return data.data
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['attachments', parentKey(parent)] })
-      toast.success('Canva design linked')
+      toast.success('Canva design exported and attached')
     },
-    onError: (err: Error) => toast.error(err.message || 'Failed to link design'),
+    onError: (err: Error) => toast.error(err.message || 'Failed to export Canva design'),
   })
 }
 
