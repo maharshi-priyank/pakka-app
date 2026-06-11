@@ -112,11 +112,33 @@ function fmtAmount(v: string | number) {
   return Number(v).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 }
 
+const CATEGORY_COLORS: Record<string, string> = {
+  'Travel':                      '#F59E0B',
+  'Accommodation':               '#8B5CF6',
+  'Food & Entertainment':        '#EC4899',
+  'Materials & Supplies':        '#14B8A6',
+  'Equipment':                   '#3B82F6',
+  'Software & Subscriptions':    '#6366F1',
+  'Contractor / Freelancer Fee': '#F97316',
+  'Studio / Venue Hire':         '#A855F7',
+  'Marketing & Ads':             '#EF4444',
+  'Printing & Production':       '#84CC16',
+  'Courier & Shipping':          '#0EA5E9',
+  'Professional Services':       '#10B981',
+  'Training & Learning':         '#FBBF24',
+  'Office & Admin':              '#6B7280',
+  'Other':                       '#9CA3AF',
+}
+function getCategoryColor(cat: string): string {
+  return CATEGORY_COLORS[cat] ?? '#6366F1'
+}
+
 type FilterTab = 'all' | 'unbilled' | 'billed'
 
 export default function ExpensesPage() {
   const [searchParams] = useSearchParams()
   const preselectedProjectId = searchParams.get('projectId') ?? ''
+  const preselectedClientId  = searchParams.get('clientId')  ?? ''
 
   const [filter,     setFilter]     = useState<FilterTab>('all')
   const [clientFilter, setClientFilter] = useState('')
@@ -172,6 +194,7 @@ export default function ExpensesPage() {
       hasGst:     false,
       amount:     undefined as any,
       projectId:  preselectedProjectId || undefined,
+      clientId:   preselectedClientId  || undefined,
     })
     setShowForm(true)
   }
@@ -288,23 +311,39 @@ export default function ExpensesPage() {
         <div>
           <h1 className="text-[20px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Expenses</h1>
           <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
-            {preselectedProjectId && projects.find(p => p.id === preselectedProjectId) ? (
-              <>Logging for <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{projects.find(p => p.id === preselectedProjectId)?.name}</span></>
-            ) : (totalAmount > 0 || unbilledAmount > 0 || gstPaid > 0) ? (
-              <span className="flex flex-wrap gap-x-3">
-                {totalAmount > 0 && <span>₹{fmtAmount(totalAmount)} total</span>}
-                {unbilledAmount > 0 && <span>₹{fmtAmount(unbilledAmount)} unbilled</span>}
-                {gstPaid > 0 && <span>₹{fmtAmount(gstPaid)} GST paid</span>}
-              </span>
-            ) : (
-              'Log out-of-pocket costs and bill them back to clients'
-            )}
+            {preselectedProjectId && projects.find(p => p.id === preselectedProjectId)
+              ? <>Logging for <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{projects.find(p => p.id === preselectedProjectId)?.name}</span></>
+              : 'Track costs, GST, TDS and bill them back to clients'}
           </p>
         </div>
         <button onClick={openNewForm} className="btn-primary text-[13px] flex items-center gap-1.5">
           <Plus size={13} strokeWidth={2.5} /> Log Expense
         </button>
       </div>
+
+      {/* Stats strip */}
+      {(totalAmount > 0 || unbilledAmount > 0 || gstPaid > 0) && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white dark:bg-[#1A1B23] rounded-xl border border-[#EAECF0] dark:border-[#26283A] px-4 py-3 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+            <p className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider">Total Spent</p>
+            <p className="text-[18px] font-bold mt-1 flex items-center gap-0.5 tabular-nums text-[#101828] dark:text-[#ECEEF3]">
+              <IndianRupee size={12} strokeWidth={2.5} className="mt-0.5 shrink-0" />{fmtAmount(totalAmount)}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-[#1A1B23] rounded-xl border border-[#EAECF0] dark:border-[#26283A] px-4 py-3 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+            <p className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider">Unbilled</p>
+            <p className="text-[18px] font-bold mt-1 flex items-center gap-0.5 tabular-nums text-[#B54708] dark:text-[#FDB022]">
+              <IndianRupee size={12} strokeWidth={2.5} className="mt-0.5 shrink-0" />{fmtAmount(unbilledAmount)}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-[#1A1B23] rounded-xl border border-[#EAECF0] dark:border-[#26283A] px-4 py-3 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+            <p className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider">GST Paid</p>
+            <p className="text-[18px] font-bold mt-1 flex items-center gap-0.5 tabular-nums text-[#6366F1] dark:text-[#818CF8]">
+              <IndianRupee size={12} strokeWidth={2.5} className="mt-0.5 shrink-0" />{fmtAmount(gstPaid)}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Log/Edit form ── */}
       {showForm && (
@@ -524,8 +563,8 @@ export default function ExpensesPage() {
       {/* ── Filters ── */}
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Billed status tabs */}
-          <div className="flex items-center gap-2">
+          {/* Status segment control */}
+          <div className="flex items-center bg-[#F3F4F6] dark:bg-[#21222D] rounded-full p-0.5">
             {(['all', 'unbilled', 'billed'] as FilterTab[]).map(tab => (
               <button
                 key={tab}
@@ -533,8 +572,8 @@ export default function ExpensesPage() {
                 className={cn(
                   'px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all',
                   filter === tab
-                    ? 'bg-[#0D1117] dark:bg-[#6366F1] text-white'
-                    : 'bg-[#F3F4F6] dark:bg-[#21222D] text-[#6B7280] dark:text-[#8B92A8] hover:bg-[#E5E7EB] dark:hover:bg-[#26283A]',
+                    ? 'bg-white dark:bg-[#2D2E3D] text-[#101828] dark:text-[#ECEEF3] shadow-sm'
+                    : 'text-[#6B7280] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
                 )}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -562,6 +601,9 @@ export default function ExpensesPage() {
             ))}
           </select>
 
+          {/* Spacer */}
+          <div className="flex-1" />
+
           {/* Export CSV */}
           <button
             onClick={() => exportCsv({
@@ -572,14 +614,13 @@ export default function ExpensesPage() {
             })}
             disabled={expenses.length === 0 || exporting}
             className={cn(
-              'ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border transition-colors',
-              'border-[#D0D5DD] dark:border-[#3D4258] text-[#344054] dark:text-[#C2C8D8]',
-              'hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] disabled:opacity-40 disabled:cursor-not-allowed',
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border transition-colors cursor-pointer',
+              'border-[#D0D5DD] dark:border-[#3D4258] text-[#344054] dark:text-[#C2C8D8] bg-white dark:bg-[#1A1B23]',
+              'hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] hover:border-[#B5BDC9] dark:hover:border-[#4D5470]',
+              'disabled:opacity-40 disabled:cursor-not-allowed',
             )}
           >
-            {exporting
-              ? <Loader2 size={12} className="animate-spin" />
-              : <Download size={12} />}
+            {exporting ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
             Export CSV
           </button>
         </div>
@@ -650,8 +691,8 @@ export default function ExpensesPage() {
               <div
                 key={expense.id}
                 className={cn(
-                  'flex items-center gap-3 px-5 py-3.5 hover:bg-[#FAFAFA] dark:hover:bg-[#21222D] group transition-colors',
-                  expense.isBilled && 'opacity-60',
+                  'flex items-center gap-3 px-5 py-3 hover:bg-[#FAFAFA] dark:hover:bg-[#21222D] group transition-colors cursor-default',
+                  expense.isBilled && 'opacity-55',
                 )}
               >
                 {/* Checkbox */}
@@ -668,62 +709,83 @@ export default function ExpensesPage() {
                   <div className="w-4 shrink-0" />
                 )}
 
-                {/* Category badge */}
-                <span className="text-[11px] font-semibold text-[#667085] dark:text-[#8B92A8] bg-[#F3F4F6] dark:bg-[#21222D] px-2 py-0.5 rounded-full shrink-0">
-                  {expense.category}
-                </span>
+                {/* Category color dot */}
+                <div
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: getCategoryColor(expense.category) }}
+                  title={expense.category}
+                />
 
-                {/* Description + client + project */}
+                {/* Description + metadata */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] text-[#344054] dark:text-[#C2C8D8] truncate">{expense.description}</p>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  <p className="text-[13px] font-medium text-[#101828] dark:text-[#ECEEF3] truncate">{expense.description}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                    <span className="text-[11px] text-[#667085] dark:text-[#8B92A8]">{expense.category}</span>
+                    {expense.vendor && (
+                      <>
+                        <span className="text-[#D0D5DD] dark:text-[#3D4258] text-[10px]">·</span>
+                        <span className="text-[11px] text-[#667085] dark:text-[#8B92A8]">{expense.vendor}</span>
+                      </>
+                    )}
                     {expense.client && (
-                      <p className="text-[11px] text-[#667085] dark:text-[#545C74]">{expense.client.name}</p>
+                      <>
+                        <span className="text-[#D0D5DD] dark:text-[#3D4258] text-[10px]">·</span>
+                        <span className="text-[11px] text-[#667085] dark:text-[#545C74]">{expense.client.name}</span>
+                      </>
                     )}
                     {expense.project && (
-                      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#027A48] bg-[#ECFDF3] px-1.5 py-0.5 rounded-full">
-                        <FolderKanban size={9} />
-                        {expense.project.name}
-                      </span>
+                      <>
+                        <span className="text-[#D0D5DD] dark:text-[#3D4258] text-[10px]">·</span>
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#027A48] bg-[#ECFDF3] dark:bg-[#0A2E1F] dark:text-[#3DD68C] px-1.5 py-0.5 rounded-full">
+                          <FolderKanban size={9} />{expense.project.name}
+                        </span>
+                      </>
                     )}
                   </div>
                 </div>
 
-                {/* Amount + date */}
-                <div className="flex items-center gap-3 shrink-0 text-right">
-                  <div>
-                    <p className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8] flex items-center gap-0.5">
-                      <IndianRupee size={10} strokeWidth={2.5} />
-                      {fmtAmount(expense.amount)}
-                    </p>
-                    <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">
-                      {new Date(expense.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                    </p>
-                  </div>
+                {/* Right: amount + date + badges */}
+                <div className="flex items-center gap-3 shrink-0">
+                  {/* GST badge */}
+                  {expense.gstAmount && Number(expense.gstAmount) > 0 && (
+                    <span className="text-[10px] font-medium text-[#6366F1] dark:text-[#818CF8] bg-[#EEF2FF] dark:bg-[#1E1D3A] px-1.5 py-0.5 rounded-full hidden sm:inline-flex">
+                      GST ₹{fmtAmount(expense.gstAmount)}
+                    </span>
+                  )}
 
-                  {/* Receipt */}
+                  {/* Status */}
+                  {expense.isBilled && (
+                    <span className="text-[10px] font-bold text-[#027A48] bg-[#ECFDF3] dark:bg-[#0A2E1F] dark:text-[#3DD68C] px-1.5 py-0.5 rounded-full">Billed</span>
+                  )}
+                  {!expense.isBillable && (
+                    <span className="text-[10px] font-medium text-[#667085] bg-[#F2F4F7] dark:bg-[#26283A] dark:text-[#8B92A8] px-1.5 py-0.5 rounded-full">Non-billable</span>
+                  )}
+
+                  {/* Receipt icon */}
                   {expense.receiptUrl && (
                     <a
                       href={expense.receiptUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="w-7 h-7 flex items-center justify-center rounded-lg bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] hover:text-[#2563EB] transition-colors"
+                      className="w-6 h-6 flex items-center justify-center rounded-lg bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3] hover:text-[#2563EB] transition-colors"
                       title="View receipt"
                     >
-                      <Receipt size={12} />
+                      <Receipt size={11} />
                     </a>
                   )}
 
-                  {/* Status badges */}
-                  {expense.isBilled && (
-                    <span className="text-[10px] font-bold text-[#027A48] bg-[#ECFDF3] px-1.5 py-0.5 rounded-full">Billed</span>
-                  )}
-                  {!expense.isBillable && (
-                    <span className="text-[10px] font-bold text-[#667085] bg-[#F2F4F7] dark:bg-[#21222D] px-1.5 py-0.5 rounded-full">Non-billable</span>
-                  )}
+                  {/* Amount + date */}
+                  <div className="text-right min-w-[72px]">
+                    <p className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] flex items-center gap-0.5 justify-end tabular-nums">
+                      <IndianRupee size={10} strokeWidth={2.5} />{fmtAmount(expense.amount)}
+                    </p>
+                    <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">
+                      {new Date(expense.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Actions */}
+                {/* Actions (hover reveal) */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                   <button
                     onClick={() => openEditForm(expense)}

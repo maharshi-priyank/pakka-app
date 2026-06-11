@@ -565,7 +565,8 @@ export default function ProjectPage() {
               title="Time Entries"
               empty={project.timeEntries.length === 0}
               emptyLabel="No time logged"
-              emptyAction={{ label: 'Log Time', href: `/time?projectId=${id}` }}
+              emptyAction={{ label: 'Log Time', href: `/time?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+              addAction={{ label: 'Log Time', href: `/time?projectId=${id}&clientId=${project.clientId ?? ''}` }}
             >
               <table className="w-full text-[13px]">
                 <thead>
@@ -590,7 +591,8 @@ export default function ProjectPage() {
               title="Expenses"
               empty={project.expenses.length === 0}
               emptyLabel="No expenses logged"
-              emptyAction={{ label: 'Add Expense', href: `/expenses?projectId=${id}` }}
+              emptyAction={{ label: 'Add Expense', href: `/expenses?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+              addAction={{ label: 'Add Expense', href: `/expenses?projectId=${id}&clientId=${project.clientId ?? ''}` }}
             >
               <table className="w-full text-[13px]">
                 <thead>

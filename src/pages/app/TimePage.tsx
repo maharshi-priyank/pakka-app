@@ -25,7 +25,7 @@ interface TimerState {
   projectId:   string
 }
 
-const TIMER_KEY = 'pakka_timer'
+const TIMER_KEY = 'clearwork_timer'
 
 function getStoredTimer(): TimerState | null {
   try {
@@ -88,6 +88,7 @@ function weekBounds() {
 export default function TimePage() {
   const [searchParams] = useSearchParams()
   const preselectedProjectId = searchParams.get('projectId') ?? ''
+  const preselectedClientId  = searchParams.get('clientId')  ?? ''
 
   const { from, to } = weekBounds()
   const [dateFrom, setDateFrom] = useState(from)
@@ -127,6 +128,7 @@ export default function TimePage() {
     if (preselectedProjectId && !showLogForm && !timerState) {
       reset({
         projectId:   preselectedProjectId,
+        clientId:    preselectedClientId || undefined,
         description: '',
         date:        new Date().toISOString().slice(0, 10),
         hours:       1,
