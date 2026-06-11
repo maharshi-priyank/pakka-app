@@ -252,9 +252,9 @@ function RequestIntegrationModal({ onClose }: { onClose: () => void }) {
     if (!tool.trim()) return
     const subject = encodeURIComponent(`Integration Request: ${tool.trim()}`)
     const body    = encodeURIComponent(
-      `Hi Pakka team,\n\nI'd like to request an integration with: ${tool.trim()}\n\nUse case:\n${useCase.trim() || 'Not specified'}\n\nThanks!`
+      `Hi ClearWork team,\n\nI'd like to request an integration with: ${tool.trim()}\n\nUse case:\n${useCase.trim() || 'Not specified'}\n\nThanks!`
     )
-    window.open(`mailto:support@pakka.in?subject=${subject}&body=${body}`)
+    window.open(`mailto:hello@getclearwork.in?subject=${subject}&body=${body}`)
     setSubmitted(true)
   }
 
@@ -265,7 +265,7 @@ function RequestIntegrationModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-start justify-between mb-5">
           <div>
             <h3 className="text-[16px] font-bold text-[#101828] dark:text-[#ECEEF3]">Request an integration</h3>
-            <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Tell us which tool you want connected to Pakka.</p>
+            <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Tell us which tool you want connected to ClearWork.</p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2B] transition-colors">
             <X size={16} className="text-[#667085]" />

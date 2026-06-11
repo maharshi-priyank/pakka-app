@@ -16,7 +16,7 @@ interface Props {
 const SOURCE_LABELS: Record<string, string> = {
   google:  'Google Calendar',
   outlook: 'Outlook',
-  pakka:   'Pakka',
+  clearwork: 'ClearWork',
 }
 
 function useIsMobile() {
@@ -70,7 +70,7 @@ export default function EventDetailSheet({ event, onClose }: Props) {
             >
               {event.type.replace(/_/g, ' ')}
             </span>
-            {event.source !== 'pakka' && (
+            {event.source !== 'clearwork' && (
               <span className="text-[10px] font-semibold text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full">
                 {SOURCE_LABELS[event.source] ?? event.source}
               </span>
@@ -113,7 +113,7 @@ export default function EventDetailSheet({ event, onClose }: Props) {
         {event.projectName && (
           <Row icon={<Briefcase size={14} />} label="Project">{event.projectName}</Row>
         )}
-        {event.source !== 'pakka' && (
+        {event.source !== 'clearwork' && (
           <Row icon={<Tag size={14} />} label="Source">{SOURCE_LABELS[event.source] ?? event.source}</Row>
         )}
         {event.agenda && (

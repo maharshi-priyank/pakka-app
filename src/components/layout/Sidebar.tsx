@@ -43,7 +43,7 @@ const SECTIONS = [
 ]
 
 const DEFAULT_ORDER = ALL_NAV_ITEMS.map(i => i.id)
-const STORAGE_KEY = 'pakka_sidebar_order'
+const STORAGE_KEY = 'clearwork_sidebar_order'
 
 function loadOrder(): string[] {
   try {

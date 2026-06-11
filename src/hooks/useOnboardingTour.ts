@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
 
-const TOUR_KEY = 'pakka_tour_v1_seen'
+const TOUR_KEY = 'clearwork_tour_v1_seen'
 
 function icon(path: string, color = '#2563EB') {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:7px">${path}</svg>`
@@ -22,7 +22,7 @@ export function useOnboardingTour() {
       overlayColor: 'rgba(0,0,0,0.55)',
       stagePadding: 6,
       stageRadius: 12,
-      popoverClass: 'pakka-tour-popover',
+      popoverClass: 'clearwork-tour-popover',
       nextBtnText: 'Next →',
       prevBtnText: '← Back',
       doneBtnText: 'Done',

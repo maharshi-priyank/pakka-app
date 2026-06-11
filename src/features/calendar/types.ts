@@ -4,7 +4,7 @@ export type CalendarEventType =
   | 'google_external'
   | 'outlook_external'
 
-export type CalendarEventSource = 'pakka' | 'google' | 'outlook'
+export type CalendarEventSource = 'clearwork' | 'google' | 'outlook'
 
 export type CalendarView = 'day' | 'week' | 'month' | 'upcoming'
 
