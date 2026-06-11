@@ -143,6 +143,7 @@ function EmptyState({ message, sub }: { message: string; sub: string }) {
 function RevenueTab({ range }: { range: DateRange }) {
   const { data, isLoading } = useRevenueReport(range)
   const { isDark } = useThemeStore()
+  const { format } = useCurrency()
 
   const rows   = data?.rows   ?? []
   const totals = data?.totals
@@ -251,6 +252,7 @@ function RevenueTab({ range }: { range: DateRange }) {
 
 function GstTab({ range }: { range: DateRange }) {
   const { data, isLoading } = useGstReport(range)
+  const { format } = useCurrency()
 
   const rows   = data?.rows   ?? []
   const totals = data?.totals
@@ -332,6 +334,7 @@ function GstTab({ range }: { range: DateRange }) {
 
 function ClientsTab({ range }: { range: DateRange }) {
   const { data: rows = [], isLoading } = useClientReport(range)
+  const { format } = useCurrency()
 
   const maxInvoiced = Math.max(...rows.map(r => r.invoiced), 1)
   const totalInvoiced    = rows.reduce((s, r) => s + r.invoiced, 0)
@@ -404,6 +407,7 @@ function ClientsTab({ range }: { range: DateRange }) {
 function ExpensesTab({ range }: { range: DateRange }) {
   const { data, isLoading } = useExpenseReport(range)
   const { isDark } = useThemeStore()
+  const { format } = useCurrency()
 
   const byCategory = data?.byCategory ?? []
   const monthly    = data?.monthly    ?? []
@@ -520,6 +524,7 @@ function ExpensesTab({ range }: { range: DateRange }) {
 function TimeTab({ range }: { range: DateRange }) {
   const { data, isLoading } = useTimeReport(range)
   const { isDark } = useThemeStore()
+  const { format } = useCurrency()
 
   const byClient = data?.byClient ?? []
   const monthly  = data?.monthly  ?? []
@@ -646,7 +651,6 @@ export default function ReportsPage() {
   const [tab,    setTab]    = useState<Tab>('revenue')
   const [preset, setPreset] = useState<Preset>('this_fy')
   const [custom, setCustom] = useState<DateRange>(() => fyBounds(0))
-  const { format } = useCurrency()
 
   const range: DateRange = preset === 'custom' ? custom : presetRange(preset)
 

@@ -2,7 +2,6 @@ import { TrendingUp, AlertCircle, FileText, ArrowUp, ArrowDown, DollarSign } fro
 import { cn } from '@/lib/utils'
 import { useDashboardStats } from '../hooks/useDashboard'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -13,7 +12,6 @@ type StatType = 'revenue_month' | 'pipeline' | 'overdue' | 'open_proposals'
 export default function StatCardWidget({ type }: { type: StatType }) {
   const { data: stats, isLoading } = useDashboardStats()
   const { format } = useCurrency()
-  const { isIndia } = useWorkspace()
 
   const META: Record<StatType, {
     label:     string
