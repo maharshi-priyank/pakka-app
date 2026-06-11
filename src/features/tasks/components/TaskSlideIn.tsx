@@ -15,7 +15,7 @@ interface Props {
 
 export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }: Props) {
   const navigate  = useNavigate()
-  const isNew     = !taskId
+  const isNew     = !taskId || taskId === 'new'
   const { data: existing, isLoading } = useTask(taskId)
   const { data: projectsData } = useProjects()
   const projects  = projectsData?.projects ?? []
@@ -60,10 +60,10 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
   // Close on Escape key
   useEffect(() => {
     if (!open) return
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') close() }
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') navigate(listUrl) }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  }, [open, navigate, listUrl])
 
   async function handleSave() {
     if (!title.trim()) return
@@ -99,13 +99,13 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
     <>
       {/* Backdrop — mobile only */}
       <div
-        className="fixed inset-0 z-30 bg-black/20 lg:hidden"
+        className="fixed inset-0 z-40 bg-black/20 lg:hidden"
         onClick={close}
       />
 
       {/* Panel */}
       <div className={cn(
-        'fixed right-0 top-0 bottom-0 z-40 w-full max-w-[420px]',
+        'fixed right-0 top-0 bottom-0 z-50 w-full max-w-[420px]',
         'bg-white dark:bg-[#13141A] border-l border-[#EAECF0] dark:border-[#26283A]',
         'flex flex-col shadow-2xl',
         'transition-transform duration-200',
@@ -270,7 +270,7 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
 
       {/* Delete confirm dialog */}
       {showDel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowDel(false)} />
           <div className="relative bg-white dark:bg-[#1A1B26] rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
             <div className="w-10 h-10 rounded-full bg-[#FEF3F2] dark:bg-red-950/40 flex items-center justify-center mx-auto mb-3">
