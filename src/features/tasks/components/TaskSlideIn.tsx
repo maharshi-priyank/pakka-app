@@ -1,10 +1,12 @@
 // pakka-app/src/features/tasks/components/TaskSlideIn.tsx
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Trash2, Loader2, Link2, Lock } from 'lucide-react'
+import { X, Trash2, Loader2, Link2, Lock, UserCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTask, useCreateTask, useUpdateTask, useDeleteTask } from '../hooks/useTasks'
 import { useProjects } from '@/features/projects/hooks/useProjects'
+import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useTeam } from '@/features/team/hooks/useTeam'
 
 interface Props {
   open:              boolean
@@ -20,6 +22,13 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
   const { data: projectsData } = useProjects()
   const projects  = projectsData?.projects ?? []
 
+  const { data: profile }  = useProfile()
+  const { data: teamData } = useTeam()
+  const assignableUsers = [
+    ...(profile ? [{ id: profile.id, name: profile.name, email: profile.email }] : []),
+    ...(teamData?.members ?? []),
+  ]
+
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
   const deleteTask = useDeleteTask()
@@ -29,6 +38,7 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
   const [includeTime, setIncludeTime] = useState(false)
   const [projectId,   setProjectId]   = useState<string>('')
   const [isPrivate,   setIsPrivate]   = useState(false)
+  const [assigneeId,  setAssigneeId]  = useState<string>('')
   const [showDel,     setShowDel]     = useState(false)
   const [saving,      setSaving]      = useState(false)
 
@@ -40,6 +50,7 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
       setIncludeTime(false)
       setProjectId(defaultProjectId ?? '')
       setIsPrivate(false)
+      setAssigneeId('')
     } else if (existing) {
       setTitle(existing.title)
       setDueDate(existing.dueDate
@@ -50,6 +61,7 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
       setIncludeTime(existing.includeTime)
       setProjectId(existing.projectId ?? '')
       setIsPrivate(existing.isPrivate)
+      setAssigneeId(existing.assigneeId ?? '')
     }
   }, [existing, isNew, defaultProjectId, taskId])
 
@@ -74,7 +86,8 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
         dueDate:     dueDate || null,
         includeTime,
         isPrivate,
-        projectId:   projectId || null,
+        projectId:   projectId  || null,
+        assigneeId:  assigneeId || null,
       }
       if (isNew) {
         const created = await createTask.mutateAsync(payload)
@@ -221,6 +234,28 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
+              </div>
+
+              {/* Assignee */}
+              <div>
+                <label className="block text-[11.5px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1.5 uppercase tracking-wide">
+                  Assignee
+                </label>
+                <div className="relative">
+                  <UserCircle2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3] pointer-events-none" />
+                  <select
+                    value={assigneeId}
+                    onChange={e => setAssigneeId(e.target.value)}
+                    className="form-input w-full text-[13px] pl-8"
+                  >
+                    <option value="">Unassigned</option>
+                    {assignableUsers.map(u => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}{profile && u.id === profile.id ? ' (you)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Private */}

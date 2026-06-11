@@ -144,6 +144,7 @@ export default function ProjectTasksTab({ projectId }: Props) {
               <thead>
                 <tr className="border-b border-[#EAECF0] dark:border-[#26283A]">
                   <th className="text-left px-4 py-2.5 text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide">Task</th>
+                  <th className="text-left px-4 py-2.5 text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide">Assignee</th>
                   <th className="text-left px-4 py-2.5 text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide">Due date</th>
                   <th className="text-left px-4 py-2.5 text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide">Created</th>
                 </tr>
@@ -208,6 +209,25 @@ function ProjectTaskRow({ task, onOpen, onToggle }: {
             {task.title}
           </span>
         </button>
+      </td>
+      <td className="px-4 py-3">
+        {task.assignee ? (
+          <div className="flex items-center gap-2">
+            <span
+              className="w-5 h-5 rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shrink-0 text-white ring-[1.5px] ring-white dark:ring-[#13141A]"
+              title={task.assignee.name}
+            >
+              <span className="text-[9px] font-bold leading-none">
+                {task.assignee.name.charAt(0).toUpperCase()}
+              </span>
+            </span>
+            <span className="text-[12.5px] text-[#344054] dark:text-[#C2C8D8] font-medium truncate max-w-[120px]">
+              {task.assignee.name}
+            </span>
+          </div>
+        ) : (
+          <span className="text-[#D0D5DD] dark:text-[#3D4258] text-[12.5px]">—</span>
+        )}
       </td>
       <td className="px-4 py-3 text-[12.5px] text-[#667085] dark:text-[#8B92A8]">
         {task.dueDate ? formatDate(task.dueDate) : <span className="text-[#D0D5DD]">—</span>}

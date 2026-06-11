@@ -10,6 +10,19 @@ export interface TaskProject {
   client: { id: string; name: string } | null
 }
 
+export interface TaskAssignee {
+  id:    string
+  name:  string
+  email: string
+}
+
+export interface TaskColumnRef {
+  id:    string
+  name:  string
+  isDone: boolean
+  color: string | null
+}
+
 export interface Task {
   id:          string
   userId:      string
@@ -23,7 +36,10 @@ export interface Task {
   createdAt:   string
   updatedAt:   string
   columnId:    string | null
+  column:      TaskColumnRef | null
   position:    number
+  assigneeId:  string | null
+  assignee:    TaskAssignee | null
 }
 
 export interface CreateTaskInput {
@@ -33,13 +49,15 @@ export interface CreateTaskInput {
   isPrivate?:   boolean
   projectId?:   string | null
   columnId?:    string | null
+  assigneeId?:  string | null
 }
 
 export interface UpdateTaskInput extends Partial<CreateTaskInput> {
-  id:        string
-  status?:   TaskStatus
-  columnId?: string | null
-  position?: number
+  id:          string
+  status?:     TaskStatus
+  columnId?:   string | null
+  position?:   number
+  assigneeId?: string | null
 }
 
 const KEYS = {
@@ -83,7 +101,12 @@ export function useCreateTask() {
       const { data } = await api.post<{ data: Task }>('/tasks', input)
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.lists() }),
+    onSuccess: (_, input) => {
+      qc.invalidateQueries({ queryKey: KEYS.lists() })
+      if (input.columnId) {
+        qc.invalidateQueries({ queryKey: ['task-boards'] })
+      }
+    },
   })
 }
 

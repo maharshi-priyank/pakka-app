@@ -6,7 +6,7 @@ import { z } from 'zod'
 import {
   ArrowLeft, FolderKanban, Building2, Calendar, IndianRupee,
   Clock, Receipt, FileText, PenLine, Wallet, Pencil, Trash2,
-  X, Loader2, Plus, CheckSquare,
+  X, Loader2, Plus,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import {
