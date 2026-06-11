@@ -1,7 +1,7 @@
 // pakka-app/src/features/tasks/components/ProjectTasksTab.tsx
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Plus, Circle, CheckCircle2, Loader2 } from 'lucide-react'
+import { Plus, Circle, CheckCircle2, Loader2, Search } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { useTasks, useUpdateTask, type Task, type TaskStatus } from '../hooks/useTasks'
 import TaskSlideIn from './TaskSlideIn'
@@ -22,11 +22,13 @@ export default function ProjectTasksTab({ projectId }: Props) {
   const { taskId }  = useParams<{ taskId?: string }>()
   const navigate    = useNavigate()
   const [filter, setFilter] = useState<FilterTab>('all')
+  const [search, setSearch] = useState('')
   const listUrl = `/projects/${projectId}/tasks`
 
   const { data: tasks, isLoading } = useTasks({
     projectId,
     status: filter === 'all' ? undefined : filter as TaskStatus,
+    search: search || undefined,
   })
 
   const updateTask = useUpdateTask()
@@ -73,6 +75,16 @@ export default function ProjectTasksTab({ projectId }: Props) {
               </button>
             ))}
           </div>
+
+          <div className="relative">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search tasks..."
+              className="form-input pl-8 text-[13px] h-8 w-48"
+            />
+          </div>
         </div>
 
         <button
@@ -91,13 +103,17 @@ export default function ProjectTasksTab({ projectId }: Props) {
           </div>
         ) : !tasks?.length ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-[13px] text-[#667085] dark:text-[#8B92A8]">No tasks for this project yet</p>
-            <button
-              onClick={openNew}
-              className="mt-2 flex items-center gap-1 text-[12px] text-[#6366F1] font-semibold hover:text-[#4F46E5] transition-colors"
-            >
-              <Plus size={12} /> New task
-            </button>
+            <p className="text-[13px] text-[#667085] dark:text-[#8B92A8]">
+              {search ? 'No tasks match your search' : 'No tasks for this project yet'}
+            </p>
+            {!search && (
+              <button
+                onClick={openNew}
+                className="mt-2 flex items-center gap-1 text-[12px] text-[#6366F1] font-semibold hover:text-[#4F46E5] transition-colors"
+              >
+                <Plus size={12} /> New task
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
