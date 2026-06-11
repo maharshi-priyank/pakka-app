@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  TrendingUp, Wallet, IndianRupee, BarChart3,
+  TrendingUp, TrendingDown, Wallet, IndianRupee, BarChart3,
 } from 'lucide-react'
 import {
-  ComposedChart, Area, Bar, Cell,
+  BarChart, Bar, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts'
 import { cn, formatCurrency } from '@/lib/utils'
@@ -22,10 +22,10 @@ function Skeleton({ className }: { className?: string }) {
 }
 
 function PlCard({
-  label, value, sub, iconBg, iconColor, icon: Icon, loading,
+  label, value, sub, iconBg, iconColor, valueColor, icon: Icon, loading,
 }: {
   label: string; value: string; sub?: string
-  iconBg: string; iconColor: string; icon: React.ElementType
+  iconBg: string; iconColor: string; valueColor?: string; icon: React.ElementType
   loading?: boolean
 }) {
   return (
@@ -37,7 +37,7 @@ function PlCard({
       </div>
       {loading
         ? <Skeleton className="h-7 w-24 mb-1" />
-        : <p className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3] leading-none tracking-tight">{value}</p>
+        : <p className={cn('text-[22px] font-extrabold leading-none tracking-tight tabular-nums', valueColor ?? 'text-[#101828] dark:text-[#ECEEF3]')}>{value}</p>
       }
       <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] font-medium mt-2">{label}</p>
       {sub && <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{sub}</p>}
@@ -145,7 +145,8 @@ export default function PlTab({ range }: { range: DateRange }) {
           value={formatCurrency(totals?.grossProfit ?? 0)}
           iconBg={profitPositive ? 'bg-[#ECFDF3] dark:bg-emerald-950/40' : 'bg-[#FEF3F2] dark:bg-red-950/40'}
           iconColor={profitPositive ? 'text-[#027A48] dark:text-[#34D399]' : 'text-[#D92D20] dark:text-red-400'}
-          icon={TrendingUp}
+          valueColor={profitPositive ? 'text-[#027A48] dark:text-[#34D399]' : 'text-[#D92D20] dark:text-red-400'}
+          icon={profitPositive ? TrendingUp : TrendingDown}
           loading={isLoading}
         />
         <PlCard
@@ -153,6 +154,7 @@ export default function PlTab({ range }: { range: DateRange }) {
           value={totals?.margin !== null && totals?.margin !== undefined ? `${totals.margin.toFixed(1)}%` : '—'}
           iconBg={profitPositive ? 'bg-[#ECFDF3] dark:bg-emerald-950/40' : 'bg-[#FEF3F2] dark:bg-red-950/40'}
           iconColor={profitPositive ? 'text-[#027A48] dark:text-[#34D399]' : 'text-[#D92D20] dark:text-red-400'}
+          valueColor={profitPositive ? 'text-[#027A48] dark:text-[#34D399]' : 'text-[#D92D20] dark:text-red-400'}
           icon={BarChart3}
           loading={isLoading}
         />
@@ -161,47 +163,72 @@ export default function PlTab({ range }: { range: DateRange }) {
       {/* Monthly chart */}
       {!isLoading && monthly.length > 0 && (
         <div className="card-glass p-5">
-          <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-4">Monthly P&amp;L</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={monthly} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-              <defs>
-                <linearGradient id="plRevGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#6366F1" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="plExpGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#F59E0B" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke={isDark ? '#26283A' : '#F2F4F7'} strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="period" tick={{ fontSize: 11, fill: isDark ? '#545C74' : '#98A2B3' }} axisLine={false} tickLine={false} />
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Monthly P&amp;L</h3>
+            <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Bar height = Revenue</span>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={monthly} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} barCategoryGap="55%">
+              <CartesianGrid stroke={isDark ? '#26283A' : '#EAECF0'} strokeDasharray="4 4" vertical={false} />
+              <XAxis
+                dataKey="period"
+                tick={{ fontSize: 11, fill: isDark ? '#545C74' : '#98A2B3' }}
+                axisLine={false}
+                tickLine={false}
+                dy={4}
+              />
               <YAxis hide />
               <Tooltip
-                formatter={(v, name) => [
-                  formatCurrency(v as number),
-                  name === 'revenue' ? 'Revenue' : name === 'expenses' ? 'Expenses' : 'Profit',
-                ]}
-                contentStyle={{
-                  border: `1px solid ${isDark ? '#3D4258' : '#EAECF0'}`,
-                  borderRadius: 10, fontSize: 12,
-                  background: isDark ? '#1A1B23' : '#fff',
-                  color: isDark ? '#ECEEF3' : '#101828',
+                cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', radius: 6 }}
+                content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null
+                  const d = payload[0]?.payload
+                  const tip_margin = d.revenue > 0 ? ((d.grossProfit / d.revenue) * 100).toFixed(1) : '0.0'
+                  return (
+                    <div style={{
+                      border: `1px solid ${isDark ? '#3D4258' : '#EAECF0'}`,
+                      borderRadius: 10, fontSize: 12, padding: '10px 14px',
+                      background: isDark ? '#1A1B23' : '#fff',
+                      color: isDark ? '#ECEEF3' : '#101828',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                      minWidth: 160,
+                    }}>
+                      <p style={{ fontWeight: 700, marginBottom: 6, color: isDark ? '#C2C8D8' : '#344054' }}>{label}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
+                        <span style={{ color: isDark ? '#8B92A8' : '#667085' }}>Revenue</span>
+                        <span style={{ fontWeight: 600 }}>{formatCurrency(d.revenue)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
+                        <span style={{ color: '#B54708' }}>Expenses</span>
+                        <span style={{ fontWeight: 600, color: '#B54708' }}>{formatCurrency(d.expenses)}</span>
+                      </div>
+                      <div style={{ borderTop: `1px dashed ${isDark ? '#3D4258' : '#E4E7EC'}`, margin: '6px 0' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
+                        <span style={{ color: d.grossProfit >= 0 ? '#027A48' : '#D92D20' }}>Gross Profit</span>
+                        <span style={{ fontWeight: 700, color: d.grossProfit >= 0 ? '#027A48' : '#D92D20' }}>{formatCurrency(d.grossProfit)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                        <span style={{ color: isDark ? '#8B92A8' : '#98A2B3' }}>Margin</span>
+                        <span style={{ fontWeight: 600, color: isDark ? '#8B92A8' : '#667085' }}>{tip_margin}%</span>
+                      </div>
+                    </div>
+                  )
                 }}
               />
               <Legend
-                iconType="line"
-                iconSize={12}
-                wrapperStyle={{ fontSize: 11, color: isDark ? '#8B92A8' : '#667085', paddingTop: 8 }}
+                iconType="square"
+                iconSize={9}
+                wrapperStyle={{ fontSize: 11, color: isDark ? '#8B92A8' : '#667085', paddingTop: 12 }}
+                formatter={(value) => value === 'expenses' ? 'Expenses' : 'Gross Profit'}
               />
-              <Area type="monotone" dataKey="revenue"  name="revenue"  stroke="#6366F1" strokeWidth={2} fill="url(#plRevGrad)" dot={false} />
-              <Area type="monotone" dataKey="expenses" name="expenses" stroke="#F59E0B" strokeWidth={2} fill="url(#plExpGrad)" dot={false} />
-              <Bar dataKey="grossProfit" name="profit" maxBarSize={28} radius={[4,4,0,0]}>
+              {/* Stacked: expenses bottom (amber) + grossProfit top (green/red) = Revenue height */}
+              <Bar dataKey="expenses" name="expenses" stackId="pl" maxBarSize={48} radius={[0, 0, 4, 4]} fill="#F59E0B" fillOpacity={0.85} />
+              <Bar dataKey="grossProfit" name="grossProfit" stackId="pl" maxBarSize={48} radius={[4, 4, 0, 0]} fill="#12B76A" fillOpacity={0.9}>
                 {monthly.map((entry, i) => (
-                  <Cell key={i} fill={entry.grossProfit >= 0 ? '#12B76A' : '#D92D20'} />
+                  <Cell key={`cell-${i}`} fill={entry.grossProfit >= 0 ? '#12B76A' : '#D92D20'} />
                 ))}
               </Bar>
-            </ComposedChart>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       )}
