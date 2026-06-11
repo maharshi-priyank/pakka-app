@@ -385,7 +385,7 @@ export default function ProjectPage() {
 
       {/* Tab content */}
       <div>
-        {tab === 'overview' && (
+        {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Left: description + dates */}
             <div className="lg:col-span-2 space-y-4">
@@ -474,7 +474,7 @@ export default function ProjectPage() {
           </div>
         )}
 
-        {tab === 'proposals' && (
+        {activeTab === 'proposals' && (
           <RecordTable
             empty={project.proposals.length === 0}
             emptyLabel="No proposals linked to this project"
@@ -501,7 +501,7 @@ export default function ProjectPage() {
           </RecordTable>
         )}
 
-        {tab === 'contracts' && (
+        {activeTab === 'contracts' && (
           <RecordTable
             empty={project.contracts.length === 0}
             emptyLabel="No contracts linked to this project"
@@ -528,7 +528,7 @@ export default function ProjectPage() {
           </RecordTable>
         )}
 
-        {tab === 'invoices' && (
+        {activeTab === 'invoices' && (
           <RecordTable
             empty={project.invoices.length === 0}
             emptyLabel="No invoices linked to this project"
@@ -556,13 +556,13 @@ export default function ProjectPage() {
           </RecordTable>
         )}
 
-        {tab === 'files' && (
+        {activeTab === 'files' && (
           <div className="max-w-2xl">
             <ProjectFilesPanel projectId={project.id} />
           </div>
         )}
 
-        {tab === 'notes' && (
+        {activeTab === 'notes' && (
           <div className="max-w-2xl">
             <ProjectNotesTab projectId={project.id} brief={project.description ?? null} />
           </div>
@@ -572,7 +572,7 @@ export default function ProjectPage() {
           <ProjectTasksTab projectId={id!} />
         )}
 
-        {tab === 'time' && (
+        {activeTab === 'time' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Time entries */}
             <RecordTable
