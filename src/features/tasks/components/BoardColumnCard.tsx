@@ -4,16 +4,16 @@ import { MoreHorizontal, Check, Trash2, Pencil, Plus, Loader2 } from 'lucide-rea
 import { cn } from '@/lib/utils'
 import { useCreateTask } from '../hooks/useTasks'
 import { useUpdateColumn, useDeleteColumn, type BoardColumnWithTasks } from '../hooks/useTaskBoards'
-import TaskCard from './TaskCard'
 
 interface Props {
   column:       BoardColumnWithTasks
   boardId:      string
   onCardClick:  (taskId: string) => void
   showProject?: boolean
+  children?:    React.ReactNode
 }
 
-export default function BoardColumnCard({ column, boardId, onCardClick, showProject }: Props) {
+export default function BoardColumnCard({ column, boardId, onCardClick, showProject, children }: Props) {
   const [menuOpen,     setMenuOpen]     = useState(false)
   const [renaming,     setRenaming]     = useState(false)
   const [nameInput,    setNameInput]    = useState(column.name)
@@ -118,16 +118,9 @@ export default function BoardColumnCard({ column, boardId, onCardClick, showProj
         </div>
       </div>
 
-      {/* Card list */}
+      {/* Card list — rendered by parent via children (SortableCard) */}
       <div className="flex-1 overflow-y-auto px-3 space-y-2 pb-2 min-h-[40px]">
-        {column.tasks.map(task => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onClick={() => onCardClick(task.id)}
-            showProject={showProject}
-          />
-        ))}
+        {children}
       </div>
 
       {/* Add task */}

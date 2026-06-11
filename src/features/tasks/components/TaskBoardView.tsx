@@ -88,7 +88,16 @@ function SortableColumn({
         boardId={boardId}
         onCardClick={onCardClick}
         showProject={showProject}
-      />
+      >
+        {column.tasks.map(task => (
+          <SortableCard
+            key={task.id}
+            task={task}
+            onClick={() => onCardClick(task.id)}
+            showProject={showProject}
+          />
+        ))}
+      </BoardColumnCard>
     </div>
   )
 }
