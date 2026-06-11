@@ -14,6 +14,7 @@ import {
   type ProjectStatus,
 } from '@/features/projects/hooks/useProjects'
 import ProjectFilesPanel from '@/features/projects/components/ProjectFilesPanel'
+import ProjectPlCard from '@/features/projects/components/ProjectPlCard'
 import ProjectNotesTab from '@/features/projects/components/ProjectNotesTab'
 import InvoiceQuickView, { type InvoiceSnap } from '@/features/invoices/components/InvoiceQuickView'
 import ProposalQuickView, { type ProposalSnap } from '@/features/proposals/components/ProposalQuickView'
@@ -353,27 +354,8 @@ export default function ProjectPage() {
         />
       </div>
 
-      {/* Budget bar */}
-      {budget !== null && (
-        <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Budget utilisation</p>
-            <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">
-              {formatCurrency(expenseTotal)} of {formatCurrency(budget)}
-              {budgetUsed !== null && <span className="ml-1.5 font-semibold text-[#344054] dark:text-[#C2C8D8]">({budgetUsed.toFixed(0)}%)</span>}
-            </p>
-          </div>
-          <div className="h-2 rounded-full bg-[#F2F4F7] dark:bg-[#21222D] overflow-hidden">
-            <div
-              className={cn(
-                'h-full rounded-full transition-all duration-500',
-                (budgetUsed ?? 0) >= 100 ? 'bg-[#D92D20]' : (budgetUsed ?? 0) >= 80 ? 'bg-amber-500' : 'bg-[#2563EB]',
-              )}
-              style={{ width: `${budgetUsed ?? 0}%` }}
-            />
-          </div>
-        </div>
-      )}
+      {/* P&L & Budget */}
+      <ProjectPlCard projectId={id!} />
 
       {/* Tabs */}
       <div className="flex items-center gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none">

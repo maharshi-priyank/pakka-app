@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   BarChart3, Download, TrendingUp, IndianRupee, Users,
-  Wallet, Clock, FileText, Info,
+  Wallet, Clock, FileText, Info, PieChart,
 } from 'lucide-react'
 import DropdownSelect from '@/components/ui/DropdownSelect'
 import {
@@ -15,10 +15,11 @@ import {
   useRevenueReport, useGstReport, useClientReport,
   useExpenseReport, useTimeReport,
 } from '@/features/reports/hooks/useReports'
+import PlTab from '@/features/reports/components/PlTab'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab    = 'revenue' | 'gst' | 'clients' | 'expenses' | 'time'
+type Tab    = 'revenue' | 'gst' | 'clients' | 'expenses' | 'time' | 'pl'
 type Preset = 'this_month' | 'last_month' | 'this_quarter' | 'last_quarter' | 'this_fy' | 'last_fy' | 'custom'
 
 interface DateRange { from: string; to: string }
@@ -635,6 +636,7 @@ const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: 'clients',  label: 'Clients',  icon: Users       },
   { key: 'expenses', label: 'Expenses', icon: Wallet      },
   { key: 'time',     label: 'Time',     icon: Clock       },
+  { key: 'pl',       label: 'P&L',      icon: PieChart    },
 ]
 
 const PRESETS: Preset[] = ['this_month', 'last_month', 'this_quarter', 'last_quarter', 'this_fy', 'last_fy', 'custom']
@@ -719,6 +721,7 @@ export default function ReportsPage() {
         {tab === 'clients'  && <ClientsTab  range={range} />}
         {tab === 'expenses' && <ExpensesTab range={range} />}
         {tab === 'time'     && <TimeTab     range={range} />}
+        {tab === 'pl'       && <PlTab       range={range} />}
       </div>
 
     </div>
