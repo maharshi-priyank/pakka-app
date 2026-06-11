@@ -1,6 +1,6 @@
 // pakka-app/src/pages/app/TasksPage.tsx
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Plus, Circle, CheckCircle2, Loader2, Search } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { useTasks, useUpdateTask, type Task, type TaskStatus } from '@/features/tasks/hooks/useTasks'
@@ -116,9 +116,12 @@ export default function TasksPage() {
         <span className="font-semibold text-[#344054] dark:text-[#C2C8D8] px-3 py-1.5 rounded-lg bg-[#F2F4F7] dark:bg-[#21222D]">
           Tasks
         </span>
-        <span className="px-3 py-1.5 rounded-lg text-[#98A2B3] dark:text-[#545C74] cursor-not-allowed select-none" title="Coming soon">
+        <Link
+          to="/tasks/task-boards"
+          className="px-3 py-1.5 rounded-lg text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors"
+        >
           Task Boards
-        </span>
+        </Link>
       </div>
 
       {/* Filter + search bar */}

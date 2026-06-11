@@ -323,7 +323,17 @@ export const router = createBrowserRouter([
           },
           {
             path: '/tasks/task-boards',
-            element: <Navigate to="/tasks" replace />,
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/TaskBoardsPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/tasks/task-boards/:boardId',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/TaskBoardsPage')
+              return { Component }
+            },
           },
           {
             path: '/tasks/:taskId',
@@ -341,7 +351,17 @@ export const router = createBrowserRouter([
           },
           {
             path: '/projects/:id/tasks/task-boards',
-            element: <Navigate to="/tasks" replace />,
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ProjectPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/projects/:id/tasks/task-boards/:boardId',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ProjectPage')
+              return { Component }
+            },
           },
           {
             path: '/projects/:id/tasks/:taskId',

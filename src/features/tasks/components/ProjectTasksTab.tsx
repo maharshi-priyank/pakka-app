@@ -1,10 +1,11 @@
 // pakka-app/src/features/tasks/components/ProjectTasksTab.tsx
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { Plus, Circle, CheckCircle2, Loader2, Search } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { useTasks, useUpdateTask, type Task, type TaskStatus } from '../hooks/useTasks'
 import TaskSlideIn from './TaskSlideIn'
+import TaskBoardsPage from '@/pages/app/TaskBoardsPage'
 
 type FilterTab = 'all' | 'TODO' | 'COMPLETED'
 
@@ -21,6 +22,8 @@ interface Props {
 export default function ProjectTasksTab({ projectId }: Props) {
   const { taskId }  = useParams<{ taskId?: string }>()
   const navigate    = useNavigate()
+  const location    = useLocation()
+  const isBoardRoute = location.pathname.includes('/task-boards')
   const [filter, setFilter] = useState<FilterTab>('all')
   const [search, setSearch] = useState('')
   const listUrl = `/projects/${projectId}/tasks`
@@ -44,18 +47,38 @@ export default function ProjectTasksTab({ projectId }: Props) {
   const slideInOpen = !!taskId
   const slideInId   = taskId === 'new' ? undefined : taskId
 
+  if (isBoardRoute) {
+    return <TaskBoardsPage projectId={projectId} />
+  }
+
   return (
     <div className="space-y-4">
       {/* Sub-nav + New task button */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-[13px]">
-            <span className="font-semibold text-[#344054] dark:text-[#C2C8D8] px-3 py-1.5 rounded-lg bg-[#F2F4F7] dark:bg-[#21222D]">
+            <Link
+              to={`/projects/${projectId}/tasks`}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-[13px] font-semibold transition-colors',
+                !isBoardRoute
+                  ? 'text-[#344054] dark:text-[#C2C8D8] bg-[#F2F4F7] dark:bg-[#21222D]'
+                  : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+              )}
+            >
               Tasks
-            </span>
-            <span className="px-3 py-1.5 rounded-lg text-[#98A2B3] dark:text-[#545C74] cursor-not-allowed select-none" title="Coming soon">
+            </Link>
+            <Link
+              to={`/projects/${projectId}/tasks/task-boards`}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-[13px] transition-colors',
+                isBoardRoute
+                  ? 'font-semibold text-[#344054] dark:text-[#C2C8D8] bg-[#F2F4F7] dark:bg-[#21222D]'
+                  : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+              )}
+            >
               Task Boards
-            </span>
+            </Link>
           </div>
 
           {/* Filter tabs */}
