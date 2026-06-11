@@ -137,3 +137,50 @@ export function useTimeReport(range: DateRange) {
     staleTime: 60_000,
   })
 }
+
+// ─── P&L ──────────────────────────────────────────────────────────────────────
+
+export type PlBasis = 'accrual' | 'cash'
+
+export interface PlMonthlyPoint {
+  period:      string
+  revenue:     number
+  expenses:    number
+  grossProfit: number
+}
+
+export interface PlProjectRow {
+  projectId:   string
+  projectName: string
+  clientName:  string | null
+  revenue:     number
+  expenses:    number
+  grossProfit: number
+  margin:      number | null
+}
+
+export interface PlTotals {
+  revenue:     number
+  expenses:    number
+  grossProfit: number
+  margin:      number | null
+}
+
+export interface PlReport {
+  totals:    PlTotals
+  monthly:   PlMonthlyPoint[]
+  byProject: PlProjectRow[]
+}
+
+export function usePlReport(range: DateRange, basis: PlBasis) {
+  return useQuery({
+    queryKey: ['reports', 'pl', range, basis],
+    queryFn: async () => {
+      const { data } = await api.get<{ data: PlReport }>('/reports/pl', {
+        params: { from: range.from, to: range.to, basis },
+      })
+      return data.data
+    },
+    staleTime: 60_000,
+  })
+}
