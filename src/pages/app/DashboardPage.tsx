@@ -352,9 +352,9 @@ export default function DashboardPage() {
           <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74] mt-1">What are you working on?</p>
         </div>
 
-        {/* Search — centered, hidden on small screens */}
-        <div className="hidden md:flex flex-1 justify-center">
-          <div className="relative w-full max-w-[300px]">
+        {/* Search — truly centered via fixed width */}
+        <div className="hidden md:block w-[280px] shrink-0">
+          <div className="relative">
             <Search
               size={14}
               className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#545C74] pointer-events-none"
@@ -363,13 +363,13 @@ export default function DashboardPage() {
             <input
               type="text"
               placeholder="Search..."
-              className="w-full h-10 pl-10 pr-4 rounded-full text-[13px] bg-white dark:bg-[#1A1B23] border border-gray-200 dark:border-[#26283A] shadow-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder-gray-400 dark:placeholder-[#545C74] text-gray-900 dark:text-[#ECEEF3]"
+              className="w-full h-9 pl-10 pr-4 rounded-xl text-[13px] bg-[#F5F6FA] dark:bg-[#1A1B23] border border-transparent focus:border-[#6366F1]/30 focus:bg-white dark:focus:bg-[#13141A] focus:ring-2 focus:ring-[#6366F1]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-[#545C74] text-gray-900 dark:text-[#ECEEF3]"
             />
           </div>
         </div>
 
         {/* Right actions */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex-1 flex items-center justify-end gap-1">
           <div className="hidden sm:flex"><CalendarBell /></div>
           <NotificationBell />
           <button
