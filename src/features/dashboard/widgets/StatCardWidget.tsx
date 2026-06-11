@@ -1,6 +1,8 @@
-import { IndianRupee, TrendingUp, AlertCircle, FileText, ArrowUp, ArrowDown } from 'lucide-react'
-import { cn, formatCurrency } from '@/lib/utils'
+import { TrendingUp, AlertCircle, FileText, ArrowUp, ArrowDown, DollarSign } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useDashboardStats } from '../hooks/useDashboard'
+import { useCurrency } from '@/hooks/useCurrency'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -8,52 +10,55 @@ function Skeleton({ className }: { className?: string }) {
 
 type StatType = 'revenue_month' | 'pipeline' | 'overdue' | 'open_proposals'
 
-const META: Record<StatType, {
-  label:   string
-  sub:     (s: NonNullable<ReturnType<typeof useDashboardStats>['data']>) => string
-  iconBg:  string
-  icon:    React.ElementType
-  iconColor: string
-  value:   (s: NonNullable<ReturnType<typeof useDashboardStats>['data']>) => React.ReactNode
-}> = {
-  revenue_month: {
-    label:     'Revenue this month',
-    sub:       s => s.revenueChange != null
-      ? `${s.revenueChange >= 0 ? '+' : ''}${s.revenueChange}% vs last month`
-      : `Last month: ${formatCurrency(s.revenueLastMonth ?? 0)}`,
-    iconBg:    'bg-[#EEF2FF] dark:bg-[#1E2040]',
-    iconColor: 'text-[#6366F1]',
-    icon:      IndianRupee,
-    value:     s => formatCurrency(s.revenueThisMonth ?? 0),
-  },
-  pipeline: {
-    label:     'Pipeline value',
-    sub:       s => `${s.activeLeads ?? 0} active lead${s.activeLeads !== 1 ? 's' : ''}`,
-    iconBg:    'bg-[#ECFDF3] dark:bg-emerald-950/40',
-    iconColor: 'text-[#027A48] dark:text-[#34D399]',
-    icon:      TrendingUp,
-    value:     s => formatCurrency(s.pipelineValue ?? 0),
-  },
-  overdue: {
-    label:     'Overdue invoices',
-    sub:       s => s.overdueCount === 0 ? 'All invoices up to date' : `${s.overdueCount} invoice${s.overdueCount !== 1 ? 's' : ''} pending`,
-    iconBg:    'bg-[#FEF3F2] dark:bg-red-950/40',
-    iconColor: 'text-[#D92D20] dark:text-red-400',
-    icon:      AlertCircle,
-    value:     s => formatCurrency(s.overdueAmount ?? 0),
-  },
-  open_proposals: {
-    label:     'Open proposals',
-    sub:       () => 'Sent or viewed by client',
-    iconBg:    'bg-[#FFFAEB] dark:bg-amber-950/30',
-    iconColor: 'text-[#B54708] dark:text-amber-400',
-    icon:      FileText,
-    value:     s => String(s.openProposals ?? 0),
-  },
-}
-
 export default function StatCardWidget({ type }: { type: StatType }) {
   const { data: stats, isLoading } = useDashboardStats()
+  const { format } = useCurrency()
+  const { isIndia } = useWorkspace()
+
+  const META: Record<StatType, {
+    label:     string
+    sub:       (s: NonNullable<typeof stats>) => string
+    iconBg:    string
+    icon:      React.ElementType
+    iconColor: string
+    value:     (s: NonNullable<typeof stats>) => React.ReactNode
+  }> = {
+    revenue_month: {
+      label:     'Revenue this month',
+      sub:       s => s.revenueChange != null
+        ? `${s.revenueChange >= 0 ? '+' : ''}${s.revenueChange}% vs last month`
+        : `Last month: ${format(s.revenueLastMonth ?? 0)}`,
+      iconBg:    'bg-[#EEF2FF] dark:bg-[#1E2040]',
+      iconColor: 'text-[#6366F1]',
+      icon:      DollarSign,
+      value:     s => format(s.revenueThisMonth ?? 0),
+    },
+    pipeline: {
+      label:     'Pipeline value',
+      sub:       s => `${s.activeLeads ?? 0} active lead${s.activeLeads !== 1 ? 's' : ''}`,
+      iconBg:    'bg-[#ECFDF3] dark:bg-emerald-950/40',
+      iconColor: 'text-[#027A48] dark:text-[#34D399]',
+      icon:      TrendingUp,
+      value:     s => format(s.pipelineValue ?? 0),
+    },
+    overdue: {
+      label:     'Overdue invoices',
+      sub:       s => s.overdueCount === 0 ? 'All invoices up to date' : `${s.overdueCount} invoice${s.overdueCount !== 1 ? 's' : ''} pending`,
+      iconBg:    'bg-[#FEF3F2] dark:bg-red-950/40',
+      iconColor: 'text-[#D92D20] dark:text-red-400',
+      icon:      AlertCircle,
+      value:     s => format(s.overdueAmount ?? 0),
+    },
+    open_proposals: {
+      label:     'Open proposals',
+      sub:       () => 'Sent or viewed by client',
+      iconBg:    'bg-[#FFFAEB] dark:bg-amber-950/30',
+      iconColor: 'text-[#B54708] dark:text-amber-400',
+      icon:      FileText,
+      value:     s => String(s.openProposals ?? 0),
+    },
+  }
+
   const m = META[type]
   const Icon = m.icon
 

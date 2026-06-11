@@ -1,6 +1,7 @@
-import { Wallet, IndianRupee } from 'lucide-react'
-import { cn, formatCurrency } from '@/lib/utils'
+import { Wallet } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useInvoices } from '@/features/invoices/hooks/useInvoices'
+import { useCurrency } from '@/hooks/useCurrency'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -8,6 +9,7 @@ function Skeleton({ className }: { className?: string }) {
 
 export default function CollectionWidget() {
   const { data, isLoading } = useInvoices({ limit: 200 })
+  const { format } = useCurrency()
   const items = data?.items ?? []
 
   const sentAmount    = items.filter(i => i.status === 'SENT').reduce((s, i) => s + Number(i.total), 0)
@@ -27,7 +29,7 @@ export default function CollectionWidget() {
       {isLoading
         ? <Skeleton className="h-8 w-28 mb-2" />
         : <p className="text-[26px] font-extrabold text-[#101828] dark:text-[#ECEEF3] leading-none tracking-tight">
-            {formatCurrency(total)}
+            {format(total)}
           </p>
       }
       <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] font-medium mt-2">Pending collection</p>
@@ -36,7 +38,6 @@ export default function CollectionWidget() {
         <Skeleton className="h-2 w-full mt-3 rounded-full" />
       ) : total > 0 ? (
         <>
-          {/* Stacked bar */}
           <div className="flex h-1.5 rounded-full overflow-hidden mt-3 gap-px">
             {sentPct > 0 && (
               <div className="rounded-full bg-[#6366F1] transition-all" style={{ width: `${sentPct}%` }} />
@@ -48,12 +49,12 @@ export default function CollectionWidget() {
           <div className="flex items-center gap-3 mt-2">
             <span className="flex items-center gap-1 text-[11px] text-[#667085] dark:text-[#8B92A8]">
               <span className="w-2 h-2 rounded-full bg-[#6366F1] shrink-0" />
-              <IndianRupee size={9} />{formatCurrency(sentAmount).replace('₹', '')} sent
+              {format(sentAmount)} sent
             </span>
             {overdueAmount > 0 && (
               <span className="flex items-center gap-1 text-[11px] text-[#D92D20]">
                 <span className="w-2 h-2 rounded-full bg-[#F04438] shrink-0" />
-                <IndianRupee size={9} />{formatCurrency(overdueAmount).replace('₹', '')} overdue
+                {format(overdueAmount)} overdue
               </span>
             )}
           </div>

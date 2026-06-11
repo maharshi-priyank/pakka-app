@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { IndianRupee } from 'lucide-react'
-import { cn, formatCurrency, formatDate } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
+import { useCurrency } from '@/hooks/useCurrency'
 import QuickViewModal, { QVField } from '@/components/shared/QuickViewModal'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -31,6 +31,7 @@ interface Props {
 
 export default function InvoiceQuickView({ invoice, onClose }: Props) {
   const navigate = useNavigate()
+  const { format } = useCurrency()
   if (!invoice) return null
 
   const total   = Number(invoice.total)
@@ -52,17 +53,12 @@ export default function InvoiceQuickView({ invoice, onClose }: Props) {
       }
     >
       <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-        <QVField label="Total Amount" value={
-          <span className="flex items-center gap-0.5">
-            <IndianRupee size={11} strokeWidth={2.5} className="inline text-gray-500" />
-            {formatCurrency(total).replace('₹', '')}
-          </span>
-        } />
-        {paid != null && <QVField label="Amount Paid" value={formatCurrency(paid)} />}
+        <QVField label="Total Amount" value={format(total)} />
+        {paid != null && <QVField label="Amount Paid" value={format(paid)} />}
         {balance != null && (
           <QVField label="Balance Due" value={
             <span className={balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
-              {formatCurrency(balance)}
+              {format(balance)}
             </span>
           } />
         )}

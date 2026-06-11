@@ -7,8 +7,9 @@ import {
   BarChart, Bar, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts'
-import { cn, formatCurrency } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { useThemeStore } from '@/store/themeStore'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
   usePlReport,
   type DateRange,
@@ -102,6 +103,7 @@ export default function PlTab({ range }: { range: DateRange }) {
   const [basis, setBasis] = useState<PlBasis>('accrual')
   const { data, isLoading } = usePlReport(range, basis)
   const { isDark } = useThemeStore()
+  const { format } = useCurrency()
 
   const totals    = data?.totals
   const monthly   = data?.monthly   ?? []
@@ -126,7 +128,7 @@ export default function PlTab({ range }: { range: DateRange }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <PlCard
           label="Revenue"
-          value={formatCurrency(totals?.revenue ?? 0)}
+          value={format(totals?.revenue ?? 0)}
           iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"
           iconColor="text-[#6366F1]"
           icon={IndianRupee}
@@ -134,7 +136,7 @@ export default function PlTab({ range }: { range: DateRange }) {
         />
         <PlCard
           label="Expenses"
-          value={formatCurrency(totals?.expenses ?? 0)}
+          value={format(totals?.expenses ?? 0)}
           iconBg="bg-[#FFFAEB] dark:bg-amber-950/30"
           iconColor="text-[#B54708] dark:text-amber-400"
           icon={Wallet}
@@ -142,7 +144,7 @@ export default function PlTab({ range }: { range: DateRange }) {
         />
         <PlCard
           label="Gross Profit"
-          value={formatCurrency(totals?.grossProfit ?? 0)}
+          value={format(totals?.grossProfit ?? 0)}
           iconBg={profitPositive ? 'bg-[#ECFDF3] dark:bg-emerald-950/40' : 'bg-[#FEF3F2] dark:bg-red-950/40'}
           iconColor={profitPositive ? 'text-[#027A48] dark:text-[#34D399]' : 'text-[#D92D20] dark:text-red-400'}
           valueColor={profitPositive ? 'text-[#027A48] dark:text-[#34D399]' : 'text-[#D92D20] dark:text-red-400'}
@@ -196,16 +198,16 @@ export default function PlTab({ range }: { range: DateRange }) {
                       <p style={{ fontWeight: 700, marginBottom: 6, color: isDark ? '#C2C8D8' : '#344054' }}>{label}</p>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
                         <span style={{ color: isDark ? '#8B92A8' : '#667085' }}>Revenue</span>
-                        <span style={{ fontWeight: 600 }}>{formatCurrency(d.revenue)}</span>
+                        <span style={{ fontWeight: 600 }}>{format(d.revenue)}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
                         <span style={{ color: '#B54708' }}>Expenses</span>
-                        <span style={{ fontWeight: 600, color: '#B54708' }}>{formatCurrency(d.expenses)}</span>
+                        <span style={{ fontWeight: 600, color: '#B54708' }}>{format(d.expenses)}</span>
                       </div>
                       <div style={{ borderTop: `1px dashed ${isDark ? '#3D4258' : '#E4E7EC'}`, margin: '6px 0' }} />
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
                         <span style={{ color: d.grossProfit >= 0 ? '#027A48' : '#D92D20' }}>Gross Profit</span>
-                        <span style={{ fontWeight: 700, color: d.grossProfit >= 0 ? '#027A48' : '#D92D20' }}>{formatCurrency(d.grossProfit)}</span>
+                        <span style={{ fontWeight: 700, color: d.grossProfit >= 0 ? '#027A48' : '#D92D20' }}>{format(d.grossProfit)}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
                         <span style={{ color: isDark ? '#8B92A8' : '#98A2B3' }}>Margin</span>
@@ -270,10 +272,10 @@ export default function PlTab({ range }: { range: DateRange }) {
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.clientName ?? <span className="text-[#D0D5DD]">—</span>}</td>
-                  <td className="px-4 py-3 font-medium text-[#344054] dark:text-[#C2C8D8]">{formatCurrency(r.revenue)}</td>
-                  <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.expenses > 0 ? formatCurrency(r.expenses) : <span className="text-[#D0D5DD]">—</span>}</td>
+                  <td className="px-4 py-3 font-medium text-[#344054] dark:text-[#C2C8D8]">{format(r.revenue)}</td>
+                  <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.expenses > 0 ? format(r.expenses) : <span className="text-[#D0D5DD]">—</span>}</td>
                   <td className={cn('px-4 py-3 font-medium', r.grossProfit >= 0 ? 'text-[#027A48] dark:text-[#34D399]' : 'text-[#D92D20] dark:text-red-400')}>
-                    {formatCurrency(r.grossProfit)}
+                    {format(r.grossProfit)}
                   </td>
                   <td className="px-4 py-3"><MarginBadge margin={r.margin} /></td>
                 </tr>

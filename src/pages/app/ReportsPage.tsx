@@ -8,9 +8,10 @@ import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
-import { cn, formatCurrency } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { exportCsv } from '@/lib/exportCsv'
 import { useThemeStore } from '@/store/themeStore'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
   useRevenueReport, useGstReport, useClientReport,
   useExpenseReport, useTimeReport,
@@ -162,9 +163,9 @@ function RevenueTab({ range }: { range: DateRange }) {
     <>
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Invoiced"   value={formatCurrency(totals?.invoiced    ?? 0)} iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"          iconColor="text-[#6366F1]"                          icon={IndianRupee} loading={isLoading} />
-        <StatCard label="Total Collected"  value={formatCurrency(totals?.collected   ?? 0)} iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40"      iconColor="text-[#027A48] dark:text-[#34D399]"      icon={TrendingUp}  loading={isLoading} />
-        <StatCard label="Outstanding"      value={formatCurrency(totals?.outstanding ?? 0)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"          iconColor="text-[#D92D20] dark:text-red-400"        icon={FileText}    loading={isLoading} />
+        <StatCard label="Total Invoiced"   value={format(totals?.invoiced    ?? 0)} iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"          iconColor="text-[#6366F1]"                          icon={IndianRupee} loading={isLoading} />
+        <StatCard label="Total Collected"  value={format(totals?.collected   ?? 0)} iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40"      iconColor="text-[#027A48] dark:text-[#34D399]"      icon={TrendingUp}  loading={isLoading} />
+        <StatCard label="Outstanding"      value={format(totals?.outstanding ?? 0)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"          iconColor="text-[#D92D20] dark:text-red-400"        icon={FileText}    loading={isLoading} />
         <StatCard label="Collection Rate"  value={`${collectionRate}%`}                     iconBg="bg-[#FFFAEB] dark:bg-amber-950/30"         iconColor="text-[#B54708] dark:text-amber-400"      icon={BarChart3}   loading={isLoading} sub={totals ? `${totals.invoiceCount} invoices` : undefined} />
       </div>
 
@@ -188,7 +189,7 @@ function RevenueTab({ range }: { range: DateRange }) {
               <XAxis dataKey="period" tick={{ fontSize: 11, fill: isDark ? '#545C74' : '#98A2B3' }} axisLine={false} tickLine={false} />
               <YAxis hide />
               <Tooltip
-                formatter={(v, name) => [formatCurrency(v as number), name === 'invoiced' ? 'Invoiced' : 'Collected']}
+                formatter={(v, name) => [format(v as number), name === 'invoiced' ? 'Invoiced' : 'Collected']}
                 contentStyle={{ border: `1px solid ${isDark ? '#3D4258' : '#EAECF0'}`, borderRadius: 10, fontSize: 12, background: isDark ? '#1A1B23' : '#fff', color: isDark ? '#ECEEF3' : '#101828' }}
               />
               <Area type="monotone" dataKey="invoiced"  stroke="#6366F1" strokeWidth={2} fill="url(#invoicedGrad)"  dot={false} />
@@ -226,18 +227,18 @@ function RevenueTab({ range }: { range: DateRange }) {
             {rows.map(r => (
               <tr key={r.period} className="border-b border-[#F2F4F7] dark:border-[#26283A] hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F2A] transition-colors">
                 <td className="px-4 py-3 font-semibold text-[#344054] dark:text-[#C2C8D8]">{r.period}</td>
-                <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{formatCurrency(r.invoiced)}</td>
-                <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399] font-medium">{formatCurrency(r.collected)}</td>
-                <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{formatCurrency(r.outstanding)}</td>
+                <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{format(r.invoiced)}</td>
+                <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399] font-medium">{format(r.collected)}</td>
+                <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{format(r.outstanding)}</td>
                 <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.invoiceCount}</td>
               </tr>
             ))}
             {totals && rows.length > 0 && (
               <tr className="bg-[#F8FAFC] dark:bg-[#1E1F2A] font-bold">
                 <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">Total</td>
-                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.invoiced)}</td>
-                <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399]">{formatCurrency(totals.collected)}</td>
-                <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{formatCurrency(totals.outstanding)}</td>
+                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.invoiced)}</td>
+                <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399]">{format(totals.collected)}</td>
+                <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{format(totals.outstanding)}</td>
                 <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{totals.invoiceCount}</td>
               </tr>
             )}
@@ -265,10 +266,10 @@ function GstTab({ range }: { range: DateRange }) {
   return (
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Taxable Value"  value={formatCurrency(totals?.taxableValue ?? 0)} iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"      iconColor="text-[#6366F1]"                     icon={IndianRupee} loading={isLoading} />
-        <StatCard label="IGST Collected" value={formatCurrency(totals?.igst         ?? 0)} iconBg="bg-[#FFFAEB] dark:bg-amber-950/30"   iconColor="text-[#B54708] dark:text-amber-400" icon={IndianRupee} loading={isLoading} />
-        <StatCard label="CGST + SGST"    value={formatCurrency((totals?.cgst ?? 0) + (totals?.sgst ?? 0))} iconBg="bg-[#F4F3FF] dark:bg-violet-950/40" iconColor="text-[#5925DC] dark:text-[#A78BFA]" icon={IndianRupee} loading={isLoading} sub={totals ? `CGST ${formatCurrency(totals.cgst)} · SGST ${formatCurrency(totals.sgst)}` : undefined} />
-        <StatCard label="TDS Deducted"   value={formatCurrency(totals?.tds          ?? 0)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"     iconColor="text-[#D92D20] dark:text-red-400"  icon={IndianRupee} loading={isLoading} />
+        <StatCard label="Taxable Value"  value={format(totals?.taxableValue ?? 0)} iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"      iconColor="text-[#6366F1]"                     icon={IndianRupee} loading={isLoading} />
+        <StatCard label="IGST Collected" value={format(totals?.igst         ?? 0)} iconBg="bg-[#FFFAEB] dark:bg-amber-950/30"   iconColor="text-[#B54708] dark:text-amber-400" icon={IndianRupee} loading={isLoading} />
+        <StatCard label="CGST + SGST"    value={format((totals?.cgst ?? 0) + (totals?.sgst ?? 0))} iconBg="bg-[#F4F3FF] dark:bg-violet-950/40" iconColor="text-[#5925DC] dark:text-[#A78BFA]" icon={IndianRupee} loading={isLoading} sub={totals ? `CGST ${format(totals.cgst)} · SGST ${format(totals.sgst)}` : undefined} />
+        <StatCard label="TDS Deducted"   value={format(totals?.tds          ?? 0)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"     iconColor="text-[#D92D20] dark:text-red-400"  icon={IndianRupee} loading={isLoading} />
       </div>
 
       <div className="flex items-center gap-2 px-3.5 py-2.5 bg-[#F8FAFC] dark:bg-[#1E1F2A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl">
@@ -300,24 +301,24 @@ function GstTab({ range }: { range: DateRange }) {
               {rows.map(r => (
                 <tr key={r.period} className="border-b border-[#F2F4F7] dark:border-[#26283A] hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F2A] transition-colors">
                   <td className="px-4 py-3 font-semibold text-[#344054] dark:text-[#C2C8D8]">{r.period}</td>
-                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{formatCurrency(r.taxableValue)}</td>
-                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{r.igst > 0 ? formatCurrency(r.igst) : <span className="text-[#98A2B3]">—</span>}</td>
-                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{r.cgst > 0 ? formatCurrency(r.cgst) : <span className="text-[#98A2B3]">—</span>}</td>
-                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{r.sgst > 0 ? formatCurrency(r.sgst) : <span className="text-[#98A2B3]">—</span>}</td>
-                  <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{r.tds > 0 ? formatCurrency(r.tds) : <span className="text-[#98A2B3]">—</span>}</td>
-                  <td className="px-4 py-3 font-medium text-[#344054] dark:text-[#C2C8D8]">{formatCurrency(r.totalTax)}</td>
+                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{format(r.taxableValue)}</td>
+                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{r.igst > 0 ? format(r.igst) : <span className="text-[#98A2B3]">—</span>}</td>
+                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{r.cgst > 0 ? format(r.cgst) : <span className="text-[#98A2B3]">—</span>}</td>
+                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{r.sgst > 0 ? format(r.sgst) : <span className="text-[#98A2B3]">—</span>}</td>
+                  <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{r.tds > 0 ? format(r.tds) : <span className="text-[#98A2B3]">—</span>}</td>
+                  <td className="px-4 py-3 font-medium text-[#344054] dark:text-[#C2C8D8]">{format(r.totalTax)}</td>
                   <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.invoiceCount}</td>
                 </tr>
               ))}
               {totals && rows.length > 0 && (
                 <tr className="bg-[#F8FAFC] dark:bg-[#1E1F2A] font-bold">
                   <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">Total</td>
-                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.taxableValue)}</td>
-                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.igst)}</td>
-                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.cgst)}</td>
-                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.sgst)}</td>
-                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.tds)}</td>
-                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.totalTax)}</td>
+                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.taxableValue)}</td>
+                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.igst)}</td>
+                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.cgst)}</td>
+                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.sgst)}</td>
+                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.tds)}</td>
+                  <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.totalTax)}</td>
                   <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{totals.invoiceCount}</td>
                 </tr>
               )}
@@ -349,9 +350,9 @@ function ClientsTab({ range }: { range: DateRange }) {
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Clients with Invoices" value={String(rows.length)} iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"     iconColor="text-[#6366F1]"                     icon={Users}       loading={isLoading} />
-        <StatCard label="Top Client"             value={topClient?.clientName ?? '—'}  iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40" iconColor="text-[#027A48] dark:text-[#34D399]" icon={TrendingUp}  loading={isLoading} sub={topClient ? formatCurrency(topClient.invoiced) : undefined} />
-        <StatCard label="Total Invoiced"         value={formatCurrency(totalInvoiced)}    iconBg="bg-[#FFFAEB] dark:bg-amber-950/30"   iconColor="text-[#B54708] dark:text-amber-400" icon={IndianRupee} loading={isLoading} />
-        <StatCard label="Total Outstanding"      value={formatCurrency(totalOutstanding)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"     iconColor="text-[#D92D20] dark:text-red-400"  icon={FileText}    loading={isLoading} />
+        <StatCard label="Top Client"             value={topClient?.clientName ?? '—'}  iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40" iconColor="text-[#027A48] dark:text-[#34D399]" icon={TrendingUp}  loading={isLoading} sub={topClient ? format(topClient.invoiced) : undefined} />
+        <StatCard label="Total Invoiced"         value={format(totalInvoiced)}    iconBg="bg-[#FFFAEB] dark:bg-amber-950/30"   iconColor="text-[#B54708] dark:text-amber-400" icon={IndianRupee} loading={isLoading} />
+        <StatCard label="Total Outstanding"      value={format(totalOutstanding)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"     iconColor="text-[#D92D20] dark:text-red-400"  icon={FileText}    loading={isLoading} />
       </div>
 
       <div className="glass-table">
@@ -387,9 +388,9 @@ function ClientsTab({ range }: { range: DateRange }) {
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{formatCurrency(r.invoiced)}</td>
-                <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399] font-medium">{formatCurrency(r.collected)}</td>
-                <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{r.outstanding > 0 ? formatCurrency(r.outstanding) : <span className="text-[#98A2B3]">—</span>}</td>
+                <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{format(r.invoiced)}</td>
+                <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399] font-medium">{format(r.collected)}</td>
+                <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{r.outstanding > 0 ? format(r.outstanding) : <span className="text-[#98A2B3]">—</span>}</td>
                 <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.invoiceCount}</td>
               </tr>
             ))}
@@ -419,9 +420,9 @@ function ExpensesTab({ range }: { range: DateRange }) {
   return (
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Spent"     value={formatCurrency(totals?.total        ?? 0)} iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"      iconColor="text-[#6366F1]"                     icon={Wallet}   loading={isLoading} sub={totals ? `${totals.count} expenses` : undefined} />
-        <StatCard label="Billable"        value={formatCurrency(totals?.billable     ?? 0)} iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40" iconColor="text-[#027A48] dark:text-[#34D399]" icon={IndianRupee} loading={isLoading} />
-        <StatCard label="Non-Billable"    value={formatCurrency(totals?.nonBillable  ?? 0)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"     iconColor="text-[#D92D20] dark:text-red-400"  icon={IndianRupee} loading={isLoading} />
+        <StatCard label="Total Spent"     value={format(totals?.total        ?? 0)} iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"      iconColor="text-[#6366F1]"                     icon={Wallet}   loading={isLoading} sub={totals ? `${totals.count} expenses` : undefined} />
+        <StatCard label="Billable"        value={format(totals?.billable     ?? 0)} iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40" iconColor="text-[#027A48] dark:text-[#34D399]" icon={IndianRupee} loading={isLoading} />
+        <StatCard label="Non-Billable"    value={format(totals?.nonBillable  ?? 0)} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"     iconColor="text-[#D92D20] dark:text-red-400"  icon={IndianRupee} loading={isLoading} />
         <StatCard label="Categories"      value={String(byCategory.length)}                 iconBg="bg-[#FFFAEB] dark:bg-amber-950/30"    iconColor="text-[#B54708] dark:text-amber-400" icon={BarChart3} loading={isLoading} />
       </div>
 
@@ -434,7 +435,7 @@ function ExpensesTab({ range }: { range: DateRange }) {
               <XAxis dataKey="category" tick={{ fontSize: 11, fill: isDark ? '#545C74' : '#98A2B3' }} axisLine={false} tickLine={false} />
               <YAxis hide />
               <Tooltip
-                formatter={(v) => [formatCurrency(v as number), 'Total']}
+                formatter={(v) => [format(v as number), 'Total']}
                 contentStyle={{ border: `1px solid ${isDark ? '#3D4258' : '#EAECF0'}`, borderRadius: 10, fontSize: 12, background: isDark ? '#1A1B23' : '#fff', color: isDark ? '#ECEEF3' : '#101828' }}
               />
               <Bar dataKey="total" fill="#6366F1" radius={[5, 5, 0, 0]} maxBarSize={48} />
@@ -448,7 +449,7 @@ function ExpensesTab({ range }: { range: DateRange }) {
                   <XAxis dataKey="period" tick={{ fontSize: 11, fill: isDark ? '#545C74' : '#98A2B3' }} axisLine={false} tickLine={false} />
                   <YAxis hide />
                   <Tooltip
-                    formatter={(v) => [formatCurrency(v as number), 'Expenses']}
+                    formatter={(v) => [format(v as number), 'Expenses']}
                     contentStyle={{ border: `1px solid ${isDark ? '#3D4258' : '#EAECF0'}`, borderRadius: 10, fontSize: 12, background: isDark ? '#1A1B23' : '#fff', color: isDark ? '#ECEEF3' : '#101828' }}
                   />
                   <Bar dataKey="value" fill="#C7D2FE" radius={[4, 4, 0, 0]} maxBarSize={40} />
@@ -485,9 +486,9 @@ function ExpensesTab({ range }: { range: DateRange }) {
                 <tr key={r.category} className="border-b border-[#F2F4F7] dark:border-[#26283A] hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F2A] transition-colors">
                   <td className="px-4 py-3 font-semibold text-[#344054] dark:text-[#C2C8D8]">{r.category}</td>
                   <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.count}</td>
-                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{formatCurrency(r.total)}</td>
-                  <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399]">{formatCurrency(r.billable)}</td>
-                  <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.nonBillable > 0 ? formatCurrency(r.nonBillable) : <span className="text-[#98A2B3]">—</span>}</td>
+                  <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{format(r.total)}</td>
+                  <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399]">{format(r.billable)}</td>
+                  <td className="px-4 py-3 text-[#667085] dark:text-[#8B92A8]">{r.nonBillable > 0 ? format(r.nonBillable) : <span className="text-[#98A2B3]">—</span>}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-1.5 bg-[#F2F4F7] dark:bg-[#26283A] rounded-full overflow-hidden">
@@ -503,9 +504,9 @@ function ExpensesTab({ range }: { range: DateRange }) {
               <tr className="bg-[#F8FAFC] dark:bg-[#1E1F2A] font-bold">
                 <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">Total</td>
                 <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{totals.count}</td>
-                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.total)}</td>
-                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.billable)}</td>
-                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.nonBillable)}</td>
+                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.total)}</td>
+                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.billable)}</td>
+                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.nonBillable)}</td>
                 <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">100%</td>
               </tr>
             )}
@@ -540,7 +541,7 @@ function TimeTab({ range }: { range: DateRange }) {
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Hours"    value={`${totalHours}h`}    iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"      iconColor="text-[#6366F1]"                     icon={Clock}       loading={isLoading} />
-        <StatCard label="Billable Value" value={formatCurrency(totals?.billableValue ?? 0)} iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40" iconColor="text-[#027A48] dark:text-[#34D399]" icon={IndianRupee} loading={isLoading} />
+        <StatCard label="Billable Value" value={format(totals?.billableValue ?? 0)} iconBg="bg-[#ECFDF3] dark:bg-emerald-950/40" iconColor="text-[#027A48] dark:text-[#34D399]" icon={IndianRupee} loading={isLoading} />
         <StatCard label="Billed Hours"   value={`${billedHours}h`}   iconBg="bg-[#FFFAEB] dark:bg-amber-950/30"   iconColor="text-[#B54708] dark:text-amber-400" icon={Clock}       loading={isLoading} />
         <StatCard label="Unbilled Hours" value={`${unbilledHours}h`} iconBg="bg-[#FEF3F2] dark:bg-red-950/40"     iconColor="text-[#D92D20] dark:text-red-400"   icon={Clock}       loading={isLoading} />
       </div>
@@ -609,7 +610,7 @@ function TimeTab({ range }: { range: DateRange }) {
                 <td className="px-4 py-3 font-medium text-[#344054] dark:text-[#C2C8D8]">{r.totalHours}h</td>
                 <td className="px-4 py-3 text-[#027A48] dark:text-[#34D399]">{(r.billedMins / 60).toFixed(1)}h</td>
                 <td className="px-4 py-3 text-[#D92D20] dark:text-red-400">{r.unbilledMins > 0 ? `${(r.unbilledMins / 60).toFixed(1)}h` : <span className="text-[#98A2B3]">—</span>}</td>
-                <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{r.billableValue > 0 ? formatCurrency(r.billableValue) : <span className="text-[#98A2B3]">—</span>}</td>
+                <td className="px-4 py-3 text-[#344054] dark:text-[#C2C8D8]">{r.billableValue > 0 ? format(r.billableValue) : <span className="text-[#98A2B3]">—</span>}</td>
               </tr>
             ))}
             {totals && byClient.length > 0 && (
@@ -618,7 +619,7 @@ function TimeTab({ range }: { range: DateRange }) {
                 <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{totalHours}h</td>
                 <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{billedHours}h</td>
                 <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{unbilledHours}h</td>
-                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{formatCurrency(totals.billableValue)}</td>
+                <td className="px-4 py-3 text-[#101828] dark:text-[#ECEEF3]">{format(totals.billableValue)}</td>
               </tr>
             )}
           </tbody>
@@ -645,6 +646,7 @@ export default function ReportsPage() {
   const [tab,    setTab]    = useState<Tab>('revenue')
   const [preset, setPreset] = useState<Preset>('this_fy')
   const [custom, setCustom] = useState<DateRange>(() => fyBounds(0))
+  const { format } = useCurrency()
 
   const range: DateRange = preset === 'custom' ? custom : presetRange(preset)
 

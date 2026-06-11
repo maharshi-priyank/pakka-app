@@ -7,7 +7,8 @@ import {
   Plus, Search, X, FolderKanban, Calendar, IndianRupee,
   FileText, PenLine, Receipt, Loader2, Building2,
 } from 'lucide-react'
-import { cn, formatCurrency, formatDate } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
   useProjects, useCreateProject,
   type Project, type ProjectStatus, type CreateProjectInput,
@@ -201,10 +202,10 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[11px] text-[#667085] dark:text-[#8B92A8]">
-              {formatCurrency(invoiced)} invoiced
+              {format(invoiced)} invoiced
             </span>
             <span className="text-[11px] text-[#667085] dark:text-[#8B92A8]">
-              Budget {formatCurrency(budget)}
+              Budget {format(budget)}
             </span>
           </div>
           <div className="h-1.5 rounded-full bg-[#F2F4F7] dark:bg-[#21222D] overflow-hidden">
@@ -220,7 +221,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
       ) : invoiced > 0 ? (
         <p className="text-[12px] text-[#344054] dark:text-[#C2C8D8] font-medium mb-3 flex items-center gap-1">
           <IndianRupee size={10} />
-          {formatCurrency(invoiced)} invoiced · {formatCurrency(collected)} collected
+          {format(invoiced)} invoiced · {format(collected)} collected
         </p>
       ) : null}
 
@@ -279,6 +280,7 @@ function ProjectCardSkeleton() {
 
 export default function ProjectsPage() {
   const navigate = useNavigate()
+  const { format } = useCurrency()
   const [showCreate,    setShowCreate]    = useState(false)
   const [search,        setSearch]        = useState('')
   const [statusFilter,  setStatusFilter]  = useState<ProjectStatus | 'ALL'>('ALL')

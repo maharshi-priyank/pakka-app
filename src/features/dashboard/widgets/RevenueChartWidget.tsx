@@ -3,9 +3,10 @@ import { TrendingUp } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
-import { cn, formatCurrency } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { useRevenueChart } from '../hooks/useDashboard'
 import { useThemeStore } from '@/store/themeStore'
+import { useCurrency } from '@/hooks/useCurrency'
 
 function Skeleton({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} style={style} />
@@ -14,6 +15,7 @@ function Skeleton({ className, style }: { className?: string; style?: React.CSSP
 export default function RevenueChartWidget() {
   const { data: chartData, isLoading } = useRevenueChart()
   const { isDark } = useThemeStore()
+  const { format } = useCurrency()
   const currentMonthIndex = chartData ? chartData.length - 1 : -1
 
   return (
@@ -51,7 +53,7 @@ export default function RevenueChartWidget() {
               <YAxis hide />
               <Tooltip
                 cursor={{ fill: isDark ? '#26283A' : '#F4F5F8', radius: 6 }}
-                formatter={(value) => [formatCurrency(value as number), 'Revenue']}
+                formatter={(value) => [format(value as number), 'Revenue']}
                 contentStyle={{ border: `1px solid ${isDark ? '#3D4258' : '#EAECF0'}`, borderRadius: 10, fontSize: 12, color: isDark ? '#ECEEF3' : '#101828', background: isDark ? '#1A1B23' : '#fff' }}
               />
               <Bar dataKey="revenue" radius={[5, 5, 0, 0]}>
