@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   ArrowLeft, FolderKanban, Building2, Calendar, IndianRupee,
   Clock, Receipt, FileText, PenLine, Wallet, Pencil, Trash2,
-  X, Loader2, Plus,
+  X, Loader2, Plus, CheckSquare,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import {
@@ -16,6 +16,7 @@ import {
 import ProjectFilesPanel from '@/features/projects/components/ProjectFilesPanel'
 import ProjectPlCard from '@/features/projects/components/ProjectPlCard'
 import ProjectNotesTab from '@/features/projects/components/ProjectNotesTab'
+import ProjectTasksTab from '@/features/tasks/components/ProjectTasksTab'
 import InvoiceQuickView, { type InvoiceSnap } from '@/features/invoices/components/InvoiceQuickView'
 import ProposalQuickView, { type ProposalSnap } from '@/features/proposals/components/ProposalQuickView'
 import ContractQuickView, { type ContractSnap } from '@/features/contracts/components/ContractQuickView'
@@ -210,7 +211,7 @@ function StatCard({ label, value, sub, icon: Icon, accent = false }: {
 
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'time' | 'files' | 'notes'
+type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'time' | 'files' | 'notes' | 'tasks'
 
 const TABS: Array<{ value: Tab; label: string }> = [
   { value: 'overview',   label: 'Overview' },
@@ -220,6 +221,7 @@ const TABS: Array<{ value: Tab; label: string }> = [
   { value: 'time',       label: 'Time & Expenses' },
   { value: 'files',      label: 'Files' },
   { value: 'notes',      label: 'Notes & Brief' },
+  { value: 'tasks',      label: 'Tasks' },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -227,7 +229,10 @@ const TABS: Array<{ value: Tab; label: string }> = [
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location     = useLocation()
+  const isTasksRoute = location.pathname.includes('/tasks')
   const [tab,       setTab]       = useState<Tab>('overview')
+  const activeTab: Tab = isTasksRoute ? 'tasks' : tab
   const [showEdit,  setShowEdit]  = useState(false)
   const [showDel,   setShowDel]   = useState(false)
   const [deleting,  setDeleting]  = useState(false)
@@ -361,10 +366,16 @@ export default function ProjectPage() {
         {TABS.map(t => (
           <button
             key={t.value}
-            onClick={() => setTab(t.value)}
+            onClick={() => {
+              if (t.value === 'tasks') {
+                navigate(`/projects/${id}/tasks`)
+              } else {
+                setTab(t.value as Exclude<Tab, 'tasks'>)
+              }
+            }}
             className={cn(
               'px-3.5 py-2.5 text-[12.5px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap',
-              tab === t.value ? 'border-[#2563EB] text-[#2563EB]' : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+              activeTab === t.value ? 'border-[#2563EB] text-[#2563EB]' : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
             )}
           >
             {t.label}
@@ -555,6 +566,10 @@ export default function ProjectPage() {
           <div className="max-w-2xl">
             <ProjectNotesTab projectId={project.id} brief={project.description ?? null} />
           </div>
+        )}
+
+        {isTasksRoute && (
+          <ProjectTasksTab projectId={id!} />
         )}
 
         {tab === 'time' && (

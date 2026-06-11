@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
   Receipt, Building2, Settings, CalendarDays, ClipboardList, Zap, BarChart3, FolderKanban, Mail,
-  LogOut,
+  LogOut, CheckSquare,
 } from 'lucide-react'
 // Customise sidebar imports — disabled until feature is ready
 // import { X } from 'lucide-react'
@@ -26,6 +26,7 @@ const ALL_NAV_ITEMS = [
   { id: 'leads',       icon: Users,           label: 'Leads',        href: '/leads',       tourId: 'tour-leads' },
   { id: 'clients',     icon: Building2,       label: 'Clients',      href: '/clients',     tourId: 'tour-clients' },
   { id: 'projects',    icon: FolderKanban,    label: 'Projects',     href: '/projects',    tourId: undefined },
+  { id: 'tasks',       icon: CheckSquare,     label: 'Tasks',        href: '/tasks',       tourId: undefined },
   { id: 'proposals',   icon: FileText,        label: 'Proposals',    href: '/proposals',   tourId: 'tour-proposals' },
   { id: 'contracts',   icon: PenLine,         label: 'Contracts',    href: '/contracts',   tourId: 'tour-contracts' },
   { id: 'invoices',    icon: Receipt,         label: 'Invoices',     href: '/invoices',    tourId: 'tour-invoices' },
@@ -37,7 +38,7 @@ const ALL_NAV_ITEMS = [
 
 // Section groups — defines labels and order for the nav
 const SECTIONS = [
-  { label: null,           ids: ['dashboard', 'leads', 'clients', 'projects'] },
+  { label: null,           ids: ['dashboard', 'leads', 'clients', 'projects', 'tasks'] },
   { label: 'TOOLS',        ids: ['proposals', 'contracts', 'invoices', 'reports'] },
   { label: 'PRODUCTIVITY', ids: ['calendar', 'forms', 'automations'] },
 ]

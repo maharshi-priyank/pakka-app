@@ -315,6 +315,42 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: '/tasks',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/TasksPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/tasks/task-boards',
+            element: <Navigate to="/tasks" replace />,
+          },
+          {
+            path: '/tasks/:taskId',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/TasksPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/projects/:id/tasks',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ProjectPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/projects/:id/tasks/task-boards',
+            element: <Navigate to="/tasks" replace />,
+          },
+          {
+            path: '/projects/:id/tasks/:taskId',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ProjectPage')
+              return { Component }
+            },
+          },
+          {
             path: '/email-templates',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/EmailTemplatesPage')
