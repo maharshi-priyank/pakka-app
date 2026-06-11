@@ -22,6 +22,8 @@ export interface Task {
   project:     TaskProject | null
   createdAt:   string
   updatedAt:   string
+  columnId:    string | null
+  position:    number
 }
 
 export interface CreateTaskInput {
@@ -30,11 +32,14 @@ export interface CreateTaskInput {
   includeTime?: boolean
   isPrivate?:   boolean
   projectId?:   string | null
+  columnId?:    string | null
 }
 
 export interface UpdateTaskInput extends Partial<CreateTaskInput> {
-  id:      string
-  status?: TaskStatus
+  id:        string
+  status?:   TaskStatus
+  columnId?: string | null
+  position?: number
 }
 
 const KEYS = {
@@ -89,9 +94,12 @@ export function useUpdateTask() {
       const { data } = await api.patch<{ data: Task }>(`/tasks/${id}`, rest)
       return data.data
     },
-    onSuccess: (_, { id }) => {
+    onSuccess: (_, { id, columnId }) => {
       qc.invalidateQueries({ queryKey: KEYS.lists() })
       qc.invalidateQueries({ queryKey: KEYS.detail(id) })
+      if (columnId !== undefined) {
+        qc.invalidateQueries({ queryKey: ['task-boards'] })
+      }
     },
   })
 }
