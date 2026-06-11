@@ -41,6 +41,12 @@ export interface UserProfile {
   razorpayKeyId:           string | null
   razorpayKeySecret:       string | null
   onboardingComplete:      boolean
+  country:                 string | null
+  currency:                string | null
+  taxLabel:                string | null
+  ibanNumber:              string | null
+  swiftCode:               string | null
+  routingNumber:           string | null
 }
 
 export function useProfile() {

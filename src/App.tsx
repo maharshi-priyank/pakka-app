@@ -8,6 +8,7 @@ import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { queryClient } from '@/lib/queryClient'
 import { router } from '@/router'
+import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import UpgradeModal from '@/components/UpgradeModal'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import PWAUpdatePrompt from '@/components/PWAUpdatePrompt'
@@ -67,12 +68,14 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-      <Toaster richColors position="top-right" closeButton />
-      <UpgradeModal />
-      <PWAInstallPrompt />
-      <PWAUpdatePrompt />
-      <ReactQueryDevtools initialIsOpen={false} />
+      <WorkspaceProvider>
+        <RouterProvider router={router} />
+        <Toaster richColors position="top-right" closeButton />
+        <UpgradeModal />
+        <PWAInstallPrompt />
+        <PWAUpdatePrompt />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </WorkspaceProvider>
     </QueryClientProvider>
   )
 }
