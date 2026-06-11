@@ -275,7 +275,6 @@ export default function ProjectPage() {
   const budget     = project.budget ? Number(project.budget) : null
   const invoiced   = stats?.invoiced  ?? 0
   const expenseTotal = stats?.expenseTotal ?? 0
-  const budgetUsed = budget ? Math.min((expenseTotal / budget) * 100, 100) : null
 
   return (
     <div className="space-y-5 max-w-[1400px]">
