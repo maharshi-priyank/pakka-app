@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  Plus, Search, X, FolderKanban, Calendar, IndianRupee,
+  Plus, Search, X, FolderKanban, Calendar,
   FileText, PenLine, Receipt, Loader2, Building2,
 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
@@ -163,6 +163,7 @@ function CreateProjectModal({ onClose }: { onClose: () => void }) {
 // ─── Project Card ─────────────────────────────────────────────────────────────
 
 function ProjectCard({ project, onClick }: { project: Project; onClick: () => void }) {
+  const { format } = useCurrency()
   const budget      = project.budget ? Number(project.budget) : null
   const invoiced    = project.invoiced  ?? 0
   const collected   = project.collected ?? 0
@@ -219,8 +220,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
           </div>
         </div>
       ) : invoiced > 0 ? (
-        <p className="text-[12px] text-[#344054] dark:text-[#C2C8D8] font-medium mb-3 flex items-center gap-1">
-          <IndianRupee size={10} />
+        <p className="text-[12px] text-[#344054] dark:text-[#C2C8D8] font-medium mb-3">
           {format(invoiced)} invoiced · {format(collected)} collected
         </p>
       ) : null}
@@ -280,7 +280,6 @@ function ProjectCardSkeleton() {
 
 export default function ProjectsPage() {
   const navigate = useNavigate()
-  const { format } = useCurrency()
   const [showCreate,    setShowCreate]    = useState(false)
   const [search,        setSearch]        = useState('')
   const [statusFilter,  setStatusFilter]  = useState<ProjectStatus | 'ALL'>('ALL')

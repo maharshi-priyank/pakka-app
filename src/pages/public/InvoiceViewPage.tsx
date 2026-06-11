@@ -37,6 +37,8 @@ interface PublicUser {
   bankName: string | null; bankAccountName: string | null
   bankAccountNumber: string | null; bankIfsc: string | null
   upiId: string | null; upiQrUrl: string | null
+  country: string | null; taxLabel: string | null
+  ibanNumber: string | null; swiftCode: string | null; routingNumber: string | null
 }
 interface PublicClient {
   id: string; name: string; company: string | null; email: string | null; gstNumber: string | null
@@ -128,8 +130,10 @@ export default function InvoiceViewPage() {
   const isPaid     = invoice.status === 'PAID'
   const isOverdue  = invoice.status === 'OVERDUE'
 
-  const currency = invoice.currency ?? 'INR'
-  const isExport = currency !== 'INR'
+  const currency  = invoice.currency ?? 'INR'
+  const isIndia   = !invoice.user.country || invoice.user.country === 'IN'
+  const isExport  = isIndia && currency !== 'INR'
+  const taxLabel  = invoice.user.taxLabel ?? (isIndia ? 'GST' : 'Tax')
 
   const tdsAmount = invoice.tdsRate
     ? (Number(invoice.subtotal) * Number(invoice.tdsRate)) / 100
@@ -292,34 +296,40 @@ export default function InvoiceViewPage() {
           </div>
 
           {/* Table header */}
-          <div className="grid grid-cols-[70px_1fr_60px_90px_70px_90px] gap-3 px-7 py-2.5 bg-[#FAFAFA] border-b border-[#F2F4F7] text-[10px] font-semibold text-[#98A2B3] uppercase tracking-wider">
-            <span>SAC/HSN</span>
+          <div className={cn(
+            'gap-3 px-7 py-2.5 bg-[#FAFAFA] border-b border-[#F2F4F7] text-[10px] font-semibold text-[#98A2B3] uppercase tracking-wider grid',
+            isIndia ? 'grid-cols-[70px_1fr_60px_90px_70px_90px]' : 'grid-cols-[1fr_60px_90px_90px]',
+          )}>
+            {isIndia && <span>SAC/HSN</span>}
             <span>Description</span>
             <span className="text-right">Qty</span>
             <span className="text-right">Rate</span>
-            <span className="text-right">GST</span>
+            {isIndia && <span className="text-right">{taxLabel} %</span>}
             <span className="text-right">Amount</span>
           </div>
 
           {invoice.lineItems.map((item, idx) => {
             const lineTotal = Number(item.qty) * Number(item.rate)
-            const lineGst   = !isExport && invoice.gstType !== 'EXEMPT'
+            const lineGst   = isIndia && !isExport && invoice.gstType !== 'EXEMPT'
               ? (lineTotal * Number(item.gstRate)) / 100 : 0
             return (
               <div
                 key={idx}
                 className={cn(
-                  'grid grid-cols-[70px_1fr_60px_90px_70px_90px] gap-3 px-7 py-3.5 text-[13px]',
+                  'gap-3 px-7 py-3.5 text-[13px] grid',
+                  isIndia ? 'grid-cols-[70px_1fr_60px_90px_70px_90px]' : 'grid-cols-[1fr_60px_90px_90px]',
                   idx < invoice.lineItems.length - 1 ? 'border-b border-[#F2F4F7]' : '',
                 )}
               >
-                <span className="text-[11px] text-[#98A2B3] font-mono self-center">{item.hsnSac ?? '—'}</span>
+                {isIndia && <span className="text-[11px] text-[#98A2B3] font-mono self-center">{item.hsnSac ?? '—'}</span>}
                 <span className="text-[#344054] font-medium">{item.description}</span>
                 <span className="text-right text-[#667085]">{item.qty}</span>
                 <span className="text-right text-[#667085]">{fmtCurrency(item.rate, currency)}</span>
-                <span className="text-right text-[#667085]">
-                  {isExport || invoice.gstType === 'EXEMPT' ? 'Nil' : `${item.gstRate}%`}
-                </span>
+                {isIndia && (
+                  <span className="text-right text-[#667085]">
+                    {isExport || invoice.gstType === 'EXEMPT' ? 'Nil' : `${item.gstRate}%`}
+                  </span>
+                )}
                 <span className="text-right font-semibold text-[#101828]">
                   {fmtCurrency(lineTotal + lineGst, currency)}
                 </span>
@@ -333,7 +343,7 @@ export default function InvoiceViewPage() {
               <span className="text-[#667085]">Subtotal</span>
               <span className="font-medium text-[#344054]">{fmtCurrency(Number(invoice.subtotal), currency)}</span>
             </div>
-            {!isExport && Number(invoice.gstAmount) > 0 && (
+            {isIndia && !isExport && Number(invoice.gstAmount) > 0 && (
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#667085]">
                   {invoice.gstType === 'IGST' ? 'IGST' : 'CGST + SGST'}
@@ -341,13 +351,19 @@ export default function InvoiceViewPage() {
                 <span className="font-medium text-[#344054]">{fmtCurrency(Number(invoice.gstAmount), currency)}</span>
               </div>
             )}
-            {isExport && (
+            {isIndia && isExport && (
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#667085]">IGST</span>
                 <span className="font-medium text-[#027A48]">Nil</span>
               </div>
             )}
-            {tdsAmount > 0 && (
+            {!isIndia && Number(invoice.gstAmount) > 0 && (
+              <div className="flex justify-between text-[13px]">
+                <span className="text-[#667085]">{taxLabel}</span>
+                <span className="font-medium text-[#344054]">{fmtCurrency(Number(invoice.gstAmount), currency)}</span>
+              </div>
+            )}
+            {isIndia && tdsAmount > 0 && (
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#667085]">TDS ({invoice.tdsRate}%)</span>
                 <span className="font-medium text-[#D92D20]">−{fmtCurrency(tdsAmount, currency)}</span>
@@ -407,8 +423,8 @@ export default function InvoiceViewPage() {
           </div>
         )}
 
-        {/* LUT / Zero-rated export declaration */}
-        {isExport && (
+        {/* LUT / Zero-rated export declaration — India only */}
+        {isIndia && isExport && (
           <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl px-7 py-5">
             <p className="text-[12px] font-semibold text-[#027A48] mb-1">Zero-Rated Export Supply</p>
             <p className="text-[12px] text-[#027A48] leading-relaxed">
@@ -419,14 +435,17 @@ export default function InvoiceViewPage() {
         )}
 
         {/* Bank / UPI payment block */}
-        {!isPaid && (invoice.user.bankAccountNumber || invoice.user.upiId) && (
+        {!isPaid && (invoice.user.bankAccountNumber || invoice.user.upiId || invoice.user.ibanNumber) && (
           <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
             <div className="px-7 py-4 border-b border-[#F2F4F7]">
-              <h2 className="text-[14px] font-bold text-[#101828]">Pay via Bank Transfer / UPI</h2>
+              <h2 className="text-[14px] font-bold text-[#101828]">
+                {isIndia ? 'Pay via Bank Transfer / UPI' : 'Bank Transfer Details'}
+              </h2>
             </div>
             <div className="px-7 py-5 flex items-center gap-8">
               <div className="flex-1 min-w-0 space-y-4">
-                {invoice.user.upiId && (
+                {/* India: UPI */}
+                {isIndia && invoice.user.upiId && (
                   <div className="flex items-start gap-2.5">
                     <Smartphone size={14} className="text-[#667085] mt-0.5 shrink-0" />
                     <div>
@@ -435,7 +454,8 @@ export default function InvoiceViewPage() {
                     </div>
                   </div>
                 )}
-                {invoice.user.bankAccountNumber && (
+                {/* India: Bank (IFSC) */}
+                {isIndia && invoice.user.bankAccountNumber && (
                   <div className="flex items-start gap-2.5">
                     <Building2 size={14} className="text-[#667085] mt-0.5 shrink-0" />
                     <div>
@@ -453,8 +473,45 @@ export default function InvoiceViewPage() {
                     </div>
                   </div>
                 )}
+                {/* International: IBAN */}
+                {!isIndia && invoice.user.ibanNumber && (
+                  <div className="flex items-start gap-2.5">
+                    <Building2 size={14} className="text-[#667085] mt-0.5 shrink-0" />
+                    <div>
+                      {invoice.user.bankAccountName && (
+                        <p className="text-[13px] font-semibold text-[#101828] mb-0.5">{invoice.user.bankAccountName}</p>
+                      )}
+                      <p className="text-[12px] text-[#98A2B3] uppercase tracking-wider mb-0.5">IBAN</p>
+                      <p className="text-[12px] text-[#344054] font-mono">{invoice.user.ibanNumber}</p>
+                      {invoice.user.swiftCode && (
+                        <>
+                          <p className="text-[12px] text-[#98A2B3] uppercase tracking-wider mt-1.5 mb-0.5">BIC / SWIFT</p>
+                          <p className="text-[12px] text-[#344054] font-mono">{invoice.user.swiftCode}</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {/* International: Account + Routing (US/CA) or generic */}
+                {!isIndia && !invoice.user.ibanNumber && invoice.user.bankAccountNumber && (
+                  <div className="flex items-start gap-2.5">
+                    <Building2 size={14} className="text-[#667085] mt-0.5 shrink-0" />
+                    <div>
+                      {invoice.user.bankName && (
+                        <p className="text-[13px] font-semibold text-[#101828] mb-0.5">{invoice.user.bankName}</p>
+                      )}
+                      {invoice.user.bankAccountName && (
+                        <p className="text-[12px] text-[#667085]">{invoice.user.bankAccountName}</p>
+                      )}
+                      <p className="text-[12px] text-[#344054] font-mono mt-0.5">A/C: {invoice.user.bankAccountNumber}</p>
+                      {invoice.user.routingNumber && (
+                        <p className="text-[12px] text-[#344054] font-mono">Routing: {invoice.user.routingNumber}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-              {invoice.user.upiQrUrl && (
+              {isIndia && invoice.user.upiQrUrl && (
                 <div className="shrink-0 flex flex-col items-center gap-2">
                   <div className="p-2 bg-white rounded-2xl border border-[#EAECF0] shadow-sm">
                     <img

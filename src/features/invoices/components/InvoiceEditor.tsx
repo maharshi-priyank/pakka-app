@@ -14,6 +14,7 @@ import FieldInfoPopover from '@/features/ai/components/FieldInfoPopover'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useClients } from '@/features/clients/hooks/useClients'
 import { useProfile } from '@/features/settings/hooks/useProfile'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 const GST_RATE_OPTIONS = [0, 5, 12, 18, 28]
 
@@ -77,8 +78,10 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
 
   const { fields, append, remove } = useFieldArray({ control, name: 'lineItems' })
 
+  const { isIndia, taxLabel, taxRate } = useWorkspace()
+
   const currency       = watch('currency')
-  const isExport       = currency !== 'INR'
+  const isExport       = isIndia && currency !== 'INR'
 
   const CURRENCY_SYMBOLS: Record<string, string> = {
     INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'AED ',
@@ -104,12 +107,13 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
     }
   }, [clientsData?.clients?.length])
 
-  const subtotal  = lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate)), 0)
-  const gstAmount = gstType === 'EXEMPT'
-    ? 0
-    : lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate) * Number(item.gstRate)) / 100, 0)
-  const tdsAmount = tdsRate ? (subtotal * Number(tdsRate)) / 100 : 0
-  const total     = subtotal + gstAmount - tdsAmount
+  const subtotal        = lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate)), 0)
+  const gstAmount       = isIndia && gstType !== 'EXEMPT'
+    ? lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate) * Number(item.gstRate)) / 100, 0)
+    : 0
+  const genericTaxAmount = !isIndia && taxRate > 0 ? (subtotal * taxRate) / 100 : 0
+  const tdsAmount       = isIndia && tdsRate ? (subtotal * Number(tdsRate)) / 100 : 0
+  const total           = subtotal + (isIndia ? gstAmount - tdsAmount : genericTaxAmount)
 
   const createMutation = useCreateInvoice()
   const updateMutation = useUpdateInvoice(invoice?.id ?? '')
@@ -217,12 +221,17 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
             <div className="overflow-x-auto">
             <div className="px-5 py-4 space-y-3 min-w-[480px]">
               {/* Column headers */}
-              <div className="grid grid-cols-[72px_1fr_80px_100px_80px_32px] gap-2 text-xs font-medium text-[#667085] uppercase tracking-wide px-1">
-                <span>SAC/HSN</span>
+              <div className={cn(
+                'gap-2 text-xs font-medium text-[#667085] uppercase tracking-wide px-1 grid',
+                isIndia
+                  ? 'grid-cols-[72px_1fr_80px_100px_80px_32px]'
+                  : 'grid-cols-[1fr_80px_100px_32px]',
+              )}>
+                {isIndia && <span>SAC/HSN</span>}
                 <span>Description</span>
                 <span className="text-right">Qty</span>
                 <span className="text-right">Rate ({currencySymbol})</span>
-                <span className="text-right flex items-center justify-end gap-1">GST % <FieldInfoPopover field="gstRate" /></span>
+                {isIndia && <span className="text-right flex items-center justify-end gap-1">GST % <FieldInfoPopover field="gstRate" /></span>}
                 <span />
               </div>
 
@@ -234,14 +243,21 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
 
                 return (
                   <div key={field.id} className="space-y-1 rounded-lg hover:bg-[#F9FAFB] transition-colors duration-150 -mx-1 px-1 py-0.5">
-                    <div className="grid grid-cols-[72px_1fr_80px_100px_80px_32px] gap-2 items-start">
-                      <input
-                        {...register(`lineItems.${idx}.hsnSac`)}
-                        disabled={!canEdit}
-                        placeholder="SAC"
-                        maxLength={8}
-                        className="form-input text-[12px] font-mono text-center"
-                      />
+                    <div className={cn(
+                      'gap-2 items-start grid',
+                      isIndia
+                        ? 'grid-cols-[72px_1fr_80px_100px_80px_32px]'
+                        : 'grid-cols-[1fr_80px_100px_32px]',
+                    )}>
+                      {isIndia && (
+                        <input
+                          {...register(`lineItems.${idx}.hsnSac`)}
+                          disabled={!canEdit}
+                          placeholder="SAC"
+                          maxLength={8}
+                          className="form-input text-[12px] font-mono text-center"
+                        />
+                      )}
                       <input
                         {...register(`lineItems.${idx}.description`)}
                         disabled={!canEdit}
@@ -260,15 +276,17 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
                         type="number" min="0"
                         className="form-input text-[13px] text-right"
                       />
-                      <select
-                        {...register(`lineItems.${idx}.gstRate`, { valueAsNumber: true })}
-                        disabled={!canEdit || gstType === 'EXEMPT'}
-                        className="form-input text-[13px] text-right pr-1"
-                      >
-                        {GST_RATE_OPTIONS.map(r => (
-                          <option key={r} value={r}>{r}%</option>
-                        ))}
-                      </select>
+                      {isIndia && (
+                        <select
+                          {...register(`lineItems.${idx}.gstRate`, { valueAsNumber: true })}
+                          disabled={!canEdit || gstType === 'EXEMPT'}
+                          className="form-input text-[13px] text-right pr-1"
+                        >
+                          {GST_RATE_OPTIONS.map(r => (
+                            <option key={r} value={r}>{r}%</option>
+                          ))}
+                        </select>
+                      )}
                       {canEdit && (
                         <button
                           type="button"
@@ -283,10 +301,10 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
                     {(lineTotal > 0) && (
                       <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] text-right pr-10">
                         {currencySymbol}{fmt(lineTotal)}
-                        {lineGst > 0 && !isExport && <span className="ml-1 text-[#667085] dark:text-[#8B92A8]">+ {currencySymbol}{fmt(lineGst)} GST</span>}
-                        {isExport && <span className="ml-1 text-[#667085] dark:text-[#8B92A8]">+ Nil GST</span>}
+                        {isIndia && lineGst > 0 && !isExport && <span className="ml-1 text-[#667085] dark:text-[#8B92A8]">+ {currencySymbol}{fmt(lineGst)} GST</span>}
+                        {isIndia && isExport && <span className="ml-1 text-[#667085] dark:text-[#8B92A8]">+ Nil GST</span>}
                         {' = '}
-                        <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{currencySymbol}{fmt(lineTotal + (isExport ? 0 : lineGst))}</span>
+                        <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{currencySymbol}{fmt(lineTotal + (isIndia && !isExport ? lineGst : 0))}</span>
                       </p>
                     )}
                     {errors.lineItems?.[idx]?.description && (
@@ -314,19 +332,25 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
                 <span className="text-[#667085] dark:text-[#8B92A8]">Subtotal</span>
                 <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{currencySymbol}{fmt(subtotal)}</span>
               </div>
-              {!isExport && gstType !== 'EXEMPT' && (
+              {isIndia && !isExport && gstType !== 'EXEMPT' && (
                 <div className="flex justify-between text-[13px]">
                   <span className="text-[#667085] dark:text-[#8B92A8]">{gstType === 'IGST' ? 'IGST' : 'CGST + SGST'}</span>
                   <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{currencySymbol}{fmt(gstAmount)}</span>
                 </div>
               )}
-              {isExport && (
+              {isIndia && isExport && (
                 <div className="flex justify-between text-[13px]">
                   <span className="text-[#667085] dark:text-[#8B92A8]">IGST</span>
                   <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">Nil</span>
                 </div>
               )}
-              {tdsAmount > 0 && (
+              {!isIndia && genericTaxAmount > 0 && (
+                <div className="flex justify-between text-[13px]">
+                  <span className="text-[#667085] dark:text-[#8B92A8]">{taxLabel} ({taxRate}%)</span>
+                  <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{currencySymbol}{fmt(genericTaxAmount)}</span>
+                </div>
+              )}
+              {isIndia && tdsAmount > 0 && (
                 <div className="flex justify-between text-[13px]">
                   <span className="text-[#667085] dark:text-[#8B92A8]">TDS ({tdsRate}%)</span>
                   <span className="font-semibold text-[#D92D20]">−{currencySymbol}{fmt(tdsAmount)}</span>
@@ -360,7 +384,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           )}
 
           {/* Settings row */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className={cn('gap-4 grid', isIndia ? 'grid-cols-3' : 'grid-cols-1 max-w-[200px]')}>
             {/* Currency selector */}
             <div>
               <label className="form-label">Currency</label>
@@ -379,7 +403,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
               />
             </div>
 
-            {isExport ? (
+            {isIndia && (isExport ? (
               <div>
                 <label className="form-label">LUT Reference No.</label>
                 <input
@@ -404,18 +428,20 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
                   )}
                 />
               </div>
-            )}
+            ))}
 
-            <div>
-              <label className="form-label flex items-center gap-1">TDS rate (%) <FieldInfoPopover field="tdsRate" /></label>
-              <input
-                {...register('tdsRate', { valueAsNumber: true })}
-                disabled={!canEdit}
-                type="number" min="0" max="30" step="0.5"
-                placeholder="0"
-                className="form-input w-full"
-              />
-            </div>
+            {isIndia && (
+              <div>
+                <label className="form-label flex items-center gap-1">TDS rate (%) <FieldInfoPopover field="tdsRate" /></label>
+                <input
+                  {...register('tdsRate', { valueAsNumber: true })}
+                  disabled={!canEdit}
+                  type="number" min="0" max="30" step="0.5"
+                  placeholder="0"
+                  className="form-input w-full"
+                />
+              </div>
+            )}
           </div>
 
           {/* Due date row (moved out of grid when currency takes a slot) */}
@@ -429,8 +455,8 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
             />
           </div>
 
-          {/* Export badge */}
-          {isExport && (
+          {/* Export badge — India only */}
+          {isIndia && isExport && (
             <div className="flex items-center gap-2 px-4 py-2.5 bg-[#F0FDF4] dark:bg-[#0D2418] border border-[#BBF7D0] dark:border-[#166534]/40 rounded-lg">
               <span className="text-[12px] font-semibold text-[#027A48] dark:text-[#4ADE80]">
                 Export of Services — Zero Rated (LUT)

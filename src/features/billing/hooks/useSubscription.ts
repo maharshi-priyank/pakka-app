@@ -47,6 +47,23 @@ export function useCreateSubscription() {
   })
 }
 
+async function createStripeCheckout(tier: 'SOLO' | 'STUDIO'): Promise<{ checkoutUrl: string }> {
+  const { data } = await api.post<{ data: { checkoutUrl: string } }>('/payments/stripe/checkout', { tier })
+  return data.data
+}
+
+export function useCreateStripeCheckout() {
+  return useMutation({
+    mutationFn: async (tier: 'SOLO' | 'STUDIO') => {
+      const { checkoutUrl } = await createStripeCheckout(tier)
+      window.location.href = checkoutUrl
+    },
+    onError: () => {
+      toast.error('Failed to start checkout. Please try again.')
+    },
+  })
+}
+
 export function useCancelSubscription() {
   const queryClient = useQueryClient()
 

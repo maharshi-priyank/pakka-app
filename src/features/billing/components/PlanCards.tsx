@@ -1,8 +1,9 @@
 import { Check, Star, Loader2, AlertCircle, Calendar, RefreshCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useCurrentPricing } from '../hooks/useCurrentPricing'
-import { useCreateSubscription } from '../hooks/useSubscription'
+import { useCreateSubscription, useCreateStripeCheckout } from '../hooks/useSubscription'
 import type { SubscriptionState } from '../hooks/useSubscription'
 
 interface Props {
@@ -141,16 +142,28 @@ function StatusDetails({
   )
 }
 
+// USD prices for international users — must match stripe.service.ts USD_PRICES
+const USD_SOLO:   Record<string, number> = { founding: 5,  earlyaccess: 7,  regular: 9 }
+const USD_STUDIO: Record<string, number> = { founding: 12, earlyaccess: 17, regular: 22 }
+
 export default function PlanCards({ subscription, onCancel }: Props) {
   const navigate = useNavigate()
+  const { isIndia } = useWorkspace()
   const { data: pricing, isLoading } = useCurrentPricing()
-  const { mutate: subscribe, isPending } = useCreateSubscription()
+  const { mutate: subscribeCashfree, isPending: isPendingCashfree } = useCreateSubscription()
+  const { mutate: subscribeStripe,   isPending: isPendingStripe   } = useCreateStripeCheckout()
 
+  const isPending  = isPendingCashfree || isPendingStripe
   const currentPlan = subscription?.plan ?? 'FREE'
-  const isFounding = pricing?.window === 'founding'
+  const isFounding  = pricing?.window === 'founding'
+  const priceWindow = pricing?.window ?? 'regular'
 
   const handleSubscribe = (tier: 'SOLO' | 'STUDIO') => {
-    subscribe(tier, { onSuccess: () => navigate('/billing/success') })
+    if (isIndia) {
+      subscribeCashfree(tier, { onSuccess: () => navigate('/billing/success') })
+    } else {
+      subscribeStripe(tier)
+    }
   }
 
   return (
@@ -197,17 +210,27 @@ export default function PlanCards({ subscription, onCancel }: Props) {
                   <div className="flex items-baseline gap-1">
                     {isLoading ? (
                       <div className="h-7 w-16 bg-[#EAECF0] rounded animate-pulse" />
-                    ) : (
+                    ) : isIndia ? (
                       <>
                         <span className="text-[26px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">
                           ₹{pricing?.solo.price ?? 299}
                         </span>
                         <span className="text-[12px] text-[#98A2B3]">/mo</span>
                       </>
+                    ) : (
+                      <>
+                        <span className="text-[26px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">
+                          ${USD_SOLO[priceWindow] ?? 9}
+                        </span>
+                        <span className="text-[12px] text-[#98A2B3]">/mo</span>
+                      </>
                     )}
                   </div>
-                  {!isLoading && isFounding && (
+                  {!isLoading && isFounding && isIndia && (
                     <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹299/mo regular</p>
+                  )}
+                  {!isLoading && isFounding && !isIndia && (
+                    <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">$9/mo regular</p>
                   )}
                 </div>
               </div>
@@ -270,17 +293,27 @@ export default function PlanCards({ subscription, onCancel }: Props) {
                   <div className="flex items-baseline gap-1">
                     {isLoading ? (
                       <div className="h-7 w-16 bg-[#EAECF0] rounded animate-pulse" />
-                    ) : (
+                    ) : isIndia ? (
                       <>
                         <span className="text-[26px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">
                           ₹{pricing?.studio.price ?? 699}
                         </span>
                         <span className="text-[12px] text-[#98A2B3]">/mo</span>
                       </>
+                    ) : (
+                      <>
+                        <span className="text-[26px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">
+                          ${USD_STUDIO[priceWindow] ?? 22}
+                        </span>
+                        <span className="text-[12px] text-[#98A2B3]">/mo</span>
+                      </>
                     )}
                   </div>
-                  {!isLoading && isFounding && (
+                  {!isLoading && isFounding && isIndia && (
                     <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹699/mo regular</p>
+                  )}
+                  {!isLoading && isFounding && !isIndia && (
+                    <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">$22/mo regular</p>
                   )}
                 </div>
               </div>
@@ -321,7 +354,9 @@ export default function PlanCards({ subscription, onCancel }: Props) {
       </div>
 
       <p className="text-[11.5px] text-[#98A2B3] text-center pt-1">
-        Monthly billing · Cancel anytime · Secure checkout via Cashfree
+        {isIndia
+          ? 'Monthly billing · Cancel anytime · Secure checkout via Cashfree'
+          : 'Monthly billing · Cancel anytime · Secure checkout via Stripe'}
       </p>
     </div>
   )

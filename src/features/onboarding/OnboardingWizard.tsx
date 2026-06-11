@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronRight, Upload, Loader2, FileText, Receipt, PenLine, Sparkles } from 'lucide-react'
 import { useUploadLogo } from '@/features/settings/hooks/useProfile'
 import { toast } from 'sonner'
+import { ALL_COUNTRIES, getCountryDefaults } from '@/lib/countryDefaults'
 
 const STORAGE_KEY = 'clearwork_onboarding_v1'
 
@@ -18,13 +19,15 @@ const SAC_SUGGESTIONS: Record<string, string> = {
   other:      '998399',
 }
 
-const STEPS = [
-  { label: 'Business Identity' },
-  { label: 'GST & Compliance' },
-  { label: 'Get Paid' },
-  { label: 'Add Client' },
-  { label: 'Send Document' },
-]
+function getSteps(isIndia: boolean) {
+  return [
+    { label: 'Business Identity' },
+    { label: isIndia ? 'GST & Compliance' : 'Tax Settings' },
+    { label: 'Get Paid' },
+    { label: 'Add Client' },
+    { label: 'Send Document' },
+  ]
+}
 
 function loadState() {
   try {
@@ -43,6 +46,7 @@ export default function OnboardingWizard() {
 
   const [step,              setStep]              = useState<number>(saved.step ?? 0)
   const [direction,         setDirection]         = useState<1 | -1>(1)
+  const [country,           setCountry]           = useState<string>(saved.country ?? 'IN')
   const [workType,          setWorkType]          = useState<string>(saved.workType ?? '')
   const [businessName,      setBusinessName]      = useState<string>(saved.businessName ?? '')
   const [logoUrl,           setLogoUrl]           = useState<string | null>(saved.logoUrl ?? null)
@@ -66,18 +70,21 @@ export default function OnboardingWizard() {
   const [saving,            setSaving]            = useState(false)
   const [showWelcome,       setShowWelcome]       = useState(false)
 
+  const isIndia = country === 'IN'
+  const STEPS   = getSteps(isIndia)
+
   const { mutateAsync: uploadLogo, isPending: uploadingLogo } = useUploadLogo()
 
   // Persist wizard state on every change
   useEffect(() => {
     saveState({
-      step, workType, businessName, logoUrl, gstRegistered, gstin,
+      step, country, workType, businessName, logoUrl, gstRegistered, gstin,
       intlClients, lutNumber, defaultHsnSac, bankAccountName,
       bankAccountNumber, bankIfsc, bankName, upiId, razorpayKeyId,
       razorpayKeySecret, clientName, clientEmail, clientPhone, clientCompany, clientId,
     })
   }, [
-    step, workType, businessName, logoUrl, gstRegistered, gstin,
+    step, country, workType, businessName, logoUrl, gstRegistered, gstin,
     intlClients, lutNumber, defaultHsnSac, bankAccountName,
     bankAccountNumber, bankIfsc, bankName, upiId, razorpayKeyId,
     razorpayKeySecret, clientName, clientEmail, clientPhone, clientCompany, clientId,
@@ -110,7 +117,13 @@ export default function OnboardingWizard() {
   const saveStep1 = async () => {
     setSaving(true)
     try {
-      await api.patch('/users/me', { businessName: businessName || null })
+      const countryDefaults = getCountryDefaults(country)
+      await api.patch('/users/me', {
+        businessName: businessName || null,
+        country,
+        currency: countryDefaults.currency,
+        taxLabel: countryDefaults.taxLabel,
+      })
       queryClient.invalidateQueries({ queryKey: ['profile'] })
       goNext()
     } finally { setSaving(false) }
@@ -223,10 +236,12 @@ export default function OnboardingWizard() {
                 {step === 0 && <Step1BusinessIdentity
                   businessName={businessName} setBusinessName={setBusinessName}
                   workType={workType} setWorkType={setWorkType}
+                  country={country} setCountry={setCountry}
                   logoUrl={logoUrl}
                   uploadingLogo={uploadingLogo} onLogoUpload={handleLogoUpload}
                 />}
                 {step === 1 && <Step2GstCompliance
+                  isIndia={isIndia}
                   gstRegistered={gstRegistered} setGstRegistered={setGstRegistered}
                   gstin={gstin} setGstin={setGstin}
                   intlClients={intlClients} setIntlClients={setIntlClients}
@@ -234,6 +249,7 @@ export default function OnboardingWizard() {
                   defaultHsnSac={defaultHsnSac} setDefaultHsnSac={setDefaultHsnSac}
                 />}
                 {step === 2 && <Step3GetPaid
+                  isIndia={isIndia}
                   bankName={bankName} setBankName={setBankName}
                   bankAccountName={bankAccountName} setBankAccountName={setBankAccountName}
                   bankAccountNumber={bankAccountNumber} setBankAccountNumber={setBankAccountNumber}
@@ -362,11 +378,12 @@ function WizardField({ label, hint, children }: { label: string; hint?: string; 
 }
 
 function Step1BusinessIdentity({
-  businessName, setBusinessName, workType, setWorkType, logoUrl,
+  businessName, setBusinessName, workType, setWorkType, country, setCountry, logoUrl,
   uploadingLogo, onLogoUpload,
 }: {
   businessName: string; setBusinessName: (v: string) => void
   workType: string; setWorkType: (v: string) => void
+  country: string; setCountry: (v: string) => void
   logoUrl: string | null
   uploadingLogo: boolean; onLogoUpload: (file: File) => Promise<void>
 }) {
@@ -394,6 +411,18 @@ function Step1BusinessIdentity({
         <h2 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">Let's set up your identity</h2>
         <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-1">This is what clients see on every proposal and invoice.</p>
       </div>
+      <WizardField label="Where are you based?" hint="Sets your tax system, currency, and bank field layout">
+        <select
+          value={country}
+          onChange={e => setCountry(e.target.value)}
+          className="form-input w-full max-w-xs"
+        >
+          {ALL_COUNTRIES.map(c => (
+            <option key={c.code} value={c.code}>{c.name}</option>
+          ))}
+        </select>
+      </WizardField>
+
       <WizardField label="Your trading name (what clients see on invoices)">
         <input
           value={businessName}
@@ -467,16 +496,39 @@ function Step1BusinessIdentity({
 }
 
 function Step2GstCompliance({
-  gstRegistered, setGstRegistered, gstin, setGstin,
+  isIndia, gstRegistered, setGstRegistered, gstin, setGstin,
   intlClients, setIntlClients, lutNumber, setLutNumber,
   defaultHsnSac, setDefaultHsnSac,
 }: {
+  isIndia: boolean
   gstRegistered: boolean; setGstRegistered: (v: boolean) => void
   gstin: string; setGstin: (v: string) => void
   intlClients: boolean; setIntlClients: (v: boolean) => void
   lutNumber: string; setLutNumber: (v: string) => void
   defaultHsnSac: string; setDefaultHsnSac: (v: string) => void
 }) {
+  if (!isIndia) {
+    return (
+      <div className="space-y-6 pb-6">
+        <div>
+          <h2 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">Tax settings</h2>
+          <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-1">Your tax label is pre-set based on your country. You can change it in Settings anytime.</p>
+        </div>
+        <div className="bg-[#F9FAFB] dark:bg-[#21222D] rounded-xl p-5 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center shrink-0">
+            <Check size={14} className="text-[#6366F1]" strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Tax label set automatically</p>
+            <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
+              Your invoices will display the correct tax label for your country. You can customise it from Settings → Business.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 pb-6">
       <div>
@@ -556,6 +608,7 @@ function Step2GstCompliance({
 }
 
 function Step3GetPaid(props: {
+  isIndia: boolean
   bankName: string; setBankName: (v: string) => void
   bankAccountName: string; setBankAccountName: (v: string) => void
   bankAccountNumber: string; setBankAccountNumber: (v: string) => void
@@ -568,30 +621,47 @@ function Step3GetPaid(props: {
     <div className="space-y-5 pb-6">
       <div>
         <h2 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">You're almost ready to get paid</h2>
-        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-1">Bank and UPI details appear on your invoices.</p>
+        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-1">Bank details appear on your invoices so clients can pay you directly.</p>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <WizardField label="Bank Name"><input value={props.bankName} onChange={e => props.setBankName(e.target.value)} placeholder="HDFC Bank" className="form-input w-full" /></WizardField>
-        <WizardField label="Account Holder Name"><input value={props.bankAccountName} onChange={e => props.setBankAccountName(e.target.value)} placeholder="Your legal name" className="form-input w-full" /></WizardField>
-        <WizardField label="Account Number"><input value={props.bankAccountNumber} onChange={e => props.setBankAccountNumber(e.target.value)} placeholder="000123456789" className="form-input w-full font-mono" /></WizardField>
-        <WizardField label="IFSC Code"><input value={props.bankIfsc} onChange={e => props.setBankIfsc(e.target.value.toUpperCase())} placeholder="HDFC0001234" className="form-input w-full font-mono uppercase" /></WizardField>
-      </div>
-      <WizardField label="UPI ID" hint="e.g. yourname@okicici — clients pay you directly here">
-        <input value={props.upiId} onChange={e => props.setUpiId(e.target.value)} placeholder="yourname@okicici" className="form-input w-full" />
-      </WizardField>
-      <div className="pt-2 border-t border-[#F2F4F7] dark:border-[#26283A] space-y-4">
-        <p className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
-          Razorpay Keys <span className="text-[11px] text-[#98A2B3] font-normal">(optional — for online payment links)</span>
-        </p>
-        <div className="grid grid-cols-2 gap-4">
-          <WizardField label="Key ID" hint="Starts with rzp_live_">
-            <input value={props.razorpayKeyId} onChange={e => props.setRazorpayKeyId(e.target.value)} placeholder="rzp_live_…" className="form-input w-full font-mono text-[12px]" />
+
+      {props.isIndia ? (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <WizardField label="Bank Name"><input value={props.bankName} onChange={e => props.setBankName(e.target.value)} placeholder="HDFC Bank" className="form-input w-full" /></WizardField>
+            <WizardField label="Account Holder Name"><input value={props.bankAccountName} onChange={e => props.setBankAccountName(e.target.value)} placeholder="Your legal name" className="form-input w-full" /></WizardField>
+            <WizardField label="Account Number"><input value={props.bankAccountNumber} onChange={e => props.setBankAccountNumber(e.target.value)} placeholder="000123456789" className="form-input w-full font-mono" /></WizardField>
+            <WizardField label="IFSC Code"><input value={props.bankIfsc} onChange={e => props.setBankIfsc(e.target.value.toUpperCase())} placeholder="HDFC0001234" className="form-input w-full font-mono uppercase" /></WizardField>
+          </div>
+          <WizardField label="UPI ID" hint="e.g. yourname@okicici — clients pay you directly here">
+            <input value={props.upiId} onChange={e => props.setUpiId(e.target.value)} placeholder="yourname@okicici" className="form-input w-full" />
           </WizardField>
-          <WizardField label="Key Secret">
-            <input value={props.razorpayKeySecret} onChange={e => props.setRazorpayKeySecret(e.target.value)} type="password" placeholder="••••••••" className="form-input w-full font-mono text-[12px]" />
+          <div className="pt-2 border-t border-[#F2F4F7] dark:border-[#26283A] space-y-4">
+            <p className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8]">
+              Razorpay Keys <span className="text-[11px] text-[#98A2B3] font-normal">(optional — for online payment links)</span>
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <WizardField label="Key ID" hint="Starts with rzp_live_">
+                <input value={props.razorpayKeyId} onChange={e => props.setRazorpayKeyId(e.target.value)} placeholder="rzp_live_…" className="form-input w-full font-mono text-[12px]" />
+              </WizardField>
+              <WizardField label="Key Secret">
+                <input value={props.razorpayKeySecret} onChange={e => props.setRazorpayKeySecret(e.target.value)} type="password" placeholder="••••••••" className="form-input w-full font-mono text-[12px]" />
+              </WizardField>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          <WizardField label="Account Holder Name">
+            <input value={props.bankAccountName} onChange={e => props.setBankAccountName(e.target.value)} placeholder="Your legal name" className="form-input w-full" />
+          </WizardField>
+          <WizardField label="IBAN" hint="Your international bank account number">
+            <input value={props.bankIfsc} onChange={e => props.setBankIfsc(e.target.value.toUpperCase())} placeholder="GB29 NWBK 6016 1331 9268 19" className="form-input w-full font-mono text-[13px] tracking-widest uppercase" />
+          </WizardField>
+          <WizardField label="BIC / SWIFT Code" hint="e.g. NWBKGB2L">
+            <input value={props.bankName} onChange={e => props.setBankName(e.target.value.toUpperCase())} placeholder="NWBKGB2L" className="form-input w-full font-mono text-[13px] tracking-wide uppercase" />
           </WizardField>
         </div>
-      </div>
+      )}
     </div>
   )
 }
