@@ -6,11 +6,13 @@ import { z } from 'zod'
 import {
   ArrowLeft, Mail, Phone, MapPin, Hash, Building2, FileText,
   FileSignature, Receipt, Link2, RotateCcw, Copy, CheckCheck,
-  Video, Pencil, X, Loader2, IndianRupee, Users, Clock, FolderKanban,
+  Video, Pencil, X, Loader2, IndianRupee, Users, Clock, FolderKanban, Archive,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
-import { useClient, useUpdateClient, useRegeneratePortalToken } from '@/features/clients/hooks/useClients'
+import { useClient, useUpdateClient, useRegeneratePortalToken, useArchiveClient, useUnarchiveClient, useDeleteClient } from '@/features/clients/hooks/useClients'
 import type { ClientProject } from '@/features/clients/hooks/useClients'
+import { RemoveModal } from '@/components/RemoveModal'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 import ClientNotesTab from '@/features/clients/components/ClientNotesTab'
 import ClientAttachmentsTab from '@/features/clients/components/ClientAttachmentsTab'
@@ -149,13 +151,17 @@ export default function ClientPage() {
   const [activeTab,    setActiveTab]    = useState<Tab>('proposals')
   const [editOpen,     setEditOpen]     = useState(false)
   const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [removeOpen,   setRemoveOpen]   = useState(false)
   const [copied,       setCopied]       = useState(false)
   const [qvInvoice,    setQvInvoice]    = useState<InvoiceSnap | null>(null)
   const [qvProposal,   setQvProposal]   = useState<ProposalSnap | null>(null)
   const [qvContract,   setQvContract]   = useState<ContractSnap | null>(null)
 
   const { data: client, isLoading } = useClient(id!)
-  const regenerate = useRegeneratePortalToken()
+  const regenerate  = useRegeneratePortalToken()
+  const archiveMut  = useArchiveClient()
+  const unarchiveMut = useUnarchiveClient()
+  const deleteMut   = useDeleteClient()
 
   const portalUrl = client?.portalToken ? `${window.location.origin}/portal/${client.portalToken}` : null
 
@@ -233,6 +239,21 @@ export default function ClientPage() {
               >
                 <Video size={13} /> Schedule Call
               </button>
+              {client.archivedAt ? (
+                <button
+                  onClick={() => unarchiveMut.mutate(client.id, { onSuccess: () => toast.success('Client unarchived') })}
+                  className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-amber-200 dark:border-amber-800 text-[13px] font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                >
+                  <Archive size={13} /> Unarchive
+                </button>
+              ) : (
+                <button
+                  onClick={() => setRemoveOpen(true)}
+                  className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
+                >
+                  <Archive size={13} /> Remove
+                </button>
+              )}
             </div>
           </div>
 
@@ -460,6 +481,38 @@ export default function ClientPage() {
         clientName={client?.name}
         defaultTitle={client ? `Discovery call with ${client.name}` : ''}
       />
+
+      {client && (
+        <RemoveModal
+          open={removeOpen}
+          onClose={() => setRemoveOpen(false)}
+          onArchive={() => {
+            archiveMut.mutate(client.id, {
+              onSuccess: () => { toast.success('Client archived'); navigate('/clients') },
+            })
+            setRemoveOpen(false)
+          }}
+          onDelete={() => {
+            deleteMut.mutate(client.id, {
+              onSuccess: () => { toast.success('Client deleted'); navigate('/clients') },
+            })
+            setRemoveOpen(false)
+          }}
+          entityLabel={client.company ?? client.name}
+          entityType="client"
+          hasLinkedRecords={
+            (client._count?.proposals ?? 0) + (client._count?.contracts ?? 0) +
+            (client._count?.invoices ?? 0) + (client.projects?.length ?? 0) > 0
+          }
+          linkedRecordsSummary={[
+            client._count?.proposals && `${client._count.proposals} proposal${client._count.proposals > 1 ? 's' : ''}`,
+            client._count?.contracts && `${client._count.contracts} contract${client._count.contracts > 1 ? 's' : ''}`,
+            client._count?.invoices  && `${client._count.invoices} invoice${client._count.invoices > 1 ? 's' : ''}`,
+          ].filter(Boolean).join(', ') || undefined}
+          isArchiving={archiveMut.isPending}
+          isDeleting={deleteMut.isPending}
+        />
+      )}
     </div>
   )
 }

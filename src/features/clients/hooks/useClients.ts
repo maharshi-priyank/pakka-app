@@ -12,6 +12,7 @@ export interface Client {
   gstNumber:   string | null
   state:       string | null
   portalToken: string | null
+  archivedAt:  string | null
   createdAt:   string
   updatedAt:   string
   _count?: {
@@ -64,12 +65,13 @@ export interface CreateClientPayload {
   state?:     string
 }
 
-export function useClients(search?: string) {
+export function useClients(search?: string, includeArchived?: boolean) {
   return useQuery({
-    queryKey: ['clients', search],
+    queryKey: ['clients', search, includeArchived],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: '50' })
       if (search) params.set('search', search)
+      if (includeArchived) params.set('includeArchived', 'true')
       const { data } = await api.get<{ data: ClientsResponse }>(`/clients?${params}`)
       return data.data
     },
