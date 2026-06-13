@@ -13,15 +13,36 @@ All destructive actions require a confirmation modal before executing. No silent
 
 ## Tiers
 
-### Tier 1 — Archive (soft delete)
+### Tier 1 — Archive or Permanent Delete (user chooses)
 
-Entities with relationships, financial history, or long-lived records. Archived items are hidden from all active list views by default. A "Show archived" toggle in each list's filter bar reveals them, greyed out with an "Archived" badge. Archived items can be **Unarchived** (restored) at any time.
+Parent entities with relationships or financial history. When the user clicks "Remove", a **two-option modal** appears letting them choose:
+
+- **Archive** — hidden from active list, all linked records preserved, fully reversible at any time
+- **Permanently delete** — removed forever; only enabled when the entity has zero linked records (no projects, invoices, proposals, contracts, tasks, or time entries). If linked records exist, the delete option is visually disabled with the explanation "This [client] has linked records — archive instead."
+
+The choice modal is the single entry point for both actions. There is no separate Archive button and Delete button — just one "Remove" action that opens the modal.
+
+After choosing Archive: executes immediately (no second confirm — it's reversible).
+After choosing Delete (when available): shows a second confirmation step — "Are you sure? This cannot be undone." — before executing.
 
 Affected entities: **Client, Lead, Project, Proposal, Contract (unsigned), Form, TaskBoard**
 
 Archive action: `PATCH /:id/archive` → sets `archivedAt = now()`
 Unarchive action: `PATCH /:id/unarchive` → sets `archivedAt = null`
+Delete action: `DELETE /:id` — backend guards: returns `BadRequestException` if any linked records exist
 All list queries filter `archivedAt: null` by default; pass `?includeArchived=true` to include them.
+
+**Linked record check per entity:**
+
+| Entity | Blocks hard delete if... |
+|--------|--------------------------|
+| Client | has any proposals, contracts, invoices, projects, meetings, or time entries |
+| Lead | has any proposals or meetings |
+| Project | has any tasks, invoices, time entries, or expenses |
+| Proposal | has any contracts |
+| Contract | has any invoices |
+| Form | has any submissions |
+| TaskBoard | always deletable (tasks are not deleted, just unassigned from the board) |
 
 ### Tier 2 — Void (financial documents)
 
@@ -136,9 +157,68 @@ Controllers accept optional `?includeArchived=true` query param and pass `includ
 
 ## Frontend changes
 
-### Shared confirmation modal component
+### Modal components
+
+#### 1. `RemoveModal` — two-option modal for parent entities
+
+New file: `src/components/RemoveModal.tsx`
+
+Used for Tier 1 entities (Client, Lead, Project, Proposal, Contract, Form, TaskBoard).
+
+Props:
+```ts
+interface RemoveModalProps {
+  open: boolean
+  onClose: () => void
+  onArchive: () => void
+  onDelete: () => void
+  entityLabel: string           // e.g. "Acme Corp", "Website Redesign"
+  entityType: string            // e.g. "client", "project"
+  hasLinkedRecords: boolean     // if true, delete option is disabled
+  linkedRecordsSummary?: string // e.g. "3 invoices and 1 project"
+  isArchiving?: boolean
+  isDeleting?: boolean
+}
+```
+
+Visual layout:
+- Modal width: `max-w-md`, centered, white card, `rounded-2xl`, `p-6`
+- Header: entity name in bold, subtitle "Choose how to remove this [entityType]"
+- Two option cards side by side (`grid grid-cols-2 gap-3 mt-4`):
+
+**Archive card** (always enabled):
+```
+bg-[#F9FAFB] border border-[#EAECF0] rounded-xl p-4 cursor-pointer
+hover: border-[#101828] bg-white
+```
+- Icon: `Archive size={18}` in a `w-9 h-9 bg-[#F2F4F7] rounded-lg`
+- Title: "Archive" (`text-[13.5px] font-semibold text-[#101828] mt-2`)
+- Description: "Hidden from your list. All linked records preserved. Restore anytime." (`text-[11.5px] text-[#667085] mt-1`)
+
+**Delete card** (conditionally enabled):
+```
+// enabled state:
+bg-[#FFF5F5] border border-[#FEE4E2] rounded-xl p-4 cursor-pointer
+hover: border-[#D92D20]
+
+// disabled state (has linked records):
+bg-[#F9FAFB] border border-[#EAECF0] rounded-xl p-4 opacity-50 cursor-not-allowed
+```
+- Icon: `Trash2 size={18}` in a `w-9 h-9 bg-[#FEE4E2] rounded-lg text-[#D92D20]` (gray bg when disabled)
+- Title: "Permanently delete" (`text-[13.5px] font-semibold text-[#D92D20]` or `text-[#98A2B3]` when disabled)
+- Description when enabled: "Removed forever. Cannot be undone." (`text-[11.5px] text-[#D92D20]/70`)
+- Description when disabled: "Has [linkedRecordsSummary]. Archive instead." (`text-[11.5px] text-[#98A2B3]`)
+
+Clicking Archive card → calls `onArchive()` and closes modal immediately.
+Clicking Delete card (enabled) → advances to a second confirmation step within the same modal (replaces the two cards with: warning text "This will permanently delete this [entityType]. This cannot be undone." + red "Yes, delete permanently" button + "Go back" link).
+
+Footer: `Cancel` text button (`text-[12px] text-[#667085]`)
+
+#### 2. `ConfirmModal` — single-action modal for leaf entities and void
 
 New file: `src/components/ConfirmModal.tsx`
+
+Used for Tier 2 (void) and Tier 3 (hard delete) entities.
 
 Props:
 ```ts
@@ -148,19 +228,18 @@ interface ConfirmModalProps {
   onConfirm: () => void
   title: string
   description: string
-  confirmLabel: string          // "Archive", "Delete", "Void"
-  variant: 'archive' | 'delete' | 'void'
+  confirmLabel: string
+  variant: 'delete' | 'void'
   isLoading?: boolean
 }
 ```
 
 Visual treatment:
-- `delete` variant: confirm button is red (`bg-[#D92D20]`)
-- `archive` variant: confirm button is gray/dark (`bg-[#101828]`)
-- `void` variant: confirm button is amber (`bg-[#DC6803]`)
-- Modal width: `max-w-md`, centered, white card, `rounded-2xl`
-- Icon in modal header: `Archive` icon (archive), `Trash2` (delete), `XCircle` (void) — all from lucide-react
-- Cancel is always a ghost text button, confirm is filled
+- `delete` variant: confirm button `bg-[#D92D20] text-white hover:bg-[#B42318]`
+- `void` variant: confirm button `bg-[#DC6803] text-white hover:bg-[#B54708]`
+- Modal width: `max-w-md`, centered, white card, `rounded-2xl`, `p-6`
+- Icon in a colored circle at top: `Trash2` (delete, red bg), `XCircle` (void, amber bg)
+- Cancel is always a plain text button below the confirm button
 
 Standard confirmation copy:
 
@@ -211,9 +290,9 @@ Pages that need the toggle: ClientsPage, LeadsPage, ProjectsPage, ProposalsPage,
 
 ### Action button placement
 
-- **List pages (table rows)**: actions in the row's kebab menu (`MoreHorizontal` dropdown) — Archive/Delete at the bottom, separated by a divider, in red (delete) or default (archive)
-- **Detail/editor pages** (ProjectPage, ContractEditorPage, InvoiceEditorPage, ProposalEditorPage): action in the top-right toolbar area, alongside existing actions. Delete/Archive/Void uses a destructive-style button (Trash2 icon + text label)
-- **Slide-in panels** (TaskSlideIn): action in the panel footer, red text button
+- **List pages (table rows)**: a "Remove" option in the row's kebab menu (`MoreHorizontal` dropdown) → opens `RemoveModal` (Tier 1) or `ConfirmModal` (Tier 3)
+- **Detail/editor pages** (ProjectPage, ContractEditorPage, InvoiceEditorPage, ProposalEditorPage): "Remove" or "Void" button in the top-right toolbar alongside existing actions (Trash2 icon + label)
+- **Slide-in panels** (TaskSlideIn): "Delete" text button in the panel footer, red, opens `ConfirmModal`
 
 ### Per-page changes
 
