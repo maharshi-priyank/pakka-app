@@ -1,14 +1,18 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { Plus, X, Loader2, LayoutDashboard, AlertTriangle } from 'lucide-react'
+import { Plus, X, Loader2, LayoutDashboard, Archive } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   useTaskBoards,
   useCreateBoard,
   useDeleteBoard,
+  useArchiveBoard,
+  useUnarchiveBoard,
   type TaskBoardSummary,
 } from '@/features/tasks/hooks/useTaskBoards'
 import TaskBoardView from '@/features/tasks/components/TaskBoardView'
+import { RemoveModal } from '@/components/RemoveModal'
+import { toast } from 'sonner'
 
 interface Props {
   projectId?: string
@@ -81,50 +85,6 @@ function NewBoardModal({ onClose, onSave, isPending }: {
   )
 }
 
-function DeleteBoardModal({ board, onClose, onConfirm, isPending }: {
-  board:     TaskBoardSummary
-  onClose:   () => void
-  onConfirm: () => void
-  isPending: boolean
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] p-4">
-      <div className="glass-modal rounded-2xl w-full max-w-sm">
-        <div className="p-5 space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#FEF3F2] dark:bg-[#2D1B1B] flex items-center justify-center shrink-0">
-              <AlertTriangle size={16} className="text-[#F04438]" />
-            </div>
-            <div>
-              <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Delete board?</p>
-              <p className="text-[12.5px] text-[#667085] dark:text-[#8B92A8] mt-1">
-                <span className="font-medium text-[#344054] dark:text-[#C2C8D8]">"{board.name}"</span> will be permanently deleted.
-                Tasks in its columns will move to Inbox.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={onClose}
-              className="flex-1 h-9 text-[13px] border border-[#EAECF0] dark:border-[#26283A] rounded-lg text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              disabled={isPending}
-              className="flex-1 h-9 text-[13px] bg-[#F04438] hover:bg-[#D92D20] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-1.5"
-            >
-              {isPending ? <Loader2 size={13} className="animate-spin" /> : null}
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function TaskBoardsPage({ projectId }: Props) {
   const { boardId } = useParams<{ boardId?: string }>()
   const navigate    = useNavigate()
@@ -132,12 +92,18 @@ export default function TaskBoardsPage({ projectId }: Props) {
   const baseUrl       = projectId ? `/projects/${projectId}/tasks` : '/tasks'
   const boardsBaseUrl = `${baseUrl}/task-boards`
 
-  const { data: boards = [], isLoading } = useTaskBoards({ projectId })
-  const createBoard = useCreateBoard()
-  const deleteBoard = useDeleteBoard()
+  const [includeArchived, setIncludeArchived] = useState(false)
+  const { data: boards = [], isLoading } = useTaskBoards({ projectId, includeArchived: includeArchived || undefined })
+  const createBoard  = useCreateBoard()
+  const deleteBoard  = useDeleteBoard()
+  const archiveMut   = useArchiveBoard()
+  const unarchiveMut = useUnarchiveBoard()
 
-  const [showNewBoard,   setShowNewBoard]   = useState(false)
-  const [confirmDelete,  setConfirmDelete]  = useState<TaskBoardSummary | null>(null)
+  const [showNewBoard,  setShowNewBoard]  = useState(false)
+  const [removeTarget,  setRemoveTarget]  = useState<TaskBoardSummary | null>(null)
+
+  const activeBoards   = boards.filter(b => !b.archivedAt)
+  const archivedBoards = boards.filter(b =>  b.archivedAt)
 
   // Auto-create default board on first visit (empty boards list)
   useEffect(() => {
@@ -148,12 +114,12 @@ export default function TaskBoardsPage({ projectId }: Props) {
     })
   }, [isLoading, boards.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Navigate to first board if no boardId in URL
+  // Navigate to first active board if no boardId in URL
   useEffect(() => {
-    if (!boardId && boards.length > 0) {
-      navigate(`${boardsBaseUrl}/${boards[0].id}`, { replace: true })
+    if (!boardId && activeBoards.length > 0) {
+      navigate(`${boardsBaseUrl}/${activeBoards[0].id}`, { replace: true })
     }
-  }, [boardId, boards.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [boardId, activeBoards.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleNewBoardSave(name: string) {
     const board = await createBoard.mutateAsync({ name, projectId: projectId ?? undefined })
@@ -161,17 +127,16 @@ export default function TaskBoardsPage({ projectId }: Props) {
     navigate(`${boardsBaseUrl}/${board.id}`)
   }
 
-  function handleDeleteClick(e: React.MouseEvent, board: TaskBoardSummary) {
+  function handleRemoveClick(e: React.MouseEvent, board: TaskBoardSummary) {
     e.preventDefault()
     e.stopPropagation()
-    setConfirmDelete(board)
+    setRemoveTarget(board)
   }
 
-  async function handleDeleteConfirm() {
-    if (!confirmDelete) return
-    await deleteBoard.mutateAsync(confirmDelete.id)
-    const remaining = boards.filter(b => b.id !== confirmDelete.id)
-    setConfirmDelete(null)
+  async function handleDelete(boardId: string) {
+    await deleteBoard.mutateAsync(boardId)
+    const remaining = activeBoards.filter(b => b.id !== boardId)
+    setRemoveTarget(null)
     if (remaining.length > 0) {
       navigate(`${boardsBaseUrl}/${remaining[0].id}`, { replace: true })
     } else {
@@ -215,7 +180,7 @@ export default function TaskBoardsPage({ projectId }: Props) {
 
         {/* Board tab bar */}
         <div className="flex items-center gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto">
-          {boards.map(board => (
+          {activeBoards.map(board => (
             <div key={board.id} className="relative group shrink-0">
               <Link
                 to={`${boardsBaseUrl}/${board.id}`}
@@ -228,7 +193,7 @@ export default function TaskBoardsPage({ projectId }: Props) {
               >
                 {board.name}
                 <button
-                  onClick={e => handleDeleteClick(e, board)}
+                  onClick={e => handleRemoveClick(e, board)}
                   className={cn(
                     'rounded-full p-0.5 transition-colors',
                     board.id === boardId
@@ -241,6 +206,19 @@ export default function TaskBoardsPage({ projectId }: Props) {
               </Link>
             </div>
           ))}
+
+          {includeArchived && archivedBoards.map(board => (
+            <div key={board.id} className="relative group shrink-0">
+              <button
+                onClick={e => handleRemoveClick(e, board)}
+                className="flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium border-b-2 border-transparent text-amber-600 dark:text-amber-400 opacity-60 hover:opacity-100 transition-opacity"
+              >
+                <Archive size={11} strokeWidth={2} />
+                {board.name}
+              </button>
+            </div>
+          ))}
+
           <button
             onClick={() => setShowNewBoard(true)}
             disabled={createBoard.isPending}
@@ -251,6 +229,19 @@ export default function TaskBoardsPage({ projectId }: Props) {
               : <Plus size={13} />
             }
             New board
+          </button>
+
+          <button
+            onClick={() => setIncludeArchived(v => !v)}
+            className={cn(
+              'ml-auto flex items-center gap-1.5 px-3 py-1.5 text-[11.5px] font-medium rounded-lg border transition-colors shrink-0',
+              includeArchived
+                ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
+                : 'border-[#E4E7EC] dark:border-[#26283A] text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]',
+            )}
+          >
+            <Archive size={11} strokeWidth={2} />
+            {includeArchived ? 'Hide archived' : 'Archived'}
           </button>
         </div>
 
@@ -272,12 +263,31 @@ export default function TaskBoardsPage({ projectId }: Props) {
         />
       )}
 
-      {confirmDelete && (
-        <DeleteBoardModal
-          board={confirmDelete}
-          onClose={() => setConfirmDelete(null)}
-          onConfirm={handleDeleteConfirm}
-          isPending={deleteBoard.isPending}
+      {removeTarget && (
+        <RemoveModal
+          open={!!removeTarget}
+          onClose={() => setRemoveTarget(null)}
+          onArchive={() => {
+            if (removeTarget.archivedAt) {
+              unarchiveMut.mutate(removeTarget.id, { onSuccess: () => { toast.success('Board unarchived'); setRemoveTarget(null) } })
+            } else {
+              archiveMut.mutate(removeTarget.id, { onSuccess: () => {
+                toast.success('Board archived')
+                setRemoveTarget(null)
+                const remaining = activeBoards.filter(b => b.id !== removeTarget.id)
+                if (boardId === removeTarget.id) {
+                  if (remaining.length > 0) navigate(`${boardsBaseUrl}/${remaining[0].id}`, { replace: true })
+                  else navigate(boardsBaseUrl, { replace: true })
+                }
+              }})
+            }
+          }}
+          onDelete={() => { handleDelete(removeTarget.id) }}
+          entityLabel={removeTarget.name}
+          entityType="board"
+          hasLinkedRecords={false}
+          isArchiving={archiveMut.isPending || unarchiveMut.isPending}
+          isDeleting={deleteBoard.isPending}
         />
       )}
     </>

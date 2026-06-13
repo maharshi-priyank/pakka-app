@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ClipboardList, Plus, Copy, CheckCheck, Pencil, Trash2, Loader2 } from 'lucide-react'
+import { ClipboardList, Plus, Copy, CheckCheck, Pencil, Archive, Loader2 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
-import { useForms, useCreateForm, useUpdateForm, useDeleteForm, type IntakeForm } from '@/features/forms/hooks/useForms'
+import { useForms, useCreateForm, useUpdateForm, useDeleteForm, useArchiveForm, useUnarchiveForm, type IntakeForm } from '@/features/forms/hooks/useForms'
+import { RemoveModal } from '@/components/RemoveModal'
+import { toast } from 'sonner'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -72,12 +74,10 @@ function CreateFormModal({ onClose }: CreateModalProps) {
 
 // ─── Form Card ────────────────────────────────────────────────────────────────
 
-function FormCard({ form }: { form: IntakeForm }) {
+function FormCard({ form, onRemove }: { form: IntakeForm; onRemove: (f: IntakeForm) => void }) {
   const navigate = useNavigate()
   const { mutate: updateForm, isPending: toggling } = useUpdateForm()
-  const { mutate: deleteForm, isPending: deleting }  = useDeleteForm()
-  const [copied,        setCopied]        = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const shareUrl = `${window.location.origin}/q/${form.token}`
 
@@ -88,10 +88,17 @@ function FormCard({ form }: { form: IntakeForm }) {
   }
 
   return (
-    <div className="card-glass p-5 flex flex-col gap-4">
+    <div className={cn('card-glass p-5 flex flex-col gap-4', form.archivedAt && 'opacity-60')}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate">{form.title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3] truncate">{form.title}</h3>
+            {form.archivedAt && (
+              <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900">
+                Archived
+              </span>
+            )}
+          </div>
           {form.description && (
             <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5 line-clamp-2">{form.description}</p>
           )}
@@ -100,12 +107,12 @@ function FormCard({ form }: { form: IntakeForm }) {
         <button
           role="switch"
           aria-checked={form.isActive}
-          disabled={toggling}
+          disabled={toggling || !!form.archivedAt}
           onClick={() => updateForm({ id: form.id, isActive: !form.isActive })}
           className={cn(
             'relative mt-0.5 inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
             form.isActive ? 'bg-[#2563EB]' : 'bg-[#D0D5DD] dark:bg-[#3D4258]',
-            toggling && 'opacity-50',
+            (toggling || form.archivedAt) && 'opacity-50 cursor-not-allowed',
           )}
         >
           <span className={cn(
@@ -119,7 +126,7 @@ function FormCard({ form }: { form: IntakeForm }) {
         <span>{form._count?.submissions ?? 0} response{(form._count?.submissions ?? 0) !== 1 ? 's' : ''}</span>
         <span>·</span>
         <span>Created {formatDate(form.createdAt)}</span>
-        {!form.isActive && (
+        {!form.isActive && !form.archivedAt && (
           <span className="ml-auto text-[11px] font-semibold text-[#D92D20] dark:text-red-400 bg-[#FEF3F2] dark:bg-red-950/30 px-2 py-0.5 rounded-full">Inactive</span>
         )}
       </div>
@@ -131,32 +138,23 @@ function FormCard({ form }: { form: IntakeForm }) {
         >
           {copied ? <><CheckCheck size={13} /> Copied!</> : <><Copy size={13} /> Copy link</>}
         </button>
-        <button
-          onClick={() => navigate(`/forms/${form.id}`)}
-          className="flex items-center gap-1.5 text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors ml-auto"
-        >
-          <Pencil size={12} /> Edit
-        </button>
-        {confirmDelete ? (
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11.5px] text-[#D92D20]">Delete?</span>
-            <button
-              onClick={() => { deleteForm(form.id); setConfirmDelete(false) }}
-              disabled={deleting}
-              className="text-[11.5px] font-bold text-[#D92D20] hover:underline"
-            >
-              Yes
-            </button>
-            <button onClick={() => setConfirmDelete(false)} className="text-[11.5px] text-[#667085] hover:underline">No</button>
-          </div>
-        ) : (
+        {!form.archivedAt && (
           <button
-            onClick={() => setConfirmDelete(true)}
-            className="flex items-center gap-1 text-[12px] text-[#D92D20] dark:text-red-400 hover:opacity-80 transition-opacity"
+            onClick={() => navigate(`/forms/${form.id}`)}
+            className="flex items-center gap-1.5 text-[12px] font-semibold text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors ml-auto"
           >
-            <Trash2 size={12} />
+            <Pencil size={12} /> Edit
           </button>
         )}
+        <button
+          onClick={() => onRemove(form)}
+          className={cn(
+            'flex items-center gap-1 text-[12px] transition-opacity hover:opacity-80',
+            form.archivedAt ? 'ml-auto text-amber-600 dark:text-amber-400' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-red-500',
+          )}
+        >
+          <Archive size={12} />
+        </button>
       </div>
     </div>
   )
@@ -165,22 +163,42 @@ function FormCard({ form }: { form: IntakeForm }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function FormsPage() {
-  const { data: forms, isLoading } = useForms()
-  const [createOpen, setCreateOpen] = useState(false)
+  const [createOpen,      setCreateOpen]      = useState(false)
+  const [includeArchived, setIncludeArchived] = useState(false)
+  const [removeTarget,    setRemoveTarget]    = useState<IntakeForm | null>(null)
+
+  const { data: forms, isLoading } = useForms({ includeArchived: includeArchived || undefined })
+  const archiveMut   = useArchiveForm()
+  const unarchiveMut = useUnarchiveForm()
+  const deleteMut    = useDeleteForm()
 
   return (
     <div className="space-y-6 max-w-[900px]">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-[20px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Intake Forms</h1>
           {!isLoading && forms && (
             <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">{forms.length} form{forms.length !== 1 ? 's' : ''}</p>
           )}
         </div>
-        <button onClick={() => setCreateOpen(true)} className="btn-primary flex items-center gap-2">
-          <Plus size={14} /> New Form
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIncludeArchived(v => !v)}
+            className={cn(
+              'flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[12px] font-medium transition-colors',
+              includeArchived
+                ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
+                : 'border-[#E4E7EC] dark:border-[#26283A] text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D]',
+            )}
+          >
+            <Archive size={12} strokeWidth={2} />
+            {includeArchived ? 'Hide archived' : 'Show archived'}
+          </button>
+          <button onClick={() => setCreateOpen(true)} className="btn-primary flex items-center gap-2">
+            <Plus size={14} /> New Form
+          </button>
+        </div>
       </div>
 
       {/* Content */}
@@ -190,7 +208,7 @@ export default function FormsPage() {
         </div>
       ) : forms && forms.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {forms.map(form => <FormCard key={form.id} form={form} />)}
+          {forms.map(form => <FormCard key={form.id} form={form} onRemove={f => setRemoveTarget(f)} />)}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -208,6 +226,29 @@ export default function FormsPage() {
       )}
 
       {createOpen && <CreateFormModal onClose={() => setCreateOpen(false)} />}
+
+      {removeTarget && (
+        <RemoveModal
+          open={!!removeTarget}
+          onClose={() => setRemoveTarget(null)}
+          onArchive={() => {
+            if (removeTarget.archivedAt) {
+              unarchiveMut.mutate(removeTarget.id, { onSuccess: () => { toast.success('Form unarchived'); setRemoveTarget(null) } })
+            } else {
+              archiveMut.mutate(removeTarget.id, { onSuccess: () => { toast.success('Form archived'); setRemoveTarget(null) } })
+            }
+          }}
+          onDelete={() => {
+            deleteMut.mutate(removeTarget.id)
+            setRemoveTarget(null)
+          }}
+          entityLabel={removeTarget.title}
+          entityType="form"
+          hasLinkedRecords={false}
+          isArchiving={archiveMut.isPending || unarchiveMut.isPending}
+          isDeleting={deleteMut.isPending}
+        />
+      )}
     </div>
   )
 }

@@ -29,11 +29,12 @@ export interface TaskBoard {
 }
 
 export interface TaskBoardSummary {
-  id:        string
-  name:      string
-  position:  number
-  projectId: string | null
-  createdAt: string
+  id:         string
+  name:       string
+  position:   number
+  projectId:  string | null
+  archivedAt: string | null
+  createdAt:  string
 }
 
 export interface CreateBoardInput {
@@ -70,7 +71,7 @@ const KEYS = {
   detail: (id: string) => [...KEYS.all, 'detail', id] as const,
 }
 
-export function useTaskBoards(params?: { projectId?: string }) {
+export function useTaskBoards(params?: { projectId?: string; includeArchived?: boolean }) {
   return useQuery({
     queryKey: KEYS.list(params ?? {}),
     queryFn: async () => {

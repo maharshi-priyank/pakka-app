@@ -19,6 +19,7 @@ export interface IntakeForm {
   isActive:       boolean
   autoCreateLead: boolean
   leadFieldMap:   Record<string, string>
+  archivedAt:     string | null
   createdAt:      string
   updatedAt:      string
   _count?:        { submissions: number }
@@ -36,11 +37,11 @@ export interface IntakeFormDetail extends IntakeForm {
   submissions: FormSubmission[]
 }
 
-export function useForms() {
+export function useForms(params?: { includeArchived?: boolean }) {
   return useQuery({
-    queryKey: ['forms'],
+    queryKey: ['forms', params ?? {}],
     queryFn:  async () => {
-      const { data } = await api.get<{ data: IntakeForm[] }>('/forms')
+      const { data } = await api.get<{ data: IntakeForm[] }>('/forms', { params })
       return data.data
     },
     staleTime: 60_000,
