@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List, FileUp } from 'lucide-react'
+import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List, FileUp, ChevronDown } from 'lucide-react'
 import AIIcon from '@/features/ai/components/AIIcon'
 import AIProposalModal from '@/features/ai/components/AIProposalModal'
 import { cn } from '@/lib/utils'
@@ -55,8 +55,11 @@ export default function ProposalsPage() {
   const [activeTab,          setActiveTab]          = useState<ActiveTab>('ALL')
   const [showAI,             setShowAI]             = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [showImportDropdown, setShowImportDropdown] = useState(false)
+  const [showImport,         setShowImport]         = useState(false)
   const [saveTemplateFor,    setSaveTemplateFor]    = useState<Proposal | null>(null)
   const [search,             setSearch]             = useState('')
+  const importDropdownRef = useRef<HTMLDivElement>(null)
   const [view,               setView]               = useState<ViewMode>(getStoredView)
   const [sortBy,             setSortBy]             = useState<SortField>('createdAt')
   const [sortDir,            setSortDir]            = useState<SortDir>('desc')
@@ -83,6 +86,16 @@ export default function ProposalsPage() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [activeTab])
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (importDropdownRef.current && !importDropdownRef.current.contains(e.target as Node)) {
+        setShowImportDropdown(false)
+      }
+    }
+    if (showImportDropdown) document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [showImportDropdown])
 
   async function handleConvertToContract(p: Proposal) {
     const contract = await convertMutation.mutateAsync(p.id)
@@ -169,14 +182,62 @@ export default function ProposalsPage() {
             <AIIcon size={13} />
             <span className="hidden sm:inline">Draft with AI</span>
           </button>
-          <button
-            onClick={() => setShowTemplatePicker(true)}
-            title="From Template"
-            className="flex items-center gap-1.5 h-9 px-3 sm:px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
-          >
-            <LayoutTemplate size={14} />
-            <span className="hidden sm:inline">From Template</span>
-          </button>
+          {/* Import dropdown */}
+          <div className="relative" ref={importDropdownRef}>
+            <button
+              onClick={() => setShowImportDropdown(v => !v)}
+              className="flex items-center gap-1.5 h-9 px-3 sm:px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
+            >
+              <LayoutTemplate size={14} />
+              <span className="hidden sm:inline">Import</span>
+              <ChevronDown size={13} className={cn('transition-transform duration-150', showImportDropdown && 'rotate-180')} />
+            </button>
+
+            {showImportDropdown && (
+              <div className="absolute right-0 top-[calc(100%+6px)] z-50 w-52 bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-lg shadow-black/8 dark:shadow-black/30 py-1.5 anim-fade">
+                <button
+                  onClick={() => { setShowTemplatePicker(true); setShowImportDropdown(false) }}
+                  className="w-full flex items-start gap-3 px-3.5 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors text-left group"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center shrink-0 mt-0.5">
+                    <LayoutTemplate size={13} className="text-[#6366F1]" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">From Template</p>
+                    <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Pick a saved template</p>
+                  </div>
+                </button>
+
+                <div className="mx-3.5 my-1 border-t border-[#F2F4F7] dark:border-[#26283A]" />
+
+                <button
+                  onClick={() => { setShowImport(true); setShowImportDropdown(false) }}
+                  className="w-full flex items-start gap-3 px-3.5 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors text-left group"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#F0FDF4] dark:bg-[#0F2A1A] flex items-center justify-center shrink-0 mt-0.5">
+                    <FileUp size={13} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Import PDF / DOCX</p>
+                    <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">AI extracts the structure</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => { setShowImport(true); setShowImportDropdown(false) }}
+                  className="w-full flex items-start gap-3 px-3.5 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors text-left group"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#EFF6FF] dark:bg-[#0F1E35] flex items-center justify-center shrink-0 mt-0.5">
+                    <FileText size={13} className="text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Import Google Doc</p>
+                    <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Browse your Drive files</p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
           <button onClick={() => navigate('/proposals/new')} className="btn-primary">
             <Plus size={14} strokeWidth={2.5} />
             New Proposal
@@ -218,7 +279,7 @@ export default function ProposalsPage() {
       </div>
 
       {/* Templates tab */}
-      {!showContent && <TemplatesTab />}
+      {!showContent && <TemplatesTab onImport={() => setShowImport(true)} />}
 
       {/* Toolbar: search + filter + view toggle (proposals tabs only) */}
       {showContent && (
@@ -334,6 +395,7 @@ export default function ProposalsPage() {
       {/* Modals */}
       {showAI && <AIProposalModal onClose={() => setShowAI(false)} />}
       <TemplatePickerModal open={showTemplatePicker} onClose={() => setShowTemplatePicker(false)} />
+      <ImportTemplateModal open={showImport} onClose={() => setShowImport(false)} onTemplateCreated={() => setShowImport(false)} />
       {saveTemplateFor && (
         <SaveTemplateModal
           open={!!saveTemplateFor}
@@ -346,9 +408,8 @@ export default function ProposalsPage() {
   )
 }
 
-function TemplatesTab() {
+function TemplatesTab({ onImport }: { onImport: () => void }) {
   const { data: templates = [], isLoading } = useProposalTemplates()
-  const [showImport, setShowImport] = useState(false)
   const systemTemplates = templates.filter(t => t.isSystem)
   const userTemplates   = templates.filter(t => !t.isSystem)
 
@@ -372,17 +433,17 @@ function TemplatesTab() {
         <div className="flex items-center justify-between mb-3">
           <p className="text-[11px] font-bold text-[#98A2B3] uppercase tracking-wider">Your Templates</p>
           <button
-            onClick={() => setShowImport(true)}
+            onClick={onImport}
             className="flex items-center gap-1.5 text-[12px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors"
           >
-            <FileUp size={13} /> Import from PDF
+            <FileUp size={13} /> Import
           </button>
         </div>
         {userTemplates.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 border-2 border-dashed border-[#EAECF0] rounded-xl text-center">
             <LayoutTemplate size={28} className="text-[#D0D5DD] mb-3" strokeWidth={1.5} />
             <p className="text-[13px] font-semibold text-[#667085]">No templates yet</p>
-            <p className="text-[12px] text-[#98A2B3] mt-0.5">Open any proposal and use "Save as Template", or import a PDF above.</p>
+            <p className="text-[12px] text-[#98A2B3] mt-0.5">Open any proposal and use "Save as Template", or import from PDF / Google Doc.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -391,11 +452,6 @@ function TemplatesTab() {
         )}
       </div>
 
-      <ImportTemplateModal
-        open={showImport}
-        onClose={() => setShowImport(false)}
-        onTemplateCreated={() => setShowImport(false)}
-      />
     </div>
   )
 }
