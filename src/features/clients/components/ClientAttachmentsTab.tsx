@@ -3,6 +3,7 @@ import { FileArchive, FileText, FileImage, File, Trash2, Upload, Loader2, Paperc
 import { useAttachments, useUploadAttachment, useDeleteAttachment, useLinkCanvaDesign, humanSize } from '@/features/attachments/useAttachments'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import CanvaPickerModal from '@/components/CanvaPickerModal'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import canvaSvg from '@/assets/canva.svg'
 
 function fileIcon(mimeType: string) {
@@ -18,6 +19,7 @@ interface Props { clientId: string }
 export default function ClientAttachmentsTab({ clientId }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [showCanvaPicker, setShowCanvaPicker] = useState(false)
+  const [deleteTarget,    setDeleteTarget]    = useState<string | null>(null)
   const parent = { clientId }
 
   const { data: attachments = [], isLoading } = useAttachments(parent)
@@ -96,8 +98,7 @@ export default function ClientAttachmentsTab({ clientId }: Props) {
                 <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">{a.mimeType === 'application/x-canva' ? 'Canva design' : humanSize(a.fileSize)}</p>
               </div>
               <button
-                onClick={() => deleteMutation.mutate(a.id)}
-                disabled={deleteMutation.isPending}
+                onClick={() => setDeleteTarget(a.id)}
                 className="shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-[#D0D5DD] hover:text-[#D92D20] hover:bg-[#FEF3F2] dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 transition-all"
               >
                 <Trash2 size={12} strokeWidth={2} />
@@ -114,6 +115,20 @@ export default function ClientAttachmentsTab({ clientId }: Props) {
           onSelect={(design) => linkCanvaDesign.mutate(design, { onSuccess: () => setShowCanvaPicker(false) })}
         />
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget)
+          setDeleteTarget(null)
+        }}
+        title="Delete attachment?"
+        description="This file will be permanently deleted. This cannot be undone."
+        confirmLabel="Delete File"
+        variant="delete"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Trash2, Loader2, Link2, Lock, UserCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTask, useCreateTask, useUpdateTask, useDeleteTask } from '../hooks/useTasks'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useTeam } from '@/features/team/hooks/useTeam'
@@ -303,30 +304,16 @@ export default function TaskSlideIn({ open, taskId, defaultProjectId, listUrl }:
         </div>
       </div>
 
-      {/* Delete confirm dialog */}
-      {showDel && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowDel(false)} />
-          <div className="relative bg-white dark:bg-[#1A1B26] rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-            <div className="w-10 h-10 rounded-full bg-[#FEF3F2] dark:bg-red-950/40 flex items-center justify-center mx-auto mb-3">
-              <Trash2 size={18} className="text-[#D92D20]" />
-            </div>
-            <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-1">Delete task?</h3>
-            <p className="text-[12.5px] text-[#667085] dark:text-[#8B92A8] mb-5">This cannot be undone.</p>
-            <div className="flex gap-2">
-              <button onClick={() => setShowDel(false)} className="btn-secondary flex-1 text-[13px]">Cancel</button>
-              <button
-                onClick={handleDelete}
-                disabled={deleteTask.isPending}
-                className="flex-1 h-9 px-4 rounded-xl bg-[#D92D20] hover:bg-[#B42318] text-white text-[13px] font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
-              >
-                {deleteTask.isPending ? <Loader2 size={12} className="animate-spin" /> : null}
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        open={showDel}
+        onClose={() => setShowDel(false)}
+        onConfirm={handleDelete}
+        title="Delete task?"
+        description="This will permanently delete the task. This cannot be undone."
+        confirmLabel="Delete Task"
+        variant="delete"
+        isLoading={deleteTask.isPending}
+      />
     </>
   )
 }

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns'
 import { Trash2, Loader2, StickyNote } from 'lucide-react'
+import { ConfirmModal } from './ConfirmModal'
 
 export interface Note {
   id:        string
@@ -26,7 +27,8 @@ function noteDate(iso: string) {
 }
 
 export default function NotesPanel({ notes, isLoading, isSubmitting, onAdd, onDelete }: Props) {
-  const [draft, setDraft] = useState('')
+  const [draft,        setDraft]        = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   function submit() {
@@ -102,7 +104,7 @@ export default function NotesPanel({ notes, isLoading, isSubmitting, onAdd, onDe
                 <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-1.5">{noteDate(note.createdAt)}</p>
               </div>
               <button
-                onClick={() => onDelete(note.id)}
+                onClick={() => setDeleteTarget(note.id)}
                 className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[#D0D5DD] dark:text-[#3A3D52] hover:text-[#D92D20] dark:hover:text-red-400 hover:bg-[#FEF3F2] dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 transition-all mt-0.5"
               >
                 <Trash2 size={12} strokeWidth={2} />
@@ -111,6 +113,19 @@ export default function NotesPanel({ notes, isLoading, isSubmitting, onAdd, onDe
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) onDelete(deleteTarget)
+          setDeleteTarget(null)
+        }}
+        title="Delete note?"
+        description="This note will be permanently deleted. This cannot be undone."
+        confirmLabel="Delete Note"
+        variant="delete"
+      />
     </div>
   )
 }
