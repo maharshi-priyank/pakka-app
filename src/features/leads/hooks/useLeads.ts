@@ -8,10 +8,11 @@ import type { Lead, LeadsListResponse, LeadStage } from '../schemas/lead.schema'
 import type { CreateLeadInput, UpdateLeadInput } from '../schemas/lead.schema'
 
 interface LeadsParams {
-  page?:   number
-  limit?:  number
-  search?: string
-  stage?:  LeadStage
+  page?:           number
+  limit?:          number
+  search?:         string
+  stage?:          LeadStage
+  includeArchived?: boolean
 }
 
 async function fetchLeads(params: LeadsParams = {}): Promise<LeadsListResponse> {

@@ -40,6 +40,7 @@ export interface Lead {
   notes:          string | null
   lastActivityAt: string
   followUpAt:     string | null
+  archivedAt:     string | null
   createdAt:      string
 }
 

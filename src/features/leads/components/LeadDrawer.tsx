@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  X, Trash2, Loader2, Building2, Mail, Phone,
+  X, Archive, Loader2, Building2, Mail, Phone,
   Tag, Calendar, IndianRupee, Clock, Video, UserPlus,
   CheckCircle2, ArrowRight, PenLine, FileText,
 } from 'lucide-react'
@@ -12,9 +12,11 @@ import {
   updateLeadSchema, LEAD_STAGES, LEAD_SOURCES, STAGE_LABELS,
   type Lead, type UpdateLeadInput,
 } from '../schemas/lead.schema'
-import { useUpdateLead, useDeleteLead, useUpdateLeadStage } from '../hooks/useLeads'
+import { useUpdateLead, useDeleteLead, useArchiveLead, useUnarchiveLead, useUpdateLeadStage } from '../hooks/useLeads'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 import ConvertLeadModal from './ConvertLeadModal'
+import { RemoveModal } from '@/components/RemoveModal'
+import { toast } from 'sonner'
 
 interface Props {
   lead:    Lead | null
@@ -53,13 +55,15 @@ function avatarColor(name: string) {
 }
 
 export default function LeadDrawer({ lead, onClose }: Props) {
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [isEditing,     setIsEditing]     = useState(false)
-  const [scheduleOpen,  setScheduleOpen]  = useState(false)
-  const [showConvert,   setShowConvert]   = useState(false)
+  const [removeOpen,   setRemoveOpen]   = useState(false)
+  const [isEditing,    setIsEditing]    = useState(false)
+  const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [showConvert,  setShowConvert]  = useState(false)
 
   const updateLead  = useUpdateLead()
   const deleteLead  = useDeleteLead()
+  const archiveMut  = useArchiveLead()
+  const unarchiveMut = useUnarchiveLead()
   const updateStage = useUpdateLeadStage()
 
   const {
@@ -81,18 +85,13 @@ export default function LeadDrawer({ lead, onClose }: Props) {
         followUpAt: lead.followUpAt ? lead.followUpAt.split('T')[0] : '',
       })
       setIsEditing(false)
-      setConfirmDelete(false)
+      setRemoveOpen(false)
     }
   }, [lead, reset])
 
   function onSave(data: UpdateLeadInput) {
     if (!lead) return
     updateLead.mutate({ id: lead.id, ...data }, { onSuccess: () => setIsEditing(false) })
-  }
-
-  function handleDelete() {
-    if (!lead) return
-    deleteLead.mutate(lead.id, { onSuccess: onClose })
   }
 
   function handleStageChange(stage: typeof LEAD_STAGES[number]) {
@@ -327,22 +326,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
           {/* ── Footer actions ── */}
           {!isEditing && (
             <div className="px-6 py-4 border-t border-black/[0.06]">
-              {confirmDelete ? (
-                <div className="flex items-center gap-3">
-                  <p className="text-[13px] text-red-500 font-medium flex-1">Delete this lead permanently?</p>
-                  <button
-                    onClick={handleDelete}
-                    disabled={deleteLead.isPending}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[12px] font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
-                  >
-                    {deleteLead.isPending ? <Loader2 size={12} className="animate-spin" /> : 'Yes, delete'}
-                  </button>
-                  <button onClick={() => setConfirmDelete(false)} className="btn-secondary text-[12px] h-9 px-4">
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                   {/* Schedule call */}
                   <button
                     onClick={() => setScheduleOpen(true)}
@@ -368,16 +352,25 @@ export default function LeadDrawer({ lead, onClose }: Props) {
                     </button>
                   )}
 
-                  {/* Spacer */}
                   <div className="flex-1" />
 
-                  {/* Delete */}
-                  <button
-                    onClick={() => setConfirmDelete(true)}
-                    className="flex items-center gap-1.5 h-9 px-3 rounded-xl text-[12px] font-medium text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                  {/* Remove / Unarchive */}
+                  {lead.archivedAt ? (
+                    <button
+                      onClick={() => unarchiveMut.mutate(lead.id, { onSuccess: () => toast.success('Lead unarchived') })}
+                      disabled={unarchiveMut.isPending}
+                      className="flex items-center gap-1.5 h-9 px-3 rounded-xl text-[12px] font-medium text-amber-600 hover:bg-amber-50 transition-colors"
+                    >
+                      <Archive size={13} /> Unarchive
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setRemoveOpen(true)}
+                      className="flex items-center gap-1.5 h-9 px-3 rounded-xl text-[12px] font-medium text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <Archive size={13} />
+                    </button>
+                  )}
 
                   {/* Edit */}
                   <button
@@ -387,7 +380,6 @@ export default function LeadDrawer({ lead, onClose }: Props) {
                     <PenLine size={13} /> Edit Lead
                   </button>
                 </div>
-              )}
             </div>
           )}
         </div>
@@ -408,6 +400,24 @@ export default function LeadDrawer({ lead, onClose }: Props) {
           onClose={() => setShowConvert(false)}
         />
       )}
+
+      <RemoveModal
+        open={removeOpen}
+        onClose={() => setRemoveOpen(false)}
+        onArchive={() => {
+          archiveMut.mutate(lead.id, { onSuccess: () => { toast.success('Lead archived'); onClose() } })
+          setRemoveOpen(false)
+        }}
+        onDelete={() => {
+          deleteLead.mutate(lead.id, { onSuccess: onClose })
+          setRemoveOpen(false)
+        }}
+        entityLabel={lead.name}
+        entityType="lead"
+        hasLinkedRecords={false}
+        isArchiving={archiveMut.isPending}
+        isDeleting={deleteLead.isPending}
+      />
     </>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { Plus, Search, X, IndianRupee, LayoutGrid, List } from 'lucide-react'
+import { Plus, Search, X, IndianRupee, LayoutGrid, List, Archive } from 'lucide-react'
 import AIIcon from '@/features/ai/components/AIIcon'
 import { LeadsKanban, AddLeadModal } from '@/features/leads'
 import { useLeads } from '@/features/leads'
@@ -51,10 +51,11 @@ export default function LeadsPage() {
   const [proposalForLead, setProposalForLead] = useState<Lead | null>(null)
   const [drawerLead,      setDrawerLead]      = useState<Lead | null>(null)
   const [filters,         setFilters]         = useState<LeadFilters>(EMPTY_FILTERS)
+  const [includeArchived, setIncludeArchived] = useState(false)
 
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const { data, isLoading } = useLeads({ limit: 500 })
+  const { data, isLoading } = useLeads({ limit: 500, includeArchived: includeArchived || undefined })
   const allLeads      = data?.items ?? []
   const pipelineValue = data?.pipelineValue ? Number(data.pipelineValue) : null
 
@@ -221,6 +222,20 @@ export default function LeadsPage() {
         )}
 
         <div className="flex-1" />
+
+        {/* Archive toggle */}
+        <button
+          onClick={() => setIncludeArchived(prev => !prev)}
+          className={cn(
+            'flex items-center gap-1.5 text-[12px] px-3 py-1.5 rounded-lg border transition-colors',
+            includeArchived
+              ? 'bg-[#F2F4F7] border-[#D0D5DD] text-[#344054] dark:bg-[#1E2030] dark:border-[#333649] dark:text-[#CDD2E0]'
+              : 'border-transparent text-[#98A2B3] hover:text-[#667085]',
+          )}
+        >
+          <Archive size={12} />
+          Show archived
+        </button>
 
         {/* View toggle */}
         <div className="flex items-center gap-0.5 p-0.5 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg border border-[#E4E7EC] dark:border-[#26283A]">

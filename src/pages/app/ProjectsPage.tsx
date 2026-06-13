@@ -6,14 +6,17 @@ import { z } from 'zod'
 import {
   Plus, Search, X, FolderKanban, Calendar,
   FileText, PenLine, Receipt, Loader2, Building2,
+  Archive, MoreHorizontal,
 } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { useCurrency } from '@/hooks/useCurrency'
 import {
-  useProjects, useCreateProject,
+  useProjects, useCreateProject, useArchiveProject, useUnarchiveProject, useDeleteProject,
   type Project, type ProjectStatus, type CreateProjectInput,
 } from '@/features/projects/hooks/useProjects'
 import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
+import { RemoveModal } from '@/components/RemoveModal'
+import { toast } from 'sonner'
 
 const STATUS_TABS: Array<{ value: ProjectStatus | 'ALL'; label: string }> = [
   { value: 'ALL',       label: 'All' },
@@ -162,7 +165,13 @@ function CreateProjectModal({ onClose }: { onClose: () => void }) {
 
 // ─── Project Card ─────────────────────────────────────────────────────────────
 
-function ProjectCard({ project, onClick }: { project: Project; onClick: () => void }) {
+function ProjectCard({ project, onClick, onRemove, onUnarchive }: {
+  project:     Project
+  onClick:     () => void
+  onRemove:    () => void
+  onUnarchive: () => void
+}) {
+  const [menuOpen, setMenuOpen] = useState(false)
   const { format } = useCurrency()
   const budget      = project.budget ? Number(project.budget) : null
   const invoiced    = project.invoiced  ?? 0
@@ -172,13 +181,53 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
   const count       = project._count
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full text-left bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-2xl p-5 hover:border-[#2563EB]/40 dark:hover:border-[#2563EB]/40 hover:shadow-md transition-all group"
-    >
+    <div className={cn(
+      'relative bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-2xl p-5 hover:border-[#2563EB]/40 dark:hover:border-[#2563EB]/40 hover:shadow-md transition-all group',
+      project.archivedAt && 'opacity-60',
+    )}>
+      {/* Archived chip */}
+      {project.archivedAt && (
+        <span className="absolute top-3 right-10 text-[10px] bg-amber-50 text-amber-600 border border-amber-200 rounded-full px-2 py-0.5 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800">
+          Archived
+        </span>
+      )}
+
+      {/* Kebab menu */}
+      <div className="absolute top-3 right-3">
+        <button
+          onClick={e => { e.stopPropagation(); setMenuOpen(v => !v) }}
+          className="p-1 rounded-lg text-[#98A2B3] hover:bg-[#F2F4F7] dark:hover:bg-[#1E2030] hover:text-[#344054] transition-colors"
+        >
+          <MoreHorizontal size={15} />
+        </button>
+        {menuOpen && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+            <div className="absolute right-0 top-7 z-20 w-36 bg-white dark:bg-[#1A1C2A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl shadow-lg py-1 text-[12.5px]">
+              {project.archivedAt ? (
+                <button
+                  onClick={e => { e.stopPropagation(); setMenuOpen(false); onUnarchive() }}
+                  className="flex items-center gap-2 w-full px-3 py-2 hover:bg-[#F9FAFB] dark:hover:bg-[#22243A] text-[#344054] dark:text-[#CDD2E0]"
+                >
+                  <Archive size={12} /> Unarchive
+                </button>
+              ) : (
+                <button
+                  onClick={e => { e.stopPropagation(); setMenuOpen(false); onRemove() }}
+                  className="flex items-center gap-2 w-full px-3 py-2 hover:bg-[#F9FAFB] dark:hover:bg-[#22243A] text-[#344054] dark:text-[#CDD2E0]"
+                >
+                  <Archive size={12} /> Remove…
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      <button onClick={onClick} className="w-full text-left">
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-start gap-3 mb-4 pr-6">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] dark:bg-[#1E3A5F] flex items-center justify-center shrink-0">
             <FolderKanban size={18} className="text-[#2563EB]" strokeWidth={2} />
           </div>
@@ -285,7 +334,8 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
           </span>
         )}
       </div>
-    </button>
+      </button>
+    </div>
   )
 }
 
@@ -319,16 +369,23 @@ function ProjectCardSkeleton() {
 
 export default function ProjectsPage() {
   const navigate = useNavigate()
-  const [showCreate,    setShowCreate]    = useState(false)
-  const [search,        setSearch]        = useState('')
-  const [statusFilter,  setStatusFilter]  = useState<ProjectStatus | 'ALL'>('ALL')
-  const [clientIds,     setClientIds]     = useState<string[]>([])
+  const [showCreate,      setShowCreate]      = useState(false)
+  const [search,          setSearch]          = useState('')
+  const [statusFilter,    setStatusFilter]    = useState<ProjectStatus | 'ALL'>('ALL')
+  const [clientIds,       setClientIds]       = useState<string[]>([])
+  const [includeArchived, setIncludeArchived] = useState(false)
+  const [removeTarget,    setRemoveTarget]    = useState<Project | null>(null)
+
+  const archiveMut   = useArchiveProject()
+  const unarchiveMut = useUnarchiveProject()
+  const deleteMut    = useDeleteProject()
 
   const { data, isLoading } = useProjects({
-    search:   search.trim() || undefined,
-    status:   statusFilter === 'ALL' ? undefined : statusFilter,
-    clientId: clientIds.length === 1 ? clientIds[0] : undefined,
-    limit:    100,
+    search:          search.trim() || undefined,
+    status:          statusFilter === 'ALL' ? undefined : statusFilter,
+    clientId:        clientIds.length === 1 ? clientIds[0] : undefined,
+    limit:           100,
+    includeArchived: includeArchived || undefined,
   })
 
   const projects    = data?.projects ?? []
@@ -406,6 +463,19 @@ export default function ProjectsPage() {
         </div>
 
         <ClientMultiSelect selected={clientIds} onChange={setClientIds} />
+
+        <button
+          onClick={() => setIncludeArchived(prev => !prev)}
+          className={cn(
+            'flex items-center gap-1.5 text-[12px] px-3 py-1.5 rounded-lg border transition-colors',
+            includeArchived
+              ? 'bg-[#F2F4F7] border-[#D0D5DD] text-[#344054] dark:bg-[#1E2030] dark:border-[#333649] dark:text-[#CDD2E0]'
+              : 'border-transparent text-[#98A2B3] hover:text-[#667085]',
+          )}
+        >
+          <Archive size={12} />
+          Show archived
+        </button>
       </div>
 
       {/* Content */}
@@ -437,12 +507,43 @@ export default function ProjectsPage() {
               key={p.id}
               project={p}
               onClick={() => navigate(`/projects/${p.id}`)}
+              onRemove={() => setRemoveTarget(p)}
+              onUnarchive={() => unarchiveMut.mutate(p.id, { onSuccess: () => toast.success('Project unarchived') })}
             />
           ))}
         </div>
       )}
 
       {showCreate && <CreateProjectModal onClose={() => setShowCreate(false)} />}
+
+      {removeTarget && (
+        <RemoveModal
+          open
+          onClose={() => setRemoveTarget(null)}
+          onArchive={() => {
+            archiveMut.mutate(removeTarget.id, { onSuccess: () => toast.success('Project archived') })
+            setRemoveTarget(null)
+          }}
+          onDelete={() => {
+            deleteMut.mutate(removeTarget.id, { onSuccess: () => toast.success('Project deleted') })
+            setRemoveTarget(null)
+          }}
+          entityLabel={removeTarget.name}
+          entityType="project"
+          hasLinkedRecords={
+            (removeTarget._count?.proposals ?? 0) + (removeTarget._count?.contracts ?? 0) +
+            (removeTarget._count?.invoices   ?? 0) + (removeTarget._count?.timeEntries ?? 0) +
+            (removeTarget._count?.expenses   ?? 0) > 0
+          }
+          linkedRecordsSummary={[
+            removeTarget._count?.proposals   && `${removeTarget._count.proposals} proposal${removeTarget._count.proposals > 1 ? 's' : ''}`,
+            removeTarget._count?.contracts   && `${removeTarget._count.contracts} contract${removeTarget._count.contracts > 1 ? 's' : ''}`,
+            removeTarget._count?.invoices    && `${removeTarget._count.invoices} invoice${removeTarget._count.invoices > 1 ? 's' : ''}`,
+          ].filter(Boolean).join(', ') || undefined}
+          isArchiving={archiveMut.isPending}
+          isDeleting={deleteMut.isPending}
+        />
+      )}
     </div>
   )
 }

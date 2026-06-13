@@ -5,14 +5,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   ArrowLeft, FolderKanban, Building2, Calendar, IndianRupee,
-  Clock, Receipt, FileText, PenLine, Wallet, Pencil, Trash2,
+  Clock, Receipt, FileText, PenLine, Wallet, Pencil, Archive,
   X, Loader2, Plus,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import {
   useProject, useProjectStats, useUpdateProject, useDeleteProject,
+  useArchiveProject, useUnarchiveProject,
   type ProjectStatus,
 } from '@/features/projects/hooks/useProjects'
+import { RemoveModal } from '@/components/RemoveModal'
+import { toast } from 'sonner'
 import ProjectFilesPanel from '@/features/projects/components/ProjectFilesPanel'
 import ProjectPlCard from '@/features/projects/components/ProjectPlCard'
 import ProjectNotesTab from '@/features/projects/components/ProjectNotesTab'
@@ -234,26 +237,17 @@ export default function ProjectPage() {
   const [tab,       setTab]       = useState<Tab>(locationState?.tab ?? 'overview')
   const [docSubTab, setDocSubTab] = useState<DocSubTab>('proposals')
   const activeTab: Tab = isTasksRoute ? 'tasks' : tab
-  const [showEdit,  setShowEdit]  = useState(false)
-  const [showDel,   setShowDel]   = useState(false)
-  const [deleting,  setDeleting]  = useState(false)
+  const [showEdit,   setShowEdit]   = useState(false)
+  const [removeOpen, setRemoveOpen] = useState(false)
   const [qvInvoice,   setQvInvoice]   = useState<InvoiceSnap | null>(null)
   const [qvProposal,  setQvProposal]  = useState<ProposalSnap | null>(null)
   const [qvContract,  setQvContract]  = useState<ContractSnap | null>(null)
 
   const { data: project, isLoading } = useProject(id!)
   const { data: stats,   isLoading: statsLoading } = useProjectStats(id!)
-  const { mutateAsync: deleteProject } = useDeleteProject()
-
-  async function handleDelete() {
-    setDeleting(true)
-    try {
-      await deleteProject(id!)
-      navigate('/projects')
-    } finally {
-      setDeleting(false)
-    }
-  }
+  const deleteMut  = useDeleteProject()
+  const archiveMut = useArchiveProject()
+  const unarchiveMut = useUnarchiveProject()
 
   if (isLoading) {
     return (
@@ -322,12 +316,21 @@ export default function ProjectPage() {
           >
             <Pencil size={12} /> Edit
           </button>
-          <button
-            onClick={() => setShowDel(true)}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12px] font-medium text-[#D92D20] bg-white dark:bg-[#13141A] hover:border-[#FDA29B] hover:bg-[#FEF3F2] dark:hover:bg-red-950/20 transition-colors"
-          >
-            <Trash2 size={12} /> Delete
-          </button>
+          {project.archivedAt ? (
+            <button
+              onClick={() => unarchiveMut.mutate(project.id, { onSuccess: () => toast.success('Project unarchived') })}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12px] font-medium text-amber-600 bg-white dark:bg-[#13141A] hover:bg-amber-50 transition-colors"
+            >
+              <Archive size={12} /> Unarchive
+            </button>
+          ) : (
+            <button
+              onClick={() => setRemoveOpen(true)}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12px] font-medium text-[#344054] dark:text-[#C2C8D8] bg-white dark:bg-[#13141A] hover:border-[#D0D5DD] dark:hover:border-[#3D4258] transition-colors"
+            >
+              <Archive size={12} /> Remove
+            </button>
+          )}
         </div>
       </div>
 
@@ -690,32 +693,36 @@ export default function ProjectPage() {
         />
       )}
 
-      {/* Delete confirm */}
-      {showDel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowDel(false)} />
-          <div className="relative bg-white dark:bg-[#1A1B26] rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-            <div className="w-12 h-12 rounded-full bg-[#FEF3F2] dark:bg-red-950/40 flex items-center justify-center mx-auto mb-4">
-              <Trash2 size={20} className="text-[#D92D20]" />
-            </div>
-            <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-1">Delete project?</h3>
-            <p className="text-[12.5px] text-[#667085] dark:text-[#8B92A8] mb-5">
-              This removes the project but keeps all linked proposals, contracts, and invoices.
-            </p>
-            <div className="flex gap-2">
-              <button onClick={() => setShowDel(false)} className="btn-secondary flex-1 text-[13px]">Cancel</button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex-1 h-9 px-4 rounded-xl bg-[#D92D20] hover:bg-[#B42318] text-white text-[13px] font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
-              >
-                {deleting ? <Loader2 size={13} className="animate-spin" /> : null}
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <RemoveModal
+        open={removeOpen}
+        onClose={() => setRemoveOpen(false)}
+        onArchive={() => {
+          archiveMut.mutate(project.id, {
+            onSuccess: () => { toast.success('Project archived'); navigate('/projects') },
+          })
+          setRemoveOpen(false)
+        }}
+        onDelete={() => {
+          deleteMut.mutate(project.id, {
+            onSuccess: () => { toast.success('Project deleted'); navigate('/projects') },
+          })
+          setRemoveOpen(false)
+        }}
+        entityLabel={project.name}
+        entityType="project"
+        hasLinkedRecords={
+          (project._count?.proposals ?? 0) + (project._count?.contracts ?? 0) +
+          (project._count?.invoices   ?? 0) + (project._count?.timeEntries ?? 0) +
+          (project._count?.expenses   ?? 0) > 0
+        }
+        linkedRecordsSummary={[
+          project._count?.proposals   && `${project._count.proposals} proposal${project._count.proposals > 1 ? 's' : ''}`,
+          project._count?.contracts   && `${project._count.contracts} contract${project._count.contracts > 1 ? 's' : ''}`,
+          project._count?.invoices    && `${project._count.invoices} invoice${project._count.invoices > 1 ? 's' : ''}`,
+        ].filter(Boolean).join(', ') || undefined}
+        isArchiving={archiveMut.isPending}
+        isDeleting={deleteMut.isPending}
+      />
     </div>
   )
 }

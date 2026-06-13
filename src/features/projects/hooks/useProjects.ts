@@ -29,6 +29,7 @@ export interface Project {
   budget:      string | null
   startDate:   string | null
   endDate:     string | null
+  archivedAt:  string | null
   createdAt:   string
   updatedAt:   string
   client:              ProjectClient | null
@@ -104,11 +105,12 @@ const KEYS = {
 }
 
 export function useProjects(params?: {
-  search?:   string
-  status?:   ProjectStatus
-  clientId?: string
-  page?:     number
-  limit?:    number
+  search?:          string
+  status?:          ProjectStatus
+  clientId?:        string
+  page?:            number
+  limit?:           number
+  includeArchived?: boolean
 }) {
   return useQuery({
     queryKey: KEYS.list(params ?? {}),
