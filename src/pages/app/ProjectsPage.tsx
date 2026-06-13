@@ -167,86 +167,119 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
   const budget      = project.budget ? Number(project.budget) : null
   const invoiced    = project.invoiced  ?? 0
   const collected   = project.collected ?? 0
+  const outstanding = invoiced - collected
   const progress    = budget && budget > 0 ? Math.min((invoiced / budget) * 100, 100) : null
   const count       = project._count
 
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-4 hover:border-[#2563EB]/40 dark:hover:border-[#2563EB]/40 hover:shadow-sm transition-all group"
+      className="w-full text-left bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-2xl p-5 hover:border-[#2563EB]/40 dark:hover:border-[#2563EB]/40 hover:shadow-md transition-all group"
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] dark:bg-[#1E3A5F] flex items-center justify-center shrink-0">
-            <FolderKanban size={14} className="text-[#2563EB]" strokeWidth={2} />
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] dark:bg-[#1E3A5F] flex items-center justify-center shrink-0">
+            <FolderKanban size={18} className="text-[#2563EB]" strokeWidth={2} />
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate group-hover:text-[#2563EB] transition-colors">
+            <p className="text-[14.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate group-hover:text-[#2563EB] transition-colors">
               {project.name}
             </p>
             {project.client && (
-              <p className="text-[11px] text-[#667085] dark:text-[#8B92A8] truncate flex items-center gap-1 mt-0.5">
-                <Building2 size={9} />
+              <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] truncate flex items-center gap-1 mt-0.5">
+                <Building2 size={11} />
                 {project.client.company || project.client.name}
               </p>
             )}
           </div>
         </div>
-        <span className={cn('text-[10.5px] font-semibold px-2 py-0.5 rounded-full shrink-0', STATUS_COLORS[project.status])}>
+        <span className={cn('text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0', STATUS_COLORS[project.status])}>
           {STATUS_LABELS[project.status]}
         </span>
       </div>
 
-      {/* Budget progress */}
-      {budget ? (
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] text-[#667085] dark:text-[#8B92A8]">
-              {format(invoiced)} invoiced
-            </span>
-            <span className="text-[11px] text-[#667085] dark:text-[#8B92A8]">
-              Budget {format(budget)}
-            </span>
-          </div>
-          <div className="h-1.5 rounded-full bg-[#F2F4F7] dark:bg-[#21222D] overflow-hidden">
-            <div
-              className={cn(
-                'h-full rounded-full transition-all',
-                progress && progress >= 100 ? 'bg-[#D92D20]' : 'bg-[#2563EB]',
+      {/* Financial summary */}
+      {(budget || invoiced > 0) && (
+        <div className="mb-4">
+          {budget ? (
+            <>
+              <div className="flex items-end justify-between mb-2">
+                <div>
+                  <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mb-0.5">Invoiced</p>
+                  <p className="text-[17px] font-bold text-[#101828] dark:text-[#ECEEF3] tabular-nums leading-none">
+                    {format(invoiced)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mb-0.5">Budget</p>
+                  <p className="text-[14px] font-semibold text-[#667085] dark:text-[#8B92A8] tabular-nums leading-none">
+                    {format(budget)}
+                  </p>
+                </div>
+              </div>
+              <div className="h-2 rounded-full bg-[#F2F4F7] dark:bg-[#21222D] overflow-hidden">
+                <div
+                  className={cn('h-full rounded-full transition-all', progress && progress >= 100 ? 'bg-[#D92D20]' : 'bg-[#2563EB]')}
+                  style={{ width: `${progress ?? 0}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between mt-1.5">
+                <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">
+                  {Math.round(progress ?? 0)}% of budget
+                </p>
+                {collected > 0 && (
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    {format(collected)} collected
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-5">
+              <div>
+                <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mb-0.5">Invoiced</p>
+                <p className="text-[17px] font-bold text-[#101828] dark:text-[#ECEEF3] tabular-nums leading-none">{format(invoiced)}</p>
+              </div>
+              {collected > 0 && (
+                <div>
+                  <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mb-0.5">Collected</p>
+                  <p className="text-[17px] font-bold text-emerald-600 dark:text-emerald-400 tabular-nums leading-none">{format(collected)}</p>
+                </div>
               )}
-              style={{ width: `${progress ?? 0}%` }}
-            />
-          </div>
+              {outstanding > 0 && (
+                <div>
+                  <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mb-0.5">Outstanding</p>
+                  <p className="text-[17px] font-bold text-amber-600 dark:text-amber-400 tabular-nums leading-none">{format(outstanding)}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      ) : invoiced > 0 ? (
-        <p className="text-[12px] text-[#344054] dark:text-[#C2C8D8] font-medium mb-3">
-          {format(invoiced)} invoiced · {format(collected)} collected
-        </p>
-      ) : null}
+      )}
 
-      {/* Counts + dates */}
-      <div className="flex items-center justify-between">
+      {/* Footer */}
+      <div className="border-t border-[#F2F4F7] dark:border-[#26283A] pt-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {(count?.proposals ?? 0) > 0 && (
-            <span className="flex items-center gap-1 text-[11px] text-[#98A2B3] dark:text-[#545C74]">
-              <FileText size={10} /> {count!.proposals}
+            <span className="flex items-center gap-1 text-[11.5px] text-[#98A2B3] dark:text-[#545C74]">
+              <FileText size={12} /> {count!.proposals}
             </span>
           )}
           {(count?.contracts ?? 0) > 0 && (
-            <span className="flex items-center gap-1 text-[11px] text-[#98A2B3] dark:text-[#545C74]">
-              <PenLine size={10} /> {count!.contracts}
+            <span className="flex items-center gap-1 text-[11.5px] text-[#98A2B3] dark:text-[#545C74]">
+              <PenLine size={12} /> {count!.contracts}
             </span>
           )}
           {(count?.invoices ?? 0) > 0 && (
-            <span className="flex items-center gap-1 text-[11px] text-[#98A2B3] dark:text-[#545C74]">
-              <Receipt size={10} /> {count!.invoices}
+            <span className="flex items-center gap-1 text-[11.5px] text-[#98A2B3] dark:text-[#545C74]">
+              <Receipt size={12} /> {count!.invoices}
             </span>
           )}
         </div>
         {(project.startDate || project.endDate) && (
-          <span className="flex items-center gap-1 text-[11px] text-[#98A2B3] dark:text-[#545C74]">
-            <Calendar size={10} />
+          <span className="flex items-center gap-1 text-[11.5px] text-[#98A2B3] dark:text-[#545C74]">
+            <Calendar size={11} />
             {project.startDate ? formatDate(project.startDate) : '—'}
             {project.endDate ? ` → ${formatDate(project.endDate)}` : ''}
           </span>
@@ -258,18 +291,24 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
 
 function ProjectCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-4 space-y-3 animate-pulse">
-      <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-[#F2F4F7] dark:bg-[#21222D]" />
-        <div className="flex-1 space-y-1.5">
-          <div className="h-3.5 rounded bg-[#F2F4F7] dark:bg-[#21222D] w-2/3" />
-          <div className="h-2.5 rounded bg-[#F2F4F7] dark:bg-[#21222D] w-1/3" />
+    <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-2xl p-5 space-y-4 animate-pulse">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-[#F2F4F7] dark:bg-[#21222D]" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 rounded bg-[#F2F4F7] dark:bg-[#21222D] w-2/3" />
+          <div className="h-3 rounded bg-[#F2F4F7] dark:bg-[#21222D] w-1/3" />
         </div>
-        <div className="h-5 w-16 rounded-full bg-[#F2F4F7] dark:bg-[#21222D]" />
+        <div className="h-6 w-16 rounded-full bg-[#F2F4F7] dark:bg-[#21222D]" />
       </div>
-      <div className="h-1.5 rounded-full bg-[#F2F4F7] dark:bg-[#21222D]" />
-      <div className="flex justify-between">
-        <div className="h-3 w-24 rounded bg-[#F2F4F7] dark:bg-[#21222D]" />
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <div className="h-5 w-24 rounded bg-[#F2F4F7] dark:bg-[#21222D]" />
+          <div className="h-5 w-20 rounded bg-[#F2F4F7] dark:bg-[#21222D]" />
+        </div>
+        <div className="h-2 rounded-full bg-[#F2F4F7] dark:bg-[#21222D]" />
+      </div>
+      <div className="pt-3 border-t border-[#F2F4F7] dark:border-[#26283A] flex justify-between">
+        <div className="h-3 w-20 rounded bg-[#F2F4F7] dark:bg-[#21222D]" />
         <div className="h-3 w-28 rounded bg-[#F2F4F7] dark:bg-[#21222D]" />
       </div>
     </div>
@@ -371,7 +410,7 @@ export default function ProjectsPage() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {Array.from({ length: 8 }).map((_, i) => <ProjectCardSkeleton key={i} />)}
         </div>
       ) : projects.length === 0 ? (
@@ -392,7 +431,7 @@ export default function ProjectsPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {projects.map(p => (
             <ProjectCard
               key={p.id}

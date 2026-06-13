@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -211,17 +211,16 @@ function StatCard({ label, value, sub, icon: Icon, accent = false }: {
 
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'time' | 'files' | 'notes' | 'tasks'
+type Tab = 'overview' | 'documents' | 'time' | 'files' | 'notes' | 'tasks'
+type DocSubTab = 'proposals' | 'contracts' | 'invoices'
 
 const TABS: Array<{ value: Tab; label: string }> = [
   { value: 'overview',   label: 'Overview' },
-  { value: 'proposals',  label: 'Proposals' },
-  { value: 'contracts',  label: 'Contracts' },
-  { value: 'invoices',   label: 'Invoices' },
+  { value: 'tasks',      label: 'Tasks' },
+  { value: 'documents',  label: 'Documents' },
   { value: 'time',       label: 'Time & Expenses' },
   { value: 'files',      label: 'Files' },
-  { value: 'notes',      label: 'Notes & Brief' },
-  { value: 'tasks',      label: 'Tasks' },
+  { value: 'notes',      label: 'Notes' },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -231,7 +230,9 @@ export default function ProjectPage() {
   const navigate = useNavigate()
   const location     = useLocation()
   const isTasksRoute = location.pathname.includes('/tasks')
-  const [tab,       setTab]       = useState<Tab>('overview')
+  const locationState = location.state as { tab?: Tab } | null
+  const [tab,       setTab]       = useState<Tab>(locationState?.tab ?? 'overview')
+  const [docSubTab, setDocSubTab] = useState<DocSubTab>('proposals')
   const activeTab: Tab = isTasksRoute ? 'tasks' : tab
   const [showEdit,  setShowEdit]  = useState(false)
   const [showDel,   setShowDel]   = useState(false)
@@ -369,8 +370,10 @@ export default function ProjectPage() {
             onClick={() => {
               if (t.value === 'tasks') {
                 navigate(`/projects/${id}/tasks`)
+              } else if (isTasksRoute) {
+                navigate(`/projects/${id}`, { state: { tab: t.value } })
               } else {
-                setTab(t.value as Exclude<Tab, 'tasks'>)
+                setTab(t.value)
               }
             }}
             className={cn(
@@ -399,21 +402,21 @@ export default function ProjectPage() {
                 <p className="text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide mb-3">Linked records</p>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {[
-                    { label: 'Proposals',  count: project._count?.proposals ?? 0,   icon: FileText, path: '/proposals'  },
-                    { label: 'Contracts',  count: project._count?.contracts ?? 0,   icon: PenLine,  path: '/contracts'  },
-                    { label: 'Invoices',   count: project._count?.invoices ?? 0,    icon: Receipt,  path: '/invoices'   },
-                    { label: 'Time log',   count: project._count?.timeEntries ?? 0, icon: Clock,    path: `/time?projectId=${id}`       },
-                    { label: 'Expenses',   count: project._count?.expenses ?? 0,    icon: Wallet,   path: `/expenses?projectId=${id}`   },
-                  ].map(({ label, count, icon: Icon, path }) => (
-                    <Link
+                    { label: 'Proposals', count: project._count?.proposals ?? 0,   icon: FileText, action: () => { setTab('documents'); setDocSubTab('proposals') } },
+                    { label: 'Contracts', count: project._count?.contracts ?? 0,   icon: PenLine,  action: () => { setTab('documents'); setDocSubTab('contracts') } },
+                    { label: 'Invoices',  count: project._count?.invoices ?? 0,    icon: Receipt,  action: () => { setTab('documents'); setDocSubTab('invoices')  } },
+                    { label: 'Time log',  count: project._count?.timeEntries ?? 0, icon: Clock,    action: () => setTab('time') },
+                    { label: 'Expenses',  count: project._count?.expenses ?? 0,    icon: Wallet,   action: () => setTab('time') },
+                  ].map(({ label, count, icon: Icon, action }) => (
+                    <button
                       key={label}
-                      to={path}
+                      onClick={action}
                       className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[#F2F4F7] dark:border-[#26283A] hover:border-[#2563EB]/40 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-all text-center"
                     >
                       <Icon size={16} className="text-[#667085] dark:text-[#8B92A8]" />
                       <p className="text-[18px] font-bold text-[#101828] dark:text-[#ECEEF3]">{count}</p>
                       <p className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74]">{label}</p>
-                    </Link>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -474,86 +477,123 @@ export default function ProjectPage() {
           </div>
         )}
 
-        {activeTab === 'proposals' && (
-          <RecordTable
-            empty={project.proposals.length === 0}
-            emptyLabel="No proposals linked to this project"
-            emptyAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-            addAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-          >
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-[#EAECF0] dark:border-[#26283A]">
-                  <Th>Title</Th><Th>Status</Th><Th>Amount</Th><Th>Date</Th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
-                {project.proposals.map(p => (
-                  <tr key={p.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvProposal({ id: p.id, title: p.title, status: p.status, totalAmount: p.totalAmount, createdAt: p.createdAt })}>
-                    <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{p.title}</Td>
-                    <Td><StatusBadge status={p.status} /></Td>
-                    <Td>{formatCurrency(Number(p.totalAmount))}</Td>
-                    <Td className="text-[#667085] dark:text-[#8B92A8]">{formatDate(p.createdAt)}</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </RecordTable>
-        )}
+        {activeTab === 'documents' && (
+          <div className="space-y-4">
+            {/* Sub-tab bar */}
+            <div className="flex items-center gap-1 bg-[#F9FAFB] dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-1 w-fit">
+              {([
+                { value: 'proposals' as DocSubTab, label: 'Proposals',  count: project._count?.proposals ?? 0 },
+                { value: 'contracts' as DocSubTab, label: 'Contracts',  count: project._count?.contracts ?? 0 },
+                { value: 'invoices'  as DocSubTab, label: 'Invoices',   count: project._count?.invoices  ?? 0 },
+              ]).map(st => (
+                <button
+                  key={st.value}
+                  onClick={() => setDocSubTab(st.value)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition-all',
+                    docSubTab === st.value
+                      ? 'bg-white dark:bg-[#1A1B26] text-[#101828] dark:text-[#ECEEF3] shadow-sm border border-[#EAECF0] dark:border-[#26283A]'
+                      : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
+                  )}
+                >
+                  {st.label}
+                  {st.count > 0 && (
+                    <span className={cn(
+                      'text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center',
+                      docSubTab === st.value
+                        ? 'bg-[#F2F4F7] dark:bg-[#26283A] text-[#344054] dark:text-[#C2C8D8]'
+                        : 'bg-[#EAECF0] dark:bg-[#26283A] text-[#667085] dark:text-[#8B92A8]',
+                    )}>
+                      {st.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
 
-        {activeTab === 'contracts' && (
-          <RecordTable
-            empty={project.contracts.length === 0}
-            emptyLabel="No contracts linked to this project"
-            emptyAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-            addAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-          >
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-[#EAECF0] dark:border-[#26283A]">
-                  <Th>Title</Th><Th>Status</Th><Th>Sent</Th><Th>Signed</Th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
-                {project.contracts.map(c => (
-                  <tr key={c.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvContract({ id: c.id, title: c.title, status: c.status, sentAt: c.sentAt, signedAt: c.signedAt })}>
-                    <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{c.title}</Td>
-                    <Td><StatusBadge status={c.status} /></Td>
-                    <Td className="text-[#667085] dark:text-[#8B92A8]">{c.sentAt ? formatDate(c.sentAt) : '—'}</Td>
-                    <Td className="text-[#667085] dark:text-[#8B92A8]">{c.signedAt ? formatDate(c.signedAt) : '—'}</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </RecordTable>
-        )}
+            {/* Sub-tab content */}
+            {docSubTab === 'proposals' && (
+              <RecordTable
+                empty={project.proposals.length === 0}
+                emptyLabel="No proposals linked to this project"
+                emptyAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+                addAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+              >
+                <table className="w-full text-[13px]">
+                  <thead>
+                    <tr className="border-b border-[#EAECF0] dark:border-[#26283A]">
+                      <Th>Title</Th><Th>Status</Th><Th>Amount</Th><Th>Date</Th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
+                    {project.proposals.map(p => (
+                      <tr key={p.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvProposal({ id: p.id, title: p.title, status: p.status, totalAmount: p.totalAmount, createdAt: p.createdAt })}>
+                        <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{p.title}</Td>
+                        <Td><StatusBadge status={p.status} /></Td>
+                        <Td>{formatCurrency(Number(p.totalAmount))}</Td>
+                        <Td className="text-[#667085] dark:text-[#8B92A8]">{formatDate(p.createdAt)}</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </RecordTable>
+            )}
 
-        {activeTab === 'invoices' && (
-          <RecordTable
-            empty={project.invoices.length === 0}
-            emptyLabel="No invoices linked to this project"
-            emptyAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-            addAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-          >
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-[#EAECF0] dark:border-[#26283A]">
-                  <Th>#</Th><Th>Status</Th><Th>Total</Th><Th>Paid</Th><Th>Due</Th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
-                {project.invoices.map(inv => (
-                  <tr key={inv.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvInvoice({ id: inv.id, invoiceNumber: inv.invoiceNumber, status: inv.status, total: inv.total, amountPaid: inv.amountPaid, dueDate: inv.dueDate })}>
-                    <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{inv.invoiceNumber}</Td>
-                    <Td><StatusBadge status={inv.status} /></Td>
-                    <Td>{formatCurrency(Number(inv.total))}</Td>
-                    <Td>{formatCurrency(Number(inv.amountPaid))}</Td>
-                    <Td className="text-[#667085] dark:text-[#8B92A8]">{inv.dueDate ? formatDate(inv.dueDate) : '—'}</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </RecordTable>
+            {docSubTab === 'contracts' && (
+              <RecordTable
+                empty={project.contracts.length === 0}
+                emptyLabel="No contracts linked to this project"
+                emptyAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+                addAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+              >
+                <table className="w-full text-[13px]">
+                  <thead>
+                    <tr className="border-b border-[#EAECF0] dark:border-[#26283A]">
+                      <Th>Title</Th><Th>Status</Th><Th>Sent</Th><Th>Signed</Th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
+                    {project.contracts.map(c => (
+                      <tr key={c.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvContract({ id: c.id, title: c.title, status: c.status, sentAt: c.sentAt, signedAt: c.signedAt })}>
+                        <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{c.title}</Td>
+                        <Td><StatusBadge status={c.status} /></Td>
+                        <Td className="text-[#667085] dark:text-[#8B92A8]">{c.sentAt ? formatDate(c.sentAt) : '—'}</Td>
+                        <Td className="text-[#667085] dark:text-[#8B92A8]">{c.signedAt ? formatDate(c.signedAt) : '—'}</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </RecordTable>
+            )}
+
+            {docSubTab === 'invoices' && (
+              <RecordTable
+                empty={project.invoices.length === 0}
+                emptyLabel="No invoices linked to this project"
+                emptyAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+                addAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+              >
+                <table className="w-full text-[13px]">
+                  <thead>
+                    <tr className="border-b border-[#EAECF0] dark:border-[#26283A]">
+                      <Th>#</Th><Th>Status</Th><Th>Total</Th><Th>Paid</Th><Th>Due</Th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
+                    {project.invoices.map(inv => (
+                      <tr key={inv.id} className="hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors cursor-pointer" onClick={() => setQvInvoice({ id: inv.id, invoiceNumber: inv.invoiceNumber, status: inv.status, total: inv.total, amountPaid: inv.amountPaid, dueDate: inv.dueDate })}>
+                        <Td className="font-medium text-[#101828] dark:text-[#ECEEF3]">{inv.invoiceNumber}</Td>
+                        <Td><StatusBadge status={inv.status} /></Td>
+                        <Td>{formatCurrency(Number(inv.total))}</Td>
+                        <Td>{formatCurrency(Number(inv.amountPaid))}</Td>
+                        <Td className="text-[#667085] dark:text-[#8B92A8]">{inv.dueDate ? formatDate(inv.dueDate) : '—'}</Td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </RecordTable>
+            )}
+          </div>
         )}
 
         {activeTab === 'files' && (
