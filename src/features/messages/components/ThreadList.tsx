@@ -12,8 +12,19 @@ export function ThreadList({ activeClientId, onSelect }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center p-4">
-        <p className="text-[12px] text-gray-400">Loading…</p>
+      <div className="flex flex-col">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="flex items-start gap-3 px-4 py-3 border-b border-gray-50">
+            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-2 pt-0.5">
+              <div className="flex justify-between gap-2">
+                <div className="h-3 bg-gray-200 animate-pulse rounded w-24" />
+                <div className="h-2.5 bg-gray-100 animate-pulse rounded w-8" />
+              </div>
+              <div className="h-2.5 bg-gray-100 animate-pulse rounded w-40" />
+            </div>
+          </div>
+        ))}
       </div>
     )
   }
@@ -43,17 +54,17 @@ export function ThreadList({ activeClientId, onSelect }: Props) {
             onClick={() => onSelect(t.client.id)}
             className={cn(
               'flex items-start gap-3 px-4 py-3 border-b border-gray-50 text-left transition-colors',
-              isActive ? 'bg-indigo-50' : 'bg-white hover:bg-gray-50',
+              isActive ? 'bg-[#F2F4F7]' : 'bg-white hover:bg-gray-50',
             )}
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-[11px] font-bold shrink-0 mt-0.5">
+            <div className="w-8 h-8 rounded-full bg-[#0D1117] flex items-center justify-center text-white text-[11px] font-bold shrink-0 mt-0.5">
               {t.client.name.slice(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-1">
                 <span className={cn(
                   'text-[12px] font-semibold truncate',
-                  isActive ? 'text-indigo-700' : 'text-gray-900',
+                  isActive ? 'text-[#101828]' : 'text-gray-900',
                 )}>
                   {t.client.name}
                 </span>
@@ -67,7 +78,7 @@ export function ThreadList({ activeClientId, onSelect }: Props) {
               </p>
             </div>
             {t.unreadCount > 0 && (
-              <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
+              <div className="w-2 h-2 rounded-full bg-[#0D1117] mt-1.5 shrink-0" />
             )}
           </button>
         )

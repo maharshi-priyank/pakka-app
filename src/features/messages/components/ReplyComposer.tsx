@@ -31,7 +31,7 @@ export function ReplyComposer({ onSend, isPending, placeholder = 'Reply…' }: P
     <div className="border-t border-gray-100 p-3 bg-gray-50/50">
       <div className={cn(
         'flex items-end gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2',
-        'focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-50 transition-all',
+        'focus-within:border-gray-400 focus-within:ring-2 focus-within:ring-gray-100 transition-all',
       )}>
         <textarea
           ref={ref}
@@ -45,7 +45,7 @@ export function ReplyComposer({ onSend, isPending, placeholder = 'Reply…' }: P
         <button
           onClick={() => void handleSend()}
           disabled={!text.trim() || isPending}
-          className="mb-0.5 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="mb-0.5 p-2 bg-[#0D1117] text-white rounded-lg hover:bg-[#1a1d2e] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
         >
           <Send size={13} />
         </button>

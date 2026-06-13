@@ -34,17 +34,17 @@ export function DocumentPickerModal({ clientId, onPick, onClose }: Props) {
 
   const proposals = useQuery<DocItem[]>({
     queryKey: ['picker', 'proposals', clientId],
-    queryFn:  () => api.get(`/proposals?clientId=${clientId}`).then(r => r.data.data),
+    queryFn:  () => api.get(`/proposals?clientId=${clientId}`).then(r => r.data.data.items),
     enabled:  tab === 'PROPOSAL',
   })
   const invoices = useQuery<DocItem[]>({
     queryKey: ['picker', 'invoices', clientId],
-    queryFn:  () => api.get(`/invoices?clientId=${clientId}`).then(r => r.data.data),
+    queryFn:  () => api.get(`/invoices?clientId=${clientId}`).then(r => r.data.data.items),
     enabled:  tab === 'INVOICE',
   })
   const contracts = useQuery<DocItem[]>({
     queryKey: ['picker', 'contracts', clientId],
-    queryFn:  () => api.get(`/contracts?clientId=${clientId}`).then(r => r.data.data),
+    queryFn:  () => api.get(`/contracts?clientId=${clientId}`).then(r => r.data.data.items),
     enabled:  tab === 'CONTRACT',
   })
 

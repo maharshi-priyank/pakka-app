@@ -23,7 +23,7 @@ export default function InboxPage() {
             <h1 className="text-[15px] font-bold text-gray-900">Inbox</h1>
             <button
               onClick={() => setShowCompose(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-600 text-white text-[12px] font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#0D1117] text-white text-[12px] font-semibold rounded-lg hover:bg-[#1a1d2e] transition-colors"
             >
               <Plus size={12} />
               New
@@ -41,7 +41,9 @@ export default function InboxPage() {
       {/* Right — thread view */}
       <div className="flex-1 flex flex-col min-w-0">
         {activeClientId ? (
-          <ThreadView clientId={activeClientId} />
+          <div key={activeClientId} className="flex-1 flex flex-col min-w-0 anim-thread-enter">
+            <ThreadView clientId={activeClientId} />
+          </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -27,12 +27,18 @@ export function ComposeModal({ initialClient, onClose }: Props) {
   const [subject,        setSubject]        = useState('')
   const [attachment,     setAttachment]     = useState<PickedDoc | null>(null)
   const [showPicker,     setShowPicker]     = useState(false)
-  const [clientSearch,   setClientSearch]   = useState(initialClient?.name ?? '')
+  const [clientSearch,    setClientSearch]    = useState(initialClient?.name ?? '')
+  const [debouncedSearch, setDebouncedSearch] = useState(initialClient?.name ?? '')
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(clientSearch), 400)
+    return () => clearTimeout(t)
+  }, [clientSearch])
 
   const { data: clientResults } = useQuery<Client[]>({
-    queryKey:  ['clients-search', clientSearch],
-    queryFn:   () => api.get(`/clients?search=${encodeURIComponent(clientSearch)}&limit=8`).then(r => r.data.data),
-    enabled:   clientSearch.length > 1 && !selectedClient,
+    queryKey:  ['clients-search', debouncedSearch],
+    queryFn:   () => api.get(`/clients?search=${encodeURIComponent(debouncedSearch)}&limit=8`).then(r => r.data.data.clients),
+    enabled:   debouncedSearch.length > 1 && !selectedClient,
     staleTime: 10_000,
   })
 
@@ -77,7 +83,7 @@ export function ComposeModal({ initialClient, onClose }: Props) {
   return (
     <>
       <div className={cn(
-        'fixed bottom-4 right-4 z-50 w-[480px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col',
+        'fixed bottom-4 right-4 z-50 w-[480px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col anim-compose-in',
         minimised ? 'h-12' : 'h-[540px]',
       )}>
         {/* Header */}
@@ -106,7 +112,7 @@ export function ComposeModal({ initialClient, onClose }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-[12px] text-gray-400 shrink-0">To:</span>
                 {selectedClient ? (
-                  <div className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-[12px] font-medium">
+                  <div className="flex items-center gap-1.5 bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-[12px] font-medium">
                     {selectedClient.name}
                     <button onClick={() => { setSelectedClient(null); setClientSearch('') }}>
                       <X size={10} />
@@ -192,7 +198,7 @@ export function ComposeModal({ initialClient, onClose }: Props) {
                   className={cn(
                     'p-1.5 rounded-lg transition-colors',
                     t.active
-                      ? 'bg-indigo-50 text-indigo-600'
+                      ? 'bg-gray-100 text-gray-900'
                       : 'text-gray-400 hover:bg-gray-100 hover:text-gray-700',
                   )}
                 >
@@ -202,7 +208,7 @@ export function ComposeModal({ initialClient, onClose }: Props) {
               <div className="w-px h-4 bg-gray-200 mx-1" />
               <button
                 onClick={() => setShowPicker(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
               >
                 <Paperclip size={12} />
                 Attach
@@ -210,7 +216,7 @@ export function ComposeModal({ initialClient, onClose }: Props) {
               <button
                 onClick={() => void handleSend()}
                 disabled={!selectedClient || sendMessage.isPending || !editor || editor.isEmpty}
-                className="ml-auto px-4 py-1.5 bg-indigo-600 text-white text-[12px] font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="ml-auto px-4 py-1.5 bg-[#0D1117] text-white text-[12px] font-semibold rounded-lg hover:bg-[#1a1d2e] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {sendMessage.isPending ? 'Sending…' : 'Send'}
               </button>

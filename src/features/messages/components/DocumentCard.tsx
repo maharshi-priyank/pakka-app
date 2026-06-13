@@ -20,9 +20,9 @@ const CONFIG: Record<AttachmentType, {
   label: string
   path: string
 }> = {
-  PROPOSAL: { icon: FileText, color: 'text-indigo-600',  bg: 'bg-indigo-50',  label: 'Proposal', path: '/app/proposals'  },
-  INVOICE:  { icon: Receipt,  color: 'text-emerald-600', bg: 'bg-emerald-50', label: 'Invoice',  path: '/app/invoices'   },
-  CONTRACT: { icon: PenLine,  color: 'text-amber-600',   bg: 'bg-amber-50',   label: 'Contract', path: '/app/contracts'  },
+  PROPOSAL: { icon: FileText, color: 'text-indigo-600',  bg: 'bg-indigo-50',  label: 'Proposal', path: '/proposals'  },
+  INVOICE:  { icon: Receipt,  color: 'text-emerald-600', bg: 'bg-emerald-50', label: 'Invoice',  path: '/invoices'   },
+  CONTRACT: { icon: PenLine,  color: 'text-amber-600',   bg: 'bg-amber-50',   label: 'Contract', path: '/contracts'  },
 }
 
 export function DocumentCard({ type, entityId, title, amount, status, isPortal = false }: Props) {

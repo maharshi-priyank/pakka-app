@@ -22,18 +22,11 @@ export function MessageBubble({ message, isPortal = false, clientName }: Props) 
         {isSent ? 'You' : (clientName ?? 'Client')} · {timeAgo}
       </span>
 
-      {message.attachmentType && message.attachmentId ? (
-        <DocumentCard
-          type={message.attachmentType}
-          entityId={message.attachmentId}
-          title="Attached document"
-          isPortal={isPortal}
-        />
-      ) : (
+      {message.body && message.body !== '<p></p>' && (
         <div className={cn(
           'max-w-[72%] px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed',
           isSent
-            ? 'bg-indigo-600 text-white rounded-br-md'
+            ? 'bg-[#0D1117] text-white rounded-br-md'
             : 'bg-gray-100 text-gray-900 rounded-bl-md',
         )}>
           <div
@@ -41,6 +34,15 @@ export function MessageBubble({ message, isPortal = false, clientName }: Props) 
             dangerouslySetInnerHTML={{ __html: message.body }}
           />
         </div>
+      )}
+
+      {message.attachmentType && message.attachmentId && (
+        <DocumentCard
+          type={message.attachmentType}
+          entityId={message.attachmentId}
+          title="Attached document"
+          isPortal={isPortal}
+        />
       )}
 
       {isSent && message.readAt && (

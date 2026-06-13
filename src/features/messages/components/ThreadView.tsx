@@ -26,8 +26,21 @@ export function ThreadView({ clientId }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-[13px] text-gray-400">Loading…</p>
+      <div className="flex flex-col h-full">
+        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 shrink-0">
+          <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3.5 bg-gray-200 animate-pulse rounded w-32" />
+            <div className="h-2.5 bg-gray-100 animate-pulse rounded w-48" />
+          </div>
+        </div>
+        <div className="flex-1 px-5 py-4 flex flex-col gap-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+              <div className={`h-10 bg-gray-${i % 2 === 0 ? '200' : '100'} animate-pulse rounded-2xl ${i % 2 === 0 ? 'w-48' : 'w-64'}`} />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -40,7 +53,7 @@ export function ThreadView({ clientId }: Props) {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 shrink-0">
-        <div className="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center text-white text-[13px] font-bold shrink-0">
+        <div className="w-9 h-9 rounded-full bg-[#0D1117] flex items-center justify-center text-white text-[13px] font-bold shrink-0">
           {client?.name?.slice(0, 2).toUpperCase() ?? '??'}
         </div>
         <div className="flex-1 min-w-0">
@@ -48,7 +61,7 @@ export function ThreadView({ clientId }: Props) {
           <p className="text-[11px] text-gray-400">{client?.email}</p>
         </div>
         <button
-          onClick={() => navigate(`/app/clients/${clientId}`)}
+          onClick={() => navigate(`/clients/${clientId}`)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[12px] font-medium text-gray-500 hover:bg-gray-50 transition-colors"
         >
           <ExternalLink size={11} />

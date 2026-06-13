@@ -42,7 +42,7 @@ export default function AppShell() {
         {/* ── Content area — NO topbar ───────────────────────────── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <main className="flex-1 overflow-y-auto p-4 lg:p-7 pb-[76px] lg:pb-7">
-            <div key={pathname} className="page-enter">
+            <div key={pathname} className="page-enter h-full">
               <Outlet />
             </div>
           </main>

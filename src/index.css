@@ -484,11 +484,23 @@
   to   { transform: translateY(0); }
 }
 
+@keyframes clinekt-thread-enter {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes clinekt-compose-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
 /* ─── Animation utility classes ─────────────────────────────────────────────*/
 
-.page-enter       { animation: clinekt-page-enter  0.22s cubic-bezier(0.16, 1, 0.3, 1); }
-.anim-fade        { animation: clinekt-fade         0.15s ease-out; }
-.anim-modal-in    { animation: clinekt-modal-in     0.28s cubic-bezier(0.16, 1, 0.3, 1); }
-.anim-slide-right { animation: clinekt-slide-right  0.3s  cubic-bezier(0.16, 1, 0.3, 1); }
-.anim-slide-left  { animation: clinekt-slide-left   0.3s  cubic-bezier(0.16, 1, 0.3, 1); }
-.anim-slide-up    { animation: clinekt-slide-up     0.32s cubic-bezier(0.16, 1, 0.3, 1); }
+.page-enter         { animation: clinekt-page-enter    0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-fade          { animation: clinekt-fade           0.18s ease-out; }
+.anim-modal-in      { animation: clinekt-modal-in       0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-slide-right   { animation: clinekt-slide-right    0.3s  cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-slide-left    { animation: clinekt-slide-left     0.3s  cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-slide-up      { animation: clinekt-slide-up       0.32s cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-thread-enter  { animation: clinekt-thread-enter   0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-compose-in    { animation: clinekt-compose-in     0.25s cubic-bezier(0.16, 1, 0.3, 1); }
