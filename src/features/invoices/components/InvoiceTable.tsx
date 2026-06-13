@@ -1,4 +1,4 @@
-import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, Trash2, Ban } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Invoice } from '../schemas/invoice.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/invoice.schema'
@@ -7,11 +7,13 @@ export type SortField = 'invoiceNumber' | 'total' | 'dueDate' | 'createdAt'
 export type SortDir   = 'asc' | 'desc'
 
 interface Props {
-  invoices: Invoice[]
-  sortBy:   SortField
-  sortDir:  SortDir
-  onSort:   (field: SortField) => void
-  onOpen:   (invoice: Invoice) => void
+  invoices:  Invoice[]
+  sortBy:    SortField
+  sortDir:   SortDir
+  onSort:    (field: SortField) => void
+  onOpen:    (invoice: Invoice) => void
+  onDelete?: (invoice: Invoice) => void
+  onVoid?:   (invoice: Invoice) => void
 }
 
 const AVATAR_COLORS = [
@@ -53,7 +55,7 @@ const COLS: Array<{ label: string; field?: SortField; right?: boolean; cls?: str
   { label: '',         cls: 'w-10' },
 ]
 
-export default function InvoiceTable({ invoices, sortBy, sortDir, onSort, onOpen }: Props) {
+export default function InvoiceTable({ invoices, sortBy, sortDir, onSort, onOpen, onDelete, onVoid }: Props) {
   return (
     <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] overflow-hidden bg-white dark:bg-[#13141A]">
       <div className="overflow-x-auto">
@@ -85,6 +87,8 @@ export default function InvoiceTable({ invoices, sortBy, sortDir, onSort, onOpen
               const clientName = inv.client?.name ?? 'No client'
               const isOverdue  = inv.status === 'OVERDUE'
               const isPaid     = inv.status === 'PAID'
+              const isDraft    = inv.status === 'DRAFT'
+              const isVoidable = inv.status === 'SENT' || inv.status === 'OVERDUE' || inv.status === 'PAID'
 
               return (
                 <tr
@@ -161,14 +165,32 @@ export default function InvoiceTable({ invoices, sortBy, sortDir, onSort, onOpen
                     <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">{formatDate(inv.createdAt)}</span>
                   </td>
 
-                  {/* Open button */}
+                  {/* Actions */}
                   <td className="px-4 py-3">
-                    <button
-                      onClick={e => { e.stopPropagation(); onOpen(inv) }}
-                      className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] hover:text-[#2563EB] transition-all"
-                    >
-                      <ArrowUpRight size={11} strokeWidth={2.5} />
-                    </button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      {onVoid && isVoidable && (
+                        <button
+                          onClick={e => { e.stopPropagation(); onVoid(inv) }}
+                          className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-orange-50 dark:hover:bg-orange-950/30 flex items-center justify-center text-[#98A2B3] hover:text-orange-500 transition-all"
+                        >
+                          <Ban size={11} strokeWidth={2.5} />
+                        </button>
+                      )}
+                      {onDelete && isDraft && (
+                        <button
+                          onClick={e => { e.stopPropagation(); onDelete(inv) }}
+                          className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center justify-center text-[#98A2B3] hover:text-red-500 transition-all"
+                        >
+                          <Trash2 size={11} strokeWidth={2.5} />
+                        </button>
+                      )}
+                      <button
+                        onClick={e => { e.stopPropagation(); onOpen(inv) }}
+                        className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] hover:text-[#2563EB] transition-all"
+                      >
+                        <ArrowUpRight size={11} strokeWidth={2.5} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )

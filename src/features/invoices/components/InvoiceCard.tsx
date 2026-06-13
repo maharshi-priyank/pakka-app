@@ -1,11 +1,13 @@
-import { ArrowUpRight, IndianRupee, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
+import { ArrowUpRight, IndianRupee, CheckCircle2, Clock, AlertCircle, Trash2, Ban } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Invoice } from '../schemas/invoice.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/invoice.schema'
 
 interface Props {
-  invoice: Invoice
-  onClick: (invoice: Invoice) => void
+  invoice:   Invoice
+  onClick:   (invoice: Invoice) => void
+  onDelete?: (invoice: Invoice) => void
+  onVoid?:   (invoice: Invoice) => void
 }
 
 const AVATAR_COLORS = [
@@ -30,10 +32,12 @@ function fmt(v: number) {
   return v.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 }
 
-export default function InvoiceCard({ invoice, onClick }: Props) {
+export default function InvoiceCard({ invoice, onClick, onDelete, onVoid }: Props) {
   const clientName = invoice.client?.name ?? 'No client'
   const isOverdue  = invoice.status === 'OVERDUE'
   const isPaid     = invoice.status === 'PAID'
+  const isDraft    = invoice.status === 'DRAFT'
+  const isVoidable = invoice.status === 'SENT' || invoice.status === 'OVERDUE' || invoice.status === 'PAID'
 
   return (
     <div
@@ -63,10 +67,26 @@ export default function InvoiceCard({ invoice, onClick }: Props) {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0 group">
           <span className={cn(STATUS_BADGE_CLASS[invoice.status], 'text-[10px] px-1.5 py-0.5')}>
             {STATUS_LABELS[invoice.status]}
           </span>
+          {onVoid && isVoidable && (
+            <button
+              onClick={e => { e.stopPropagation(); onVoid(invoice) }}
+              className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 flex items-center justify-center text-[#98A2B3] hover:bg-orange-50 hover:text-orange-500 transition-all"
+            >
+              <Ban size={11} strokeWidth={2.5} />
+            </button>
+          )}
+          {onDelete && isDraft && (
+            <button
+              onClick={e => { e.stopPropagation(); onDelete(invoice) }}
+              className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 flex items-center justify-center text-[#98A2B3] hover:bg-red-50 hover:text-red-500 transition-all"
+            >
+              <Trash2 size={11} strokeWidth={2.5} />
+            </button>
+          )}
           <button
             onClick={e => { e.stopPropagation(); onClick(invoice) }}
             className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:text-[#2563EB] transition-colors"

@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
-import { useInvoice } from '@/features/invoices/hooks/useInvoices'
+import { ArrowLeft, Trash2, Ban } from 'lucide-react'
+import { useInvoice, useDeleteInvoice, useVoidInvoice } from '@/features/invoices/hooks/useInvoices'
 import InvoiceEditor from '@/features/invoices/components/InvoiceEditor'
 import type { Invoice } from '@/features/invoices/schemas/invoice.schema'
 import { useProject } from '@/features/projects/hooks/useProjects'
+import { ConfirmModal } from '@/components/ConfirmModal'
 
 export default function InvoiceEditorPage() {
   const { id } = useParams<{ id: string }>()
@@ -11,14 +13,22 @@ export default function InvoiceEditorPage() {
   const [searchParams] = useSearchParams()
   const isNew = !id || id === 'new'
 
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [voidOpen,   setVoidOpen]   = useState(false)
+
   const urlProjectId = searchParams.get('projectId') || undefined
   const urlClientId  = searchParams.get('clientId')  || undefined
   const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: invoice, isLoading } = useInvoice(isNew ? null : id ?? null)
+  const deleteMut = useDeleteInvoice()
+  const voidMut   = useVoidInvoice()
 
   const effectiveProjectId   = urlProjectId ?? invoice?.projectId ?? undefined
   const effectiveProjectName = projectFromUrl?.name ?? invoice?.project?.name ?? null
+
+  const isDraft    = invoice?.status === 'DRAFT'
+  const isVoidable = invoice?.status === 'SENT' || invoice?.status === 'OVERDUE' || invoice?.status === 'PAID'
 
   function handleSaved(inv: Invoice) {
     navigate(`/invoices/${inv.id}`, { replace: true })
@@ -68,6 +78,24 @@ export default function InvoiceEditorPage() {
             }`}>
               {invoice.status}
             </span>
+            {isVoidable && (
+              <button
+                onClick={() => setVoidOpen(true)}
+                title="Void invoice"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:text-orange-500 transition-colors"
+              >
+                <Ban size={14} strokeWidth={2} />
+              </button>
+            )}
+            {isDraft && (
+              <button
+                onClick={() => setDeleteOpen(true)}
+                title="Delete invoice"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-colors"
+              >
+                <Trash2 size={14} strokeWidth={2} />
+              </button>
+            )}
           </>
         )}
       </div>
@@ -82,6 +110,40 @@ export default function InvoiceEditorPage() {
           onDiscard={() => effectiveProjectId ? navigate(`/projects/${effectiveProjectId}`) : navigate('/invoices')}
         />
       </div>
+
+      {invoice && (
+        <>
+          <ConfirmModal
+            open={deleteOpen}
+            onClose={() => setDeleteOpen(false)}
+            onConfirm={() => {
+              deleteMut.mutate(invoice.id, {
+                onSuccess: () => navigate(effectiveProjectId ? `/projects/${effectiveProjectId}` : '/invoices'),
+              })
+            }}
+            title={`Delete invoice ${invoice.invoiceNumber}?`}
+            description="This draft invoice will be permanently deleted. This cannot be undone."
+            confirmLabel="Delete Invoice"
+            variant="delete"
+            isLoading={deleteMut.isPending}
+          />
+
+          <ConfirmModal
+            open={voidOpen}
+            onClose={() => setVoidOpen(false)}
+            onConfirm={() => {
+              voidMut.mutate(invoice.id, {
+                onSuccess: () => setVoidOpen(false),
+              })
+            }}
+            title={`Void invoice ${invoice.invoiceNumber}?`}
+            description="This will mark the invoice as CANCELLED. The client payment link will no longer work."
+            confirmLabel="Void Invoice"
+            variant="void"
+            isLoading={voidMut.isPending}
+          />
+        </>
+      )}
     </div>
   )
 }

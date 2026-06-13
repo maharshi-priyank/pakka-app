@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, FileText, Search, X, LayoutGrid, List } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useInvoices } from '@/features/invoices/hooks/useInvoices'
+import { useInvoices, useDeleteInvoice, useVoidInvoice } from '@/features/invoices/hooks/useInvoices'
 import InvoiceCard, { InvoiceCardSkeleton } from '@/features/invoices/components/InvoiceCard'
 import InvoiceTable, { InvoiceTableSkeleton } from '@/features/invoices/components/InvoiceTable'
 import type { SortField, SortDir } from '@/features/invoices/components/InvoiceTable'
@@ -11,6 +11,7 @@ import { STATUS_LABELS } from '@/features/invoices/schemas/invoice.schema'
 import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
 import DateRangePill from '@/components/filters/DateRangePill'
 import AmountRangePill from '@/components/filters/AmountRangePill'
+import { ConfirmModal } from '@/components/ConfirmModal'
 
 const STATUS_TABS: Array<{ value: InvoiceStatus | 'ALL'; label: string }> = [
   { value: 'ALL',     label: 'All' },
@@ -39,14 +40,18 @@ function getStoredView(): ViewMode {
 export default function InvoicesPage() {
   const navigate = useNavigate()
 
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'ALL'>('ALL')
-  const [search,       setSearch]       = useState('')
-  const [view,         setView]         = useState<ViewMode>(getStoredView)
-  const [sortBy,       setSortBy]       = useState<SortField>('createdAt')
-  const [sortDir,      setSortDir]      = useState<SortDir>('desc')
-  const [filters,      setFilters]      = useState<InvoiceFilters>(EMPTY_FILTERS)
+  const [statusFilter,  setStatusFilter]  = useState<InvoiceStatus | 'ALL'>('ALL')
+  const [search,        setSearch]        = useState('')
+  const [view,          setView]          = useState<ViewMode>(getStoredView)
+  const [sortBy,        setSortBy]        = useState<SortField>('createdAt')
+  const [sortDir,       setSortDir]       = useState<SortDir>('desc')
+  const [filters,       setFilters]       = useState<InvoiceFilters>(EMPTY_FILTERS)
+  const [deleteTarget,  setDeleteTarget]  = useState<Invoice | null>(null)
+  const [voidTarget,    setVoidTarget]    = useState<Invoice | null>(null)
 
   const searchRef = useRef<HTMLInputElement>(null)
+  const deleteMut = useDeleteInvoice()
+  const voidMut   = useVoidInvoice()
 
   const { data, isLoading } = useInvoices({ limit: 500 })
   const allInvoices  = data?.items ?? []
@@ -258,13 +263,52 @@ export default function InvoicesPage() {
           sortDir={sortDir}
           onSort={handleSort}
           onOpen={(inv: Invoice) => navigate(`/invoices/${inv.id}`)}
+          onDelete={inv => setDeleteTarget(inv)}
+          onVoid={inv => setVoidTarget(inv)}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {displayed.map(inv => (
-            <InvoiceCard key={inv.id} invoice={inv} onClick={(i: Invoice) => navigate(`/invoices/${i.id}`)} />
+            <InvoiceCard
+              key={inv.id}
+              invoice={inv}
+              onClick={(i: Invoice) => navigate(`/invoices/${i.id}`)}
+              onDelete={i => setDeleteTarget(i)}
+              onVoid={i => setVoidTarget(i)}
+            />
           ))}
         </div>
+      )}
+      {deleteTarget && (
+        <ConfirmModal
+          open={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            deleteMut.mutate(deleteTarget.id)
+            setDeleteTarget(null)
+          }}
+          title={`Delete invoice ${deleteTarget.invoiceNumber}?`}
+          description="This draft invoice will be permanently deleted. This cannot be undone."
+          confirmLabel="Delete Invoice"
+          variant="delete"
+          isLoading={deleteMut.isPending}
+        />
+      )}
+
+      {voidTarget && (
+        <ConfirmModal
+          open={!!voidTarget}
+          onClose={() => setVoidTarget(null)}
+          onConfirm={() => {
+            voidMut.mutate(voidTarget.id)
+            setVoidTarget(null)
+          }}
+          title={`Void invoice ${voidTarget.invoiceNumber}?`}
+          description="This will mark the invoice as CANCELLED. The client payment link will no longer work."
+          confirmLabel="Void Invoice"
+          variant="void"
+          isLoading={voidMut.isPending}
+        />
       )}
     </div>
   )
