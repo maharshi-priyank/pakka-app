@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   FileText, FileSignature, Receipt, AlertTriangle, Video, CalendarDays,
   ExternalLink, FolderKanban, Clock, IndianRupee, Shield, AlertCircle,
-  Paperclip, FileArchive, FileImage, Download, Lock,
+  Paperclip, FileArchive, FileImage, Download, Lock, MessageSquare,
   File as FileIconLucide,
 } from 'lucide-react'
+import { usePortalThread, useSendPortalReply, useMarkPortalRead } from '@/features/messages/hooks/useMessages'
+import { MessageBubble } from '@/features/messages/components/MessageBubble'
+import { ReplyComposer } from '@/features/messages/components/ReplyComposer'
 import { cn } from '@/lib/utils'
 import {
   usePortalData,
@@ -20,7 +23,7 @@ import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
 
 const APP_URL = (import.meta.env.VITE_APP_URL as string | undefined) || window.location.origin
 
-type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings' | 'projects' | 'files'
+type Tab = 'overview' | 'proposals' | 'contracts' | 'invoices' | 'meetings' | 'projects' | 'files' | 'messages'
 
 function fmt(v: string | number) {
   return Number(v).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
@@ -37,6 +40,7 @@ const NAV_ICONS: Partial<Record<Tab, React.ComponentType<{ size?: number; classN
   meetings:  Video,
   projects:  FolderKanban,
   files:     Paperclip,
+  messages:  MessageSquare,
 }
 
 export default function ClientPortalPage() {
@@ -88,9 +92,10 @@ export default function ClientPortalPage() {
     { key: 'meetings',  label: 'Meetings',  count: upcomingMeetings.length },
     { key: 'projects',  label: 'Projects',  count: activeProjects.length },
     { key: 'files',     label: 'Files',     count: portalFiles.length },
+    { key: 'messages',  label: 'Messages',  count: 1 },
   ]
 
-  const visibleTabs = TABS.filter(t => t.key === 'overview' || t.count > 0)
+  const visibleTabs = TABS.filter(t => t.key === 'overview' || t.key === 'messages' || t.count > 0)
 
   const attentionItems: { label: string; tab: Tab; urgent?: boolean }[] = data ? [
     ...activeInvoices
@@ -386,6 +391,10 @@ export default function ClientPortalPage() {
                 </div>
               )}
 
+              {tab === 'messages' && token && (
+                <PortalMessagesPanel token={token} />
+              )}
+
               {tab === 'files' && (
                 <div className="space-y-3">
                   {portalFiles.length === 0 ? (
@@ -430,6 +439,52 @@ export default function ClientPortalPage() {
           )}
         </main>
       </div>
+    </div>
+  )
+}
+
+// ─── Portal Messages Panel ─────────────────────────────────────────────────────
+
+function PortalMessagesPanel({ token }: { token: string }) {
+  const { data, isLoading } = usePortalThread(token)
+  const sendReply = useSendPortalReply(token)
+  const markRead  = useMarkPortalRead(token)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => { markRead.mutate() }, [token]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [data?.messages.length])
+
+  if (isLoading) {
+    return <div className="py-8 text-center text-sm text-[#98A2B3]">Loading messages…</div>
+  }
+
+  const messages      = data?.messages ?? []
+  const businessName  = data?.businessName ?? 'Your service provider'
+
+  return (
+    <div className="bg-white rounded-xl border border-[#EAECF0] overflow-hidden">
+      <div className="px-4 py-3 border-b border-[#EAECF0]">
+        <h3 className="text-[13px] font-semibold text-[#344054]">Messages from {businessName}</h3>
+      </div>
+      <div className="px-4 py-4 flex flex-col gap-3 min-h-[160px]">
+        {messages.length === 0 && (
+          <p className="text-center text-[13px] text-[#98A2B3] py-6">
+            No messages yet from {businessName}.
+          </p>
+        )}
+        {messages.map(msg => (
+          <MessageBubble key={msg.id} message={msg} isPortal clientName={businessName} />
+        ))}
+        <div ref={bottomRef} />
+      </div>
+      <ReplyComposer
+        isPending={sendReply.isPending}
+        placeholder={`Message ${businessName}…`}
+        onSend={async body => { await sendReply.mutateAsync(body) }}
+      />
     </div>
   )
 }
