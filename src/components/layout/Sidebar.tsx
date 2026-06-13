@@ -3,8 +3,9 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
   Receipt, Building2, Settings, CalendarDays, ClipboardList, Zap, BarChart3, FolderKanban, Mail,
-  LogOut, CheckSquare,
+  LogOut, CheckSquare, MessageSquare,
 } from 'lucide-react'
+import { useMessageUnreadCount } from '@/features/messages/hooks/useMessages'
 // Customise sidebar imports — disabled until feature is ready
 // import { X } from 'lucide-react'
 // import {
@@ -27,6 +28,7 @@ const ALL_NAV_ITEMS = [
   { id: 'clients',     icon: Building2,       label: 'Clients',      href: '/clients',     tourId: 'tour-clients' },
   { id: 'projects',    icon: FolderKanban,    label: 'Projects',     href: '/projects',    tourId: undefined },
   { id: 'tasks',       icon: CheckSquare,     label: 'Tasks',        href: '/tasks',       tourId: undefined },
+  { id: 'inbox',       icon: MessageSquare,   label: 'Inbox',        href: '/inbox',       tourId: undefined },
   { id: 'proposals',   icon: FileText,        label: 'Proposals',    href: '/proposals',   tourId: 'tour-proposals' },
   { id: 'contracts',   icon: PenLine,         label: 'Contracts',    href: '/contracts',   tourId: 'tour-contracts' },
   { id: 'invoices',    icon: Receipt,         label: 'Invoices',     href: '/invoices',    tourId: 'tour-invoices' },
@@ -38,7 +40,7 @@ const ALL_NAV_ITEMS = [
 
 // Section groups — defines labels and order for the nav
 const SECTIONS = [
-  { label: null,           ids: ['dashboard', 'leads', 'clients', 'projects', 'tasks'] },
+  { label: null,           ids: ['dashboard', 'leads', 'clients', 'projects', 'tasks', 'inbox'] },
   { label: 'TOOLS',        ids: ['proposals', 'contracts', 'invoices', 'reports'] },
   { label: 'PRODUCTIVITY', ids: ['calendar', 'forms', 'automations'] },
 ]
@@ -93,6 +95,7 @@ export default function Sidebar({ onClose }: Props) {
   // const [customizing, setCustomizing] = useState(false) // disabled — Customise feature not ready
 
   const { user } = useAuthStore()
+  const { data: inboxUnread = 0 } = useMessageUnreadCount()
   const name = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
   const initials = generateInitials(name)
   const firstName = name.split(' ')[0]
@@ -144,7 +147,7 @@ export default function Sidebar({ onClose }: Props) {
                 </p>
               )}
               <nav className="space-y-0.5">
-                {sectionItems.map(({ icon: Icon, label, href, tourId }) => (
+                {sectionItems.map(({ id, icon: Icon, label, href, tourId }) => (
                   <NavLink
                     key={href}
                     to={href}
@@ -167,6 +170,11 @@ export default function Sidebar({ onClose }: Props) {
                           className={cn('shrink-0 transition-colors', isActive ? 'text-gray-900' : 'text-gray-400')}
                         />
                         <span>{label}</span>
+                        {id === 'inbox' && inboxUnread > 0 && (
+                          <span className="ml-auto text-[10px] font-bold bg-indigo-600 text-white rounded-full px-1.5 py-0.5 leading-none">
+                            {inboxUnread > 9 ? '9+' : inboxUnread}
+                          </span>
+                        )}
                       </>
                     )}
                   </NavLink>
