@@ -12,9 +12,10 @@ import type {
 } from '../schemas/proposal.schema'
 
 interface ProposalsParams {
-  page?:   number
-  limit?:  number
-  status?: ProposalStatus
+  page?:            number
+  limit?:           number
+  status?:          ProposalStatus
+  includeArchived?: boolean
 }
 
 async function fetchProposals(params: ProposalsParams = {}): Promise<ProposalListResponse> {

@@ -132,6 +132,7 @@ export interface Proposal {
   acceptedAt:       string | null
   opens:       ProposalOpen[]
   contracts?:  ProposalContract[]
+  archivedAt:  string | null
   createdAt:   string
   _count?:     { opens: number }
 }

@@ -83,6 +83,7 @@ export interface Contract {
   content:    ContractContent
   signedAt:   string | null
   auditLog:   Record<string, unknown> | null
+  archivedAt: string | null
   createdAt:  string
 }
 

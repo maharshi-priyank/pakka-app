@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List, FileUp, ChevronDown } from 'lucide-react'
+import { Plus, FileText, IndianRupee, LayoutTemplate, Search, X, LayoutGrid, List, FileUp, ChevronDown, Archive } from 'lucide-react'
 import AIIcon from '@/features/ai/components/AIIcon'
 import AIProposalModal from '@/features/ai/components/AIProposalModal'
 import { cn } from '@/lib/utils'
-import { useProposals } from '@/features/proposals/hooks/useProposals'
+import { useProposals, useArchiveProposal, useUnarchiveProposal, useDeleteProposal } from '@/features/proposals/hooks/useProposals'
 import { useCreateContractFromProposal } from '@/features/contracts/hooks/useContracts'
 import ProposalCard, { ProposalCardSkeleton } from '@/features/proposals/components/ProposalCard'
 import ProposalTable, { ProposalTableSkeleton } from '@/features/proposals/components/ProposalTable'
@@ -20,6 +20,8 @@ import type { Proposal } from '@/features/proposals/schemas/proposal.schema'
 import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
 import DateRangePill from '@/components/filters/DateRangePill'
 import AmountRangePill from '@/components/filters/AmountRangePill'
+import { RemoveModal } from '@/components/RemoveModal'
+import { toast } from 'sonner'
 
 type ActiveTab = ProposalStatus | 'ALL' | 'TEMPLATES'
 
@@ -64,12 +66,17 @@ export default function ProposalsPage() {
   const [sortBy,             setSortBy]             = useState<SortField>('createdAt')
   const [sortDir,            setSortDir]            = useState<SortDir>('desc')
   const [filters,            setFilters]            = useState<ProposalFilters>(EMPTY_FILTERS)
+  const [includeArchived,    setIncludeArchived]    = useState(false)
+  const [removeTarget,       setRemoveTarget]       = useState<Proposal | null>(null)
 
   const searchRef     = useRef<HTMLInputElement>(null)
   const convertMutation = useCreateContractFromProposal()
+  const archiveMut    = useArchiveProposal()
+  const unarchiveMut  = useUnarchiveProposal()
+  const deleteMut     = useDeleteProposal()
   const statusFilter  = activeTab === 'TEMPLATES' ? 'ALL' : activeTab as ProposalStatus | 'ALL'
 
-  const { data, isLoading } = useProposals({ limit: 500 })
+  const { data, isLoading } = useProposals({ limit: 500, includeArchived: includeArchived || undefined })
   const allProposals  = data?.items ?? []
   const totalValue    = allProposals.reduce((sum, p) => sum + Number(p.totalAmount), 0)
   const acceptedCount = allProposals.filter(p => p.status === 'ACCEPTED').length
@@ -328,6 +335,18 @@ export default function ProposalsPage() {
             </span>
           )}
           <div className="flex-1" />
+          <button
+            onClick={() => setIncludeArchived(v => !v)}
+            className={cn(
+              'flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[12px] font-medium transition-colors',
+              includeArchived
+                ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
+                : 'border-[#E4E7EC] dark:border-[#26283A] text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D]',
+            )}
+          >
+            <Archive size={12} strokeWidth={2} />
+            {includeArchived ? 'Hide archived' : 'Show archived'}
+          </button>
           <div className="flex items-center gap-0.5 p-0.5 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg border border-[#E4E7EC] dark:border-[#26283A]">
             <button onClick={() => setView('table')} title="Table view" className={cn('w-7 h-7 rounded-md flex items-center justify-center transition-colors', view === 'table' ? 'bg-white dark:bg-[#13141A] text-[#2563EB] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]')}>
               <List size={13} strokeWidth={2} />
@@ -376,6 +395,7 @@ export default function ProposalsPage() {
             sortDir={sortDir}
             onSort={handleSort}
             onOpen={p => navigate(`/proposals/${p.id}`)}
+            onRemove={p => setRemoveTarget(p)}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -386,6 +406,7 @@ export default function ProposalsPage() {
                 onClick={openP => navigate(`/proposals/${openP.id}`)}
                 onConvertToContract={handleConvertToContract}
                 onSaveAsTemplate={p => setSaveTemplateFor(p)}
+                onRemove={p => setRemoveTarget(p)}
               />
             ))}
           </div>
@@ -402,6 +423,35 @@ export default function ProposalsPage() {
           onClose={() => setSaveTemplateFor(null)}
           proposalId={saveTemplateFor.id}
           defaultName={saveTemplateFor.title}
+        />
+      )}
+
+      {removeTarget && (
+        <RemoveModal
+          open={!!removeTarget}
+          onClose={() => setRemoveTarget(null)}
+          onArchive={() => {
+            if (removeTarget.archivedAt) {
+              unarchiveMut.mutate(removeTarget.id, { onSuccess: () => toast.success('Proposal unarchived') })
+            } else {
+              archiveMut.mutate(removeTarget.id, { onSuccess: () => toast.success('Proposal archived') })
+            }
+            setRemoveTarget(null)
+          }}
+          onDelete={() => {
+            deleteMut.mutate(removeTarget.id)
+            setRemoveTarget(null)
+          }}
+          entityLabel={removeTarget.title}
+          entityType="proposal"
+          hasLinkedRecords={(removeTarget.contracts?.length ?? 0) > 0}
+          linkedRecordsSummary={
+            (removeTarget.contracts?.length ?? 0) > 0
+              ? `${removeTarget.contracts!.length} contract${removeTarget.contracts!.length > 1 ? 's' : ''}`
+              : undefined
+          }
+          isArchiving={archiveMut.isPending || unarchiveMut.isPending}
+          isDeleting={deleteMut.isPending}
         />
       )}
     </div>

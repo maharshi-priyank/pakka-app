@@ -1,4 +1,4 @@
-import { ArrowUpRight, FileSignature, IndianRupee, CheckCircle2, Clock } from 'lucide-react'
+import { ArrowUpRight, FileSignature, IndianRupee, CheckCircle2, Clock, Archive, Ban } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Contract } from '../schemas/contract.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/contract.schema'
@@ -6,6 +6,8 @@ import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/contract.schema'
 interface Props {
   contract: Contract
   onClick:  (contract: Contract) => void
+  onRemove?: (contract: Contract) => void
+  onVoid?:   (contract: Contract) => void
 }
 
 const AVATAR_COLORS = [
@@ -26,7 +28,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export default function ContractCard({ contract, onClick }: Props) {
+export default function ContractCard({ contract, onClick, onRemove, onVoid }: Props) {
   const clientName = contract.client?.name ?? 'No client'
   const c = contract.content as Record<string, unknown>
   const totalAmount = c.totalAmount as number | undefined
@@ -34,7 +36,10 @@ export default function ContractCard({ contract, onClick }: Props) {
   return (
     <div
       onClick={() => onClick(contract)}
-      className="bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm cursor-pointer hover:shadow-md hover:border-[#D0D5DD] dark:hover:border-[#333649] transition-all duration-150"
+      className={cn(
+        'bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm cursor-pointer hover:shadow-md hover:border-[#D0D5DD] dark:hover:border-[#333649] transition-all duration-150',
+        contract.archivedAt && 'opacity-60',
+      )}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 px-3.5 pt-3.5 pb-3">
@@ -57,10 +62,31 @@ export default function ContractCard({ contract, onClick }: Props) {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0 group">
+          {contract.archivedAt && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+              Archived
+            </span>
+          )}
           <span className={cn(STATUS_BADGE_CLASS[contract.status], 'text-[10px] px-1.5 py-0.5')}>
             {STATUS_LABELS[contract.status]}
           </span>
+          {onVoid && (contract.status === 'SENT' || contract.status === 'SIGNED') && (
+            <button
+              onClick={e => { e.stopPropagation(); onVoid(contract) }}
+              className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:text-orange-500 transition-all"
+            >
+              <Ban size={11} strokeWidth={2.5} />
+            </button>
+          )}
+          {onRemove && (
+            <button
+              onClick={e => { e.stopPropagation(); onRemove(contract) }}
+              className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-all"
+            >
+              <Archive size={11} strokeWidth={2.5} />
+            </button>
+          )}
           <button
             onClick={e => { e.stopPropagation(); onClick(contract) }}
             className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:text-[#2563EB] transition-colors"

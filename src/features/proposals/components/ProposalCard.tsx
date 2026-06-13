@@ -1,4 +1,4 @@
-import { ArrowUpRight, IndianRupee, CalendarDays, Eye, FileSignature, LayoutTemplate } from 'lucide-react'
+import { ArrowUpRight, IndianRupee, CalendarDays, Eye, FileSignature, LayoutTemplate, Archive } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Proposal } from '../schemas/proposal.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/proposal.schema'
@@ -8,6 +8,7 @@ interface Props {
   onClick:              (proposal: Proposal) => void
   onConvertToContract?: (proposal: Proposal) => void
   onSaveAsTemplate?:    (proposal: Proposal) => void
+  onRemove?:            (proposal: Proposal) => void
 }
 
 const AVATAR_COLORS = [
@@ -33,7 +34,7 @@ function isExpiringSoon(iso: string) {
   return daysLeft >= 0 && daysLeft <= 7
 }
 
-export default function ProposalCard({ proposal, onClick, onConvertToContract, onSaveAsTemplate }: Props) {
+export default function ProposalCard({ proposal, onClick, onConvertToContract, onSaveAsTemplate, onRemove }: Props) {
   const clientName = proposal.client?.name ?? proposal.lead?.name ?? 'No client'
   const openCount  = proposal._count?.opens ?? proposal.opens?.length ?? 0
   const expiring   = proposal.validUntil && isExpiringSoon(proposal.validUntil)
@@ -43,7 +44,10 @@ export default function ProposalCard({ proposal, onClick, onConvertToContract, o
   return (
     <div
       onClick={() => onClick(proposal)}
-      className="group bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm cursor-pointer hover:shadow-md hover:border-[#C8D0DC] dark:hover:border-[#333649] transition-all duration-150 flex flex-col"
+      className={cn(
+        'group bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm cursor-pointer hover:shadow-md hover:border-[#C8D0DC] dark:hover:border-[#333649] transition-all duration-150 flex flex-col',
+        proposal.archivedAt && 'opacity-60',
+      )}
     >
       {/* ── Header ── */}
       <div className="flex items-start gap-3 px-4 pt-4 pb-3.5">
@@ -65,9 +69,22 @@ export default function ProposalCard({ proposal, onClick, onConvertToContract, o
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
+          {proposal.archivedAt && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+              Archived
+            </span>
+          )}
           <span className={cn(STATUS_BADGE_CLASS[proposal.status], 'text-[10px] font-semibold px-1.5 py-0.5 rounded-full')}>
             {STATUS_LABELS[proposal.status]}
           </span>
+          {onRemove && (
+            <button
+              onClick={e => { e.stopPropagation(); onRemove(proposal) }}
+              className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-all"
+            >
+              <Archive size={11} strokeWidth={2.5} />
+            </button>
+          )}
           <button
             onClick={e => { e.stopPropagation(); onClick(proposal) }}
             className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] hover:text-[#2563EB] transition-all"

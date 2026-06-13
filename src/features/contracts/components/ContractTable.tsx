@@ -1,4 +1,4 @@
-import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, CheckCircle2 } from 'lucide-react'
+import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, CheckCircle2, Archive, Ban } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Contract } from '../schemas/contract.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/contract.schema'
@@ -12,6 +12,8 @@ interface Props {
   sortDir:   SortDir
   onSort:    (field: SortField) => void
   onOpen:    (contract: Contract) => void
+  onRemove?: (contract: Contract) => void
+  onVoid?:   (contract: Contract) => void
 }
 
 const AVATAR_COLORS = [
@@ -53,7 +55,7 @@ const COLS: Array<{ label: string; field?: SortField; right?: boolean; cls?: str
   { label: '',          cls: 'w-10' },
 ]
 
-export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOpen }: Props) {
+export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOpen, onRemove, onVoid }: Props) {
   return (
     <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] overflow-hidden bg-white dark:bg-[#13141A]">
       <div className="overflow-x-auto">
@@ -113,9 +115,16 @@ export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOp
 
                   {/* Status */}
                   <td className="px-4 py-3">
-                    <span className={cn(STATUS_BADGE_CLASS[c.status], 'text-[10.5px] whitespace-nowrap')}>
-                      {STATUS_LABELS[c.status]}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={cn(STATUS_BADGE_CLASS[c.status], 'text-[10.5px] whitespace-nowrap')}>
+                        {STATUS_LABELS[c.status]}
+                      </span>
+                      {c.archivedAt && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100 whitespace-nowrap">
+                          Archived
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Value */}
@@ -157,14 +166,32 @@ export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOp
                     <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">{formatDate(c.createdAt)}</span>
                   </td>
 
-                  {/* Open button */}
+                  {/* Actions */}
                   <td className="px-4 py-3">
-                    <button
-                      onClick={e => { e.stopPropagation(); onOpen(c) }}
-                      className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] hover:text-[#2563EB] transition-all"
-                    >
-                      <ArrowUpRight size={11} strokeWidth={2.5} />
-                    </button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      {onVoid && (c.status === 'SENT' || c.status === 'SIGNED') && (
+                        <button
+                          onClick={e => { e.stopPropagation(); onVoid(c) }}
+                          className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-orange-50 dark:hover:bg-orange-950/30 flex items-center justify-center text-[#98A2B3] hover:text-orange-500 transition-all"
+                        >
+                          <Ban size={11} strokeWidth={2.5} />
+                        </button>
+                      )}
+                      {onRemove && (
+                        <button
+                          onClick={e => { e.stopPropagation(); onRemove(c) }}
+                          className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center justify-center text-[#98A2B3] hover:text-red-500 transition-all"
+                        >
+                          <Archive size={11} strokeWidth={2.5} />
+                        </button>
+                      )}
+                      <button
+                        onClick={e => { e.stopPropagation(); onOpen(c) }}
+                        className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] hover:text-[#2563EB] transition-all"
+                      >
+                        <ArrowUpRight size={11} strokeWidth={2.5} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )

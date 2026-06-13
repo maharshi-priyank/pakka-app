@@ -1,4 +1,4 @@
-import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
+import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, Archive } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Proposal } from '../schemas/proposal.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/proposal.schema'
@@ -12,6 +12,7 @@ interface Props {
   sortDir:   SortDir
   onSort:    (field: SortField) => void
   onOpen:    (proposal: Proposal) => void
+  onRemove?: (proposal: Proposal) => void
 }
 
 const AVATAR_COLORS = [
@@ -53,7 +54,7 @@ const COLS: Array<{ label: string; field?: SortField; right?: boolean; cls?: str
   { label: '',            cls: 'w-10' },
 ]
 
-export default function ProposalTable({ proposals, sortBy, sortDir, onSort, onOpen }: Props) {
+export default function ProposalTable({ proposals, sortBy, sortDir, onSort, onOpen, onRemove }: Props) {
   return (
     <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] overflow-hidden bg-white dark:bg-[#13141A]">
       <div className="overflow-x-auto">
@@ -113,9 +114,16 @@ export default function ProposalTable({ proposals, sortBy, sortDir, onSort, onOp
 
                   {/* Status */}
                   <td className="px-4 py-3">
-                    <span className={cn(STATUS_BADGE_CLASS[p.status], 'text-[10.5px] whitespace-nowrap')}>
-                      {STATUS_LABELS[p.status]}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={cn(STATUS_BADGE_CLASS[p.status], 'text-[10.5px] whitespace-nowrap')}>
+                        {STATUS_LABELS[p.status]}
+                      </span>
+                      {p.archivedAt && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100 whitespace-nowrap">
+                          Archived
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* Total */}
@@ -155,14 +163,24 @@ export default function ProposalTable({ proposals, sortBy, sortDir, onSort, onOp
                     <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">{formatDate(p.createdAt)}</span>
                   </td>
 
-                  {/* Open button */}
+                  {/* Actions */}
                   <td className="px-4 py-3">
-                    <button
-                      onClick={e => { e.stopPropagation(); onOpen(p) }}
-                      className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] hover:text-[#2563EB] transition-all"
-                    >
-                      <ArrowUpRight size={11} strokeWidth={2.5} />
-                    </button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      {onRemove && (
+                        <button
+                          onClick={e => { e.stopPropagation(); onRemove(p) }}
+                          className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center justify-center text-[#98A2B3] hover:text-red-500 transition-all"
+                        >
+                          <Archive size={11} strokeWidth={2.5} />
+                        </button>
+                      )}
+                      <button
+                        onClick={e => { e.stopPropagation(); onOpen(p) }}
+                        className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EFF6FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] hover:text-[#2563EB] transition-all"
+                      >
+                        <ArrowUpRight size={11} strokeWidth={2.5} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )

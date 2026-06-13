@@ -12,9 +12,10 @@ import type {
 } from '../schemas/contract.schema'
 
 interface ContractsParams {
-  page?:   number
-  limit?:  number
-  status?: ContractStatus
+  page?:            number
+  limit?:           number
+  status?:          ContractStatus
+  includeArchived?: boolean
 }
 
 async function fetchContracts(params: ContractsParams = {}): Promise<ContractListResponse> {

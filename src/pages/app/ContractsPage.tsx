@@ -1,8 +1,12 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileSignature, Search, X, LayoutGrid, List } from 'lucide-react'
+import { Plus, FileSignature, Search, X, LayoutGrid, List, Archive } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useContracts } from '@/features/contracts/hooks/useContracts'
+import {
+  useContracts,
+  useArchiveContract, useUnarchiveContract,
+  useDeleteContract, useVoidContract,
+} from '@/features/contracts/hooks/useContracts'
 import ContractCard, { ContractCardSkeleton } from '@/features/contracts/components/ContractCard'
 import ContractTable, { ContractTableSkeleton } from '@/features/contracts/components/ContractTable'
 import type { SortField, SortDir } from '@/features/contracts/components/ContractTable'
@@ -11,6 +15,9 @@ import { STATUS_LABELS } from '@/features/contracts/schemas/contract.schema'
 import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
 import DateRangePill from '@/components/filters/DateRangePill'
 import AmountRangePill from '@/components/filters/AmountRangePill'
+import { RemoveModal } from '@/components/RemoveModal'
+import { ConfirmModal } from '@/components/ConfirmModal'
+import { toast } from 'sonner'
 
 const STATUS_TABS: Array<{ value: ContractStatus | 'ALL'; label: string }> = [
   { value: 'ALL',      label: 'All' },
@@ -39,16 +46,23 @@ function getStoredView(): ViewMode {
 export default function ContractsPage() {
   const navigate = useNavigate()
 
-  const [statusFilter, setStatusFilter] = useState<ContractStatus | 'ALL'>('ALL')
-  const [search,       setSearch]       = useState('')
-  const [view,         setView]         = useState<ViewMode>(getStoredView)
-  const [sortBy,       setSortBy]       = useState<SortField>('createdAt')
-  const [sortDir,      setSortDir]      = useState<SortDir>('desc')
-  const [filters,      setFilters]      = useState<ContractFilters>(EMPTY_FILTERS)
+  const [statusFilter,    setStatusFilter]    = useState<ContractStatus | 'ALL'>('ALL')
+  const [search,          setSearch]          = useState('')
+  const [view,            setView]            = useState<ViewMode>(getStoredView)
+  const [sortBy,          setSortBy]          = useState<SortField>('createdAt')
+  const [sortDir,         setSortDir]         = useState<SortDir>('desc')
+  const [filters,         setFilters]         = useState<ContractFilters>(EMPTY_FILTERS)
+  const [includeArchived, setIncludeArchived] = useState(false)
+  const [removeTarget,    setRemoveTarget]    = useState<Contract | null>(null)
+  const [voidTarget,      setVoidTarget]      = useState<Contract | null>(null)
 
-  const searchRef = useRef<HTMLInputElement>(null)
+  const searchRef   = useRef<HTMLInputElement>(null)
+  const archiveMut  = useArchiveContract()
+  const unarchiveMut = useUnarchiveContract()
+  const deleteMut   = useDeleteContract()
+  const voidMut     = useVoidContract()
 
-  const { data, isLoading } = useContracts({ limit: 500 })
+  const { data, isLoading } = useContracts({ limit: 500, includeArchived: includeArchived || undefined })
   const allContracts  = data?.items ?? []
   const signedCount   = allContracts.filter(c => c.status === 'SIGNED').length
   const awaitingCount = allContracts.filter(c => c.status === 'SENT').length
@@ -217,6 +231,18 @@ export default function ContractsPage() {
           </span>
         )}
         <div className="flex-1" />
+        <button
+          onClick={() => setIncludeArchived(v => !v)}
+          className={cn(
+            'flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[12px] font-medium transition-colors',
+            includeArchived
+              ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-400'
+              : 'border-[#E4E7EC] dark:border-[#26283A] text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D]',
+          )}
+        >
+          <Archive size={12} strokeWidth={2} />
+          {includeArchived ? 'Hide archived' : 'Show archived'}
+        </button>
         <div className="flex items-center gap-0.5 p-0.5 bg-[#F5F6FA] dark:bg-[#21222D] rounded-lg border border-[#E4E7EC] dark:border-[#26283A]">
           <button onClick={() => setView('table')} title="Table view" className={cn('w-7 h-7 rounded-md flex items-center justify-center transition-colors', view === 'table' ? 'bg-white dark:bg-[#13141A] text-[#2563EB] shadow-sm' : 'text-[#98A2B3] dark:text-[#545C74] hover:text-[#667085]')}>
             <List size={13} strokeWidth={2} />
@@ -264,13 +290,66 @@ export default function ContractsPage() {
           sortDir={sortDir}
           onSort={handleSort}
           onOpen={(c: Contract) => navigate(`/contracts/${c.id}`)}
+          onRemove={c => setRemoveTarget(c)}
+          onVoid={c => setVoidTarget(c)}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {displayed.map(c => (
-            <ContractCard key={c.id} contract={c} onClick={(c: Contract) => navigate(`/contracts/${c.id}`)} />
+            <ContractCard
+              key={c.id}
+              contract={c}
+              onClick={(c: Contract) => navigate(`/contracts/${c.id}`)}
+              onRemove={c => setRemoveTarget(c)}
+              onVoid={c => setVoidTarget(c)}
+            />
           ))}
         </div>
+      )}
+      {removeTarget && (
+        <RemoveModal
+          open={!!removeTarget}
+          onClose={() => setRemoveTarget(null)}
+          onArchive={() => {
+            if (removeTarget.archivedAt) {
+              unarchiveMut.mutate(removeTarget.id, { onSuccess: () => toast.success('Contract unarchived') })
+            } else {
+              archiveMut.mutate(removeTarget.id, { onSuccess: () => toast.success('Contract archived') })
+            }
+            setRemoveTarget(null)
+          }}
+          onDelete={() => {
+            deleteMut.mutate(removeTarget.id)
+            setRemoveTarget(null)
+          }}
+          entityLabel={removeTarget.title}
+          entityType="contract"
+          hasLinkedRecords={removeTarget.status === 'SIGNED' || removeTarget.status === 'SENT'}
+          linkedRecordsSummary={
+            removeTarget.status === 'SIGNED' ? 'Contract is signed — void it first to delete'
+            : removeTarget.status === 'SENT' ? 'Contract is awaiting signature — void it first'
+            : undefined
+          }
+          isArchiving={archiveMut.isPending || unarchiveMut.isPending}
+          isDeleting={deleteMut.isPending}
+        />
+      )}
+
+      {voidTarget && (
+        <ConfirmModal
+          open={!!voidTarget}
+          onClose={() => setVoidTarget(null)}
+          onConfirm={() => {
+            voidMut.mutate(voidTarget.id, {
+              onSuccess: () => setVoidTarget(null),
+            })
+          }}
+          title={`Void "${voidTarget.title}"?`}
+          description="This will mark the contract as VOID. The client link will no longer work. This cannot be undone."
+          confirmLabel="Void Contract"
+          variant="void"
+          isLoading={voidMut.isPending}
+        />
       )}
     </div>
   )
