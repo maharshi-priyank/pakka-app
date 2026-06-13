@@ -4,8 +4,26 @@ import { X, Upload, FileText, Loader2, LayoutTemplate, ChevronLeft, IndianRupee,
 import { cn } from '@/lib/utils'
 import { useParseTemplate, useCreateTemplate } from '../hooks/useProposalTemplates'
 import type { ParsedTemplate } from '../hooks/useProposalTemplates'
+import type { ProposalContent } from '../schemas/proposal.schema'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useListDriveFiles, useFetchDocText } from '@/features/settings/hooks/useGoogleDocs'
+
+// Transform the flat AI response shape into the ProposalContent shape the editor expects
+function toProposalContent(parsed: ParsedTemplate): ProposalContent {
+  const totalAmount = parsed.lineItems.reduce((sum, li) => sum + li.qty * li.rate, 0)
+  return {
+    scopeItems:      parsed.scopeItems.map(s => ({ title: s })),
+    deliverables:    parsed.deliverables.map(s => ({ item: s })),
+    exclusions:      parsed.exclusions,
+    lineItems:       parsed.lineItems,
+    pricingNotes:    parsed.pricingNotes || undefined,
+    paymentSchedule: parsed.paymentSchedule.map(p => ({
+      milestone: p.milestone,
+      amount:    Math.round((p.percentage / 100) * totalAmount),
+    })),
+    terms: parsed.terms || undefined,
+  }
+}
 
 interface Props {
   open:               boolean
@@ -27,6 +45,7 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
   const { data: profile } = useProfile()
 
   const [step,          setStep]          = useState<'upload' | 'review'>('upload')
+  const [reviewTab,     setReviewTab]     = useState<'scope' | 'pricing' | 'terms'>('scope')
   const [importTab,     setImportTab]     = useState<'file' | 'gdocs'>('file')
   const [file,          setFile]          = useState<File | null>(null)
   const [context,       setContext]       = useState('')
@@ -52,6 +71,7 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
     setCategory('')
     setDocsQuery('')
     setSelectedDocId(null)
+    setReviewTab('scope')
     parseMut.reset()
     createMut.reset()
   }
@@ -97,7 +117,7 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
       {
         name:        name.trim(),
         category:    category.trim() || undefined,
-        content:     parsed as unknown as object,
+        content:     toProposalContent(parsed) as unknown as object,
         totalAmount,
       },
       {
@@ -120,7 +140,7 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
           name:        name || parsed.title,
           category:    category || null,
           description: null,
-          content:     parsed,
+          content:     toProposalContent(parsed),
           totalAmount,
           isSystem:    false,
           usageCount:  0,
@@ -134,7 +154,7 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] anim-fade" onClick={handleClose} />
-      <div className="relative z-10 w-full max-w-lg glass-modal rounded-2xl overflow-hidden anim-modal-in flex flex-col max-h-[85vh]">
+      <div className="relative z-10 w-full max-w-xl glass-modal rounded-2xl overflow-hidden anim-modal-in flex flex-col max-h-[88vh]">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#EAECF0] dark:border-[#26283A] shrink-0">
@@ -360,68 +380,168 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
                 </div>
               </div>
 
-              {/* Scope items */}
-              {parsed.scopeItems.length > 0 && (
-                <div>
-                  <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-1.5">Scope ({parsed.scopeItems.length} items)</p>
-                  <ul className="space-y-1">
-                    {parsed.scopeItems.slice(0, 5).map((item, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-[12px] text-[#344054] dark:text-[#C2C8D8]">
-                        <span className="mt-1.5 w-1 h-1 rounded-full bg-[#6366F1] shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                    {parsed.scopeItems.length > 5 && (
-                      <li className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] pl-3">+{parsed.scopeItems.length - 5} more…</li>
+              {/* Review tabs */}
+              <div className="flex gap-0.5 p-0.5 bg-[#F2F4F7] dark:bg-[#21222D] rounded-lg">
+                {([
+                  { key: 'scope',   label: 'Scope & Deliverables' },
+                  { key: 'pricing', label: 'Pricing' },
+                  { key: 'terms',   label: 'Terms' },
+                ] as const).map(t => (
+                  <button
+                    key={t.key}
+                    onClick={() => setReviewTab(t.key)}
+                    className={cn(
+                      'flex-1 h-7 rounded-md text-[12px] font-semibold transition-colors',
+                      reviewTab === t.key
+                        ? 'bg-white dark:bg-[#13141A] text-[#344054] dark:text-[#C2C8D8] shadow-sm'
+                        : 'text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
                     )}
-                  </ul>
-                </div>
-              )}
-
-              {/* Line items */}
-              {parsed.lineItems.length > 0 && (
-                <div>
-                  <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-1.5">Pricing</p>
-                  <div className="space-y-1">
-                    {parsed.lineItems.map((li, i) => (
-                      <div key={i} className="flex items-start justify-between gap-2 text-[12px]">
-                        <span className="text-[#667085] dark:text-[#8B92A8] flex-1">{li.description}</span>
-                        {li.rate > 0 && (
-                          <span className="text-[#344054] dark:text-[#C2C8D8] font-semibold shrink-0 flex items-center gap-0.5">
-                            <IndianRupee size={10} />
-                            {Number(li.rate * (li.qty || 1)).toLocaleString('en-IN')}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                    <div className="pt-1.5 border-t border-[#F2F4F7] dark:border-[#26283A] flex justify-between text-[12px] font-bold text-[#101828] dark:text-[#ECEEF3]">
-                      <span>Total</span>
-                      <span>{fmt(parsed.lineItems.reduce((s, li) => s + li.qty * li.rate, 0))}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Payment schedule */}
-              {parsed.paymentSchedule.length > 0 && (
-                <div>
-                  <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-1.5">Payment schedule</p>
-                  <div className="space-y-1">
-                    {parsed.paymentSchedule.map((p, i) => (
-                      <div key={i} className="flex items-start justify-between gap-2 text-[12px]">
-                        <span className="text-[#667085] dark:text-[#8B92A8] flex-1">{p.milestone}</span>
-                        <span className="text-[#344054] dark:text-[#C2C8D8] font-semibold shrink-0">{p.percentage}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Confidence */}
-              <div className="flex items-center gap-1.5 text-[11.5px] text-[#667085] dark:text-[#8B92A8]">
-                <Check size={12} className="text-emerald-500" />
-                AI confidence: {Math.round(parsed.confidence * 100)}%
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
+
+              {/* ── Scope tab ── */}
+              {reviewTab === 'scope' && (
+                <div className="space-y-4">
+                  {parsed.scopeItems.length > 0 && (
+                    <div>
+                      <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-2">
+                        Scope of work <span className="font-normal normal-case">({parsed.scopeItems.length} items)</span>
+                      </p>
+                      <ul className="space-y-1.5">
+                        {parsed.scopeItems.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-[12.5px] text-[#344054] dark:text-[#C2C8D8] leading-relaxed">
+                            <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#6366F1] shrink-0" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {parsed.deliverables.length > 0 && (
+                    <div>
+                      <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-2">
+                        Deliverables <span className="font-normal normal-case">({parsed.deliverables.length} items)</span>
+                      </p>
+                      <ul className="space-y-1.5">
+                        {parsed.deliverables.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-[12.5px] text-[#344054] dark:text-[#C2C8D8] leading-relaxed">
+                            <span className="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {parsed.exclusions.length > 0 && (
+                    <div>
+                      <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-2">
+                        Exclusions <span className="font-normal normal-case">({parsed.exclusions.length} items)</span>
+                      </p>
+                      <ul className="space-y-1.5">
+                        {parsed.exclusions.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-[12.5px] text-[#667085] dark:text-[#8B92A8] leading-relaxed">
+                            <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#D0D5DD] dark:border-[#3D4258] shrink-0" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {parsed.scopeItems.length === 0 && parsed.deliverables.length === 0 && parsed.exclusions.length === 0 && (
+                    <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] text-center py-4">No scope items extracted</p>
+                  )}
+                </div>
+              )}
+
+              {/* ── Pricing tab ── */}
+              {reviewTab === 'pricing' && (
+                <div className="space-y-4">
+                  {parsed.lineItems.length > 0 && (
+                    <div>
+                      <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-2">Line items</p>
+                      <div className="rounded-lg border border-[#F2F4F7] dark:border-[#26283A] overflow-hidden">
+                        {parsed.lineItems.map((li, i) => (
+                          <div key={i} className={cn(
+                            'flex items-center justify-between gap-3 px-3 py-2.5 text-[12.5px]',
+                            i < parsed.lineItems.length - 1 && 'border-b border-[#F2F4F7] dark:border-[#26283A]',
+                          )}>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[#344054] dark:text-[#C2C8D8] font-medium truncate">{li.description}</p>
+                              <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">
+                                Qty {li.qty} · GST {li.gstRate}%
+                              </p>
+                            </div>
+                            <span className={cn(
+                              'font-semibold shrink-0 flex items-center gap-0.5',
+                              li.rate > 0 ? 'text-[#344054] dark:text-[#C2C8D8]' : 'text-[#98A2B3] dark:text-[#545C74]',
+                            )}>
+                              {li.rate > 0 ? (
+                                <><IndianRupee size={10} />{Number(li.rate * (li.qty || 1)).toLocaleString('en-IN')}</>
+                              ) : '—'}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="flex justify-between px-3 py-2.5 bg-[#F9FAFB] dark:bg-[#1C1D26] text-[12.5px] font-bold text-[#101828] dark:text-[#ECEEF3] border-t border-[#F2F4F7] dark:border-[#26283A]">
+                          <span>Total</span>
+                          <span className="flex items-center gap-0.5">
+                            <IndianRupee size={11} />
+                            {parsed.lineItems.reduce((s, li) => s + li.qty * li.rate, 0).toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {parsed.paymentSchedule.length > 0 && (
+                    <div>
+                      <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-2">Payment schedule</p>
+                      <div className="space-y-1.5">
+                        {parsed.paymentSchedule.map((p, i) => (
+                          <div key={i} className="flex items-center justify-between gap-2 text-[12.5px]">
+                            <span className="text-[#344054] dark:text-[#C2C8D8] flex-1">{p.milestone}</span>
+                            <span className="font-semibold text-[#6366F1] shrink-0">{p.percentage}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {parsed.pricingNotes && (
+                    <div>
+                      <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-1.5">Pricing notes</p>
+                      <p className="text-[12.5px] text-[#667085] dark:text-[#8B92A8] leading-relaxed">{parsed.pricingNotes}</p>
+                    </div>
+                  )}
+
+                  {parsed.lineItems.length === 0 && parsed.paymentSchedule.length === 0 && (
+                    <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] text-center py-4">No pricing details extracted</p>
+                  )}
+                </div>
+              )}
+
+              {/* ── Terms tab ── */}
+              {reviewTab === 'terms' && (
+                <div className="space-y-3">
+                  {parsed.terms ? (
+                    <div>
+                      <p className="text-[10.5px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wider mb-2">Terms & conditions</p>
+                      <p className="text-[12.5px] text-[#344054] dark:text-[#C2C8D8] leading-[1.75]">{parsed.terms}</p>
+                    </div>
+                  ) : (
+                    <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] text-center py-4">No terms extracted from this document</p>
+                  )}
+                  <div className="flex items-center gap-1.5 text-[11.5px] text-[#667085] dark:text-[#8B92A8] pt-1 border-t border-[#F2F4F7] dark:border-[#26283A]">
+                    <Check size={12} className="text-emerald-500" />
+                    AI confidence: {Math.round(parsed.confidence * 100)}%
+                  </div>
+                </div>
+              )}
 
               {createMut.isError && (
                 <p className="text-[12px] text-[#D92D20]">Failed to save template. Please try again.</p>
