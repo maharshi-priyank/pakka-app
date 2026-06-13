@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
 export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED'
@@ -175,5 +176,23 @@ export function useDeleteProject() {
       await api.delete(`/projects/${id}`)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.lists() }),
+  })
+}
+
+export function useArchiveProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/projects/${id}/archive`).then(r => r.data.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.lists() }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to archive project'),
+  })
+}
+
+export function useUnarchiveProject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/projects/${id}/unarchive`).then(r => r.data.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.lists() }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to unarchive project'),
   })
 }

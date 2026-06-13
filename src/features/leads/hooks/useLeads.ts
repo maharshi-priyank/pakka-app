@@ -165,3 +165,21 @@ export function useConvertLeadToClient() {
     onError: (err: Error) => toast.error(err.message || 'Failed to convert lead'),
   })
 }
+
+export function useArchiveLead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/leads/${id}/archive`).then(r => r.data.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leads'] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to archive lead'),
+  })
+}
+
+export function useUnarchiveLead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/leads/${id}/unarchive`).then(r => r.data.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leads'] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to unarchive lead'),
+  })
+}

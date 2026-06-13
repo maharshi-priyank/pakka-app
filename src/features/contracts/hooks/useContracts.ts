@@ -117,3 +117,30 @@ export function useDeleteContract() {
     onError: (err: Error) => toast.error(err.message || 'Failed to delete contract'),
   })
 }
+
+export function useArchiveContract() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/contracts/${id}/archive`).then(r => r.data.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to archive contract'),
+  })
+}
+
+export function useUnarchiveContract() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/contracts/${id}/unarchive`).then(r => r.data.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to unarchive contract'),
+  })
+}
+
+export function useVoidContract() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/contracts/${id}/void`).then(r => r.data.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [CONTRACTS_QUERY_KEY] }); toast.success('Contract voided') },
+    onError: (err: Error) => toast.error(err.message || 'Failed to void contract'),
+  })
+}

@@ -1,5 +1,6 @@
 // pakka-app/src/features/tasks/hooks/useTaskBoards.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import type { Task } from './useTasks'
 
@@ -166,5 +167,23 @@ export function useDeleteColumn() {
       qc.invalidateQueries({ queryKey: KEYS.detail(boardId) })
       qc.invalidateQueries({ queryKey: ['tasks'] })
     },
+  })
+}
+
+export function useArchiveBoard() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/task-boards/${id}/archive`).then(r => r.data.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.lists() }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to archive board'),
+  })
+}
+
+export function useUnarchiveBoard() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/task-boards/${id}/unarchive`).then(r => r.data.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.lists() }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to unarchive board'),
   })
 }

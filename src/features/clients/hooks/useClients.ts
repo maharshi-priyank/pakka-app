@@ -151,3 +151,21 @@ export function useRegeneratePortalToken() {
     onError: (err: Error) => toast.error(err.message || 'Failed to regenerate link'),
   })
 }
+
+export function useArchiveClient() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/clients/${id}/archive`).then(r => r.data.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['clients'] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to archive client'),
+  })
+}
+
+export function useUnarchiveClient() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/clients/${id}/unarchive`).then(r => r.data.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['clients'] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to unarchive client'),
+  })
+}

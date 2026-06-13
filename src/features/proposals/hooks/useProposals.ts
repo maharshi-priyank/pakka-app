@@ -107,3 +107,21 @@ export function useDeleteProposal() {
     onError: (err: Error) => toast.error(err.message || 'Failed to delete proposal'),
   })
 }
+
+export function useArchiveProposal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/proposals/${id}/archive`).then(r => r.data.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [PROPOSALS_QUERY_KEY] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to archive proposal'),
+  })
+}
+
+export function useUnarchiveProposal() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/proposals/${id}/unarchive`).then(r => r.data.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [PROPOSALS_QUERY_KEY] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to unarchive proposal'),
+  })
+}

@@ -104,3 +104,21 @@ export function useDeleteForm() {
     onError: (err: Error) => toast.error(err.message || 'Failed to delete form'),
   })
 }
+
+export function useArchiveForm() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/forms/${id}/archive`).then(r => r.data.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['forms'] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to archive form'),
+  })
+}
+
+export function useUnarchiveForm() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/forms/${id}/unarchive`).then(r => r.data.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['forms'] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to unarchive form'),
+  })
+}

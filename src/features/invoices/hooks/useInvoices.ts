@@ -162,3 +162,16 @@ export function useDeleteInvoice() {
     onError: (err: Error) => toast.error(err.message || 'Failed to delete invoice'),
   })
 }
+
+export function useVoidInvoice() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/invoices/${id}/void`).then(r => r.data.data),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: KEYS.all() })
+      qc.invalidateQueries({ queryKey: KEYS.detail(id) })
+      toast.success('Invoice voided')
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to void invoice'),
+  })
+}
