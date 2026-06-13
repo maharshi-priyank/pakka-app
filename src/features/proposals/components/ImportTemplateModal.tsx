@@ -15,7 +15,10 @@ function toProposalContent(parsed: ParsedTemplate): ProposalContent {
     scopeItems:      parsed.scopeItems.map(s => ({ title: s })),
     deliverables:    parsed.deliverables.map(s => ({ item: s })),
     exclusions:      parsed.exclusions,
-    lineItems:       parsed.lineItems,
+    lineItems:       parsed.lineItems.map(li => ({
+      ...li,
+      gstRate: ([0, 5, 12, 18, 28].includes(li.gstRate) ? li.gstRate : 18) as 0 | 5 | 12 | 18 | 28,
+    })),
     pricingNotes:    parsed.pricingNotes || undefined,
     paymentSchedule: parsed.paymentSchedule.map(p => ({
       milestone: p.milestone,
@@ -33,9 +36,6 @@ interface Props {
 
 const CATEGORY_SUGGESTIONS = ['Web Design', 'Branding', 'Marketing', 'Photography', 'Video Production', 'Interior Design', 'Consulting', 'Development', 'Other']
 
-function fmt(v: number) {
-  return `₹${Number(v).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
-}
 
 export default function ImportTemplateModal({ open, onClose, onTemplateCreated }: Props) {
   const navigate          = useNavigate()
