@@ -26,7 +26,7 @@ export function MessageBubble({ message, isPortal = false, clientName }: Props) 
         <div className={cn(
           'max-w-[72%] px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed',
           isSent
-            ? 'bg-[#0D1117] text-white rounded-br-md'
+            ? 'bg-gray-700 text-white rounded-br-md'
             : 'bg-gray-100 text-gray-900 rounded-bl-md',
         )}>
           <div

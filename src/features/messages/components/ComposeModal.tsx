@@ -216,7 +216,7 @@ export function ComposeModal({ initialClient, onClose }: Props) {
               <button
                 onClick={() => void handleSend()}
                 disabled={!selectedClient || sendMessage.isPending || !editor || editor.isEmpty}
-                className="ml-auto px-4 py-1.5 bg-[#0D1117] text-white text-[12px] font-semibold rounded-lg hover:bg-[#1a1d2e] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="ml-auto px-4 py-1.5 bg-gray-700 text-white text-[12px] font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {sendMessage.isPending ? 'Sending…' : 'Send'}
               </button>

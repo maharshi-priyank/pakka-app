@@ -53,7 +53,7 @@ export function ThreadView({ clientId }: Props) {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 shrink-0">
-        <div className="w-9 h-9 rounded-full bg-[#0D1117] flex items-center justify-center text-white text-[13px] font-bold shrink-0">
+        <div className="w-9 h-9 rounded-full bg-gray-500 flex items-center justify-center text-white text-[13px] font-bold shrink-0">
           {client?.name?.slice(0, 2).toUpperCase() ?? '??'}
         </div>
         <div className="flex-1 min-w-0">

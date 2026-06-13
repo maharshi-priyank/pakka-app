@@ -45,7 +45,7 @@ export function ReplyComposer({ onSend, isPending, placeholder = 'Reply…' }: P
         <button
           onClick={() => void handleSend()}
           disabled={!text.trim() || isPending}
-          className="mb-0.5 p-2 bg-[#0D1117] text-white rounded-lg hover:bg-[#1a1d2e] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="mb-0.5 p-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
         >
           <Send size={13} />
         </button>

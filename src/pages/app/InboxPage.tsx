@@ -23,7 +23,7 @@ export default function InboxPage() {
             <h1 className="text-[15px] font-bold text-gray-900">Inbox</h1>
             <button
               onClick={() => setShowCompose(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#0D1117] text-white text-[12px] font-semibold rounded-lg hover:bg-[#1a1d2e] transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-700 text-white text-[12px] font-semibold rounded-lg hover:bg-gray-800 transition-colors"
             >
               <Plus size={12} />
               New

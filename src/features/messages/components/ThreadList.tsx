@@ -57,7 +57,7 @@ export function ThreadList({ activeClientId, onSelect }: Props) {
               isActive ? 'bg-[#F2F4F7]' : 'bg-white hover:bg-gray-50',
             )}
           >
-            <div className="w-8 h-8 rounded-full bg-[#0D1117] flex items-center justify-center text-white text-[11px] font-bold shrink-0 mt-0.5">
+            <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-[11px] font-bold shrink-0 mt-0.5">
               {t.client.name.slice(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -78,7 +78,7 @@ export function ThreadList({ activeClientId, onSelect }: Props) {
               </p>
             </div>
             {t.unreadCount > 0 && (
-              <div className="w-2 h-2 rounded-full bg-[#0D1117] mt-1.5 shrink-0" />
+              <div className="w-2 h-2 rounded-full bg-gray-400 mt-1.5 shrink-0" />
             )}
           </button>
         )
