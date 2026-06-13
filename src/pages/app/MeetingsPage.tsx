@@ -3,6 +3,7 @@ import { CalendarDays, Video, ExternalLink, CheckCircle2, XCircle, Loader2, Mail
 import { cn } from '@/lib/utils'
 import { useMeetings, useCompleteMeeting, useCancelMeeting, type Meeting, type MeetingStatus } from '@/features/meetings/hooks/useMeetings'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
+import { ConfirmModal } from '@/components/ConfirmModal'
 
 const STATUS_COLORS: Record<MeetingStatus, string> = {
   SCHEDULED:  'bg-[#EFF6FF] dark:bg-blue-950/40 text-[#2563EB] dark:text-[#60A5FA]',
@@ -25,9 +26,10 @@ function formatDateTime(iso: string) {
 }
 
 function MeetingRow({ meeting }: { meeting: Meeting }) {
-  const complete = useCompleteMeeting()
-  const cancel   = useCancelMeeting()
-  const contact  = meeting.client?.name ?? meeting.lead?.name ?? null
+  const complete      = useCompleteMeeting()
+  const cancel        = useCancelMeeting()
+  const contact       = meeting.client?.name ?? meeting.lead?.name ?? null
+  const [showCancel, setShowCancel] = useState(false)
 
   return (
     <div className="flex items-start gap-3 px-4 sm:px-5 py-3.5 hover:bg-[#FAFBFF] dark:hover:bg-[#1A1B23] transition-colors">
@@ -77,7 +79,7 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
               {complete.isPending ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
             </button>
             <button
-              onClick={() => cancel.mutate(meeting.id)}
+              onClick={() => setShowCancel(true)}
               disabled={cancel.isPending}
               title="Cancel meeting"
               className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#FEF3F2] dark:hover:bg-red-950/40 hover:text-[#D92D20] transition-colors disabled:opacity-50"
@@ -87,6 +89,20 @@ function MeetingRow({ meeting }: { meeting: Meeting }) {
           </>
         )}
       </div>
+
+      <ConfirmModal
+        open={showCancel}
+        onClose={() => setShowCancel(false)}
+        onConfirm={() => {
+          cancel.mutate(meeting.id)
+          setShowCancel(false)
+        }}
+        title={`Cancel "${meeting.title}"?`}
+        description="This meeting will be marked as cancelled and the calendar event will be removed."
+        confirmLabel="Cancel Meeting"
+        variant="void"
+        isLoading={cancel.isPending}
+      />
     </div>
   )
 }

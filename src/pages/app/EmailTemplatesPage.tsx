@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Mail, ChevronRight, CheckCircle2, RotateCcw, Send, Eye, Save, X, Copy, Info } from 'lucide-react'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import Editor from '@monaco-editor/react'
 import { cn } from '@/lib/utils'
 import {
@@ -96,9 +97,10 @@ function TemplateEditor({ templateKey, onBack }: { templateKey: string; onBack: 
   const [previewWidth, setPreviewWidth] = useState(440)
   const [testEmail, setTestEmail] = useState('')
   const [showTestInput, setShowTestInput] = useState(false)
-  const [showVars, setShowVars] = useState(false)
-  const [copiedVar, setCopiedVar] = useState<string | null>(null)
-  const [loaded, setLoaded] = useState(false)
+  const [showVars,   setShowVars]   = useState(false)
+  const [copiedVar,  setCopiedVar]  = useState<string | null>(null)
+  const [loaded,     setLoaded]     = useState(false)
+  const [showReset,  setShowReset]  = useState(false)
   const dragRef = useRef<{ startX: number; startW: number } | null>(null)
 
   function startResizePreview(e: React.MouseEvent) {
@@ -130,10 +132,9 @@ function TemplateEditor({ templateKey, onBack }: { templateKey: string; onBack: 
   }
 
   function handleReset() {
-    if (confirm('Reset this template to the system default? Your customizations will be lost.')) {
-      reset.mutate(templateKey)
-      setLoaded(false)
-    }
+    reset.mutate(templateKey)
+    setLoaded(false)
+    setShowReset(false)
   }
 
   function handleSendTest() {
@@ -240,7 +241,7 @@ function TemplateEditor({ templateKey, onBack }: { templateKey: string; onBack: 
 
         {data.isCustomised && (
           <button
-            onClick={handleReset}
+            onClick={() => setShowReset(true)}
             disabled={reset.isPending}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium border bg-white dark:bg-[#1C1E2E] border-[#D0D5DD] dark:border-[#26283A] text-[#344054] dark:text-[#C2C8D8] hover:border-[#F97316] hover:text-[#F97316] transition-colors"
           >
@@ -342,6 +343,17 @@ function TemplateEditor({ templateKey, onBack }: { templateKey: string; onBack: 
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={showReset}
+        onClose={() => setShowReset(false)}
+        onConfirm={handleReset}
+        title="Reset to default?"
+        description="Your customizations will be lost and the template will be restored to the system default. This cannot be undone."
+        confirmLabel="Reset Template"
+        variant="delete"
+        isLoading={reset.isPending}
+      />
     </div>
   )
 }
