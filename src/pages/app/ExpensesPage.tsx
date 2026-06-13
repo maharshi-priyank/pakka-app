@@ -8,6 +8,7 @@ import {
   IndianRupee, ChevronRight, Loader2, Receipt, Image, ExternalLink,
   FolderKanban, Download,
 } from 'lucide-react'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import DropdownSelect from '@/components/ui/DropdownSelect'
 import { cn } from '@/lib/utils'
 import { useClients } from '@/features/clients/hooks/useClients'
@@ -148,7 +149,7 @@ export default function ExpensesPage() {
   const [showForm,   setShowForm]   = useState(false)
   const [editExpense, setEditExpense] = useState<Expense | null>(null)
   const [selected,   setSelected]   = useState<Set<string>>(new Set())
-  const [confirmId,  setConfirmId]  = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null)
   const [uploadingReceipt, setUploadingReceipt] = useState(false)
   const [localReceiptUrl, setLocalReceiptUrl] = useState<string | undefined>(undefined)
 
@@ -793,25 +794,12 @@ export default function ExpensesPage() {
                   >
                     <Edit2 size={12} />
                   </button>
-                  {confirmId === expense.id ? (
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => { deleteExpense.mutate(expense.id); setConfirmId(null) }}
-                        disabled={deleteExpense.isPending}
-                        className="text-[11px] text-red-500 font-semibold hover:text-red-700 px-1"
-                      >
-                        Delete
-                      </button>
-                      <button onClick={() => setConfirmId(null)} className="text-[11px] text-[#98A2B3] px-1">Cancel</button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmId(expense.id)}
-                      className="w-7 h-7 flex items-center justify-center text-[#98A2B3] hover:text-[#F04438] transition-colors rounded-lg hover:bg-[#FEF3F2]"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setDeleteTarget(expense)}
+                    className="w-7 h-7 flex items-center justify-center text-[#98A2B3] hover:text-[#F04438] transition-colors rounded-lg hover:bg-[#FEF3F2]"
+                  >
+                    <Trash2 size={12} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -838,6 +826,22 @@ export default function ExpensesPage() {
           </div>
         )}
       </div>
+
+      {deleteTarget && (
+        <ConfirmModal
+          open={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            deleteExpense.mutate(deleteTarget.id)
+            setDeleteTarget(null)
+          }}
+          title="Delete expense?"
+          description={`This will permanently delete "${deleteTarget.description || 'this expense'}". This cannot be undone.`}
+          confirmLabel="Delete Expense"
+          variant="delete"
+          isLoading={deleteExpense.isPending}
+        />
+      )}
     </div>
   )
 }

@@ -7,6 +7,7 @@ import {
   Clock, Play, Square, Plus, Trash2, Edit2, CheckSquare,
   Square as SquareIcon, IndianRupee, ChevronRight, Loader2, FolderKanban,
 } from 'lucide-react'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import { cn } from '@/lib/utils'
 import DropdownSelect from '@/components/ui/DropdownSelect'
 import { useClients } from '@/features/clients/hooks/useClients'
@@ -103,7 +104,7 @@ export default function TimePage() {
   const [showLogForm, setShowLogForm] = useState(false)
   const [editEntry,   setEditEntry]   = useState<TimeEntry | null>(null)
   const [selected,    setSelected]    = useState<Set<string>>(new Set())
-  const [confirmId,   setConfirmId]   = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<TimeEntry | null>(null)
 
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -566,23 +567,12 @@ export default function TimePage() {
                       >
                         <Edit2 size={12} />
                       </button>
-                      {confirmId === entry.id ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => { deleteEntry.mutate(entry.id); setConfirmId(null) }}
-                            disabled={deleteEntry.isPending}
-                            className="text-[11px] text-red-500 font-semibold hover:text-red-700 px-1"
-                          >Delete</button>
-                          <button onClick={() => setConfirmId(null)} className="text-[11px] text-[#98A2B3] px-1">Cancel</button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setConfirmId(entry.id)}
-                          className="w-7 h-7 flex items-center justify-center text-[#98A2B3] hover:text-[#F04438] transition-colors rounded-lg hover:bg-[#FEF3F2]"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      )}
+                      <button
+                        onClick={() => setDeleteTarget(entry)}
+                        className="w-7 h-7 flex items-center justify-center text-[#98A2B3] hover:text-[#F04438] transition-colors rounded-lg hover:bg-[#FEF3F2]"
+                      >
+                        <Trash2 size={12} />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -610,6 +600,22 @@ export default function TimePage() {
           </div>
         )}
       </div>
+
+      {deleteTarget && (
+        <ConfirmModal
+          open={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            deleteEntry.mutate(deleteTarget.id)
+            setDeleteTarget(null)
+          }}
+          title="Delete time entry?"
+          description={`This will permanently delete "${deleteTarget.description || 'this entry'}". This cannot be undone.`}
+          confirmLabel="Delete Entry"
+          variant="delete"
+          isLoading={deleteEntry.isPending}
+        />
+      )}
     </div>
   )
 }
