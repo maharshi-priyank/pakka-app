@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -14,6 +14,9 @@ type FormValues = z.infer<typeof schema>
 export default function LoginPage() {
   const [serverError, setServerError] = useState('')
   const [isLoading,   setIsLoading]   = useState(false)
+  const [params]    = useSearchParams()
+  const navigate    = useNavigate()
+  const inviteToken = params.get('invite') ?? ''
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -23,14 +26,26 @@ export default function LoginPage() {
     setIsLoading(true)
     setServerError('')
     const { error } = await supabase.auth.signInWithPassword(values)
-    if (error) setServerError(error.message)
+    if (error) {
+      setServerError(error.message)
+      setIsLoading(false)
+      return
+    }
+    // If came from an invite link, redirect back to accept it
+    if (inviteToken) {
+      navigate(`/accept-invite?token=${encodeURIComponent(inviteToken)}`, { replace: true })
+    }
     setIsLoading(false)
   }
 
   async function signInWithGoogle() {
+    // Preserve invite token through Google OAuth redirect
+    const redirectTo = inviteToken
+      ? `${window.location.origin}/accept-invite?token=${encodeURIComponent(inviteToken)}`
+      : `${window.location.origin}/dashboard`
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo },
     })
   }
 
@@ -160,7 +175,10 @@ export default function LoginPage() {
 
           <p className="mt-7 text-center text-[13px] text-[#64748B]">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-[#2563EB] font-semibold hover:text-[#1D4ED8]">
+            <Link
+              to={inviteToken ? `/signup?invite=${encodeURIComponent(inviteToken)}` : '/signup'}
+              className="text-[#2563EB] font-semibold hover:text-[#1D4ED8]"
+            >
               Sign up free
             </Link>
           </p>

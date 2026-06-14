@@ -116,18 +116,13 @@ export const router = createBrowserRouter([
       return { Component }
     },
   },
-  // ── Accept team invite (requires auth) ──────────────────────────────────────
+  // ── Accept team invite (public — handles both authed and unauthed states) ────
   {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: '/accept-invite',
-        lazy: async () => {
-          const { default: Component } = await import('@/pages/app/AcceptInvitePage')
-          return { Component }
-        },
-      },
-    ],
+    path: '/accept-invite',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/app/AcceptInvitePage')
+      return { Component }
+    },
   },
   {
     element: <ProtectedRoute />,

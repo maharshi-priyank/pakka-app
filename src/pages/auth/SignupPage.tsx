@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { Mail } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,15 +17,21 @@ export default function SignupPage() {
   const [serverError, setServerError] = useState('')
   const [isLoading,   setIsLoading]   = useState(false)
   const [success,     setSuccess]     = useState(false)
+  const [params]    = useSearchParams()
+  const navigate    = useNavigate()
+  const inviteToken = params.get('invite') ?? ''
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   })
 
   async function signInWithGoogle() {
+    const redirectTo = inviteToken
+      ? `${window.location.origin}/accept-invite?token=${encodeURIComponent(inviteToken)}`
+      : `${window.location.origin}/dashboard`
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo },
     })
   }
 
@@ -53,8 +59,20 @@ export default function SignupPage() {
           <p className="text-[14px] text-[#64748B] leading-relaxed">
             We've sent a confirmation link to your email. Click it to activate your account.
           </p>
+          {inviteToken && (
+            <p className="mt-4 text-[13px] text-[#64748B] leading-relaxed">
+              After verifying your email and signing in,{' '}
+              <Link
+                to={`/accept-invite?token=${encodeURIComponent(inviteToken)}`}
+                className="text-[#6366F1] font-semibold hover:underline"
+              >
+                click here to accept your workspace invite
+              </Link>
+              .
+            </p>
+          )}
           <Link
-            to="/login"
+            to={inviteToken ? `/login?invite=${encodeURIComponent(inviteToken)}` : '/login'}
             className="inline-block mt-7 text-[13.5px] font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
           >
             ← Back to sign in
@@ -198,7 +216,10 @@ export default function SignupPage() {
 
           <p className="mt-7 text-center text-[13px] text-[#64748B]">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#2563EB] font-semibold hover:text-[#1D4ED8]">
+            <Link
+              to={inviteToken ? `/login?invite=${encodeURIComponent(inviteToken)}` : '/login'}
+              className="text-[#2563EB] font-semibold hover:text-[#1D4ED8]"
+            >
               Sign in
             </Link>
           </p>

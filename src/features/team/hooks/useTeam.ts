@@ -75,3 +75,20 @@ export function useAcceptInvite() {
     mutationFn: (token: string) => api.post(`/team/accept/${token}`),
   })
 }
+
+export interface InvitePreview {
+  inviteeEmail: string
+  senderName:   string
+}
+
+export function useInvitePreview(token: string) {
+  return useQuery<InvitePreview>({
+    queryKey:  ['invite-preview', token],
+    queryFn:   async () => {
+      const { data } = await api.get<{ data: InvitePreview }>(`/team/invite-preview/${token}`)
+      return data.data
+    },
+    enabled:   !!token,
+    retry:     false,
+  })
+}
