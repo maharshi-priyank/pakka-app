@@ -76,7 +76,7 @@ export default function AcceptInvitePage() {
             ) : (
               <>
                 <h1 className="text-[16px] font-bold text-[#101828] mb-1">
-                  {preview ? `Join ${senderName}'s workspace` : 'You've been invited'}
+                  {preview ? `Join ${senderName}'s workspace` : "You've been invited"}
                 </h1>
                 <p className="text-[13px] text-[#667085] mb-6">
                   {preview
