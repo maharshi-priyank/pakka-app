@@ -39,7 +39,6 @@ export default function AcceptInvitePage() {
     })
   }, [token, authLoading, session]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const inviteBase  = `/accept-invite?token=${encodeURIComponent(token)}`
   const loginUrl    = `/login?invite=${encodeURIComponent(token)}`
   const signupUrl   = `/signup?invite=${encodeURIComponent(token)}`
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Mail } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,7 +18,6 @@ export default function SignupPage() {
   const [isLoading,   setIsLoading]   = useState(false)
   const [success,     setSuccess]     = useState(false)
   const [params]    = useSearchParams()
-  const navigate    = useNavigate()
   const inviteToken = params.get('invite') ?? ''
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
