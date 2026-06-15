@@ -15,6 +15,8 @@ import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useClients } from '@/features/clients/hooks/useClients'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
+import { Permission } from '@/types/permissions'
 
 const GST_RATE_OPTIONS = [0, 5, 12, 18, 28]
 
@@ -35,6 +37,10 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const isNew     = !invoice
   const isPaid    = invoice?.status === 'PAID'
   const canEdit   = !isPaid
+
+  const { hasPermission } = useWorkspacePermissions()
+  const canSendInvoice   = hasPermission(Permission.SEND_INVOICES)
+  const canRecordPayment = hasPermission(Permission.RECORD_PAYMENTS)
   const [saved,      setSaved]     = useState<Invoice | null>(null)
   const [viewUrl,    setViewUrl]   = useState<string | null>(null)
   const [copied,     setCopied]    = useState(false)
@@ -587,7 +593,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           )}
 
           {/* Record Payment / TDS */}
-          {displayInvoice && displayInvoice.status !== 'PAID' && displayInvoice.status !== 'DRAFT' && (
+          {canRecordPayment && displayInvoice && displayInvoice.status !== 'PAID' && displayInvoice.status !== 'DRAFT' && (
             <button
               type="button"
               onClick={() => setShowRecordPayment(true)}
@@ -600,7 +606,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           )}
 
           {/* Mark paid */}
-          {displayInvoice && displayInvoice.status !== 'PAID' && displayInvoice.status !== 'DRAFT' && (
+          {canRecordPayment && displayInvoice && displayInvoice.status !== 'PAID' && displayInvoice.status !== 'DRAFT' && (
             <button
               type="button"
               onClick={handleMarkPaid}
@@ -621,7 +627,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           )}
 
           {/* Send */}
-          {displayInvoice && displayInvoice.status === 'DRAFT' && (
+          {canSendInvoice && displayInvoice && displayInvoice.status === 'DRAFT' && (
             <button
               type="button"
               onClick={handleSend}

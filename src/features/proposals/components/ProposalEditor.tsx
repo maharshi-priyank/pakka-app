@@ -24,6 +24,8 @@ import type { Lead } from '@/features/leads/schemas/lead.schema'
 import { useCreateProposal, useUpdateProposal, useSendProposal } from '../hooks/useProposals'
 import { useLeads } from '@/features/leads/hooks/useLeads'
 import { useProjects } from '@/features/projects/hooks/useProjects'
+import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
+import { Permission } from '@/types/permissions'
 import SaveTemplateModal from './SaveTemplateModal'
 import { useNavigate } from 'react-router-dom'
 
@@ -85,6 +87,8 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
   const attachmentInputRef = useRef<HTMLInputElement>(null)
   const [showCanvaPicker, setShowCanvaPicker] = useState(false)
   const navigate = useNavigate()
+
+  const { hasPermission } = useWorkspacePermissions()
 
   const createMutation = useCreateProposal()
   const updateMutation = useUpdateProposal()
@@ -239,7 +243,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
     setTimeout(() => setCopied(false), 2000)
   }, [shareUrl])
 
-  const canSend = isEdit && (proposal?.status === 'DRAFT' || proposal?.status === 'DECLINED' || proposal?.status === 'SENT')
+  const canSend = isEdit && hasPermission(Permission.SEND_PROPOSALS) && (proposal?.status === 'DRAFT' || proposal?.status === 'DECLINED' || proposal?.status === 'SENT')
   const isSent  = isEdit && (proposal?.status === 'SENT' || proposal?.status === 'OPENED' || proposal?.status === 'ACCEPTED')
 
   return (

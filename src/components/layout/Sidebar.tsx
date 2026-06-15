@@ -7,6 +7,8 @@ import {
   LogOut, CheckSquare, MessageSquare,
 } from 'lucide-react'
 import { useMessageUnreadCount } from '@/features/messages/hooks/useMessages'
+import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
+import { Permission } from '@/types/permissions'
 // Customise sidebar imports — disabled until feature is ready
 // import { X } from 'lucide-react'
 // import {
@@ -26,19 +28,19 @@ import WorkspaceSwitcher from '@/features/settings/components/WorkspaceSwitcher'
 import CreateWorkspaceModal from '@/features/settings/components/CreateWorkspaceModal'
 
 const ALL_NAV_ITEMS = [
-  { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',   href: '/dashboard',   tourId: 'tour-dashboard' },
-  { id: 'leads',       icon: Users,           label: 'Leads',        href: '/leads',       tourId: 'tour-leads' },
-  { id: 'clients',     icon: Building2,       label: 'Clients',      href: '/clients',     tourId: 'tour-clients' },
-  { id: 'projects',    icon: FolderKanban,    label: 'Projects',     href: '/projects',    tourId: undefined },
-  { id: 'tasks',       icon: CheckSquare,     label: 'Tasks',        href: '/tasks',       tourId: undefined },
-  { id: 'inbox',       icon: MessageSquare,   label: 'Inbox',        href: '/inbox',       tourId: undefined },
-  { id: 'proposals',   icon: FileText,        label: 'Proposals',    href: '/proposals',   tourId: 'tour-proposals' },
-  { id: 'contracts',   icon: PenLine,         label: 'Contracts',    href: '/contracts',   tourId: 'tour-contracts' },
-  { id: 'invoices',    icon: Receipt,         label: 'Invoices',     href: '/invoices',    tourId: 'tour-invoices' },
-  { id: 'reports',     icon: BarChart3,       label: 'Reports',      href: '/reports',     tourId: undefined },
-  { id: 'calendar',    icon: CalendarDays,    label: 'Calendar',     href: '/calendar',    tourId: undefined },
-  { id: 'forms',       icon: ClipboardList,   label: 'Forms',        href: '/forms',       tourId: undefined },
-  { id: 'automations', icon: Zap,             label: 'Automations',  href: '/automations', tourId: undefined },
+  { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',   href: '/dashboard',   tourId: 'tour-dashboard', permission: undefined },
+  { id: 'leads',       icon: Users,           label: 'Leads',        href: '/leads',       tourId: 'tour-leads',      permission: Permission.VIEW_LEADS },
+  { id: 'clients',     icon: Building2,       label: 'Clients',      href: '/clients',     tourId: 'tour-clients',    permission: Permission.VIEW_CLIENTS },
+  { id: 'projects',    icon: FolderKanban,    label: 'Projects',     href: '/projects',    tourId: undefined,         permission: Permission.VIEW_PROJECTS },
+  { id: 'tasks',       icon: CheckSquare,     label: 'Tasks',        href: '/tasks',       tourId: undefined,         permission: Permission.VIEW_TASKS },
+  { id: 'inbox',       icon: MessageSquare,   label: 'Inbox',        href: '/inbox',       tourId: undefined,         permission: Permission.VIEW_INBOX },
+  { id: 'proposals',   icon: FileText,        label: 'Proposals',    href: '/proposals',   tourId: 'tour-proposals',  permission: Permission.VIEW_PROPOSALS },
+  { id: 'contracts',   icon: PenLine,         label: 'Contracts',    href: '/contracts',   tourId: 'tour-contracts',  permission: Permission.VIEW_CONTRACTS },
+  { id: 'invoices',    icon: Receipt,         label: 'Invoices',     href: '/invoices',    tourId: 'tour-invoices',   permission: Permission.VIEW_INVOICES },
+  { id: 'reports',     icon: BarChart3,       label: 'Reports',      href: '/reports',     tourId: undefined,         permission: Permission.VIEW_REPORTS },
+  { id: 'calendar',    icon: CalendarDays,    label: 'Calendar',     href: '/calendar',    tourId: undefined,         permission: Permission.VIEW_CALENDAR },
+  { id: 'forms',       icon: ClipboardList,   label: 'Forms',        href: '/forms',       tourId: undefined,         permission: Permission.VIEW_FORMS },
+  { id: 'automations', icon: Zap,             label: 'Automations',  href: '/automations', tourId: undefined,         permission: Permission.VIEW_AUTOMATIONS },
 ]
 
 // Section groups — defines labels and order for the nav
@@ -98,6 +100,7 @@ export default function Sidebar({ onClose }: Props) {
   const [createWsOpen, setCreateWsOpen] = useState(false)
 
   const { user } = useAuthStore()
+  const { hasPermission } = useWorkspacePermissions()
 
   useEffect(() => {
     function onCreateWs() { setCreateWsOpen(true) }
@@ -147,7 +150,10 @@ export default function Sidebar({ onClose }: Props) {
       <div className="flex-1 pt-2 pb-3 pl-4 pr-3 overflow-y-auto min-h-0">
         {SECTIONS.map((section, si) => {
           const sectionItems = orderedItems.filter(item => section.ids.includes(item.id))
-          if (sectionItems.length === 0) return null
+          const visibleItems = sectionItems.filter(item =>
+            !item.permission || hasPermission(item.permission)
+          )
+          if (visibleItems.length === 0) return null
           return (
             <div key={si} className={si > 0 ? 'mt-6' : ''}>
               {section.label && (
@@ -156,7 +162,7 @@ export default function Sidebar({ onClose }: Props) {
                 </p>
               )}
               <nav className="space-y-0.5">
-                {sectionItems.map(({ id, icon: Icon, label, href, tourId }) => (
+                {visibleItems.map(({ id, icon: Icon, label, href, tourId }) => (
                   <NavLink
                     key={href}
                     to={href}

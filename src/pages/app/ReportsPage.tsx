@@ -3,6 +3,8 @@ import {
   BarChart3, Download, TrendingUp, IndianRupee, Users,
   Wallet, Clock, FileText, Info, PieChart,
 } from 'lucide-react'
+import { usePermissionRedirect } from '@/hooks/usePermissionRedirect'
+import { Permission } from '@/types/permissions'
 import DropdownSelect from '@/components/ui/DropdownSelect'
 import {
   AreaChart, Area, BarChart, Bar,
@@ -648,6 +650,7 @@ const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
 const PRESETS: Preset[] = ['this_month', 'last_month', 'this_quarter', 'last_quarter', 'this_fy', 'last_fy', 'custom']
 
 export default function ReportsPage() {
+  usePermissionRedirect(Permission.VIEW_REPORTS)
   const [tab,    setTab]    = useState<Tab>('revenue')
   const [preset, setPreset] = useState<Preset>('this_fy')
   const [custom, setCustom] = useState<DateRange>(() => fyBounds(0))
