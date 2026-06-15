@@ -6,7 +6,8 @@ import {
   Building2, CreditCard, Smartphone, Check, Loader2, Landmark, Upload, X, QrCode, Globe,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useProfile, useUpdateProfile, useUploadUpiQr } from '../hooks/useProfile'
+import { useProfile, useUploadUpiQr } from '../hooks/useProfile'
+import { useUpdateWorkspace } from '../hooks/useWorkspaces'
 import { getCountryDefaults, ALL_COUNTRIES, ALL_CURRENCIES } from '@/lib/countryDefaults'
 
 const businessSchema = z.object({
@@ -31,10 +32,14 @@ function Skeleton({ className }: { className?: string }) {
 
 export default function BusinessTab() {
   const { data: profile, isLoading } = useProfile()
-  const { mutateAsync: updateProfile, isPending: saving } = useUpdateProfile()
+  const workspaceId = profile?.activeWorkspaceId ?? profile?.id ?? ''
+  const { mutateAsync: updateWorkspace, isPending: saving } = useUpdateWorkspace(workspaceId)
   const { mutateAsync: uploadQr, isPending: uploadingQr } = useUploadUpiQr()
   const [saved, setSaved] = useState(false)
   const [qrPreview, setQrPreview] = useState<string | null>(null)
+
+  // Read from active workspace, fall back to user profile for backwards compat
+  const ws = profile?.activeWorkspace
 
   const { register, handleSubmit, reset, watch, setValue, formState: { errors, isDirty } } = useForm<BusinessForm>({
     resolver: zodResolver(businessSchema),
@@ -49,31 +54,32 @@ export default function BusinessTab() {
     setValue('country', code, { shouldDirty: true })
     const d = getCountryDefaults(code)
     setValue('currency', d.currency, { shouldDirty: true })
-    if (!profile?.taxLabel) setValue('taxLabel', d.taxLabel, { shouldDirty: true })
+    if (!(ws?.taxLabel ?? profile?.taxLabel)) setValue('taxLabel', d.taxLabel, { shouldDirty: true })
   }
 
   useEffect(() => {
     if (profile) {
       reset({
-        country:           profile.country           ?? 'IN',
-        currency:          profile.currency          ?? 'INR',
-        taxLabel:          profile.taxLabel          ?? '',
-        bankName:          profile.bankName          ?? '',
-        bankAccountName:   profile.bankAccountName   ?? '',
-        bankAccountNumber: profile.bankAccountNumber ?? '',
-        bankIfsc:          profile.bankIfsc          ?? '',
-        upiId:             profile.upiId             ?? '',
-        ibanNumber:        profile.ibanNumber        ?? '',
-        swiftCode:         profile.swiftCode         ?? '',
-        routingNumber:     profile.routingNumber     ?? '',
+        country:           ws?.country           ?? profile.country           ?? 'IN',
+        currency:          ws?.currency          ?? profile.currency          ?? 'INR',
+        taxLabel:          ws?.taxLabel          ?? profile.taxLabel          ?? '',
+        bankName:          ws?.bankName          ?? profile.bankName          ?? '',
+        bankAccountName:   ws?.bankAccountName   ?? profile.bankAccountName   ?? '',
+        bankAccountNumber: ws?.bankAccountNumber ?? profile.bankAccountNumber ?? '',
+        bankIfsc:          ws?.bankIfsc          ?? profile.bankIfsc          ?? '',
+        upiId:             ws?.upiId             ?? profile.upiId             ?? '',
+        ibanNumber:        ws?.ibanNumber        ?? profile.ibanNumber        ?? '',
+        swiftCode:         ws?.swiftCode         ?? profile.swiftCode         ?? '',
+        routingNumber:     ws?.routingNumber     ?? profile.routingNumber     ?? '',
       })
-      if (profile.upiQrUrl && !qrPreview) setQrPreview(profile.upiQrUrl)
+      const qrUrl = ws?.upiQrUrl ?? profile.upiQrUrl
+      if (qrUrl && !qrPreview) setQrPreview(qrUrl)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile, reset])
+  }, [profile, ws, reset])
 
   const onSubmit = async (values: BusinessForm) => {
-    await updateProfile({
+    await updateWorkspace({
       country:           values.country           || null,
       currency:          values.currency          || null,
       taxLabel:          values.taxLabel          || null,
@@ -94,12 +100,12 @@ export default function BusinessTab() {
   async function handleQrUpload(file: File) {
     const url = await uploadQr(file)
     setQrPreview(url)
-    await updateProfile({ upiQrUrl: url })
+    await updateWorkspace({ upiQrUrl: url })
   }
 
   async function handleQrRemove() {
     setQrPreview(null)
-    await updateProfile({ upiQrUrl: null })
+    await updateWorkspace({ upiQrUrl: null })
   }
 
   if (isLoading) {

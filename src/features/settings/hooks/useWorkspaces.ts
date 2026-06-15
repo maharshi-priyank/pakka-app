@@ -7,8 +7,24 @@ export interface Workspace {
   name:            string
   logoUrl:         string | null
   businessName:    string | null
+  businessType:    string | null
+  gstNumber:       string | null
+  panNumber:       string | null
   country:         string | null
   currency:        string | null
+  taxLabel:        string | null
+  bankName:        string | null
+  bankAccountName: string | null
+  bankAccountNumber: string | null
+  bankIfsc:        string | null
+  upiId:           string | null
+  upiQrUrl:        string | null
+  ibanNumber:      string | null
+  swiftCode:       string | null
+  routingNumber:   string | null
+  defaultHsnSac:   string | null
+  defaultLutNumber: string | null
+  emailSignature:  string | null
   createdAt:       string
   role:            'OWNER' | 'MEMBER'
 }
