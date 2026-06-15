@@ -6,7 +6,7 @@ import { z } from 'zod'
 import {
   ArrowLeft, FolderKanban, Building2, Calendar, IndianRupee,
   Clock, Receipt, FileText, PenLine, Wallet, Pencil, Archive,
-  X, Loader2, Plus,
+  X, Loader2, Plus, ChevronDown, ChevronUp,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import {
@@ -237,8 +237,9 @@ export default function ProjectPage() {
   const [tab,       setTab]       = useState<Tab>(locationState?.tab ?? 'overview')
   const [docSubTab, setDocSubTab] = useState<DocSubTab>('proposals')
   const activeTab: Tab = isTasksRoute ? 'tasks' : tab
-  const [showEdit,   setShowEdit]   = useState(false)
-  const [removeOpen, setRemoveOpen] = useState(false)
+  const [showEdit,     setShowEdit]     = useState(false)
+  const [removeOpen,   setRemoveOpen]   = useState(false)
+  const [detailsOpen,  setDetailsOpen]  = useState(false)
   const [qvInvoice,   setQvInvoice]   = useState<InvoiceSnap | null>(null)
   const [qvProposal,  setQvProposal]  = useState<ProposalSnap | null>(null)
   const [qvContract,  setQvContract]  = useState<ContractSnap | null>(null)
@@ -365,6 +366,94 @@ export default function ProjectPage() {
       {/* P&L & Budget */}
       <ProjectPlCard projectId={id!} />
 
+      {/* Collapsible Details */}
+      <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl overflow-hidden">
+        <button
+          onClick={() => setDetailsOpen(v => !v)}
+          className="flex items-center justify-between w-full px-4 py-3 text-left hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <p className="text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide shrink-0">Details</p>
+            {!detailsOpen && (
+              <div className="flex items-center gap-4 text-[12.5px] text-[#344054] dark:text-[#C2C8D8] overflow-hidden">
+                {project.client && (
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    <Building2 size={11} className="text-[#98A2B3] dark:text-[#545C74]" />
+                    {project.client.company || project.client.name}
+                  </span>
+                )}
+                {project.startDate && (
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    <Calendar size={11} className="text-[#98A2B3] dark:text-[#545C74]" />
+                    {formatDate(project.startDate)}{project.endDate ? ` → ${formatDate(project.endDate)}` : ''}
+                  </span>
+                )}
+                {budget && (
+                  <span className="flex items-center gap-1 shrink-0">
+                    <IndianRupee size={11} className="text-[#98A2B3] dark:text-[#545C74]" />
+                    {formatCurrency(budget)}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+          {detailsOpen
+            ? <ChevronUp size={13} className="text-[#98A2B3] shrink-0" />
+            : <ChevronDown size={13} className="text-[#98A2B3] shrink-0" />
+          }
+        </button>
+        {detailsOpen && (
+          <div className="px-4 pb-4 border-t border-[#F2F4F7] dark:border-[#26283A]">
+            <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-4 pt-3">
+              {project.client && (
+                <div>
+                  <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Client</dt>
+                  <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5">
+                    {project.client.name}
+                    {project.client.company && <span className="text-[#98A2B3]"> · {project.client.company}</span>}
+                  </dd>
+                </div>
+              )}
+              {project.startDate && (
+                <div>
+                  <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Start date</dt>
+                  <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5 flex items-center gap-1.5">
+                    <Calendar size={11} />{formatDate(project.startDate)}
+                  </dd>
+                </div>
+              )}
+              {project.endDate && (
+                <div>
+                  <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">End date</dt>
+                  <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5 flex items-center gap-1.5">
+                    <Calendar size={11} />{formatDate(project.endDate)}
+                  </dd>
+                </div>
+              )}
+              {budget && (
+                <div>
+                  <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Budget</dt>
+                  <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5 flex items-center gap-1">
+                    <IndianRupee size={11} />{formatCurrency(budget)}
+                  </dd>
+                </div>
+              )}
+              <div>
+                <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Created</dt>
+                <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5">{formatDate(project.createdAt)}</dd>
+              </div>
+              <div>
+                <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Share rates</dt>
+                <dd className="mt-1.5 flex items-center gap-2">
+                  <ShareRateToggle projectId={project.id} value={project.shareRateWithClient} />
+                  <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Show in portal</span>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        )}
+      </div>
+
       {/* Tabs */}
       <div className="flex items-center gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none">
         {TABS.map(t => (
@@ -392,90 +481,34 @@ export default function ProjectPage() {
       {/* Tab content */}
       <div>
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Left: description + dates */}
-            <div className="lg:col-span-2 space-y-4">
-              {project.description && (
-                <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-4">
-                  <p className="text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide mb-2">Description</p>
-                  <p className="text-[13px] text-[#344054] dark:text-[#C2C8D8] leading-relaxed">{project.description}</p>
-                </div>
-              )}
+          <div className="space-y-4">
+            {project.description && (
               <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-4">
-                <p className="text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide mb-3">Linked records</p>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  {[
-                    { label: 'Proposals', count: project._count?.proposals ?? 0,   icon: FileText, action: () => { setTab('documents'); setDocSubTab('proposals') } },
-                    { label: 'Contracts', count: project._count?.contracts ?? 0,   icon: PenLine,  action: () => { setTab('documents'); setDocSubTab('contracts') } },
-                    { label: 'Invoices',  count: project._count?.invoices ?? 0,    icon: Receipt,  action: () => { setTab('documents'); setDocSubTab('invoices')  } },
-                    { label: 'Time log',  count: project._count?.timeEntries ?? 0, icon: Clock,    action: () => setTab('time') },
-                    { label: 'Expenses',  count: project._count?.expenses ?? 0,    icon: Wallet,   action: () => setTab('time') },
-                  ].map(({ label, count, icon: Icon, action }) => (
-                    <button
-                      key={label}
-                      onClick={action}
-                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[#F2F4F7] dark:border-[#26283A] hover:border-[#2563EB]/40 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-all text-center"
-                    >
-                      <Icon size={16} className="text-[#667085] dark:text-[#8B92A8]" />
-                      <p className="text-[18px] font-bold text-[#101828] dark:text-[#ECEEF3]">{count}</p>
-                      <p className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74]">{label}</p>
-                    </button>
-                  ))}
-                </div>
+                <p className="text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide mb-2">Description</p>
+                <p className="text-[13px] text-[#344054] dark:text-[#C2C8D8] leading-relaxed">{project.description}</p>
               </div>
-            </div>
-
-            {/* Right: meta */}
-            <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-4 h-fit">
-              <p className="text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide mb-3">Details</p>
-              <dl className="space-y-3">
-                {project.client && (
-                  <div>
-                    <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Client</dt>
-                    <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5">
-                      {project.client.name}
-                      {project.client.company && <span className="text-[#98A2B3]"> · {project.client.company}</span>}
-                    </dd>
-                  </div>
-                )}
-                {project.startDate && (
-                  <div>
-                    <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Start date</dt>
-                    <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5 flex items-center gap-1.5">
-                      <Calendar size={11} />{formatDate(project.startDate)}
-                    </dd>
-                  </div>
-                )}
-                {project.endDate && (
-                  <div>
-                    <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">End date</dt>
-                    <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5 flex items-center gap-1.5">
-                      <Calendar size={11} />{formatDate(project.endDate)}
-                    </dd>
-                  </div>
-                )}
-                {budget && (
-                  <div>
-                    <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Budget</dt>
-                    <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5 flex items-center gap-1">
-                      <IndianRupee size={11} />{formatCurrency(budget)}
-                    </dd>
-                  </div>
-                )}
-                <div>
-                  <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Created</dt>
-                  <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5">{formatDate(project.createdAt)}</dd>
-                </div>
-                <div className="pt-1 border-t border-[#F2F4F7] dark:border-[#26283A]">
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <p className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Share rates with client</p>
-                      <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Show hourly rates in client portal</p>
-                    </div>
-                    <ShareRateToggle projectId={project.id} value={project.shareRateWithClient} />
-                  </div>
-                </div>
-              </dl>
+            )}
+            <div className="bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-4">
+              <p className="text-[11.5px] font-semibold text-[#667085] dark:text-[#8B92A8] uppercase tracking-wide mb-3">Linked records</p>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  { label: 'Proposals', count: project._count?.proposals ?? 0,   icon: FileText, action: () => { setTab('documents'); setDocSubTab('proposals') } },
+                  { label: 'Contracts', count: project._count?.contracts ?? 0,   icon: PenLine,  action: () => { setTab('documents'); setDocSubTab('contracts') } },
+                  { label: 'Invoices',  count: project._count?.invoices ?? 0,    icon: Receipt,  action: () => { setTab('documents'); setDocSubTab('invoices')  } },
+                  { label: 'Time log',  count: project._count?.timeEntries ?? 0, icon: Clock,    action: () => setTab('time') },
+                  { label: 'Expenses',  count: project._count?.expenses ?? 0,    icon: Wallet,   action: () => setTab('time') },
+                ].map(({ label, count, icon: Icon, action }) => (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[#F2F4F7] dark:border-[#26283A] hover:border-[#2563EB]/40 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-all text-center"
+                  >
+                    <Icon size={16} className="text-[#667085] dark:text-[#8B92A8]" />
+                    <p className="text-[18px] font-bold text-[#101828] dark:text-[#ECEEF3]">{count}</p>
+                    <p className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74]">{label}</p>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

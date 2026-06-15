@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AlertCircle, Loader2, RefreshCw, ExternalLink, X, Send, Copy, Check, BookOpen } from 'lucide-react'
@@ -516,14 +516,19 @@ export default function IntegrationsTab() {
   const disconnectGoogleSheets = useDisconnectGoogleSheets()
   const initGoogleSheets      = useInitGoogleSheets()
 
-  // After OAuth redirect, create the spreadsheet
+  // After OAuth redirect, create the spreadsheet.
+  // sheetsInitFired prevents the effect from firing twice:
+  //   - once when profile is undefined (condition: !undefined = true)
+  //   - again when profile loads with googleSheetsConnected:false (dep change)
   const { search } = useLocation()
+  const sheetsInitFired = useRef(false)
   useEffect(() => {
     const params = new URLSearchParams(search)
-    if (params.get('googleSheetsConnected') === 'true' && !profile?.googleSheetsConnected) {
+    if (params.get('googleSheetsConnected') === 'true' && !sheetsInitFired.current) {
+      sheetsInitFired.current = true
       initGoogleSheets.mutate()
     }
-  }, [search, profile?.googleSheetsConnected])
+  }, [search])
 
   const integrations: IntegrationDef[] = [
     {
