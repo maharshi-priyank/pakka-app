@@ -26,7 +26,9 @@ export interface Workspace {
   defaultLutNumber: string | null
   emailSignature:  string | null
   createdAt:       string
-  role:            'OWNER' | 'MEMBER'
+  role:     'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER'
+  roleId:   string
+  roleName: string
 }
 
 export function useWorkspaces() {
@@ -76,7 +78,7 @@ export function useSwitchWorkspace() {
 export function useUpdateWorkspace(workspaceId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: Partial<Omit<Workspace, 'id' | 'createdAt' | 'role'>>) => {
+    mutationFn: async (payload: Partial<Omit<Workspace, 'id' | 'createdAt' | 'role' | 'roleId' | 'roleName'>>) => {
       const { data } = await api.patch<{ data: Workspace }>(`/workspaces/${workspaceId}`, payload)
       return data.data
     },

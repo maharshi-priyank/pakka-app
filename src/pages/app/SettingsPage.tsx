@@ -9,26 +9,31 @@ import IntegrationsTab from '@/features/settings/components/IntegrationsTab'
 import PublicProfileTab from '@/features/settings/components/PublicProfileTab'
 import BillingTab from '@/features/billing/components/BillingTab'
 import TeamTab from '@/features/team/components/TeamTab'
+import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
+import { Permission } from '@/types/permissions'
 
-const TABS = [
-  { key: 'profile',       label: 'Profile',        icon: User       },
-  { key: 'business',      label: 'Business',       icon: Building2  },
-  { key: 'public',        label: 'Public Profile', icon: Globe      },
-  { key: 'notifications', label: 'Notifications',  icon: Bell       },
-  { key: 'integrations',  label: 'Integrations',   icon: Puzzle     },
-  { key: 'billing',       label: 'Billing',        icon: CreditCard },
-  { key: 'team',          label: 'Team',           icon: Users      },
-] as const
+const TAB_DEFS = [
+  { key: 'profile'       as const, label: 'Profile',        icon: User,       permission: null },
+  { key: 'business'      as const, label: 'Business',       icon: Building2,  permission: null },
+  { key: 'public'        as const, label: 'Public Profile', icon: Globe,      permission: null },
+  { key: 'notifications' as const, label: 'Notifications',  icon: Bell,       permission: null },
+  { key: 'integrations'  as const, label: 'Integrations',   icon: Puzzle,     permission: Permission.MANAGE_INTEGRATIONS },
+  { key: 'billing'       as const, label: 'Billing',        icon: CreditCard, permission: Permission.MANAGE_BILLING },
+  { key: 'team'          as const, label: 'Team',           icon: Users,      permission: Permission.MANAGE_MEMBERS },
+]
 
-type TabKey = typeof TABS[number]['key']
+type TabKey = typeof TAB_DEFS[number]['key']
 
 export default function SettingsPage() {
   const { search }                    = useLocation()
   const [activeTab, setActiveTab]     = useState<TabKey>('profile')
 
+  const { hasPermission } = useWorkspacePermissions()
+  const visibleTabs = TAB_DEFS.filter(t => !t.permission || hasPermission(t.permission))
+
   useEffect(() => {
     const tab = new URLSearchParams(search).get('tab') as TabKey | null
-    if (tab && TABS.some(t => t.key === tab)) setActiveTab(tab)
+    if (tab && visibleTabs.some(t => t.key === tab)) setActiveTab(tab)
   }, [search])
 
   return (
@@ -40,7 +45,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="flex gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
-        {TABS.map(({ key, label, icon: Icon }) => (
+        {visibleTabs.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}

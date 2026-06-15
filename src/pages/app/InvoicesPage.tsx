@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, FileText, Search, X, LayoutGrid, List } from 'lucide-react'
+import { usePermissionRedirect } from '@/hooks/usePermissionRedirect'
+import { Permission } from '@/types/permissions'
 import { cn } from '@/lib/utils'
 import { useInvoices, useDeleteInvoice, useVoidInvoice } from '@/features/invoices/hooks/useInvoices'
 import InvoiceCard, { InvoiceCardSkeleton } from '@/features/invoices/components/InvoiceCard'
@@ -38,6 +40,7 @@ function getStoredView(): ViewMode {
 }
 
 export default function InvoicesPage() {
+  usePermissionRedirect(Permission.VIEW_INVOICES)
   const navigate = useNavigate()
 
   const [statusFilter,  setStatusFilter]  = useState<InvoiceStatus | 'ALL'>('ALL')

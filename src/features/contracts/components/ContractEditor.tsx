@@ -15,6 +15,8 @@ import type { Contract, SendContractResponse } from '../schemas/contract.schema'
 import { useCreateContract, useUpdateContract, useSendContract } from '../hooks/useContracts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useClients } from '@/features/clients/hooks/useClients'
+import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
+import { Permission } from '@/types/permissions'
 
 type Tab = 'parties' | 'scope' | 'financials' | 'clauses'
 
@@ -39,6 +41,8 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
   const [sendResult, setSendResult] = useState<SendContractResponse | null>(null)
   const [copied,     setCopied]     = useState(false)
   const [projectId,  setProjectId]  = useState(contract?.projectId ?? defaultProjectId ?? '')
+
+  const { hasPermission } = useWorkspacePermissions()
 
   const createMutation = useCreateContract()
   const updateMutation = useUpdateContract()
@@ -135,7 +139,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
     setTimeout(() => setCopied(false), 2000)
   }, [sendResult])
 
-  const canSend = isEdit && (contract?.status === 'DRAFT' || contract?.status === 'SENT')
+  const canSend = isEdit && hasPermission(Permission.SEND_CONTRACTS) && (contract?.status === 'DRAFT' || contract?.status === 'SENT')
   const isSigned = isEdit && contract?.status === 'SIGNED'
 
   return (

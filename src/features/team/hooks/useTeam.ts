@@ -7,6 +7,9 @@ export interface TeamMember {
   name:      string
   email:     string
   createdAt: string
+  roleId:    string
+  roleKey:   string
+  roleName:  string
 }
 
 export interface TeamInvite {
@@ -34,7 +37,8 @@ export function useTeam() {
 export function useInviteMember() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (email: string) => api.post('/team/invite', { email }),
+    mutationFn: async ({ email, roleId }: { email: string; roleId?: string }) =>
+      api.post('/team/invite', { email, roleId }).then(r => r.data),
     onSuccess: () => {
       toast.success('Invite sent')
       qc.invalidateQueries({ queryKey: ['team'] })
@@ -66,6 +70,21 @@ export function useRemoveMember() {
     },
     onError: (err: { response?: { data?: { message?: string } } }) => {
       toast.error(err.response?.data?.message ?? 'Failed to remove member')
+    },
+  })
+}
+
+export function useUpdateMemberRole() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ memberId, roleId }: { memberId: string; roleId: string }) =>
+      api.patch(`/team/member/${memberId}/role`, { roleId }).then(r => r.data),
+    onSuccess: () => {
+      toast.success('Role updated')
+      qc.invalidateQueries({ queryKey: ['team'] })
+    },
+    onError: (err: { response?: { data?: { message?: string } } }) => {
+      toast.error(err.response?.data?.message ?? 'Failed to update role')
     },
   })
 }
