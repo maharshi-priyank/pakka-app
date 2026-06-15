@@ -40,6 +40,22 @@ export function useWorkspaces() {
   })
 }
 
+export function useCreateWorkspace() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (name: string) => {
+      const { data } = await api.post<{ data: { id: string; name: string } }>('/workspaces', { name })
+      return data.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['workspaces'] })
+      qc.invalidateQueries({ queryKey: ['profile'] })
+      toast.success('Workspace created')
+    },
+    onError: () => toast.error('Failed to create workspace'),
+  })
+}
+
 export function useSwitchWorkspace() {
   const qc = useQueryClient()
   return useMutation({
@@ -48,7 +64,10 @@ export function useSwitchWorkspace() {
       return workspaceId
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['profile'] })
+      // Workspace switch is a complete context change — every cached entity
+      // belongs to the old workspace. Invalidate all queries so every list,
+      // detail, and dashboard re-fetches against the new activeWorkspaceId.
+      qc.invalidateQueries()
     },
     onError: () => toast.error('Failed to switch workspace'),
   })

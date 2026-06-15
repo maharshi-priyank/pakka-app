@@ -43,6 +43,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const displayInvoice = saved ?? invoice
 
   const { data: profile } = useProfile()
+  const { currency: wsCurrency } = useWorkspace()
 
   const {
     register, control, handleSubmit, watch, setValue,
@@ -63,7 +64,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           recurrenceCycle:   invoice.recurrenceCycle    ?? undefined,
           recurrenceDay:     invoice.recurrenceDay      ?? undefined,
           recurrenceEndDate: invoice.recurrenceEndDate  ? invoice.recurrenceEndDate.slice(0, 10) : undefined,
-          currency:          invoice.currency  ?? 'INR',
+          currency:          invoice.currency  ?? wsCurrency,
           lutNumber:         invoice.lutNumber ?? (profile?.defaultLutNumber ?? ''),
         }
       : {
@@ -71,7 +72,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
           clientId:   defaultClientId,
           lineItems:  [{ description: '', qty: 1, rate: 0, gstRate: 18 }],
           gstType:    'IGST',
-          currency:   'INR',
+          currency:   wsCurrency,
           lutNumber:  profile?.defaultLutNumber ?? '',
         },
   })

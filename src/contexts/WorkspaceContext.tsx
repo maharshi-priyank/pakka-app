@@ -25,10 +25,11 @@ const WorkspaceContext = createContext<WorkspaceSettings>({
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const { data: profile } = useProfile()
 
-  const country  = profile?.country  ?? 'IN'
+  const ws       = profile?.activeWorkspace
+  const country  = ws?.country  ?? profile?.country  ?? 'IN'
   const defaults = getCountryDefaults(country)
-  const currency = profile?.currency ?? defaults.currency
-  const taxLabel = profile?.taxLabel ?? defaults.taxLabel
+  const currency = ws?.currency ?? profile?.currency ?? defaults.currency
+  const taxLabel = ws?.taxLabel ?? profile?.taxLabel ?? defaults.taxLabel
 
   const value: WorkspaceSettings = {
     country,

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
@@ -22,6 +23,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { generateInitials } from '@/lib/utils'
 import WorkspaceSwitcher from '@/features/settings/components/WorkspaceSwitcher'
+import CreateWorkspaceModal from '@/features/settings/components/CreateWorkspaceModal'
 
 const ALL_NAV_ITEMS = [
   { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',   href: '/dashboard',   tourId: 'tour-dashboard' },
@@ -93,9 +95,15 @@ interface Props {
 
 export default function Sidebar({ onClose }: Props) {
   const [order] = useState<string[]>(loadOrder)
-  // const [customizing, setCustomizing] = useState(false) // disabled — Customise feature not ready
+  const [createWsOpen, setCreateWsOpen] = useState(false)
 
   const { user } = useAuthStore()
+
+  useEffect(() => {
+    function onCreateWs() { setCreateWsOpen(true) }
+    document.addEventListener('create-workspace', onCreateWs)
+    return () => document.removeEventListener('create-workspace', onCreateWs)
+  }, [])
   const { data: inboxUnread = 0 } = useMessageUnreadCount()
   const name = (user?.user_metadata?.name as string | undefined) ?? user?.email ?? 'User'
   const initials = generateInitials(name)
@@ -130,16 +138,13 @@ export default function Sidebar({ onClose }: Props) {
   return (
     <aside className="w-[240px] shrink-0 bg-transparent flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-black/[0.06]">
 
-      {/* Logo */}
-      <div className="h-[60px] flex items-center px-5 shrink-0">
-        <img src="/logo/clearwork_full_dark.png" alt="ClearWork" style={{ height: 26, width: 'auto', display: 'block' }} />
+      {/* Workspace switcher */}
+      <div className="pt-3 pb-2 shrink-0 border-b border-gray-100">
+        <WorkspaceSwitcher />
       </div>
 
-      {/* Workspace switcher — only visible when user belongs to 2+ workspaces */}
-      <WorkspaceSwitcher />
-
       {/* Nav — scrollable */}
-      <div className="flex-1 py-3 pl-4 pr-3 overflow-y-auto min-h-0">
+      <div className="flex-1 pt-2 pb-3 pl-4 pr-3 overflow-y-auto min-h-0">
         {SECTIONS.map((section, si) => {
           const sectionItems = orderedItems.filter(item => section.ids.includes(item.id))
           if (sectionItems.length === 0) return null
@@ -252,6 +257,11 @@ export default function Sidebar({ onClose }: Props) {
           <LogOut size={13} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
         </button>
       </div>
+
+      {createPortal(
+        <CreateWorkspaceModal open={createWsOpen} onClose={() => setCreateWsOpen(false)} />,
+        document.body,
+      )}
 
       {/* Customise overlay — disabled until sidebar customisation is ready
       {customizing && (

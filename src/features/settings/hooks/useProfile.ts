@@ -70,8 +70,8 @@ export function useUpdateProfile() {
       const { data } = await api.patch<{ data: UserProfile }>('/users/me', payload)
       return data.data
     },
-    onSuccess: (updated) => {
-      queryClient.setQueryData(['profile'], updated)
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
     },
   })
 }
