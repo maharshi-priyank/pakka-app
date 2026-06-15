@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
-import { Plus, Search, X, IndianRupee, LayoutGrid, List, Archive } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { Plus, Search, X, IndianRupee, LayoutGrid, List, Archive, Telescope, ExternalLink } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 import AIIcon from '@/features/ai/components/AIIcon'
 import { LeadsKanban, AddLeadModal } from '@/features/leads'
 import { useLeads } from '@/features/leads'
@@ -54,6 +55,16 @@ export default function LeadsPage() {
   const [includeArchived, setIncludeArchived] = useState(false)
 
   const searchRef = useRef<HTMLInputElement>(null)
+
+  const openLeadFinder = useCallback(async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    const { data: { session } } = await supabase.auth.getSession()
+    const base = import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'
+    const url = session
+      ? `${base}?at=${encodeURIComponent(session.access_token)}&rt=${encodeURIComponent(session.refresh_token)}`
+      : base
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }, [])
 
   const { data, isLoading } = useLeads({ limit: 500, includeArchived: includeArchived || undefined })
   const allLeads      = data?.items ?? []
@@ -145,6 +156,17 @@ export default function LeadsPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Lead Finder link */}
+          <a
+            href={import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'}
+            onClick={openLeadFinder}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer"
+          >
+            <Telescope size={13} />
+            Find Leads
+            <ExternalLink size={10} className="opacity-60" />
+          </a>
+
           {/* AI button */}
           <button
             onClick={() => setShowAI(true)}

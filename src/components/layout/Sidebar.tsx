@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Users, FileText, PenLine,
   Receipt, Building2, Settings, CalendarDays, ClipboardList, Zap, BarChart3, FolderKanban, Mail,
-  LogOut, CheckSquare, MessageSquare,
+  LogOut, CheckSquare, MessageSquare, Telescope, ExternalLink,
 } from 'lucide-react'
 import { useMessageUnreadCount } from '@/features/messages/hooks/useMessages'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
@@ -116,6 +116,16 @@ export default function Sidebar({ onClose }: Props) {
     await supabase.auth.signOut()
   }
 
+  const openLeadFinder = useCallback(async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    const { data: { session } } = await supabase.auth.getSession()
+    const base = import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'
+    const url = session
+      ? `${base}?at=${encodeURIComponent(session.access_token)}&rt=${encodeURIComponent(session.refresh_token)}`
+      : base
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }, [])
+
   const orderedItems = order.map(id => ALL_NAV_ITEMS.find(n => n.id === id)!).filter(Boolean)
 
   // Customise sidebar logic — disabled until feature is ready
@@ -202,6 +212,16 @@ export default function Sidebar({ onClose }: Props) {
 
       {/* Bottom actions */}
       <div className="border-t border-gray-100 pl-4 pr-3 py-3 space-y-0.5 shrink-0">
+        <a
+          href={import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'}
+          onClick={openLeadFinder}
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium text-gray-500 hover:bg-white/40 hover:text-gray-800 transition-all duration-100 cursor-pointer"
+        >
+          <Telescope size={15} strokeWidth={2} className="shrink-0 text-gray-400" />
+          <span className="flex-1">Lead Finder</span>
+          <ExternalLink size={11} className="text-gray-300" />
+        </a>
+
         <NavLink
           to="/email-templates"
           onClick={onClose}
