@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
+import type { Workspace } from './useWorkspaces'
 
 export interface UserProfile {
   id:                string
@@ -47,6 +48,8 @@ export interface UserProfile {
   ibanNumber:              string | null
   swiftCode:               string | null
   routingNumber:           string | null
+  activeWorkspaceId:       string | null
+  activeWorkspace:         (Omit<Workspace, 'role'> & { razorpayKeyId?: string | null }) | null
 }
 
 export function useProfile() {

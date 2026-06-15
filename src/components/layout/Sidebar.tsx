@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { generateInitials } from '@/lib/utils'
+import WorkspaceSwitcher from '@/features/settings/components/WorkspaceSwitcher'
 
 const ALL_NAV_ITEMS = [
   { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',   href: '/dashboard',   tourId: 'tour-dashboard' },
@@ -133,6 +134,9 @@ export default function Sidebar({ onClose }: Props) {
       <div className="h-[60px] flex items-center px-5 shrink-0">
         <img src="/logo/clearwork_full_dark.png" alt="ClearWork" style={{ height: 26, width: 'auto', display: 'block' }} />
       </div>
+
+      {/* Workspace switcher — only visible when user belongs to 2+ workspaces */}
+      <WorkspaceSwitcher />
 
       {/* Nav — scrollable */}
       <div className="flex-1 py-3 pl-4 pr-3 overflow-y-auto min-h-0">
