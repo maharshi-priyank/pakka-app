@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { UserPlus, Trash2, Clock, Loader2, Users, ChevronDown, Check, Shield } from 'lucide-react'
+import { UserPlus, Trash2, Clock, Loader2, ChevronDown, Check, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useSubscriptionStatus } from '@/features/billing/hooks/useSubscription'
 import { useTeam, useInviteMember, useCancelInvite, useRemoveMember, useUpdateMemberRole } from '../hooks/useTeam'
 import { useWorkspaceRoles } from '@/features/settings/hooks/useWorkspacePermissions'
 
@@ -112,9 +111,6 @@ function RoleDropdown({
 }
 
 export default function TeamTab() {
-  const { data: subscription } = useSubscriptionStatus()
-  const isStudio = subscription?.plan === 'STUDIO'
-
   const { data: team, isLoading } = useTeam()
   const { mutate: invite, isPending: inviting } = useInviteMember()
   const { mutate: cancelInvite, isPending: cancelling } = useCancelInvite()
@@ -139,28 +135,6 @@ export default function TeamTab() {
     invite(
       { email: email.trim(), roleId: selectedRoleId || undefined },
       { onSuccess: () => setEmail('') }
-    )
-  }
-
-  if (!isStudio) {
-    return (
-      <div className="space-y-5 max-w-xl">
-        <div>
-          <h2 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">Team</h2>
-          <p className="text-[12.5px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
-            Invite a team member to collaborate in your workspace.
-          </p>
-        </div>
-        <div className="bg-[#F9FAFB] border border-[#EAECF0] rounded-xl p-6 text-center">
-          <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] flex items-center justify-center mx-auto mb-3">
-            <Users size={18} className="text-[#6366F1]" />
-          </div>
-          <p className="text-[14px] font-semibold text-[#101828] dark:text-[#ECEEF3] mb-1">Studio plan required</p>
-          <p className="text-[12.5px] text-[#667085] dark:text-[#8B92A8]">
-            Upgrade to Studio to add a team member to your workspace.
-          </p>
-        </div>
-      </div>
     )
   }
 
