@@ -164,7 +164,7 @@ export default function UpgradePlanCards() {
       </div>
 
       <p className="text-[11.5px] text-[#98A2B3] text-center pt-1">
-        Monthly billing · Cancel anytime · Secure checkout via Cashfree
+        Monthly billing · Cancel anytime · Secure checkout via Razorpay
       </p>
     </div>
   )
