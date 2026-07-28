@@ -1,0 +1,5 @@
+export * from './schemas/contact.schema'
+export * from './hooks/useContacts'
+export { default as AddContactModal } from './components/AddContactModal'
+export { default as ContactsTable, ContactsTableSkeleton } from './components/ContactsTable'
+export { default as ContactsCards } from './components/ContactsCards'

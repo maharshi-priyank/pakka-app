@@ -14,7 +14,7 @@ import {
 import type { Contract, SendContractResponse } from '../schemas/contract.schema'
 import { useCreateContract, useUpdateContract, useSendContract } from '../hooks/useContracts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
-import { useClients } from '@/features/clients/hooks/useClients'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
 
@@ -30,13 +30,13 @@ const TABS: { id: Tab; label: string; icon: typeof FileText }[] = [
 interface Props {
   contract?:          Contract
   defaultProjectId?:  string
-  defaultClientId?:   string
+  defaultContactId?:  string
   onSaved?:           (contract: Contract) => void
   onDiscard?:         () => void
   onGenerateInvoice?: () => void
 }
 
-export default function ContractEditor({ contract, defaultProjectId, defaultClientId, onSaved, onDiscard, onGenerateInvoice }: Props) {
+export default function ContractEditor({ contract, defaultProjectId, defaultContactId, onSaved, onDiscard, onGenerateInvoice }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('parties')
   const [sendResult, setSendResult] = useState<SendContractResponse | null>(null)
   const [copied,     setCopied]     = useState(false)
@@ -57,7 +57,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
     resolver: zodResolver(createContractSchema),
     defaultValues: {
       title:      contract?.title ?? '',
-      clientId:   contract?.clientId ?? defaultClientId ?? undefined,
+      contactId:  contract?.contactId ?? defaultContactId ?? undefined,
       proposalId: contract?.proposalId ?? undefined,
       content: {
         intro:              (c.intro              as string) ?? 'This agreement is entered into between the service provider ("Agency") and the client ("Client") for the services described below.',
@@ -87,18 +87,18 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
   const deliverablesArr = useFieldArray({ control, name: 'content.deliverables' })
   const paymentArr      = useFieldArray({ control, name: 'content.paymentSchedule' })
 
-  const watchedClientId = watch('clientId') ?? ''
-  const { data: clientsData } = useClients()
-  const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
+  const watchedContactId = watch('contactId') ?? ''
+  const { data: contactsData } = useContacts({ limit: 200 })
+  const { data: projectsData } = useProjects({ contactId: watchedContactId || undefined, limit: 100 })
 
-  const clientSynced = useRef(false)
+  const contactSynced = useRef(false)
   useEffect(() => {
-    if (clientSynced.current || !clientsData?.clients?.length || !defaultClientId) return
-    if (clientsData.clients.some(c => c.id === defaultClientId)) {
-      setValue('clientId', defaultClientId)
-      clientSynced.current = true
+    if (contactSynced.current || !contactsData?.items?.length || !defaultContactId) return
+    if (contactsData.items.some(c => c.id === defaultContactId)) {
+      setValue('contactId', defaultContactId)
+      contactSynced.current = true
     }
-  }, [clientsData?.clients?.length])
+  }, [contactsData?.items?.length])
 
   const exclusions = (watch('content.exclusions') ?? []) as string[]
   function addExclusion() { setValue('content.exclusions' as never, [...exclusions, ''] as never) }
@@ -182,15 +182,15 @@ export default function ContractEditor({ contract, defaultProjectId, defaultClie
           {activeTab === 'parties' && (
             <>
               {!isEdit && (
-                <CSection title="Client" description="Who is this contract for?">
+                <CSection title="Contact" description="Who is this contract for?">
                   <select
-                    {...register('clientId')}
+                    {...register('contactId')}
                     className="form-input w-full max-w-xs"
                   >
-                    <option value="">— Select a client —</option>
-                    {(clientsData?.clients ?? []).map(cl => (
-                      <option key={cl.id} value={cl.id}>
-                        {cl.name}{cl.company ? ` · ${cl.company}` : ''}
+                    <option value="">— Select a contact —</option>
+                    {(contactsData?.items ?? []).map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}{c.company ? ` — ${c.company}` : ''}
                       </option>
                     ))}
                   </select>

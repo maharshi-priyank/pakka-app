@@ -6,7 +6,6 @@ import ProposalEditor from '@/features/proposals/components/ProposalEditor'
 import TemplatePickerModal from '@/features/proposals/components/TemplatePickerModal'
 import AIProposalModal from '@/features/ai/components/AIProposalModal'
 import type { Proposal, ProposalTemplate } from '@/features/proposals/schemas/proposal.schema'
-import type { Lead } from '@/features/leads/schemas/lead.schema'
 import { useProject } from '@/features/projects/hooks/useProjects'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useExportProposalToGoogleDocs } from '@/features/settings/hooks/useGoogleDocs'
@@ -18,17 +17,16 @@ export default function ProposalEditorPage() {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const isNew = !id || id === 'new'
-  const state             = location.state as { template?: ProposalTemplate; lead?: Lead } | null
+  const state             = location.state as { template?: ProposalTemplate } | null
   const templateFromState = state?.template
-  const leadFromState     = state?.lead
 
   // Start-method picker: shown for new blank proposals only
   const [startMethod,      setStartMethod]      = useState<'blank' | null>(templateFromState ? 'blank' : null)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [showAI,             setShowAI]             = useState(false)
 
-  const urlProjectId = searchParams.get('projectId') || undefined
-  const urlClientId  = searchParams.get('clientId')  || undefined
+  const urlProjectId  = searchParams.get('projectId') || undefined
+  const urlContactId  = searchParams.get('contactId') || searchParams.get('clientId') || undefined
   const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: proposal, isLoading } = useProposal(isNew ? null : id ?? null)
@@ -70,7 +68,6 @@ export default function ProposalEditorPage() {
             <Link to={`/projects/${effectiveProjectId}`} className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
               {effectiveProjectName}
             </Link>
-            <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
           </>
         ) : (
           <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Proposals</span>
@@ -172,10 +169,9 @@ export default function ProposalEditorPage() {
       ) : (
         <ProposalEditor
           proposal={!isNew ? proposal : undefined}
-          defaultLead={isNew ? leadFromState : undefined}
           defaultTemplate={isNew ? templateFromState : undefined}
           defaultProjectId={isNew ? urlProjectId : undefined}
-          defaultClientId={isNew ? urlClientId : undefined}
+          defaultContactId={isNew ? urlContactId : undefined}
           onSaved={handleSaved}
           onDiscard={handleDiscard}
         />
@@ -191,7 +187,7 @@ export default function ProposalEditorPage() {
         open={showTemplatePicker}
         onClose={() => setShowTemplatePicker(false)}
         defaultProjectId={urlProjectId}
-        defaultClientId={urlClientId}
+        defaultContactId={urlContactId}
       />
     </div>
   )

@@ -22,6 +22,7 @@ import DateRangePill from '@/components/filters/DateRangePill'
 import AmountRangePill from '@/components/filters/AmountRangePill'
 import { RemoveModal } from '@/components/RemoveModal'
 import { toast } from 'sonner'
+import ProposalPreviewDrawer from '@/features/proposals/components/ProposalPreviewDrawer'
 
 type ActiveTab = ProposalStatus | 'ALL' | 'TEMPLATES'
 
@@ -68,6 +69,7 @@ export default function ProposalsPage() {
   const [filters,            setFilters]            = useState<ProposalFilters>(EMPTY_FILTERS)
   const [includeArchived,    setIncludeArchived]    = useState(false)
   const [removeTarget,       setRemoveTarget]       = useState<Proposal | null>(null)
+  const [proposalId,         setProposalId]         = useState<string | null>(null)
 
   const searchRef     = useRef<HTMLInputElement>(null)
   const convertMutation = useCreateContractFromProposal()
@@ -394,7 +396,7 @@ export default function ProposalsPage() {
             sortBy={sortBy}
             sortDir={sortDir}
             onSort={handleSort}
-            onOpen={p => navigate(`/proposals/${p.id}`)}
+            onOpen={p => setProposalId(p.id)}
             onRemove={p => setRemoveTarget(p)}
           />
         ) : (
@@ -403,7 +405,7 @@ export default function ProposalsPage() {
               <ProposalCard
                 key={p.id}
                 proposal={p}
-                onClick={openP => navigate(`/proposals/${openP.id}`)}
+                onClick={openP => setProposalId(openP.id)}
                 onConvertToContract={handleConvertToContract}
                 onSaveAsTemplate={p => setSaveTemplateFor(p)}
                 onRemove={p => setRemoveTarget(p)}
@@ -425,6 +427,11 @@ export default function ProposalsPage() {
           defaultName={saveTemplateFor.title}
         />
       )}
+
+      <ProposalPreviewDrawer
+        id={proposalId}
+        onClose={() => setProposalId(null)}
+      />
 
       {removeTarget && (
         <RemoveModal

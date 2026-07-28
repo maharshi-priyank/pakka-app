@@ -1,13 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { load } from '@cashfreepayments/cashfree-js'
 import { api } from '@/lib/api'
+import { useProfile } from '@/features/settings/hooks/useProfile'
 
 export interface SubscriptionState {
   plan: string
   subscriptionStatus: 'NONE' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED' | 'PAUSED'
-  cashfreeSubscriptionId?: string
-  cashfreePlanId?: string
+  razorpaySubscriptionId?: string
   billingAnchorDate?: string
   planExpiresAt?: string
 }
@@ -34,12 +33,49 @@ export function useSubscriptionStatus() {
 }
 
 export function useCreateSubscription() {
+  const queryClient = useQueryClient()
+  const { data: profile } = useProfile()
+
   return useMutation({
     mutationFn: async (tier: 'SOLO' | 'STUDIO') => {
-      const { checkoutUrl: sessionId } = await createSubscription(tier)
-      const mode = (import.meta.env.VITE_CASHFREE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production'
-      const cashfree = await load({ mode })
-      await cashfree.subscriptionsCheckout({ subsSessionId: sessionId })
+      const { checkoutUrl: subscriptionId } = await createSubscription(tier)
+
+      return new Promise<void>((resolve, reject) => {
+        const rzp = new window.Razorpay({
+          key:             import.meta.env.VITE_RAZORPAY_KEY_ID,
+          subscription_id: subscriptionId,
+          name:            'ClearWork',
+          description:     'Monthly subscription',
+          prefill: {
+            name:  profile?.name  ?? '',
+            email: profile?.email ?? '',
+          },
+          handler: async (response: {
+            razorpay_payment_id: string
+            razorpay_subscription_id: string
+            razorpay_signature: string
+          }) => {
+            try {
+              await api.post('/payments/razorpay/verify', {
+                razorpay_payment_id:      response.razorpay_payment_id,
+                razorpay_subscription_id: response.razorpay_subscription_id,
+                razorpay_signature:       response.razorpay_signature,
+              })
+              queryClient.invalidateQueries({ queryKey: ['billing'] })
+              queryClient.invalidateQueries({ queryKey: ['profile'] })
+              window.location.href = '/billing/success'
+              resolve()
+            } catch (err) {
+              reject(err)
+            }
+          },
+          modal: {
+            ondismiss: () => resolve(),
+          },
+        })
+
+        rzp.open()
+      })
     },
     onError: () => {
       toast.error('Failed to start checkout. Please try again.')

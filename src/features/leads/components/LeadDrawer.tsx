@@ -388,8 +388,6 @@ export default function LeadDrawer({ lead, onClose }: Props) {
       <ScheduleCallModal
         open={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
-        leadId={lead.id}
-        leadName={lead.name}
         defaultTitle={`Discovery call with ${lead.name}`}
       />
 

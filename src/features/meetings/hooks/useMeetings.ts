@@ -32,8 +32,7 @@ export interface CreateMeetingDto {
   scheduledAt:  string
   durationMins?: number
   agenda?:      string
-  leadId?:      string
-  clientId?:    string
+  contactId?:   string
   guestEmails?: string[]
   provider?:    'google' | 'outlook'
 }

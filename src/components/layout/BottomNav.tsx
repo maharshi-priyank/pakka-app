@@ -1,21 +1,24 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, Users, FileText, Receipt, MoreHorizontal,
-  PenLine, Building2, Settings, LogOut, X,
+  LayoutDashboard, FileText, Receipt, MoreHorizontal,
+  PenLine, Settings, LogOut, X,
   FolderKanban, BarChart3, CalendarDays, ClipboardList, Zap,
+  Clock, Wallet,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 
 const PRIMARY_TABS = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Users,           label: 'Leads',     href: '/leads' },
-  { icon: Building2,       label: 'Clients',   href: '/clients' },
+  // { icon: Users,           label: 'Leads',     href: '/leads' },
+  // { icon: Building2,       label: 'Clients',   href: '/clients' },
   { icon: FolderKanban,    label: 'Projects',  href: '/projects' },
 ]
 
 const MORE_ITEMS = [
+  { icon: Clock,         label: 'Time Log',    href: '/time' },
+  { icon: Wallet,        label: 'Expenses',    href: '/expenses' },
   { icon: FileText,      label: 'Proposals',   href: '/proposals' },
   { icon: Receipt,       label: 'Invoices',    href: '/invoices' },
   { icon: PenLine,       label: 'Contracts',   href: '/contracts' },

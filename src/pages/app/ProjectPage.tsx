@@ -390,7 +390,6 @@ export default function ProjectPage() {
                 )}
                 {budget && (
                   <span className="flex items-center gap-1 shrink-0">
-                    <IndianRupee size={11} className="text-[#98A2B3] dark:text-[#545C74]" />
                     {formatCurrency(budget)}
                   </span>
                 )}
@@ -405,12 +404,14 @@ export default function ProjectPage() {
         {detailsOpen && (
           <div className="px-4 pb-4 border-t border-[#F2F4F7] dark:border-[#26283A]">
             <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-4 pt-3">
-              {project.client && (
+              {(project.contact || project.client) && (
                 <div>
-                  <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Client</dt>
+                  <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Contact</dt>
                   <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5">
-                    {project.client.name}
-                    {project.client.company && <span className="text-[#98A2B3]"> · {project.client.company}</span>}
+                    {(project.contact ?? project.client)!.name}
+                    {(project.contact ?? project.client)?.company && (
+                      <span className="text-[#98A2B3]"> · {(project.contact ?? project.client)!.company}</span>
+                    )}
                   </dd>
                 </div>
               )}
@@ -434,7 +435,7 @@ export default function ProjectPage() {
                 <div>
                   <dt className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Budget</dt>
                   <dd className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] mt-0.5 flex items-center gap-1">
-                    <IndianRupee size={11} />{formatCurrency(budget)}
+                    {formatCurrency(budget)}
                   </dd>
                 </div>
               )}
@@ -552,8 +553,8 @@ export default function ProjectPage() {
               <RecordTable
                 empty={project.proposals.length === 0}
                 emptyLabel="No proposals linked to this project"
-                emptyAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-                addAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+                emptyAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
+                addAction={{ label: 'New Proposal', href: `/proposals/new?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
               >
                 <table className="w-full text-[13px]">
                   <thead>
@@ -579,8 +580,8 @@ export default function ProjectPage() {
               <RecordTable
                 empty={project.contracts.length === 0}
                 emptyLabel="No contracts linked to this project"
-                emptyAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-                addAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+                emptyAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
+                addAction={{ label: 'New Contract', href: `/contracts/new?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
               >
                 <table className="w-full text-[13px]">
                   <thead>
@@ -606,8 +607,8 @@ export default function ProjectPage() {
               <RecordTable
                 empty={project.invoices.length === 0}
                 emptyLabel="No invoices linked to this project"
-                emptyAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-                addAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+                emptyAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
+                addAction={{ label: 'New Invoice', href: `/invoices/new?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
               >
                 <table className="w-full text-[13px]">
                   <thead>
@@ -655,8 +656,8 @@ export default function ProjectPage() {
               title="Time Entries"
               empty={project.timeEntries.length === 0}
               emptyLabel="No time logged"
-              emptyAction={{ label: 'Log Time', href: `/time?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-              addAction={{ label: 'Log Time', href: `/time?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+              emptyAction={{ label: 'Log Time', href: `/time?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
+              addAction={{ label: 'Log Time', href: `/time?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
             >
               <table className="w-full text-[13px]">
                 <thead>
@@ -681,8 +682,8 @@ export default function ProjectPage() {
               title="Expenses"
               empty={project.expenses.length === 0}
               emptyLabel="No expenses logged"
-              emptyAction={{ label: 'Add Expense', href: `/expenses?projectId=${id}&clientId=${project.clientId ?? ''}` }}
-              addAction={{ label: 'Add Expense', href: `/expenses?projectId=${id}&clientId=${project.clientId ?? ''}` }}
+              emptyAction={{ label: 'Add Expense', href: `/expenses?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
+              addAction={{ label: 'Add Expense', href: `/expenses?projectId=${id}&contactId=${project.contactId ?? project.clientId ?? ''}` }}
             >
               <table className="w-full text-[13px]">
                 <thead>

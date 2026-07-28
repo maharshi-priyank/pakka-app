@@ -18,6 +18,7 @@ import AmountRangePill from '@/components/filters/AmountRangePill'
 import { RemoveModal } from '@/components/RemoveModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { toast } from 'sonner'
+import ContractPreviewDrawer from '@/features/contracts/components/ContractPreviewDrawer'
 
 const STATUS_TABS: Array<{ value: ContractStatus | 'ALL'; label: string }> = [
   { value: 'ALL',      label: 'All' },
@@ -55,6 +56,7 @@ export default function ContractsPage() {
   const [includeArchived, setIncludeArchived] = useState(false)
   const [removeTarget,    setRemoveTarget]    = useState<Contract | null>(null)
   const [voidTarget,      setVoidTarget]      = useState<Contract | null>(null)
+  const [contractId,      setContractId]      = useState<string | null>(null)
 
   const searchRef   = useRef<HTMLInputElement>(null)
   const archiveMut  = useArchiveContract()
@@ -289,7 +291,7 @@ export default function ContractsPage() {
           sortBy={sortBy}
           sortDir={sortDir}
           onSort={handleSort}
-          onOpen={(c: Contract) => navigate(`/contracts/${c.id}`)}
+          onOpen={(c: Contract) => setContractId(c.id)}
           onRemove={c => setRemoveTarget(c)}
           onVoid={c => setVoidTarget(c)}
         />
@@ -299,7 +301,7 @@ export default function ContractsPage() {
             <ContractCard
               key={c.id}
               contract={c}
-              onClick={(c: Contract) => navigate(`/contracts/${c.id}`)}
+              onClick={(c: Contract) => setContractId(c.id)}
               onRemove={c => setRemoveTarget(c)}
               onVoid={c => setVoidTarget(c)}
             />
@@ -351,6 +353,11 @@ export default function ContractsPage() {
           isLoading={voidMut.isPending}
         />
       )}
+
+      <ContractPreviewDrawer
+        id={contractId}
+        onClose={() => setContractId(null)}
+      />
     </div>
   )
 }

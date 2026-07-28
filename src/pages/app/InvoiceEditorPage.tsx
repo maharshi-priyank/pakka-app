@@ -16,8 +16,8 @@ export default function InvoiceEditorPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [voidOpen,   setVoidOpen]   = useState(false)
 
-  const urlProjectId = searchParams.get('projectId') || undefined
-  const urlClientId  = searchParams.get('clientId')  || undefined
+  const urlProjectId  = searchParams.get('projectId') || undefined
+  const urlContactId  = searchParams.get('contactId') || searchParams.get('clientId') || undefined
   const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: invoice, isLoading } = useInvoice(isNew ? null : id ?? null)
@@ -57,7 +57,6 @@ export default function InvoiceEditorPage() {
             <Link to={`/projects/${effectiveProjectId}`} className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
               {effectiveProjectName}
             </Link>
-            <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
           </>
         ) : (
           <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Invoices</span>
@@ -105,7 +104,7 @@ export default function InvoiceEditorPage() {
         <InvoiceEditor
           invoice={!isNew ? invoice : undefined}
           defaultProjectId={isNew ? urlProjectId : undefined}
-          defaultClientId={isNew ? urlClientId : undefined}
+          defaultContactId={isNew ? urlContactId : undefined}
           onSaved={handleSaved}
           onDiscard={() => effectiveProjectId ? navigate(`/projects/${effectiveProjectId}`) : navigate('/invoices')}
         />

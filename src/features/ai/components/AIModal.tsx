@@ -3,7 +3,7 @@ import { X, Upload, ImageIcon, FileText } from 'lucide-react'
 import AIIcon from './AIIcon'
 import { cn } from '@/lib/utils'
 
-export type AIModalMode = 'lead' | 'proposal'
+export type AIModalMode = 'lead' | 'proposal' | 'contact'
 export type AIModalPhase = 'input' | 'extracting' | 'review'
 
 interface Props {
@@ -36,6 +36,17 @@ const MODE_CONFIG = {
       '"Mobile app MVP, 3 months, React Native"',
     ],
     showPricingContext: true,
+  },
+  contact: {
+    title:    'Extract Contact with AI',
+    subtitle: 'Paste a conversation, email, or describe the contact',
+    textPlaceholder: 'Paste a WhatsApp message, email, or describe the contact…\n\nExamples:\n• "Ritu runs a cafe, ritu@gmail.com, looking for a website"\n• "Met Arjun at a conference, needs brand identity for his startup"\n• Forward an email introduction here',
+    examples: [
+      '"Cafe owner, needs website, budget ~₹80k"',
+      '"Need brand identity for startup"',
+      '"Intro email from potential client"',
+    ],
+    showPricingContext: false,
   },
 }
 

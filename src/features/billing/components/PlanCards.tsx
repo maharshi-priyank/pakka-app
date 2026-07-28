@@ -1,5 +1,4 @@
 import { Check, Star, Loader2, AlertCircle, Calendar, RefreshCw } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useCurrentPricing } from '../hooks/useCurrentPricing'
@@ -68,7 +67,7 @@ function StatusDetails({
       <div className="flex items-start gap-2 bg-[#FFF8ED] border border-[#FEE3A3] rounded-lg px-3 py-2.5">
         <AlertCircle size={13} className="text-[#F59E0B] mt-0.5 shrink-0" />
         <p className="text-[11.5px] text-[#92400E]">
-          Payment failed — update your payment method via Cashfree.
+          Payment failed — contact support or retry payment via Razorpay.
         </p>
       </div>
     )
@@ -147,20 +146,19 @@ const USD_SOLO:   Record<string, number> = { founding: 5,  earlyaccess: 7,  regu
 const USD_STUDIO: Record<string, number> = { founding: 12, earlyaccess: 17, regular: 22 }
 
 export default function PlanCards({ subscription, onCancel }: Props) {
-  const navigate = useNavigate()
   const { isIndia } = useWorkspace()
   const { data: pricing, isLoading } = useCurrentPricing()
-  const { mutate: subscribeCashfree, isPending: isPendingCashfree } = useCreateSubscription()
+  const { mutate: subscribeRazorpay, isPending: isPendingRazorpay } = useCreateSubscription()
   const { mutate: subscribeStripe,   isPending: isPendingStripe   } = useCreateStripeCheckout()
 
-  const isPending  = isPendingCashfree || isPendingStripe
+  const isPending  = isPendingRazorpay || isPendingStripe
   const currentPlan = subscription?.plan ?? 'FREE'
   const isFounding  = pricing?.window === 'founding'
   const priceWindow = pricing?.window ?? 'regular'
 
   const handleSubscribe = (tier: 'SOLO' | 'STUDIO') => {
     if (isIndia) {
-      subscribeCashfree(tier, { onSuccess: () => navigate('/billing/success') })
+      subscribeRazorpay(tier)
     } else {
       subscribeStripe(tier)
     }
@@ -355,7 +353,7 @@ export default function PlanCards({ subscription, onCancel }: Props) {
 
       <p className="text-[11.5px] text-[#98A2B3] text-center pt-1">
         {isIndia
-          ? 'Monthly billing · Cancel anytime · Secure checkout via Cashfree'
+          ? 'Monthly billing · Cancel anytime · Secure checkout via Razorpay'
           : 'Monthly billing · Cancel anytime · Secure checkout via Stripe'}
       </p>
     </div>

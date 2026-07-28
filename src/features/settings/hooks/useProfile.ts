@@ -12,8 +12,7 @@ export interface UserProfile {
   plan:              'FREE' | 'SOLO' | 'STUDIO'
   planExpiresAt:     string | null
   subscriptionStatus: 'NONE' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED' | 'PAUSED'
-  cashfreeSubscriptionId: string | null
-  cashfreePlanId:    string | null
+  razorpaySubscriptionId: string | null
   billingAnchorDate: string | null
   businessName:      string | null
   businessType:      string | null

@@ -200,7 +200,7 @@ export default function UpgradeModal() {
           {/* Footer */}
           <div className="px-6 pb-5 pt-0 border-t border-[#F1F3F8] dark:border-[#26283A] pt-4">
             <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] text-center">
-              Monthly billing only · Cancel anytime · Secure checkout via Cashfree
+              Monthly billing only · Cancel anytime · Secure checkout via Razorpay
             </p>
           </div>
         </div>

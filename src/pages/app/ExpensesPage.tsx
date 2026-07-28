@@ -11,7 +11,7 @@ import {
 import { ConfirmModal } from '@/components/ConfirmModal'
 import DropdownSelect from '@/components/ui/DropdownSelect'
 import { cn } from '@/lib/utils'
-import { useClients } from '@/features/clients/hooks/useClients'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import {
   useExpenses, useCreateExpense, useUpdateExpense,
@@ -19,6 +19,7 @@ import {
   useExpenseCategories, useExportExpenses,
   type Expense, type CreateExpensePayload,
 } from '@/features/expenses/hooks/useExpenses'
+import ExpenseQuickView, { type ExpenseSnap } from '@/features/expenses/components/ExpenseQuickView'
 
 // ─── Date preset helpers ──────────────────────────────────────────────────────
 type DatePreset = 'all' | 'this-month' | 'last-month' | 'this-quarter' | 'this-fy' | 'last-fy' | 'custom'
@@ -91,7 +92,7 @@ function presetToDates(preset: DatePreset): { from?: string; to?: string } {
 
 // ─── Schema ────────────────────────────────────────────────────────────────────
 const expenseSchema = z.object({
-  clientId:    z.string().optional(),
+  contactId:   z.string().optional(),
   projectId:   z.string().optional(),
   category:    z.string().min(1, 'Category required'),
   description: z.string().min(1, 'Description required'),
@@ -139,10 +140,10 @@ type FilterTab = 'all' | 'unbilled' | 'billed'
 export default function ExpensesPage() {
   const [searchParams] = useSearchParams()
   const preselectedProjectId = searchParams.get('projectId') ?? ''
-  const preselectedClientId  = searchParams.get('clientId')  ?? ''
+  const preselectedContactId = searchParams.get('contactId') || searchParams.get('clientId') || ''
 
-  const [filter,     setFilter]     = useState<FilterTab>('all')
-  const [clientFilter, setClientFilter] = useState('')
+  const [filter,         setFilter]         = useState<FilterTab>('all')
+  const [contactFilter,  setContactFilter]  = useState('')
   const [datePreset, setDatePreset] = useState<DatePreset>('all')
   const [customFrom, setCustomFrom] = useState('')
   const [customTo,   setCustomTo]   = useState('')
@@ -152,9 +153,11 @@ export default function ExpensesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null)
   const [uploadingReceipt, setUploadingReceipt] = useState(false)
   const [localReceiptUrl, setLocalReceiptUrl] = useState<string | undefined>(undefined)
+  const [expenseSnap, setExpenseSnap] = useState<ExpenseSnap | null>(null)
+  const [activeExpense, setActiveExpense] = useState<Expense | null>(null)
 
-  const { data: clientsData } = useClients()
-  const clients = clientsData?.clients ?? []
+  const { data: contactsData } = useContacts({ limit: 200 })
+  const contacts = contactsData?.items ?? []
   const { data: projectsData } = useProjects()
   const projects = projectsData?.projects ?? []
   const { data: categoryList = [] } = useExpenseCategories()
@@ -162,7 +165,7 @@ export default function ExpensesPage() {
     ? { from: customFrom || undefined, to: customTo || undefined }
     : presetToDates(datePreset)
   const { data: expenses = [], isLoading } = useExpenses({
-    clientId:   clientFilter || undefined,
+    contactId:  contactFilter || undefined,
     isBillable: filter === 'unbilled' ? true : undefined,
     isBilled:   filter === 'unbilled' ? false : filter === 'billed' ? true : undefined,
     from:       dateFilters.from,
@@ -195,7 +198,7 @@ export default function ExpensesPage() {
       hasGst:     false,
       amount:     undefined as any,
       projectId:  preselectedProjectId || undefined,
-      clientId:   preselectedClientId  || undefined,
+      contactId:  preselectedContactId || undefined,
     })
     setShowForm(true)
   }
@@ -205,7 +208,7 @@ export default function ExpensesPage() {
     setLocalReceiptUrl(expense.receiptUrl ?? undefined)
     const hasGst = expense.gstRate != null
     reset({
-      clientId:    expense.clientId ?? undefined,
+      contactId:   expense.contactId ?? undefined,
       projectId:   expense.projectId ?? undefined,
       category:    expense.category,
       description: expense.description,
@@ -252,7 +255,7 @@ export default function ExpensesPage() {
 
   async function onSubmit(data: ExpenseForm) {
     const payload: CreateExpensePayload = {
-      clientId:    data.clientId || undefined,
+      contactId:   data.contactId || undefined,
       projectId:   data.projectId || undefined,
       category:    data.category,
       description: data.description,
@@ -283,9 +286,9 @@ export default function ExpensesPage() {
     const e = expenses.find(e => e.id === id)
     return e && !e.isBilled
   })
-  const selectedExpenses   = expenses.filter(e => selected.has(e.id))
-  const selectedClientIds  = [...new Set(selectedExpenses.map(e => e.clientId))]
-  const canBill = selectedUnbilled.length > 0 && selectedClientIds.length === 1
+  const selectedExpenses    = expenses.filter(e => selected.has(e.id))
+  const selectedContactIds  = [...new Set(selectedExpenses.map(e => e.contactId))]
+  const canBill = selectedUnbilled.length > 0 && selectedContactIds.length === 1
 
   function toggleSelect(id: string) {
     setSelected(prev => {
@@ -369,10 +372,10 @@ export default function ExpensesPage() {
                 {errors.category && <p className="form-error">{errors.category.message}</p>}
               </div>
               <div>
-                <label className="form-label">Client</label>
-                <select {...register('clientId')} className="form-input w-full">
-                  <option value="">No client</option>
-                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                <label className="form-label">Contact</label>
+                <select {...register('contactId')} className="form-input w-full">
+                  <option value="">No contact</option>
+                  {contacts.map(c => <option key={c.id} value={c.id}>{c.name}{c.company ? ` — ${c.company}` : ''}</option>)}
                 </select>
               </div>
             </div>
@@ -582,12 +585,12 @@ export default function ExpensesPage() {
             ))}
           </div>
 
-          {/* Client filter */}
+          {/* Contact filter */}
           <DropdownSelect
-            value={clientFilter}
-            onChange={setClientFilter}
-            placeholder="All clients"
-            options={[{ value: '', label: 'All clients' }, ...clients.map(c => ({ value: c.id, label: c.name }))]}
+            value={contactFilter}
+            onChange={setContactFilter}
+            placeholder="All contacts"
+            options={[{ value: '', label: 'All contacts' }, ...contacts.map(c => ({ value: c.id, label: c.name }))]}
             className="w-full sm:w-auto"
           />
 
@@ -608,7 +611,7 @@ export default function ExpensesPage() {
           {/* Export CSV */}
           <button
             onClick={() => exportCsv({
-              clientId:   clientFilter || undefined,
+              contactId:  contactFilter || undefined,
               isBillable: filter === 'unbilled' ? true : undefined,
               isBilled:   filter === 'unbilled' ? false : filter === 'billed' ? true : undefined,
               ...dateFilters,
@@ -692,14 +695,29 @@ export default function ExpensesPage() {
               <div
                 key={expense.id}
                 className={cn(
-                  'flex items-center gap-3 px-5 py-3 hover:bg-[#FAFAFA] dark:hover:bg-[#21222D] group transition-colors cursor-default',
+                  'flex items-center gap-3 px-5 py-3 hover:bg-[#FAFAFA] dark:hover:bg-[#21222D] group transition-colors cursor-pointer',
                   expense.isBilled && 'opacity-55',
                 )}
+                onClick={() => {
+                  setExpenseSnap({
+                    id: expense.id,
+                    description: expense.description,
+                    category: expense.category,
+                    amount: expense.amount,
+                    date: expense.date,
+                    vendor: expense.vendor,
+                    isBillable: expense.isBillable,
+                    isBilled: expense.isBilled,
+                    projectName: expense.project?.name,
+                    contactName: expense.contact?.name,
+                  })
+                  setActiveExpense(expense)
+                }}
               >
                 {/* Checkbox */}
                 {!expense.isBilled && expense.isBillable ? (
                   <button
-                    onClick={() => toggleSelect(expense.id)}
+                    onClick={e => { e.stopPropagation(); toggleSelect(expense.id) }}
                     className="shrink-0 text-[#D0D5DD] hover:text-[#2563EB] transition-colors"
                   >
                     {selected.has(expense.id)
@@ -728,10 +746,10 @@ export default function ExpensesPage() {
                         <span className="text-[11px] text-[#667085] dark:text-[#8B92A8]">{expense.vendor}</span>
                       </>
                     )}
-                    {expense.client && (
+                    {(expense.contact || expense.client) && (
                       <>
                         <span className="text-[#D0D5DD] dark:text-[#3D4258] text-[10px]">·</span>
-                        <span className="text-[11px] text-[#667085] dark:text-[#545C74]">{expense.client.name}</span>
+                        <span className="text-[11px] text-[#667085] dark:text-[#545C74]">{expense.contact?.name ?? expense.client?.name}</span>
                       </>
                     )}
                     {expense.project && (
@@ -768,6 +786,7 @@ export default function ExpensesPage() {
                       href={expense.receiptUrl}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={e => e.stopPropagation()}
                       className="w-6 h-6 flex items-center justify-center rounded-lg bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3] hover:text-[#2563EB] transition-colors"
                       title="View receipt"
                     >
@@ -789,13 +808,13 @@ export default function ExpensesPage() {
                 {/* Actions (hover reveal) */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                   <button
-                    onClick={() => openEditForm(expense)}
+                    onClick={e => { e.stopPropagation(); openEditForm(expense) }}
                     className="w-7 h-7 flex items-center justify-center text-[#98A2B3] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors rounded-lg hover:bg-[#F2F4F7] dark:hover:bg-[#3D4258]"
                   >
                     <Edit2 size={12} />
                   </button>
                   <button
-                    onClick={() => setDeleteTarget(expense)}
+                    onClick={e => { e.stopPropagation(); setDeleteTarget(expense) }}
                     className="w-7 h-7 flex items-center justify-center text-[#98A2B3] hover:text-[#F04438] transition-colors rounded-lg hover:bg-[#FEF3F2]"
                   >
                     <Trash2 size={12} />
@@ -811,8 +830,8 @@ export default function ExpensesPage() {
           <div className="px-5 py-3 border-t border-[#EAECF0] dark:border-[#26283A] bg-[#FAFAFA] dark:bg-[#21222D] flex items-center justify-between">
             <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">
               {selected.size} selected
-              {!canBill && selectedClientIds.length > 1 && (
-                <span className="ml-1 text-amber-600"> — must be same client to bill</span>
+              {!canBill && selectedContactIds.length > 1 && (
+                <span className="ml-1 text-amber-600"> — must be same contact to bill</span>
               )}
             </p>
             <button
@@ -842,6 +861,12 @@ export default function ExpensesPage() {
           isLoading={deleteExpense.isPending}
         />
       )}
+
+      <ExpenseQuickView
+        snap={expenseSnap}
+        onClose={() => { setExpenseSnap(null); setActiveExpense(null) }}
+        onEdit={() => { setExpenseSnap(null); if (activeExpense) openEditForm(activeExpense) }}
+      />
     </div>
   )
 }

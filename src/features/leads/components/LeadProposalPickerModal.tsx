@@ -27,7 +27,7 @@ export default function LeadProposalPickerModal({ lead, onClose }: Props) {
   }
 
   if (showTemplate) {
-    return <TemplatePickerModal open defaultLead={lead} onClose={onClose} />
+    return <TemplatePickerModal open onClose={onClose} />
   }
 
   return (

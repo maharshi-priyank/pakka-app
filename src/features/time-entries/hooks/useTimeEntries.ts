@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
 export interface TimeEntryClient  { id: string; name: string }
+export interface TimeEntryContact { id: string; name: string }
 export interface TimeEntryProject { id: string; name: string }
 
 export interface TimeEntry {
@@ -11,6 +12,8 @@ export interface TimeEntry {
   userId:       string
   clientId:     string | null
   client:       TimeEntryClient | null
+  contactId:    string | null
+  contact:      TimeEntryContact | null
   projectId:    string | null
   project:      TimeEntryProject | null
   description:  string
@@ -25,6 +28,7 @@ export interface TimeEntry {
 
 export interface CreateTimeEntryPayload {
   clientId?:    string
+  contactId?:   string
   projectId?:   string
   description:  string
   date:         string
@@ -34,6 +38,7 @@ export interface CreateTimeEntryPayload {
 
 export interface UpdateTimeEntryPayload {
   clientId?:     string
+  contactId?:    string
   projectId?:    string
   description?:  string
   date?:         string
