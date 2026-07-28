@@ -1,4 +1,9 @@
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
+import { createBrowserRouter, Navigate, Outlet, useParams } from 'react-router-dom'
+
+function RedirectClientsDetail() {
+  const { id } = useParams<{ id: string }>()
+  return <Navigate to={`/contacts/${id}`} replace />
+}
 import { useAuthStore } from '@/store/authStore'
 import AppShell from '@/components/layout/AppShell'
 
@@ -145,6 +150,27 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: '/contacts',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ContactsPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/contacts/:id',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/ContactPage')
+              return { Component }
+            },
+          },
+          {
+            path: '/pipeline',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/PipelinePage')
+              return { Component }
+            },
+          },
+          {
             path: '/proposals',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ProposalsPage')
@@ -223,10 +249,7 @@ export const router = createBrowserRouter([
           },
           {
             path: '/clients/:id',
-            lazy: async () => {
-              const { default: Component } = await import('@/pages/app/ClientPage')
-              return { Component }
-            },
+            element: <RedirectClientsDetail />,
           },
           {
             path: '/calendar',

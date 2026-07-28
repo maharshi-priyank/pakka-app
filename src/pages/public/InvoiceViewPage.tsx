@@ -295,83 +295,90 @@ export default function InvoiceViewPage() {
             <h2 className="text-[14px] font-bold text-[#101828]">Line items</h2>
           </div>
 
-          {/* Table header */}
-          <div className={cn(
-            'gap-3 px-7 py-2.5 bg-[#FAFAFA] border-b border-[#F2F4F7] text-[10px] font-semibold text-[#98A2B3] uppercase tracking-wider grid',
-            isIndia ? 'grid-cols-[70px_1fr_60px_90px_70px_90px]' : 'grid-cols-[1fr_60px_90px_90px]',
-          )}>
-            {isIndia && <span>SAC/HSN</span>}
-            <span>Description</span>
-            <span className="text-right">Qty</span>
-            <span className="text-right">Rate</span>
-            {isIndia && <span className="text-right">{taxLabel} %</span>}
-            <span className="text-right">Amount</span>
-          </div>
+          {/* Scrollable table — prevents clipping on narrow screens */}
+          <div className="overflow-x-auto">
+            {/* Table header */}
+            <div className={cn(
+              'gap-3 px-7 py-2.5 bg-[#FAFAFA] border-b border-[#F2F4F7] text-[10px] font-semibold text-[#98A2B3] uppercase tracking-wider grid',
+              isIndia
+                ? 'grid-cols-[70px_1fr_60px_100px_70px_100px] min-w-[500px]'
+                : 'grid-cols-[1fr_60px_100px_100px] min-w-[360px]',
+            )}>
+              {isIndia && <span>SAC/HSN</span>}
+              <span>Description</span>
+              <span className="text-right">Qty</span>
+              <span className="text-right whitespace-nowrap">Rate</span>
+              {isIndia && <span className="text-right whitespace-nowrap">{taxLabel} %</span>}
+              <span className="text-right whitespace-nowrap">Amount</span>
+            </div>
 
-          {invoice.lineItems.map((item, idx) => {
-            const lineTotal = Number(item.qty) * Number(item.rate)
-            const lineGst   = isIndia && !isExport && invoice.gstType !== 'EXEMPT'
-              ? (lineTotal * Number(item.gstRate)) / 100 : 0
-            return (
-              <div
-                key={idx}
-                className={cn(
-                  'gap-3 px-7 py-3.5 text-[13px] grid',
-                  isIndia ? 'grid-cols-[70px_1fr_60px_90px_70px_90px]' : 'grid-cols-[1fr_60px_90px_90px]',
-                  idx < invoice.lineItems.length - 1 ? 'border-b border-[#F2F4F7]' : '',
-                )}
-              >
-                {isIndia && <span className="text-[11px] text-[#98A2B3] font-mono self-center">{item.hsnSac ?? '—'}</span>}
-                <span className="text-[#344054] font-medium">{item.description}</span>
-                <span className="text-right text-[#667085]">{item.qty}</span>
-                <span className="text-right text-[#667085]">{fmtCurrency(item.rate, currency)}</span>
-                {isIndia && (
-                  <span className="text-right text-[#667085]">
-                    {isExport || invoice.gstType === 'EXEMPT' ? 'Nil' : `${item.gstRate}%`}
+            {invoice.lineItems.map((item, idx) => {
+              const lineTotal = Number(item.qty) * Number(item.rate)
+              const lineGst   = isIndia && !isExport && invoice.gstType !== 'EXEMPT'
+                ? (lineTotal * Number(item.gstRate)) / 100 : 0
+              return (
+                <div
+                  key={idx}
+                  className={cn(
+                    'gap-3 px-7 py-3.5 text-[13px] grid items-start',
+                    isIndia
+                      ? 'grid-cols-[70px_1fr_60px_100px_70px_100px] min-w-[500px]'
+                      : 'grid-cols-[1fr_60px_100px_100px] min-w-[360px]',
+                    idx < invoice.lineItems.length - 1 ? 'border-b border-[#F2F4F7]' : '',
+                  )}
+                >
+                  {isIndia && <span className="text-[11px] text-[#98A2B3] font-mono">{item.hsnSac ?? '—'}</span>}
+                  <span className="text-[#344054] font-medium leading-snug">{item.description}</span>
+                  <span className="text-right text-[#667085] tabular-nums">{item.qty}</span>
+                  <span className="text-right text-[#667085] whitespace-nowrap tabular-nums">{fmtCurrency(item.rate, currency)}</span>
+                  {isIndia && (
+                    <span className="text-right text-[#667085] whitespace-nowrap tabular-nums">
+                      {isExport || invoice.gstType === 'EXEMPT' ? 'Nil' : `${item.gstRate}%`}
+                    </span>
+                  )}
+                  <span className="text-right font-semibold text-[#101828] whitespace-nowrap tabular-nums">
+                    {fmtCurrency(lineTotal + lineGst, currency)}
                   </span>
-                )}
-                <span className="text-right font-semibold text-[#101828]">
-                  {fmtCurrency(lineTotal + lineGst, currency)}
-                </span>
-              </div>
-            )
-          })}
+                </div>
+              )
+            })}
+          </div>
 
           {/* Totals */}
           <div className="px-7 py-5 bg-[#FAFAFA] border-t border-[#EAECF0] space-y-2">
-            <div className="flex justify-between text-[13px]">
+            <div className="flex items-center justify-between text-[13px]">
               <span className="text-[#667085]">Subtotal</span>
-              <span className="font-medium text-[#344054]">{fmtCurrency(Number(invoice.subtotal), currency)}</span>
+              <span className="font-medium text-[#344054] tabular-nums">{fmtCurrency(Number(invoice.subtotal), currency)}</span>
             </div>
             {isIndia && !isExport && Number(invoice.gstAmount) > 0 && (
-              <div className="flex justify-between text-[13px]">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-[#667085]">
                   {invoice.gstType === 'IGST' ? 'IGST' : 'CGST + SGST'}
                 </span>
-                <span className="font-medium text-[#344054]">{fmtCurrency(Number(invoice.gstAmount), currency)}</span>
+                <span className="font-medium text-[#344054] tabular-nums">{fmtCurrency(Number(invoice.gstAmount), currency)}</span>
               </div>
             )}
             {isIndia && isExport && (
-              <div className="flex justify-between text-[13px]">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-[#667085]">IGST</span>
                 <span className="font-medium text-[#027A48]">Nil</span>
               </div>
             )}
             {!isIndia && Number(invoice.gstAmount) > 0 && (
-              <div className="flex justify-between text-[13px]">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-[#667085]">{taxLabel}</span>
-                <span className="font-medium text-[#344054]">{fmtCurrency(Number(invoice.gstAmount), currency)}</span>
+                <span className="font-medium text-[#344054] tabular-nums">{fmtCurrency(Number(invoice.gstAmount), currency)}</span>
               </div>
             )}
             {isIndia && tdsAmount > 0 && (
-              <div className="flex justify-between text-[13px]">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-[#667085]">TDS ({invoice.tdsRate}%)</span>
-                <span className="font-medium text-[#D92D20]">−{fmtCurrency(tdsAmount, currency)}</span>
+                <span className="font-medium text-[#D92D20] tabular-nums">−{fmtCurrency(tdsAmount, currency)}</span>
               </div>
             )}
             <div className="flex items-center justify-between pt-3 border-t border-[#EAECF0]">
               <span className="text-[16px] font-bold text-[#101828]">Total due</span>
-              <span className={cn('text-[22px] font-extrabold', isPaid ? 'text-[#027A48]' : 'text-[#101828]')}>
+              <span className={cn('text-[22px] font-extrabold tabular-nums', isPaid ? 'text-[#027A48]' : 'text-[#101828]')}>
                 {fmtCurrency(Number(invoice.total), currency)}
               </span>
             </div>

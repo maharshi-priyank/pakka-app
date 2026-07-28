@@ -1,30 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { X, Video, AlertTriangle, Loader2, UserRound, Building2, Plus, Mail } from 'lucide-react'
+import { X, Video, AlertTriangle, Loader2, UserRound, Plus, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCreateMeeting, useCheckConflicts, type CreateMeetingDto } from '../hooks/useMeetings'
 import { useProfile } from '@/features/settings/hooks/useProfile'
-import { useLeads } from '@/features/leads/hooks/useLeads'
-import { useClients } from '@/features/clients/hooks/useClients'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { cn } from '@/lib/utils'
 
 interface Props {
-  open:          boolean
-  onClose:       () => void
-  defaultTitle?: string
-  leadId?:       string
-  leadName?:     string
-  clientId?:     string
-  clientName?:   string
-  onSuccess?:    (meetLink: string | null) => void
+  open:           boolean
+  onClose:        () => void
+  defaultTitle?:  string
+  contactId?:     string
+  contactName?:   string
+  onSuccess?:     (meetLink: string | null) => void
 }
 
-type ContactType = 'lead' | 'client'
 interface SelectedContact {
-  id:      string
-  name:    string
-  sub?:    string
-  type:    ContactType
+  id:   string
+  name: string
+  sub?: string
 }
 
 const DURATION_OPTIONS = [
@@ -55,8 +50,7 @@ const labelCls = 'block text-[12px] font-semibold text-[#344054] dark:text-[#C2C
 
 export default function ScheduleCallModal({
   open, onClose, defaultTitle = '',
-  leadId: propLeadId, leadName: propLeadName,
-  clientId: propClientId, clientName: propClientName,
+  contactId: propContactId, contactName: propContactName,
   onSuccess,
 }: Props) {
   const { data: profile } = useProfile()
@@ -90,14 +84,9 @@ export default function ScheduleCallModal({
       : null
   )
 
-  const { data: leadsData }   = useLeads({ search: contactSearch, limit: 5 })
-  const { data: clientsData } = useClients(contactSearch)
-
-  const leads   = leadsData?.items ?? []
-  const clients = (clientsData as any)?.clients ?? clientsData ?? []
-  const filteredClients = Array.isArray(clients) ? clients.slice(0, 5) : []
-
-  const hasResults = leads.length > 0 || filteredClients.length > 0
+  const { data: contactsData } = useContacts({ search: contactSearch, limit: 8 })
+  const contacts   = contactsData?.items ?? []
+  const hasResults = contacts.length > 0
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<{
     title:        string
@@ -129,14 +118,12 @@ export default function ScheduleCallModal({
     setGuestInput('')
     setGuestError('')
 
-    if (propLeadId && propLeadName) {
-      setContact({ id: propLeadId, name: propLeadName, type: 'lead' })
-    } else if (propClientId && propClientName) {
-      setContact({ id: propClientId, name: propClientName, type: 'client' })
+    if (propContactId && propContactName) {
+      setContact({ id: propContactId, name: propContactName })
     } else {
       setContact(null)
     }
-  }, [open, defaultTitle, propLeadId, propLeadName, propClientId, propClientName, reset])
+  }, [open, defaultTitle, propContactId, propContactName, reset])
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -183,8 +170,7 @@ export default function ScheduleCallModal({
       scheduledAt,
       durationMins: Number(values.durationMins),
       agenda:       values.agenda || undefined,
-      leadId:       contact?.type === 'lead'   ? contact.id : undefined,
-      clientId:     contact?.type === 'client' ? contact.id : undefined,
+      contactId:    contact?.id,
       guestEmails:  guestEmails.length > 0 ? guestEmails : undefined,
       provider:     activeProvider,
     }
@@ -195,7 +181,7 @@ export default function ScheduleCallModal({
 
   if (!open) return null
 
-  const isLocked = !!(propLeadId || propClientId)
+  const isLocked = !!propContactId
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -288,23 +274,13 @@ export default function ScheduleCallModal({
 
             {contact ? (
               <div className="flex items-center gap-2 h-9 pl-3 pr-2 rounded-lg border border-[#6366F1]/40 bg-[#EEF2FF] dark:bg-[#1E2040] dark:border-[#6366F1]/30">
-                <div className={cn(
-                  'w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0',
-                  contact.type === 'lead' ? 'bg-[#6366F1]' : 'bg-[#059669]',
-                )}>
-                  {contact.type === 'lead'
-                    ? <UserRound size={10} className="text-white" />
-                    : <Building2 size={10} className="text-white" />}
+                <div className="w-5 h-5 rounded-full bg-[#6366F1] flex items-center justify-center flex-shrink-0">
+                  <UserRound size={10} className="text-white" />
                 </div>
                 <span className="text-[13px] font-medium text-[#344054] dark:text-[#C2C8D8] flex-1 truncate">{contact.name}</span>
-                <span className={cn(
-                  'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                  contact.type === 'lead'
-                    ? 'bg-[#6366F1]/15 text-[#4338CA] dark:text-[#A5B4FC]'
-                    : 'bg-[#059669]/15 text-[#065F46] dark:text-[#34D399]',
-                )}>
-                  {contact.type === 'lead' ? 'Lead' : 'Client'}
-                </span>
+                {contact.sub && (
+                  <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] truncate max-w-[120px]">{contact.sub}</span>
+                )}
                 {!isLocked && (
                   <button type="button" onClick={clearContact} className="text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] ml-1 flex-shrink-0">
                     <X size={13} />
@@ -317,65 +293,30 @@ export default function ScheduleCallModal({
                   value={contactSearch}
                   onChange={e => { setContactSearch(e.target.value); setDropdownOpen(true) }}
                   onFocus={() => setDropdownOpen(true)}
-                  placeholder="Search leads or clients..."
+                  placeholder="Search contacts..."
                   className={inputCls}
                 />
 
-                {dropdownOpen && (contactSearch.length > 0 ? hasResults : true) && (
+                {dropdownOpen && (contactSearch.length > 0 ? hasResults : contacts.length > 0) && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1A1B23] border border-[#EAECF0] dark:border-[#26283A] rounded-xl shadow-lg z-20 overflow-hidden max-h-52 overflow-y-auto">
-
-                    {leads.length > 0 && (
-                      <>
-                        <div className="px-3 py-1.5 bg-[#F9FAFB] dark:bg-[#21222D] border-b border-[#F2F4F7] dark:border-[#26283A]">
-                          <span className="text-[10px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Leads</span>
+                    {contacts.map((c: any) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] text-left transition-colors"
+                        onMouseDown={() => selectContact({ id: c.id, name: c.name, sub: c.company })}
+                      >
+                        <div className="w-6 h-6 rounded-full bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center flex-shrink-0">
+                          <span className="text-[10px] font-bold text-[#6366F1]">{c.name.charAt(0)}</span>
                         </div>
-                        {leads.map((lead: any) => (
-                          <button
-                            key={lead.id}
-                            type="button"
-                            className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] text-left transition-colors"
-                            onMouseDown={() => selectContact({ id: lead.id, name: lead.name, sub: lead.company, type: 'lead' })}
-                          >
-                            <div className="w-6 h-6 rounded-full bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center flex-shrink-0">
-                              <span className="text-[10px] font-bold text-[#6366F1]">{lead.name.charAt(0)}</span>
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-[12px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">{lead.name}</p>
-                              {lead.company && <p className="text-[11px] text-[#667085] dark:text-[#8B92A8] truncate">{lead.company}</p>}
-                            </div>
-                            <span className="text-[10px] font-semibold text-[#6366F1] bg-[#EEF2FF] dark:bg-[#1E2040] px-1.5 py-0.5 rounded-full flex-shrink-0">Lead</span>
-                          </button>
-                        ))}
-                      </>
-                    )}
-
-                    {filteredClients.length > 0 && (
-                      <>
-                        <div className="px-3 py-1.5 bg-[#F9FAFB] dark:bg-[#21222D] border-b border-[#F2F4F7] dark:border-[#26283A]">
-                          <span className="text-[10px] font-bold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Clients</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[12px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">{c.name}</p>
+                          {c.company && <p className="text-[11px] text-[#667085] dark:text-[#8B92A8] truncate">{c.company}</p>}
                         </div>
-                        {filteredClients.map((client: any) => (
-                          <button
-                            key={client.id}
-                            type="button"
-                            className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] text-left transition-colors"
-                            onMouseDown={() => selectContact({ id: client.id, name: client.name, sub: client.company, type: 'client' })}
-                          >
-                            <div className="w-6 h-6 rounded-full bg-[#ECFDF3] dark:bg-emerald-950/40 flex items-center justify-center flex-shrink-0">
-                              <span className="text-[10px] font-bold text-[#027A48] dark:text-[#34D399]">{client.name.charAt(0)}</span>
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-[12px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">{client.name}</p>
-                              {client.company && <p className="text-[11px] text-[#667085] dark:text-[#8B92A8] truncate">{client.company}</p>}
-                            </div>
-                            <span className="text-[10px] font-semibold text-[#059669] dark:text-[#34D399] bg-[#ECFDF3] dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-full flex-shrink-0">Client</span>
-                          </button>
-                        ))}
-                      </>
-                    )}
-
+                      </button>
+                    ))}
                     {contactSearch.length > 0 && !hasResults && (
-                      <div className="px-4 py-3 text-[12px] text-[#98A2B3] dark:text-[#545C74]">No leads or clients found</div>
+                      <div className="px-4 py-3 text-[12px] text-[#98A2B3] dark:text-[#545C74]">No contacts found</div>
                     )}
                   </div>
                 )}

@@ -20,9 +20,8 @@ import {
   type CreateProposalInput, type LineItem,
 } from '../schemas/proposal.schema'
 import type { Proposal, ProposalTemplate } from '../schemas/proposal.schema'
-import type { Lead } from '@/features/leads/schemas/lead.schema'
 import { useCreateProposal, useUpdateProposal, useSendProposal } from '../hooks/useProposals'
-import { useLeads } from '@/features/leads/hooks/useLeads'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
@@ -66,10 +65,9 @@ function calcTotals(lineItems: LineItem[], gstType: string) {
 
 interface Props {
   proposal?:          Proposal
-  defaultLead?:       Lead
   defaultTemplate?:   ProposalTemplate
   defaultProjectId?:  string
-  defaultClientId?:   string
+  defaultContactId?:  string
   onSaved?:           (proposal: Proposal) => void
   onDiscard?:         () => void
   /** When set, editor is in "template editing" mode — hides client/project selectors and changes save behavior */
@@ -77,7 +75,7 @@ interface Props {
   onSaveTemplate?:    (content: object, name: string, totalAmount: number) => void
 }
 
-export default function ProposalEditor({ proposal, defaultLead, defaultTemplate, defaultProjectId, defaultClientId, onSaved, onDiscard, templateMode, onSaveTemplate }: Props) {
+export default function ProposalEditor({ proposal, defaultTemplate, defaultProjectId, defaultContactId, onSaved, onDiscard, templateMode, onSaveTemplate }: Props) {
   const [activeTab,        setActiveTab]        = useState<Tab>('cover')
   const [shareUrl,         setShareUrl]         = useState<string | null>(null)
   const [copied,           setCopied]           = useState(false)
@@ -93,7 +91,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
   const createMutation = useCreateProposal()
   const updateMutation = useUpdateProposal()
   const sendMutation   = useSendProposal()
-  const { data: leadsData } = useLeads({ limit: 100 })
+  const { data: contactsData } = useContacts({ limit: 200 })
   const { data: profile } = useProfile()
 
   const attachParent      = { proposalId: proposal?.id ?? '' }
@@ -102,20 +100,17 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
   const deleteAttachment  = useDeleteAttachment(attachParent)
   const linkCanvaDesign   = useLinkCanvaDesign(attachParent)
 
-  // Re-sync leadId after async leads data loads — the <select> can't pick a value
+  // Re-sync contactId after async contacts data loads — the <select> can't pick a value
   // that doesn't exist as an <option> yet, so the initial defaultValues binding is lost.
-  const leadSynced = useRef(false)
+  const contactSynced = useRef(false)
   useEffect(() => {
-    if (leadSynced.current || !leadsData?.items?.length) return
-    // Prefer explicit lead, then fall back to the lead linked to the default client
-    const targetLeadId = proposal?.leadId
-      ?? defaultLead?.id
-      ?? (defaultClientId ? leadsData.items.find(l => l.clientId === defaultClientId)?.id : undefined)
-    if (targetLeadId) {
-      setValue('leadId', targetLeadId)
-      leadSynced.current = true
+    if (contactSynced.current || !contactsData?.items?.length) return
+    const target = proposal?.contactId ?? defaultContactId
+    if (target && contactsData.items.some(c => c.id === target)) {
+      setValue('contactId', target)
+      contactSynced.current = true
     }
-  }, [leadsData?.items?.length])
+  }, [contactsData?.items?.length])
 
   const isEdit      = !!proposal
   const isSaving    = createMutation.isPending || updateMutation.isPending
@@ -124,18 +119,12 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
 
   const c = (proposal?.content ?? defaultTemplate?.content ?? {}) as Record<string, unknown>
 
-  // Pre-fill a line item from lead budget when creating from lead
-  const leadBudgetNum = defaultLead?.budget ? parseFloat(defaultLead.budget.replace(/[^0-9.]/g, '')) : NaN
-  const leadLineItem  = defaultLead && !isNaN(leadBudgetNum) && leadBudgetNum > 0
-    ? [{ description: defaultLead.service ?? 'Service', qty: 1, rate: leadBudgetNum, gstRate: 18 as const }]
-    : []
 
   const { register, control, handleSubmit, watch, setValue, formState: { errors, isDirty } } = useForm<CreateProposalInput>({
     resolver: zodResolver(createProposalSchema),
     defaultValues: {
-      title:      proposal?.title ?? defaultTemplate?.name ?? (defaultLead?.service ? `Proposal — ${defaultLead.service}` : ''),
-      leadId:     proposal?.leadId ?? defaultLead?.id ?? undefined,
-      clientId:   proposal?.clientId ?? defaultClientId ?? undefined,
+      title:      proposal?.title ?? defaultTemplate?.name ?? '',
+      contactId:  proposal?.contactId ?? defaultContactId ?? undefined,
       validUntil: proposal?.validUntil ? proposal.validUntil.slice(0, 10) : '',
       content: {
         intro:           (c.intro         as string)  ?? '',
@@ -144,7 +133,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
         scopeItems:      (c.scopeItems    as [])      ?? [],
         deliverables:    (c.deliverables  as [])      ?? [],
         exclusions:      (c.exclusions    as string[]) ?? [],
-        lineItems:       (c.lineItems     as [])      ?? leadLineItem,
+        lineItems:       (c.lineItems     as [])      ?? [],
         pricingNotes:    (c.pricingNotes  as string)  ?? '',
         gstType:         (c.gstType       as 'IGST')  ?? 'IGST',
         paymentSchedule: (c.paymentSchedule as [])   ?? [],
@@ -170,7 +159,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
 
   const watchedLineItems   = watch('content.lineItems')      ?? []
   const watchedGstType     = watch('content.gstType')        ?? 'IGST'
-  const watchedClientId    = watch('clientId')               ?? ''
+  const watchedContactId   = watch('contactId')              ?? ''
   const watchedIntro       = watch('content.intro')          ?? ''
   const watchedWhyUs       = watch('content.whyUs')          ?? ''
   const watchedScopeItems  = watch('content.scopeItems')     ?? []
@@ -181,7 +170,7 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
   const watchedFaq         = watch('content.faq')            ?? []
   const { subtotal, gstAmount, total } = calcTotals(watchedLineItems as LineItem[], watchedGstType)
 
-  const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
+  const { data: projectsData } = useProjects({ contactId: watchedContactId || undefined, limit: 100 })
 
   const tabCompletion: Record<Tab, boolean> = {
     cover:       !!(watchedIntro?.trim() || watchedWhyUs?.trim()),
@@ -339,16 +328,16 @@ export default function ProposalEditor({ proposal, defaultLead, defaultTemplate,
                 <div className="space-y-4">
                   {!templateMode && (
                     <div>
-                      <label className="form-label">Lead *</label>
-                      <select {...register('leadId')} className="form-input w-full">
-                        <option value="">— Select a lead —</option>
-                        {(leadsData?.items ?? []).map(l => (
-                          <option key={l.id} value={l.id}>
-                            {l.name}{l.company ? ` · ${l.company}` : ''}
+                      <label className="form-label">Contact</label>
+                      <select {...register('contactId')} className="form-input w-full">
+                        <option value="">— Select a contact —</option>
+                        {(contactsData?.items ?? []).map(c => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}{c.company ? ` — ${c.company}` : ''}
                           </option>
                         ))}
                       </select>
-                      {errors.leadId && <p className="form-error">{errors.leadId.message}</p>}
+                      {errors.contactId && <p className="form-error">{errors.contactId.message}</p>}
                     </div>
                   )}
                   {!templateMode && (projectsData?.projects?.length ?? 0) > 0 && (

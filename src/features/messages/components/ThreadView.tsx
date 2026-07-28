@@ -61,11 +61,11 @@ export function ThreadView({ clientId }: Props) {
           <p className="text-[11px] text-gray-400">{client?.email}</p>
         </div>
         <button
-          onClick={() => navigate(`/clients/${clientId}`)}
+          onClick={() => navigate(`/contacts/${clientId}`)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-[12px] font-medium text-gray-500 hover:bg-gray-50 transition-colors"
         >
           <ExternalLink size={11} />
-          View client
+          View contact
         </button>
       </div>
 

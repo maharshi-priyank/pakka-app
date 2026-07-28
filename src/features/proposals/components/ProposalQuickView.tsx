@@ -17,6 +17,8 @@ export interface ProposalSnap {
   status: string
   totalAmount: string | number
   createdAt: string
+  slug?: string
+  updatedAt?: string
   clientName?: string
   projectName?: string
 }
@@ -24,9 +26,10 @@ export interface ProposalSnap {
 interface Props {
   proposal: ProposalSnap | null
   onClose: () => void
+  onDownload?: () => void
 }
 
-export default function ProposalQuickView({ proposal, onClose }: Props) {
+export default function ProposalQuickView({ proposal, onClose, onDownload }: Props) {
   const navigate = useNavigate()
   if (!proposal) return null
 
@@ -38,6 +41,9 @@ export default function ProposalQuickView({ proposal, onClose }: Props) {
       onClose={onClose}
       onEdit={() => { onClose(); navigate(`/proposals/${proposal.id}`) }}
       editLabel="Open Proposal"
+      downloadAction={onDownload}
+      downloadLabel="View / Download"
+      updatedAt={proposal.updatedAt}
       title={proposal.title}
       subtitle={proposal.clientName ?? proposal.projectName}
       statusBadge={

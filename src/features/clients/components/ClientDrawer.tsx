@@ -220,8 +220,6 @@ export default function ClientDrawer({ clientId, onClose }: Props) {
       <ScheduleCallModal
         open={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
-        clientId={clientId}
-        clientName={client?.name}
         defaultTitle={client ? `Discovery call with ${client.name}` : ''}
       />
     </div>

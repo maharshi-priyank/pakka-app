@@ -10,19 +10,20 @@ import {
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { cn } from '@/lib/utils'
 import DropdownSelect from '@/components/ui/DropdownSelect'
-import { useClients } from '@/features/clients/hooks/useClients'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import {
   useTimeEntries, useCreateTimeEntry, useUpdateTimeEntry,
   useDeleteTimeEntry, useBillEntries,
   type TimeEntry, type CreateTimeEntryPayload,
 } from '@/features/time-entries/hooks/useTimeEntries'
+import TimeEntryQuickView, { type TimeEntrySnap } from '@/features/time-entries/components/TimeEntryQuickView'
 
 // ─── Timer state shape stored in localStorage ───────────────────────────────
 interface TimerState {
   startedAt:   string
   description: string
-  clientId:    string
+  contactId:   string
   projectId:   string
 }
 
@@ -37,7 +38,7 @@ function getStoredTimer(): TimerState | null {
 
 // ─── Form schema ──────────────────────────────────────────────────────────────
 const logEntrySchema = z.object({
-  clientId:    z.string().optional(),
+  contactId:   z.string().optional(),
   projectId:   z.string().optional(),
   description: z.string().min(1, 'Description required'),
   date:        z.string().min(1, 'Date required'),
@@ -89,7 +90,7 @@ function weekBounds() {
 export default function TimePage() {
   const [searchParams] = useSearchParams()
   const preselectedProjectId = searchParams.get('projectId') ?? ''
-  const preselectedClientId  = searchParams.get('clientId')  ?? ''
+  const preselectedContactId = searchParams.get('contactId') || searchParams.get('clientId') || ''
 
   const { from, to } = weekBounds()
   const [dateFrom, setDateFrom] = useState(from)
@@ -98,18 +99,20 @@ export default function TimePage() {
   const [timerState,     setTimerState]     = useState<TimerState | null>(getStoredTimer)
   const [elapsed,        setElapsed]        = useState(0)
   const [timerDesc,      setTimerDesc]      = useState('')
-  const [timerClientId,  setTimerClientId]  = useState('')
+  const [timerContactId,  setTimerContactId]  = useState('')
   const [timerProjectId, setTimerProjectId] = useState(preselectedProjectId)
 
   const [showLogForm, setShowLogForm] = useState(false)
   const [editEntry,   setEditEntry]   = useState<TimeEntry | null>(null)
   const [selected,    setSelected]    = useState<Set<string>>(new Set())
   const [deleteTarget, setDeleteTarget] = useState<TimeEntry | null>(null)
+  const [timeSnap,       setTimeSnap]       = useState<TimeEntrySnap | null>(null)
+  const [activeTimeEntry, setActiveTimeEntry] = useState<TimeEntry | null>(null)
 
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const { data: clientsData } = useClients()
-  const clients = clientsData?.clients ?? []
+  const { data: contactsData } = useContacts({ limit: 200 })
+  const contacts = contactsData?.items ?? []
   const { data: projectsData } = useProjects({ limit: 100 })
   const projects = projectsData?.projects ?? []
 
@@ -129,7 +132,7 @@ export default function TimePage() {
     if (preselectedProjectId && !showLogForm && !timerState) {
       reset({
         projectId:   preselectedProjectId,
-        clientId:    preselectedClientId || undefined,
+        contactId:   preselectedContactId || undefined,
         description: '',
         date:        new Date().toISOString().slice(0, 10),
         hours:       1,
@@ -143,7 +146,7 @@ export default function TimePage() {
   useEffect(() => {
     if (timerState) {
       setTimerDesc(timerState.description)
-      setTimerClientId(timerState.clientId)
+      setTimerContactId(timerState.contactId)
       setTimerProjectId(timerState.projectId ?? '')
       startTick(timerState.startedAt)
     }
@@ -166,7 +169,7 @@ export default function TimePage() {
     const state: TimerState = {
       startedAt:   new Date().toISOString(),
       description: timerDesc,
-      clientId:    timerClientId,
+      contactId:   timerContactId,
       projectId:   timerProjectId,
     }
     localStorage.setItem(TIMER_KEY, JSON.stringify(state))
@@ -183,7 +186,7 @@ export default function TimePage() {
     const minutes = durationMins % 60
     reset({
       description: timerState.description,
-      clientId:    timerState.clientId  || undefined,
+      contactId:   timerState.contactId  || undefined,
       projectId:   timerState.projectId || undefined,
       date:        new Date().toISOString().slice(0, 10),
       hours:       hours || 0,
@@ -211,7 +214,7 @@ export default function TimePage() {
   function handleOpenEdit(entry: TimeEntry) {
     setEditEntry(entry)
     reset({
-      clientId:    entry.clientId  ?? undefined,
+      contactId:   entry.contactId ?? undefined,
       projectId:   entry.projectId ?? undefined,
       description: entry.description,
       date:        entry.date.slice(0, 10),
@@ -225,7 +228,7 @@ export default function TimePage() {
   async function onSubmitEntry(data: LogEntryForm) {
     const durationMins = Math.round((data.hours * 60) + (data.minutes ?? 0))
     const payload: CreateTimeEntryPayload = {
-      clientId:    data.clientId  || undefined,
+      contactId:   data.contactId || undefined,
       projectId:   data.projectId || undefined,
       description: data.description,
       date:        data.date,
@@ -248,9 +251,9 @@ export default function TimePage() {
     const e = entries.find(e => e.id === id)
     return e && !e.isBilled
   })
-  const selectedEntries   = entries.filter(e => selected.has(e.id))
-  const selectedClientIds = [...new Set(selectedEntries.map(e => e.clientId))]
-  const canBill = selectedUnbilled.length > 0 && selectedClientIds.length === 1
+  const selectedEntries    = entries.filter(e => selected.has(e.id))
+  const selectedContactIds = [...new Set(selectedEntries.map(e => e.contactId))]
+  const canBill = selectedUnbilled.length > 0 && selectedContactIds.length === 1
 
   function toggleSelect(id: string) {
     setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
@@ -300,9 +303,9 @@ export default function TimePage() {
             </div>
             <p className="text-[13px] text-[#667085] dark:text-[#8B92A8]">
               {timerState.description}
-              {timerState.clientId && clients.find(c => c.id === timerState.clientId) && (
+              {timerState.contactId && contacts.find(c => c.id === timerState.contactId) && (
                 <span className="ml-2 text-[#2563EB]">
-                  · {clients.find(c => c.id === timerState.clientId)?.name}
+                  · {contacts.find(c => c.id === timerState.contactId)?.name}
                 </span>
               )}
               {timerState.projectId && projects.find(p => p.id === timerState.projectId) && (
@@ -323,10 +326,10 @@ export default function TimePage() {
             {/* Row 1: client + project selectors */}
             <div className="flex gap-2">
               <DropdownSelect
-                value={timerClientId}
-                onChange={setTimerClientId}
-                placeholder="No client"
-                options={[{ value: '', label: 'No client' }, ...clients.map(c => ({ value: c.id, label: c.name }))]}
+                value={timerContactId}
+                onChange={setTimerContactId}
+                placeholder="No contact"
+                options={[{ value: '', label: 'No contact' }, ...contacts.map(c => ({ value: c.id, label: c.name }))]}
                 className="flex-1 min-w-0"
               />
               <DropdownSelect
@@ -375,10 +378,10 @@ export default function TimePage() {
           <form onSubmit={handleSubmit(onSubmitEntry)} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="form-label">Client</label>
-                <select {...register('clientId')} className="form-input w-full">
-                  <option value="">No client</option>
-                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                <label className="form-label">Contact</label>
+                <select {...register('contactId')} className="form-input w-full">
+                  <option value="">No contact</option>
+                  {contacts.map(c => <option key={c.id} value={c.id}>{c.name}{c.company ? ` — ${c.company}` : ''}</option>)}
                 </select>
               </div>
               <div>
@@ -513,22 +516,35 @@ export default function TimePage() {
                   <div
                     key={entry.id}
                     className={cn(
-                      'flex items-center gap-3 px-5 py-3 hover:bg-[#FAFAFA] dark:hover:bg-[#21222D] group transition-colors',
+                      'flex items-center gap-3 px-5 py-3 hover:bg-[#FAFAFA] dark:hover:bg-[#21222D] group transition-colors cursor-pointer',
                       entry.isBilled && 'opacity-60',
                     )}
+                    onClick={() => {
+                      setTimeSnap({
+                        id: entry.id,
+                        description: entry.description,
+                        date: entry.date,
+                        durationMins: entry.durationMins,
+                        hourlyRate: entry.hourlyRate,
+                        isBilled: entry.isBilled,
+                        projectName: entry.project?.name,
+                        contactName: entry.contact?.name,
+                      })
+                      setActiveTimeEntry(entry)
+                    }}
                   >
                     {!entry.isBilled ? (
-                      <button onClick={() => toggleSelect(entry.id)} className="shrink-0 text-[#D0D5DD] hover:text-[#2563EB] transition-colors">
+                      <button onClick={e => { e.stopPropagation(); toggleSelect(entry.id) }} className="shrink-0 text-[#D0D5DD] hover:text-[#2563EB] transition-colors">
                         {selected.has(entry.id)
                           ? <CheckSquare size={15} className="text-[#2563EB]" />
                           : <SquareIcon size={15} />}
                       </button>
                     ) : <div className="w-4 shrink-0" />}
 
-                    {/* Client badge */}
-                    {entry.client ? (
+                    {/* Contact badge */}
+                    {(entry.contact || entry.client) ? (
                       <span className="text-[11px] font-semibold text-[#2563EB] bg-[#EFF6FF] dark:bg-[#1E3A5F]/60 px-2 py-0.5 rounded-full shrink-0">
-                        {entry.client.name}
+                        {entry.contact?.name ?? entry.client?.name}
                       </span>
                     ) : (
                       <span className="text-[11px] text-[#D0D5DD] shrink-0">—</span>
@@ -562,13 +578,13 @@ export default function TimePage() {
 
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                       <button
-                        onClick={() => handleOpenEdit(entry)}
+                        onClick={e => { e.stopPropagation(); handleOpenEdit(entry) }}
                         className="w-7 h-7 flex items-center justify-center text-[#98A2B3] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors rounded-lg hover:bg-[#F2F4F7] dark:hover:bg-[#3D4258]"
                       >
                         <Edit2 size={12} />
                       </button>
                       <button
-                        onClick={() => setDeleteTarget(entry)}
+                        onClick={e => { e.stopPropagation(); setDeleteTarget(entry) }}
                         className="w-7 h-7 flex items-center justify-center text-[#98A2B3] hover:text-[#F04438] transition-colors rounded-lg hover:bg-[#FEF3F2]"
                       >
                         <Trash2 size={12} />
@@ -585,8 +601,8 @@ export default function TimePage() {
           <div className="px-5 py-3 border-t border-[#EAECF0] dark:border-[#26283A] bg-[#FAFAFA] dark:bg-[#21222D] flex items-center justify-between">
             <p className="text-[12px] text-[#667085] dark:text-[#8B92A8]">
               {selected.size} entr{selected.size === 1 ? 'y' : 'ies'} selected
-              {!canBill && selectedEntries.length > 0 && selectedClientIds.length > 1 && (
-                <span className="ml-1 text-amber-600"> — must be same client to bill</span>
+              {!canBill && selectedEntries.length > 0 && selectedContactIds.length > 1 && (
+                <span className="ml-1 text-amber-600"> — must be same contact to bill</span>
               )}
             </p>
             <button
@@ -600,6 +616,12 @@ export default function TimePage() {
           </div>
         )}
       </div>
+
+      <TimeEntryQuickView
+        snap={timeSnap}
+        onClose={() => { setTimeSnap(null); setActiveTimeEntry(null) }}
+        onEdit={() => { setTimeSnap(null); if (activeTimeEntry) handleOpenEdit(activeTimeEntry) }}
+      />
 
       {deleteTarget && (
         <ConfirmModal

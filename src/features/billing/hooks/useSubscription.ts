@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 
@@ -35,7 +34,6 @@ export function useSubscriptionStatus() {
 
 export function useCreateSubscription() {
   const queryClient = useQueryClient()
-  const navigate    = useNavigate()
   const { data: profile } = useProfile()
 
   return useMutation({
@@ -65,7 +63,7 @@ export function useCreateSubscription() {
               })
               queryClient.invalidateQueries({ queryKey: ['billing'] })
               queryClient.invalidateQueries({ queryKey: ['profile'] })
-              navigate('/billing/success')
+              window.location.href = '/billing/success'
               resolve()
             } catch (err) {
               reject(err)

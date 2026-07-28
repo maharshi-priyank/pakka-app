@@ -45,7 +45,7 @@ export const lineItemSchema = z.object({
 
 export const invoiceFormSchema = z.object({
   title:              z.string().optional(),
-  clientId:           z.string().optional(),
+  contactId:          z.string().optional(),
   contractId:         z.string().optional(),
   lineItems:          z.array(lineItemSchema).min(1, 'Add at least one line item'),
   gstType:            z.enum(GST_TYPES),
@@ -74,6 +74,7 @@ export interface Invoice {
   id:                 string
   userId:             string
   contractId:         string | null
+  contactId:          string | null
   clientId:           string | null
   invoiceNumber:      string
   status:             InvoiceStatus

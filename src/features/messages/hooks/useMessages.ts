@@ -4,7 +4,8 @@ import { api } from '@/lib/api'
 export interface ThreadSummary {
   id:            string
   subject:       string | null
-  client:        { id: string; name: string; email: string }
+  client:        { id: string; name: string; email: string } | null
+  contact:       { id: string; name: string; email: string | null } | null
   latestMessage: { id: string; senderType: 'FREELANCER' | 'CLIENT'; body: string; createdAt: string } | null
   unreadCount:   number
   updatedAt:     string
@@ -73,6 +74,48 @@ export function useMarkThreadRead(clientId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: () => api.patch(`/messages/${clientId}/read`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['messages', 'threads'] })
+      qc.invalidateQueries({ queryKey: ['messages', 'unread-count'] })
+    },
+  })
+}
+
+// ── Contact thread hooks ─────────────────────────────────────────────────────
+
+export interface ContactThreadDetail {
+  thread:   { id: string; subject: string | null }
+  messages: Message[]
+  contact:  { id: string; name: string; email: string | null } | null
+}
+
+export function useContactThread(contactId: string | null) {
+  return useQuery<ContactThreadDetail>({
+    queryKey:        ['messages', 'contact-thread', contactId],
+    queryFn:         () => api.get(`/messages/contact/${contactId}`).then(r => r.data.data),
+    enabled:         !!contactId,
+    refetchInterval: 8_000,
+    staleTime:       4_000,
+  })
+}
+
+export function useSendContactMessage(contactId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (dto: { body: string; subject?: string; attachmentType?: string; attachmentId?: string }) =>
+      api.post(`/messages/contact/${contactId}`, dto).then(r => r.data.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['messages', 'contact-thread', contactId] })
+      qc.invalidateQueries({ queryKey: ['messages', 'threads'] })
+      qc.invalidateQueries({ queryKey: ['messages', 'unread-count'] })
+    },
+  })
+}
+
+export function useMarkContactThreadRead(contactId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.patch(`/messages/contact/${contactId}/read`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['messages', 'threads'] })
       qc.invalidateQueries({ queryKey: ['messages', 'unread-count'] })

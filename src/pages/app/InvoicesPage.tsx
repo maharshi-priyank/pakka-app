@@ -14,6 +14,7 @@ import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
 import DateRangePill from '@/components/filters/DateRangePill'
 import AmountRangePill from '@/components/filters/AmountRangePill'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import InvoicePreviewDrawer from '@/features/invoices/components/InvoicePreviewDrawer'
 
 const STATUS_TABS: Array<{ value: InvoiceStatus | 'ALL'; label: string }> = [
   { value: 'ALL',     label: 'All' },
@@ -51,6 +52,7 @@ export default function InvoicesPage() {
   const [filters,       setFilters]       = useState<InvoiceFilters>(EMPTY_FILTERS)
   const [deleteTarget,  setDeleteTarget]  = useState<Invoice | null>(null)
   const [voidTarget,    setVoidTarget]    = useState<Invoice | null>(null)
+  const [invoiceId,     setInvoiceId]     = useState<string | null>(null)
 
   const searchRef = useRef<HTMLInputElement>(null)
   const deleteMut = useDeleteInvoice()
@@ -265,7 +267,7 @@ export default function InvoicesPage() {
           sortBy={sortBy}
           sortDir={sortDir}
           onSort={handleSort}
-          onOpen={(inv: Invoice) => navigate(`/invoices/${inv.id}`)}
+          onOpen={(inv: Invoice) => setInvoiceId(inv.id)}
           onDelete={inv => setDeleteTarget(inv)}
           onVoid={inv => setVoidTarget(inv)}
         />
@@ -275,7 +277,7 @@ export default function InvoicesPage() {
             <InvoiceCard
               key={inv.id}
               invoice={inv}
-              onClick={(i: Invoice) => navigate(`/invoices/${i.id}`)}
+              onClick={(i: Invoice) => setInvoiceId(i.id)}
               onDelete={i => setDeleteTarget(i)}
               onVoid={i => setVoidTarget(i)}
             />
@@ -313,6 +315,11 @@ export default function InvoicesPage() {
           isLoading={voidMut.isPending}
         />
       )}
+
+      <InvoicePreviewDrawer
+        id={invoiceId}
+        onClose={() => setInvoiceId(null)}
+      />
     </div>
   )
 }

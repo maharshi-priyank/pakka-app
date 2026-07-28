@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 
 export interface ExpenseClient  { id: string; name: string }
+export interface ExpenseContact { id: string; name: string }
 export interface ExpenseProject { id: string; name: string }
 
 export interface Expense {
@@ -14,6 +15,8 @@ export interface Expense {
   userId:      string
   clientId:    string | null
   client:      ExpenseClient | null
+  contactId:   string | null
+  contact:     ExpenseContact | null
   projectId:   string | null
   project:     ExpenseProject | null
   category:    string
@@ -35,6 +38,7 @@ export interface Expense {
 
 export interface CreateExpensePayload {
   clientId?:    string
+  contactId?:   string
   projectId?:   string
   category:     string
   description:  string
@@ -51,6 +55,7 @@ export interface CreateExpensePayload {
 
 export interface UpdateExpensePayload {
   clientId?:    string
+  contactId?:   string
   projectId?:   string
   category?:    string
   description?: string
@@ -69,6 +74,7 @@ export interface UpdateExpensePayload {
 
 export interface ExpensesQuery {
   clientId?:   string
+  contactId?:  string
   projectId?:  string
   from?:       string
   to?:         string

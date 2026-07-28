@@ -42,7 +42,9 @@ export function ThreadList({ activeClientId, onSelect }: Props) {
   return (
     <div className="flex flex-col">
       {threads.map(t => {
-        const isActive = t.client.id === activeClientId
+        const displayName = t.contact?.name ?? t.client?.name ?? 'Unknown'
+        const entityId    = t.contact?.id   ?? t.client?.id   ?? t.id
+        const isActive    = entityId === activeClientId
         const preview  = t.latestMessage?.body.replace(/<[^>]*>/g, '').slice(0, 60) ?? ''
         const timeAgo  = t.latestMessage
           ? formatDistanceToNow(new Date(t.latestMessage.createdAt), { addSuffix: false })
@@ -51,14 +53,14 @@ export function ThreadList({ activeClientId, onSelect }: Props) {
         return (
           <button
             key={t.id}
-            onClick={() => onSelect(t.client.id)}
+            onClick={() => onSelect(entityId)}
             className={cn(
               'flex items-start gap-3 px-4 py-3 border-b border-gray-50 text-left transition-colors',
               isActive ? 'bg-[#F2F4F7]' : 'bg-white hover:bg-gray-50',
             )}
           >
             <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-[11px] font-bold shrink-0 mt-0.5">
-              {t.client.name.slice(0, 2).toUpperCase()}
+              {displayName.slice(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-1">
@@ -66,7 +68,7 @@ export function ThreadList({ activeClientId, onSelect }: Props) {
                   'text-[12px] font-semibold truncate',
                   isActive ? 'text-[#101828]' : 'text-gray-900',
                 )}>
-                  {t.client.name}
+                  {displayName}
                 </span>
                 <span className="text-[10px] text-gray-400 shrink-0">{timeAgo}</span>
               </div>

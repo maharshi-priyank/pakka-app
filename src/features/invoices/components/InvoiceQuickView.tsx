@@ -20,6 +20,7 @@ export interface InvoiceSnap {
   amountPaid?: string | number
   dueDate?: string | null
   createdAt?: string
+  updatedAt?: string
   clientName?: string
   projectName?: string
 }
@@ -27,9 +28,10 @@ export interface InvoiceSnap {
 interface Props {
   invoice: InvoiceSnap | null
   onClose: () => void
+  onDownload?: () => void
 }
 
-export default function InvoiceQuickView({ invoice, onClose }: Props) {
+export default function InvoiceQuickView({ invoice, onClose, onDownload }: Props) {
   const navigate = useNavigate()
   const { format } = useCurrency()
   if (!invoice) return null
@@ -44,6 +46,9 @@ export default function InvoiceQuickView({ invoice, onClose }: Props) {
       onClose={onClose}
       onEdit={() => { onClose(); navigate(`/invoices/${invoice.id}`) }}
       editLabel="Open Invoice"
+      downloadAction={onDownload}
+      downloadLabel="View / Download"
+      updatedAt={invoice.updatedAt}
       title={invoice.invoiceNumber}
       subtitle={invoice.clientName ?? invoice.projectName}
       statusBadge={

@@ -12,7 +12,7 @@ import RecordPaymentModal from './RecordPaymentModal'
 import InvoiceFilesPanel from './InvoiceFilesPanel'
 import FieldInfoPopover from '@/features/ai/components/FieldInfoPopover'
 import { useProjects } from '@/features/projects/hooks/useProjects'
-import { useClients } from '@/features/clients/hooks/useClients'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
@@ -21,10 +21,10 @@ import { Permission } from '@/types/permissions'
 const GST_RATE_OPTIONS = [0, 5, 12, 18, 28]
 
 interface Props {
-  invoice?:           Invoice
-  defaultContractId?: string
-  defaultClientId?:   string
-  defaultProjectId?:  string
+  invoice?:            Invoice
+  defaultContractId?:  string
+  defaultContactId?:   string
+  defaultProjectId?:   string
   onSaved: (invoice: Invoice) => void
   onDiscard: () => void
 }
@@ -33,7 +33,7 @@ function fmt(v: number) {
   return v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-export default function InvoiceEditor({ invoice, defaultContractId, defaultClientId, defaultProjectId, onSaved, onDiscard }: Props) {
+export default function InvoiceEditor({ invoice, defaultContractId, defaultContactId, defaultProjectId, onSaved, onDiscard }: Props) {
   const isNew     = !invoice
   const isPaid    = invoice?.status === 'PAID'
   const canEdit   = !isPaid
@@ -58,7 +58,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: invoice
       ? {
-          clientId:          invoice.clientId   ?? undefined,
+          contactId:         invoice.contactId  ?? undefined,
           contractId:        invoice.contractId ?? undefined,
           lineItems:         invoice.lineItems.length > 0
             ? invoice.lineItems
@@ -75,7 +75,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
         }
       : {
           contractId: defaultContractId,
-          clientId:   defaultClientId,
+          contactId:  defaultContactId,
           lineItems:  [{ description: '', qty: 1, rate: 0, gstRate: 18 }],
           gstType:    'IGST',
           currency:   wsCurrency,
@@ -100,19 +100,19 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
   const tdsRate         = watch('tdsRate')
   const isRecurring     = watch('isRecurring')
   const recurrenceCycle = watch('recurrenceCycle')
-  const watchedClientId = watch('clientId') ?? ''
+  const watchedContactId = watch('contactId') ?? ''
 
-  const { data: clientsData } = useClients()
-  const { data: projectsData } = useProjects({ clientId: watchedClientId || undefined, limit: 100 })
+  const { data: contactsData } = useContacts({ limit: 200 })
+  const { data: projectsData } = useProjects({ contactId: watchedContactId || undefined, limit: 100 })
 
-  const clientSynced = useRef(false)
+  const contactSynced = useRef(false)
   useEffect(() => {
-    if (clientSynced.current || !clientsData?.clients?.length || !defaultClientId) return
-    if (clientsData.clients.some(c => c.id === defaultClientId)) {
-      setValue('clientId', defaultClientId)
-      clientSynced.current = true
+    if (contactSynced.current || !contactsData?.items?.length || !defaultContactId) return
+    if (contactsData.items.some(c => c.id === defaultContactId)) {
+      setValue('contactId', defaultContactId)
+      contactSynced.current = true
     }
-  }, [clientsData?.clients?.length])
+  }, [contactsData?.items?.length])
 
   const subtotal        = lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate)), 0)
   const gstAmount       = isIndia && gstType !== 'EXEMPT'
@@ -200,19 +200,19 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultClien
             </div>
           )}
 
-          {/* Client selector */}
+          {/* Contact selector */}
           {isNew && (
             <div>
-              <label className="form-label">Client *</label>
+              <label className="form-label">Contact</label>
               <select
-                {...register('clientId')}
+                {...register('contactId')}
                 disabled={!canEdit}
                 className="form-input w-full max-w-xs"
               >
-                <option value="">— Select a client —</option>
-                {(clientsData?.clients ?? []).map(c => (
+                <option value="">— Select a contact —</option>
+                {(contactsData?.items ?? []).map(c => (
                   <option key={c.id} value={c.id}>
-                    {c.name}{c.company ? ` · ${c.company}` : ''}
+                    {c.name}{c.company ? ` — ${c.company}` : ''}
                   </option>
                 ))}
               </select>

@@ -1,12 +1,16 @@
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ExternalLink } from 'lucide-react'
+import { X, ExternalLink, Download } from 'lucide-react'
+import { formatDate } from '@/lib/utils'
 
 interface Props {
   open: boolean
   onClose: () => void
   onEdit: () => void
   editLabel?: string
+  downloadAction?: () => void
+  downloadLabel?: string
+  updatedAt?: string
   title: string
   subtitle?: string
   statusBadge?: React.ReactNode
@@ -17,6 +21,8 @@ interface Props {
 export default function QuickViewModal({
   open, onClose, onEdit,
   editLabel = 'Open Editor',
+  downloadAction, downloadLabel = 'Download',
+  updatedAt,
   title, subtitle, statusBadge, extraActions, children,
 }: Props) {
   useEffect(() => {
@@ -52,6 +58,7 @@ export default function QuickViewModal({
                     {statusBadge}
                   </div>
                   {subtitle && <p className="text-[12px] text-gray-400 mt-0.5">{subtitle}</p>}
+                  {updatedAt && <p className="text-[11px] text-gray-400 mt-0.5">Modified {formatDate(updatedAt)}</p>}
                 </div>
                 <button
                   onClick={onClose}
@@ -71,9 +78,17 @@ export default function QuickViewModal({
                 <button onClick={onClose} className="btn-secondary text-[12.5px] h-9 px-4">
                   Close
                 </button>
+                {downloadAction && (
+                  <button
+                    onClick={downloadAction}
+                    className="btn-secondary flex items-center gap-1.5 text-[12.5px] h-9 px-4"
+                  >
+                    <Download size={11} /> {downloadLabel}
+                  </button>
+                )}
                 <button
                   onClick={onEdit}
-                  className="flex items-center gap-1.5 h-9 px-4 rounded-xl bg-gray-900 text-white text-[12.5px] font-semibold hover:bg-gray-800 transition-colors"
+                  className="flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[#3538CD] text-white text-[12.5px] font-semibold hover:bg-[#2D31B3] transition-colors"
                 >
                   {editLabel} <ExternalLink size={11} />
                 </button>

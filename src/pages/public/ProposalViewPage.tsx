@@ -512,17 +512,17 @@ export default function ProposalViewPage() {
         {/* ── Pricing ── */}
         {lineItems.length > 0 && !proposal.hidePricingTable && (
           <ViewCard icon={IndianRupee} title="Pricing breakdown">
-            <div className="overflow-x-auto mt-1">
-              <table className="w-full text-[13px]">
+            <div className="overflow-x-auto mt-1 -mx-1">
+              <table className="w-full min-w-[420px] text-[13px]">
                 <thead>
                   <tr className="border-b border-[#F2F4F7]">
-                    <th className="text-left py-2.5 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide">Description</th>
-                    <th className="text-right py-2.5 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide">Qty</th>
-                    <th className="text-right py-2.5 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide">Rate</th>
+                    <th className="text-left py-2.5 pr-4 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide">Description</th>
+                    <th className="text-right py-2.5 px-4 w-14 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide whitespace-nowrap">Qty</th>
+                    <th className="text-right py-2.5 px-4 w-28 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide whitespace-nowrap">Rate</th>
                     {gstType !== 'EXEMPT' && (
-                      <th className="text-right py-2.5 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide">GST</th>
+                      <th className="text-right py-2.5 px-4 w-16 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide whitespace-nowrap">GST</th>
                     )}
-                    <th className="text-right py-2.5 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide">Amount</th>
+                    <th className="text-right py-2.5 pl-4 w-28 text-[11px] font-bold text-[#98A2B3] uppercase tracking-wide whitespace-nowrap">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -531,13 +531,13 @@ export default function ProposalViewPage() {
                     const lineGst   = gstType !== 'EXEMPT' ? lineTotal * (item.gstRate ?? 0) / 100 : 0
                     return (
                       <tr key={idx} className="border-b border-[#F9FAFB]">
-                        <td className="py-3 text-[#344054] font-medium">{item.description}</td>
-                        <td className="py-3 text-right text-[#667085]">{item.qty}</td>
-                        <td className="py-3 text-right text-[#667085]">₹{fmt(item.rate)}</td>
+                        <td className="py-3 pr-4 text-[#344054] font-medium leading-snug">{item.description}</td>
+                        <td className="py-3 px-4 text-right text-[#667085] tabular-nums align-top">{item.qty}</td>
+                        <td className="py-3 px-4 text-right text-[#667085] whitespace-nowrap tabular-nums align-top">₹{fmt(item.rate)}</td>
                         {gstType !== 'EXEMPT' && (
-                          <td className="py-3 text-right text-[#667085]">{item.gstRate ?? 0}%</td>
+                          <td className="py-3 px-4 text-right text-[#667085] whitespace-nowrap tabular-nums align-top">{item.gstRate ?? 0}%</td>
                         )}
-                        <td className="py-3 text-right font-semibold text-[#101828]">₹{fmt(lineTotal + lineGst)}</td>
+                        <td className="py-3 pl-4 text-right font-semibold text-[#101828] whitespace-nowrap tabular-nums align-top">₹{fmt(lineTotal + lineGst)}</td>
                       </tr>
                     )
                   })}
@@ -545,20 +545,20 @@ export default function ProposalViewPage() {
               </table>
             </div>
             <div className="mt-4 border-t border-[#EAECF0] pt-4 space-y-2">
-              <div className="flex justify-between text-[12px] text-[#667085]">
+              <div className="flex items-center justify-between text-[12px] text-[#667085]">
                 <span>Subtotal</span>
-                <span className="font-medium text-[#344054]">₹{fmt(subtotal)}</span>
+                <span className="font-medium text-[#344054] tabular-nums">₹{fmt(subtotal)}</span>
               </div>
               {gstAmount > 0 && (
-                <div className="flex justify-between text-[12px] text-[#667085]">
+                <div className="flex items-center justify-between text-[12px] text-[#667085]">
                   <span>{GST_TYPE_LABELS[gstType]}</span>
-                  <span className="font-medium text-[#344054]">₹{fmt(gstAmount)}</span>
+                  <span className="font-medium text-[#344054] tabular-nums">₹{fmt(gstAmount)}</span>
                 </div>
               )}
-              <div className="flex justify-between pt-2 border-t border-[#EAECF0]">
+              <div className="flex items-center justify-between pt-2 border-t border-[#EAECF0]">
                 <span className="text-[14px] font-bold text-[#101828]">Total</span>
-                <span className="flex items-center gap-0.5 text-[17px] font-extrabold text-[#101828]">
-                  <IndianRupee size={12} strokeWidth={3} />
+                <span className="flex items-center gap-0.5 text-[18px] font-extrabold text-[#101828] tabular-nums">
+                  <IndianRupee size={13} strokeWidth={3} />
                   {fmt(total)}
                 </span>
               </div>

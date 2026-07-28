@@ -6,14 +6,12 @@ import { useProposalTemplates, useIncrementTemplateUsage } from '../hooks/usePro
 import TemplateCard from './TemplateCard'
 import ImportTemplateModal from './ImportTemplateModal'
 import type { ProposalTemplate } from '../schemas/proposal.schema'
-import type { Lead } from '@/features/leads/schemas/lead.schema'
 
 interface Props {
-  open:              boolean
-  onClose:           () => void
-  defaultLead?:      Lead
-  defaultProjectId?: string
-  defaultClientId?:  string
+  open:               boolean
+  onClose:            () => void
+  defaultProjectId?:  string
+  defaultContactId?:  string
 }
 
 function fmt(v: number) {
@@ -113,7 +111,7 @@ function TemplatePreviewPanel({
   )
 }
 
-export default function TemplatePickerModal({ open, onClose, defaultLead, defaultProjectId, defaultClientId }: Props) {
+export default function TemplatePickerModal({ open, onClose, defaultProjectId, defaultContactId }: Props) {
   const [search,          setSearch]          = useState('')
   const [activeCategory,  setCategory]        = useState<string>('All')
   const [previewTemplate, setPreviewTemplate] = useState<ProposalTemplate | null>(null)
@@ -140,10 +138,10 @@ export default function TemplatePickerModal({ open, onClose, defaultLead, defaul
     incrementUsage.mutate(template.id)
     onClose()
     const params = new URLSearchParams()
-    if (defaultProjectId) params.set('projectId', defaultProjectId)
-    if (defaultClientId)  params.set('clientId',  defaultClientId)
+    if (defaultProjectId)  params.set('projectId', defaultProjectId)
+    if (defaultContactId)  params.set('contactId', defaultContactId)
     const qs = params.toString()
-    navigate(`/proposals/new${qs ? `?${qs}` : ''}`, { state: { template, lead: defaultLead ?? undefined } })
+    navigate(`/proposals/new${qs ? `?${qs}` : ''}`, { state: { template } })
   }
 
   if (!open) return null

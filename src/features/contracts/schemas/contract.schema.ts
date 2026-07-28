@@ -45,7 +45,7 @@ export const contractContentSchema = z.object({
 export const createContractSchema = z.object({
   title:       z.string().min(1, 'Title is required').max(200),
   proposalId:  z.string().optional(),
-  clientId:    z.string().optional(),
+  contactId:   z.string().optional(),
   clientName:  z.string().optional(),
   clientEmail: z.string().optional(),
   projectId:   z.string().optional(),
@@ -73,6 +73,7 @@ export interface Contract {
   id:         string
   userId:     string
   proposalId: string | null
+  contactId:  string | null
   clientId:   string | null
   projectId:  string | null
   proposal:   ContractProposal | null

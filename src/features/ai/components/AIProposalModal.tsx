@@ -53,8 +53,7 @@ export default function AIProposalModal({ onClose, defaultLeadId }: Props) {
     try {
       const proposal = await createMutation.mutateAsync({
         title:       data.title,
-        leadId:      defaultLeadId,
-        clientId:    data.clientId,
+        contactId:   defaultLeadId || undefined,
         clientName:  data.clientName,
         clientEmail: data.clientEmail,
         validUntil:  data.validUntil ?? undefined,

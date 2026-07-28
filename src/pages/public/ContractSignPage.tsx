@@ -320,7 +320,7 @@ export default function ContractSignPage() {
                     <p className="text-[13px] font-semibold text-[#344054]">{ps.milestone}</p>
                     {ps.dueOn && <p className="text-[11px] text-[#98A2B3]">{ps.dueOn}</p>}
                   </div>
-                  <div className="flex items-center gap-0.5 font-extrabold text-[#101828]">
+                  <div className="flex items-center gap-0.5 font-extrabold text-[#101828] shrink-0 tabular-nums">
                     <IndianRupee size={10} strokeWidth={3} />
                     <span className="text-[14px]">{fmt(ps.amount)}</span>
                   </div>

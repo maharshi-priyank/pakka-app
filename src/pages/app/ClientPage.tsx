@@ -477,8 +477,7 @@ export default function ClientPage() {
       <ScheduleCallModal
         open={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
-        clientId={id}
-        clientName={client?.name}
+        contactName={client?.name}
         defaultTitle={client ? `Discovery call with ${client.name}` : ''}
       />
 

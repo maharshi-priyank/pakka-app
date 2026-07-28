@@ -3,12 +3,14 @@ import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
 export type ProjectStatus = 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED'
+export type ProjectStage  = 'SCOPING' | 'PROPOSAL_SENT' | 'ACTIVE' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED'
 
 export interface ProjectClient {
   id:      string
   name:    string
   company: string | null
   email?:  string | null
+  stage?:  string | null
 }
 
 export interface ProjectCount {
@@ -20,19 +22,22 @@ export interface ProjectCount {
 }
 
 export interface Project {
-  id:          string
-  userId:      string
-  clientId:    string | null
-  name:        string
-  description: string | null
-  status:      ProjectStatus
-  budget:      string | null
-  startDate:   string | null
-  endDate:     string | null
-  archivedAt:  string | null
-  createdAt:   string
-  updatedAt:   string
+  id:           string
+  userId:       string
+  clientId:     string | null
+  contactId:    string | null
+  name:         string
+  description:  string | null
+  status:       ProjectStatus
+  projectStage: ProjectStage | null
+  budget:       string | null
+  startDate:    string | null
+  endDate:      string | null
+  archivedAt:   string | null
+  createdAt:    string
+  updatedAt:    string
   client:              ProjectClient | null
+  contact:             ProjectClient | null
   _count?:             ProjectCount
   invoiced?:           number
   collected?:          number
@@ -85,7 +90,9 @@ export interface CreateProjectInput {
   name:                 string
   description?:         string
   clientId?:            string
+  contactId?:           string
   status?:              ProjectStatus
+  projectStage?:        ProjectStage
   budget?:              number
   startDate?:           string
   endDate?:             string
@@ -108,6 +115,7 @@ export function useProjects(params?: {
   search?:          string
   status?:          ProjectStatus
   clientId?:        string
+  contactId?:       string
   page?:            number
   limit?:           number
   includeArchived?: boolean

@@ -15,8 +15,8 @@ export default function ContractEditorPage() {
   const [searchParams] = useSearchParams()
   const isNew = !id || id === 'new'
 
-  const urlProjectId = searchParams.get('projectId') || undefined
-  const urlClientId  = searchParams.get('clientId')  || undefined
+  const urlProjectId  = searchParams.get('projectId') || undefined
+  const urlContactId  = searchParams.get('contactId') || searchParams.get('clientId') || undefined
   const { data: projectFromUrl } = useProject(urlProjectId ?? '')
 
   const { data: contract, isLoading } = useContract(isNew ? null : id ?? null)
@@ -60,7 +60,6 @@ export default function ContractEditorPage() {
             <Link to={`/projects/${effectiveProjectId}`} className="text-[12px] text-[#98A2B3] dark:text-[#545C74] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors">
               {effectiveProjectName}
             </Link>
-            <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">/</span>
           </>
         ) : (
           <span className="text-[12px] text-[#98A2B3] dark:text-[#545C74]">Contracts</span>
@@ -112,7 +111,7 @@ export default function ContractEditorPage() {
       <ContractEditor
         contract={!isNew ? contract : undefined}
         defaultProjectId={isNew ? urlProjectId : undefined}
-        defaultClientId={isNew ? urlClientId : undefined}
+        defaultContactId={isNew ? urlContactId : undefined}
         onSaved={handleSaved}
         onDiscard={() => effectiveProjectId ? navigate(`/projects/${effectiveProjectId}`) : navigate('/contracts')}
         onGenerateInvoice={contract?.status === 'SIGNED' ? handleGenerateInvoice : undefined}
