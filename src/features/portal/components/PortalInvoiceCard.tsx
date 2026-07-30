@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Eye, Download, CreditCard, CheckCircle2, Receipt } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useCreateInvoiceOrder, type PortalInvoice } from '../hooks/usePortal'
+import { useCreateInvoiceOrder, useVerifyInvoicePayment, type PortalInvoice } from '../hooks/usePortal'
 
 const STATUS_LABEL: Record<string, string> = {
   SENT:      'Awaiting payment',
@@ -40,8 +40,10 @@ export default function PortalInvoiceCard({
 }: Props) {
   const [localStatus, setLocalStatus] = useState(invoice.status)
   const [payError,    setPayError]    = useState('')
+  const [verifying,   setVerifying]   = useState(false)
 
   const createOrder = useCreateInvoiceOrder(portalToken)
+  const verifyPayment = useVerifyInvoicePayment(portalToken)
 
   async function handlePayNow() {
     setPayError('')
@@ -56,10 +58,36 @@ export default function PortalInvoiceCard({
         description: `Invoice ${invoice.invoiceNumber}`,
         prefill:     { name: clientName, email: clientEmail ?? '' },
         theme:       { color: '#101828' },
-        handler:     () => {
-          setLocalStatus('PAID')
-          onStatusChange(invoice.id, 'PAID')
+        modal: {
+          // Fires when the client closes the checkout without completing payment
+          ondismiss: () => setPayError('Payment was cancelled.'),
         },
+        handler: async (response: {
+          razorpay_order_id:   string
+          razorpay_payment_id: string
+          razorpay_signature:  string
+        }) => {
+          setVerifying(true)
+          try {
+            await verifyPayment.mutateAsync({
+              invoiceId:         invoice.id,
+              razorpayOrderId:   response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            })
+            setLocalStatus('PAID')
+            onStatusChange(invoice.id, 'PAID')
+          } catch {
+            // Payment succeeded at Razorpay but our signature check failed or
+            // the request errored — do NOT mark as paid on unverified success.
+            setPayError('Payment could not be verified. If you were charged, contact the freelancer with your payment reference.')
+          } finally {
+            setVerifying(false)
+          }
+        },
+      })
+      rzp.on('payment.failed', () => {
+        setPayError('Payment failed. Please try again or use a different payment method.')
       })
       rzp.open()
     } catch {
@@ -128,11 +156,11 @@ export default function PortalInvoiceCard({
           {isPayable && (
             <button
               onClick={handlePayNow}
-              disabled={createOrder.isPending}
+              disabled={createOrder.isPending || verifying}
               className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13px] font-semibold transition-colors disabled:opacity-60"
             >
               <CreditCard size={13} strokeWidth={2} />
-              {createOrder.isPending ? 'Opening…' : 'Pay Now'}
+              {verifying ? 'Confirming…' : createOrder.isPending ? 'Opening…' : 'Pay Now'}
             </button>
           )}
           {localStatus === 'PAID' && (

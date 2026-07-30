@@ -109,6 +109,29 @@ export function useCreateInvoiceOrder(token: string) {
   })
 }
 
+export interface VerifyPaymentInput {
+  invoiceId:          string
+  razorpayOrderId:    string
+  razorpayPaymentId:  string
+  razorpaySignature:  string
+}
+
+export function useVerifyInvoicePayment(token: string) {
+  return useMutation({
+    mutationFn: async (input: VerifyPaymentInput) => {
+      const { data } = await publicApi.post<{ data: { status: string; paidAt: string | null } }>(
+        `/portal/${token}/invoices/${input.invoiceId}/verify-payment`,
+        {
+          razorpayOrderId:   input.razorpayOrderId,
+          razorpayPaymentId: input.razorpayPaymentId,
+          razorpaySignature: input.razorpaySignature,
+        },
+      )
+      return data.data
+    },
+  })
+}
+
 export function usePortalAcceptProposal() {
   return useMutation({
     mutationFn: async (slug: string) => {
