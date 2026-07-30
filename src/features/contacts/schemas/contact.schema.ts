@@ -115,6 +115,20 @@ export const STAGE_COLORS: Record<ContactStage, string> = {
   LOST:          'bg-[#FEF3F2] text-[#B42318]',
 }
 
+// Outlined/bordered variant of STAGE_COLORS — same color family, no fill.
+// Used wherever a Contact-stage badge renders next to a Project's own status
+// badge (which uses the filled-pill STAGE_COLORS-style treatment), so the two
+// badges stay visually distinct even when their colors overlap (e.g. a
+// CLIENT-stage Contact next to an ACTIVE Project are both green).
+export const STAGE_OUTLINE_COLORS: Record<ContactStage, string> = {
+  ENQUIRY:       'bg-transparent border border-[#3538CD] text-[#3538CD]',
+  PROPOSAL_SENT: 'bg-transparent border border-[#B54708] text-[#B54708]',
+  NEGOTIATING:   'bg-transparent border border-[#6941C6] text-[#6941C6]',
+  CLIENT:        'bg-transparent border border-[#027A48] text-[#027A48]',
+  PAST_CLIENT:   'bg-transparent border border-[#344054] text-[#344054]',
+  LOST:          'bg-transparent border border-[#B42318] text-[#B42318]',
+}
+
 export const SOURCE_LABELS: Record<string, string> = {
   instagram:     'Instagram',
   referral:      'Referral',

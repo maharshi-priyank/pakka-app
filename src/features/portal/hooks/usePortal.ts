@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
 import axios from 'axios'
+import type { ContactStage } from '@/features/contacts/schemas/contact.schema'
 
 const publicApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL as string,
@@ -74,6 +75,9 @@ export interface PortalData {
     name:    string
     email:   string | null
     company: string | null
+    // Only present when resolved via Contact (Phase C portal path). The legacy
+    // Client-based portal path (no Contact record) never includes this field.
+    stage?:  ContactStage
   }
   freelancer: {
     businessName:  string | null

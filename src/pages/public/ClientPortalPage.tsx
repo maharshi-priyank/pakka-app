@@ -17,6 +17,7 @@ import {
 } from '@/features/portal/hooks/usePortal'
 import { usePortalAttachments, humanSize } from '@/features/attachments/useAttachments'
 import type { PortalAttachment } from '@/features/attachments/types'
+import { STAGE_LABELS, STAGE_OUTLINE_COLORS, type ContactStage } from '@/features/contacts/schemas/contact.schema'
 import PortalProposalCard from '@/features/portal/components/PortalProposalCard'
 import PortalContractCard from '@/features/portal/components/PortalContractCard'
 import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
@@ -386,7 +387,9 @@ export default function ClientPortalPage() {
                 <div className="space-y-3">
                   {activeProjects.length === 0
                     ? <EmptyState label="No projects shared yet" />
-                    : activeProjects.map(p => <PortalProjectCard key={p.id} project={p} />)
+                    : activeProjects.map(p => (
+                        <PortalProjectCard key={p.id} project={p} contactStage={data?.client.stage} />
+                      ))
                   }
                 </div>
               )}
@@ -508,7 +511,12 @@ const STATUS_BADGE: Record<string, string> = {
 
 // ─── PortalProjectCard ────────────────────────────────────────────────────────
 
-function PortalProjectCard({ project }: { project: PortalProject }) {
+function PortalProjectCard({ project, contactStage }: {
+  project:       PortalProject
+  // Only present when the portal response includes the Contact's stage (Phase C
+  // contact-based portal path) — the legacy Client-based path has no such field.
+  contactStage?: ContactStage
+}) {
   const [open, setOpen] = useState(false)
 
   const totalMins    = project.timeEntries.reduce((s, e) => s + e.durationMins, 0)
@@ -545,9 +553,19 @@ function PortalProjectCard({ project }: { project: PortalProject }) {
             )}
           </div>
         </div>
-        <span className={cn('text-[10.5px] font-semibold px-2.5 py-1 rounded-full shrink-0', statusBadge)}>
-          {project.status.charAt(0) + project.status.slice(1).toLowerCase().replace('_', ' ')}
-        </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Contact-stage badge renders first (leftmost) — outlined pill, same
+              treatment as ContactProjectAccordion.tsx — and only when the portal
+              response actually includes it (legacy Client-based path won't). */}
+          {contactStage && (
+            <span className={cn('text-[10.5px] font-semibold px-2.5 py-1 rounded-full shrink-0', STAGE_OUTLINE_COLORS[contactStage])}>
+              {STAGE_LABELS[contactStage]}
+            </span>
+          )}
+          <span className={cn('text-[10.5px] font-semibold px-2.5 py-1 rounded-full shrink-0', statusBadge)}>
+            {project.status.charAt(0) + project.status.slice(1).toLowerCase().replace('_', ' ')}
+          </span>
+        </div>
       </div>
 
       {/* Summary row */}
