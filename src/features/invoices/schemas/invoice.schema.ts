@@ -66,6 +66,9 @@ export type InvoiceFormData = z.infer<typeof invoiceFormSchema>
 export interface InvoiceClient {
   id: string; name: string; company: string | null; email: string | null
 }
+export interface InvoiceContact {
+  id: string; name: string; company: string | null
+}
 export interface InvoiceContract {
   id: string; title: string
 }
@@ -76,6 +79,7 @@ export interface Invoice {
   contractId:         string | null
   contactId:          string | null
   clientId:           string | null
+  contact?:           InvoiceContact | null
   invoiceNumber:      string
   status:             InvoiceStatus
   lineItems:          LineItem[]

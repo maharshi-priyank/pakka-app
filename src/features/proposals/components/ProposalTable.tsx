@@ -83,8 +83,8 @@ export default function ProposalTable({ proposals, sortBy, sortDir, onSort, onOp
 
           <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
             {proposals.map(p => {
-              const contactName = p.client?.name ?? p.lead?.name ?? 'No client'
-              const company     = p.client?.company ?? null
+              const contactName = p.contact?.name ?? p.client?.name ?? p.lead?.name ?? 'No client'
+              const company     = p.contact?.company ?? p.client?.company ?? null
 
               return (
                 <tr

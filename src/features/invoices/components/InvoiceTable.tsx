@@ -84,7 +84,7 @@ export default function InvoiceTable({ invoices, sortBy, sortDir, onSort, onOpen
 
           <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
             {invoices.map(inv => {
-              const clientName = inv.client?.name ?? 'No client'
+              const clientName = inv.contact?.name ?? inv.client?.name ?? 'No client'
               const isOverdue  = inv.status === 'OVERDUE'
               const isPaid     = inv.status === 'PAID'
               const isDraft    = inv.status === 'DRAFT'

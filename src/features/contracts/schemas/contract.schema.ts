@@ -68,6 +68,7 @@ export type UpdateContractInput     = z.infer<typeof updateContractSchema>
 
 export interface ContractProposal { id: string; title: string; slug: string }
 export interface ContractClient   { id: string; name: string; company?: string | null; email?: string | null }
+export interface ContractContact  { id: string; name: string; company?: string | null; email?: string | null }
 
 export interface Contract {
   id:         string
@@ -78,6 +79,7 @@ export interface Contract {
   projectId:  string | null
   proposal:   ContractProposal | null
   client:     ContractClient | null
+  contact?:   ContractContact | null
   project:    { id: string; name: string } | null
   title:      string
   status:     ContractStatus
