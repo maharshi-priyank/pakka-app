@@ -130,6 +130,7 @@ export interface Proposal {
   totalAmount:      string
   gstAmount:        string
   hidePricingTable: boolean
+  otpGated:         boolean
   validUntil:       string | null
   acceptedAt:       string | null
   opens:       ProposalOpen[]

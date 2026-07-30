@@ -433,6 +433,7 @@ export default function ContactPage() {
               <ProjectsTab
                 projects={projects}
                 contactId={contact.id}
+                contactStage={contact.stage}
                 onNewProject={handleNewProject}
                 isPending={createProject.isPending}
               />
@@ -641,9 +642,10 @@ function MobileProfileStrip({ contact, palette, isOverdueFollowUp, portalCopied,
 
 // ─── Projects tab ─────────────────────────────────────────────────────────────
 
-function ProjectsTab({ projects, contactId, onNewProject, isPending }: {
+function ProjectsTab({ projects, contactId, contactStage, onNewProject, isPending }: {
   projects:     ContactProject[]
   contactId:    string
+  contactStage: Contact['stage']
   onNewProject: () => void
   isPending:    boolean
 }) {
@@ -687,6 +689,7 @@ function ProjectsTab({ projects, contactId, onNewProject, isPending }: {
               key={p.id}
               project={p}
               contactId={contactId}
+              contactStage={contactStage}
               defaultOpen={i === 0}
             />
           ))}

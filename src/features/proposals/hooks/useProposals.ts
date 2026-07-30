@@ -38,8 +38,11 @@ async function updateProposal(id: string, input: UpdateProposalInput): Promise<P
   return data.data
 }
 
-async function sendProposal(id: string): Promise<{ proposal: Proposal; shareUrl: string }> {
-  const { data } = await api.post<{ data: { proposal: Proposal; shareUrl: string } }>(`/proposals/${id}/send`)
+async function sendProposal(
+  id: string,
+  dto?: { otpGated?: boolean },
+): Promise<{ proposal: Proposal; shareUrl: string; otp?: string | null }> {
+  const { data } = await api.post<{ data: { proposal: Proposal; shareUrl: string; otp?: string | null } }>(`/proposals/${id}/send`, dto)
   return data.data
 }
 
@@ -94,7 +97,7 @@ export function useUpdateProposal() {
 export function useSendProposal() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => sendProposal(id),
+    mutationFn: (params: { id: string; otpGated?: boolean }) => sendProposal(params.id, { otpGated: params.otpGated }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: [PROPOSALS_QUERY_KEY] }); toast.success('Proposal sent to client'); ph.proposalSent() },
     onError: (err: Error) => toast.error(err.message || 'Failed to send proposal'),
   })

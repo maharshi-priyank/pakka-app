@@ -9,7 +9,8 @@ import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { useProject } from '@/features/projects/hooks/useProjects'
 import { useProjectNotes } from '@/features/projects/hooks/useProjectNotes'
 import { useAttachments, humanSize } from '@/features/attachments/useAttachments'
-import type { ContactProject } from '../schemas/contact.schema'
+import type { ContactProject, ContactStage } from '../schemas/contact.schema'
+import { STAGE_LABELS, STAGE_OUTLINE_COLORS } from '../schemas/contact.schema'
 import ProposalPreviewDrawer from '@/features/proposals/components/ProposalPreviewDrawer'
 import ContractPreviewDrawer from '@/features/contracts/components/ContractPreviewDrawer'
 import InvoicePreviewDrawer from '@/features/invoices/components/InvoicePreviewDrawer'
@@ -50,11 +51,12 @@ const MAX_VISIBLE = 4
 interface Props {
   project:      ContactProject
   contactId:    string
+  contactStage: ContactStage
   contactName?: string
   defaultOpen?: boolean
 }
 
-export default function ContactProjectAccordion({ project, contactId, contactName, defaultOpen = false }: Props) {
+export default function ContactProjectAccordion({ project, contactId, contactStage, contactName, defaultOpen = false }: Props) {
   const [open, setOpen] = useState(defaultOpen)
   const navigate = useNavigate()
   const [proposalId,   setProposalId]   = useState<string | null>(null)
@@ -94,6 +96,17 @@ export default function ContactProjectAccordion({ project, contactId, contactNam
             <span className="text-[13.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">
               {project.name}
             </span>
+            {/* Contact-stage badge renders first (leftmost) — outlined pill so it stays
+                visually distinct from the Project badge even when colors overlap (e.g.
+                STAGE_COLORS.CLIENT and PROJECT_STAGE_COLORS.ACTIVE are both green). */}
+            <span className={cn(
+              'text-[10.5px] font-semibold px-2 py-0.5 rounded-full shrink-0',
+              STAGE_OUTLINE_COLORS[contactStage],
+            )}>
+              {STAGE_LABELS[contactStage]}
+            </span>
+            {/* Project's own status badge — only rendered when projectStage is set;
+                no placeholder when it's null. */}
             {project.projectStage && (
               <span className={cn(
                 'text-[10.5px] font-semibold px-2 py-0.5 rounded-full shrink-0',

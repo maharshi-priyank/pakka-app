@@ -80,6 +80,8 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
   const [shareUrl,         setShareUrl]         = useState<string | null>(null)
   const [copied,           setCopied]           = useState(false)
   const [hidePricingTable, setHidePricingTable] = useState(proposal?.hidePricingTable ?? false)
+  const [otpGated,         setOtpGated]         = useState(false)
+  const [sendOtp,          setSendOtp]          = useState<string | null>(null)
   const [projectId,        setProjectId]        = useState(proposal?.projectId ?? defaultProjectId ?? '')
   const [showSaveTemplate, setShowSaveTemplate] = useState(false)
   const attachmentInputRef = useRef<HTMLInputElement>(null)
@@ -221,9 +223,10 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
 
   const onSend = useCallback(async () => {
     if (!proposal) return
-    const result = await sendMutation.mutateAsync(proposal.id)
+    const result = await sendMutation.mutateAsync({ id: proposal.id, otpGated })
     setShareUrl(result.shareUrl)
-  }, [proposal, sendMutation])
+    setSendOtp(result.otp ?? null)
+  }, [proposal, sendMutation, otpGated])
 
   const copyLink = useCallback(() => {
     if (!shareUrl) return
@@ -914,6 +917,13 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
         </div>
 
         <div className="flex items-center gap-2">
+          {sendOtp && (
+            <div className="flex items-center gap-2 bg-[#FFFAEB] border border-[#FEF0C7] rounded-lg px-3 py-1.5">
+              <span className="text-[10px] text-[#B54708] font-medium">OTP for client:</span>
+              <span className="text-[14px] font-extrabold text-[#B54708] tracking-widest">{sendOtp}</span>
+            </div>
+          )}
+
           {shareUrl && (
             <div className="flex items-center gap-1.5 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg px-3 py-1.5">
               <span className="text-[11px] text-[#166534] font-medium truncate max-w-[200px]">{shareUrl}</span>
@@ -935,6 +945,18 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
             >
               <LayoutTemplate size={14} />
             </button>
+          )}
+
+          {!templateMode && canSend && (
+            <label className="flex items-center gap-1.5 text-[12px] text-[#667085] dark:text-[#8B92A8] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={otpGated}
+                onChange={e => setOtpGated(e.target.checked)}
+                className="rounded border-[#D0D5DD]"
+              />
+              Secure with OTP
+            </label>
           )}
 
           {!templateMode && canSend && (
