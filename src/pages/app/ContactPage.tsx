@@ -21,8 +21,9 @@ import EditContactModal from '@/features/contacts/components/EditContactModal'
 import { MessageBubble } from '@/features/messages/components/MessageBubble'
 import { ReplyComposer } from '@/features/messages/components/ReplyComposer'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import { ContactHistoryTab } from '@/features/contacts/components/ContactHistoryTab'
 
-type Tab = 'projects' | 'messages' | 'meetings'
+type Tab = 'projects' | 'messages' | 'meetings' | 'history'
 
 // ─── Avatar helpers ───────────────────────────────────────────────────────────
 
@@ -418,6 +419,12 @@ export default function ContactPage() {
               label="Meetings"
               count={(contact.meetings?.length ?? 0) > 0 ? contact.meetings!.length : undefined}
             />
+            <TabButton
+              active={activeTab === 'history'}
+              onClick={() => setActiveTab('history')}
+              icon={Clock}
+              label="History"
+            />
           </div>
 
           {/* Tab panels */}
@@ -444,6 +451,9 @@ export default function ContactPage() {
             )}
             {activeTab === 'meetings' && (
               <MeetingsTab meetings={contact.meetings ?? []} />
+            )}
+            {activeTab === 'history' && (
+              <ContactHistoryTab contactId={contact.id} />
             )}
           </div>
         </div>
