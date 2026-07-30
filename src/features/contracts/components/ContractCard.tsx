@@ -29,7 +29,7 @@ function formatDate(iso: string) {
 }
 
 export default function ContractCard({ contract, onClick, onRemove, onVoid }: Props) {
-  const clientName = contract.client?.name ?? 'No client'
+  const clientName = contract.contact?.name ?? contract.client?.name ?? 'No client'
   const c = contract.content as Record<string, unknown>
   const totalAmount = c.totalAmount as number | undefined
 

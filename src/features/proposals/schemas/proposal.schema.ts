@@ -105,9 +105,10 @@ export type UpdateProposalInput = z.infer<typeof updateProposalSchema>
 
 // ─── API response types ───────────────────────────────────────────────────────
 
-export interface ProposalLead   { id: string; name: string; email?: string }
-export interface ProposalClient { id: string; name: string; company?: string | null }
-export interface ProposalOpen   { id: string; openedAt: string }
+export interface ProposalLead    { id: string; name: string; email?: string }
+export interface ProposalClient  { id: string; name: string; company?: string | null }
+export interface ProposalContact { id: string; name: string; company?: string | null }
+export interface ProposalOpen    { id: string; openedAt: string }
 
 export interface ProposalContract { id: string; status: string }
 
@@ -120,6 +121,7 @@ export interface Proposal {
   projectId:   string | null
   lead:        ProposalLead | null
   client:      ProposalClient | null
+  contact?:    ProposalContact | null
   project:     { id: string; name: string } | null
   title:       string
   status:      ProposalStatus

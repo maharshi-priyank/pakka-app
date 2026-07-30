@@ -33,7 +33,7 @@ function fmt(v: number) {
 }
 
 export default function InvoiceCard({ invoice, onClick, onDelete, onVoid }: Props) {
-  const clientName = invoice.client?.name ?? 'No client'
+  const clientName = invoice.contact?.name ?? invoice.client?.name ?? 'No client'
   const isOverdue  = invoice.status === 'OVERDUE'
   const isPaid     = invoice.status === 'PAID'
   const isDraft    = invoice.status === 'DRAFT'

@@ -35,7 +35,7 @@ function isExpiringSoon(iso: string) {
 }
 
 export default function ProposalCard({ proposal, onClick, onConvertToContract, onSaveAsTemplate, onRemove }: Props) {
-  const clientName = proposal.client?.name ?? proposal.lead?.name ?? 'No client'
+  const clientName = proposal.contact?.name ?? proposal.client?.name ?? proposal.lead?.name ?? 'No client'
   const openCount  = proposal._count?.opens ?? proposal.opens?.length ?? 0
   const expiring   = proposal.validUntil && isExpiringSoon(proposal.validUntil)
   const showOpens  = proposal.status === 'SENT' || proposal.status === 'OPENED'

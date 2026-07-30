@@ -84,7 +84,7 @@ export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOp
 
           <tbody className="divide-y divide-[#F2F4F7] dark:divide-[#26283A]">
             {contracts.map(c => {
-              const clientName  = c.client?.name ?? 'No client'
+              const clientName  = c.contact?.name ?? c.client?.name ?? 'No client'
               const totalAmount = (c.content as Record<string, unknown>)?.totalAmount as number | undefined
 
               return (
