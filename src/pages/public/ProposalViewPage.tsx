@@ -7,7 +7,7 @@ import {
   AlertCircle, CheckSquare, XCircle, Star, MessageSquare, Briefcase,
   ExternalLink, ChevronDown, ArrowRight, Download, ThumbsUp, ThumbsDown,
   Loader2, CreditCard, Lock, Paperclip, FileArchive, FileImage,
-  File as FileIconLucide,
+  File as FileIconLucide, Shield,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import DocumentHeader from '@/components/documents/DocumentHeader'
@@ -64,6 +64,22 @@ async function recordOpen(slug: string) {
   try { await publicApi.post(`/proposals/view/${slug}/open`) } catch { /* ignore */ }
 }
 
+async function verifyProposalOtp(slug: string, otp: string): Promise<void> {
+  await publicApi.post(`/proposals/view/${slug}/verify-otp`, { otp })
+}
+
+// R9/KTD8: OTP-verified state persists client-side only, in sessionStorage
+// keyed by proposal slug, for that browser tab's session.
+function otpSessionKey(slug: string) {
+  return `otp-verified:${slug}`
+}
+
+// KTD8: the gate bypasses entirely once a Proposal reaches a terminal state —
+// the outcome is already settled, so re-verifying only adds friction.
+function isTerminalProposalStatus(status?: string) {
+  return status === 'ACCEPTED' || status === 'DECLINED' || status === 'EXPIRED'
+}
+
 async function acceptProposal(slug: string): Promise<AcceptResponse> {
   const { data } = await publicApi.post<{ data: AcceptResponse }>(`/proposals/view/${slug}/accept`)
   return data.data
@@ -100,6 +116,9 @@ export default function ProposalViewPage() {
   const [depositPaid,   setDepositPaid]   = useState(false)
   const [payError,      setPayError]      = useState('')
   const [payLoading,    setPayLoading]    = useState(false)
+  const [otpInput,      setOtpInput]      = useState('')
+  const [otpError,      setOtpError]      = useState('')
+  const [otpVerified,   setOtpVerified]   = useState(false)
 
   const { data: proposal, isLoading, isError } = useQuery({
     queryKey: ['public-proposal', slug],
@@ -124,6 +143,33 @@ export default function ProposalViewPage() {
       queryClient.invalidateQueries({ queryKey: ['public-proposal', slug] })
     },
   })
+
+  // R9/R10/R12: gated proposals require a correct OTP before the view's
+  // tracking side effect (ProposalOpen + SENT -> OPENED) fires server-side.
+  const verifyOtpMutation = useMutation({
+    mutationFn: (otp: string) => verifyProposalOtp(slug!, otp),
+    onSuccess: () => {
+      if (slug) sessionStorage.setItem(otpSessionKey(slug), 'true')
+      // The successful verify-otp call already produced the tracking side
+      // effect server-side — mark recordOpen as done so the mount effect
+      // below never also calls the old unauthenticated /open endpoint.
+      openRecorded.current = true
+      setOtpVerified(true)
+    },
+    onError: () => {
+      setOtpError('Incorrect OTP. Please check and try again.')
+      setOtpInput('')
+    },
+  })
+
+  function handleVerifyOtp() {
+    setOtpError('')
+    if (otpInput.length !== 6) {
+      setOtpError('OTP must be 6 digits')
+      return
+    }
+    verifyOtpMutation.mutate(otpInput)
+  }
 
   // If the page is loaded for an already-accepted proposal with a pending deposit,
   // re-call accept (idempotent) to retrieve the existing deposit order info
@@ -186,6 +232,13 @@ export default function ProposalViewPage() {
 
   useEffect(() => {
     if (proposal && slug && !openRecorded.current) {
+      // R9/R11: when gating applies and hasn't been satisfied yet, the OTP
+      // gate takes over — recordOpen (and the tracking it triggers) only
+      // fires once a correct OTP is submitted via verifyOtpMutation instead.
+      const gateActive = !!proposal.otpGated
+        && !isTerminalProposalStatus(proposal.status)
+        && sessionStorage.getItem(otpSessionKey(slug)) !== 'true'
+      if (gateActive) return
       openRecorded.current = true
       recordOpen(slug)
     }
@@ -213,6 +266,72 @@ export default function ProposalViewPage() {
           <AlertCircle size={40} className="mx-auto text-[#D0D5DD] mb-3" />
           <p className="text-[16px] font-bold text-[#344054]">Proposal not found</p>
           <p className="text-[13px] text-[#98A2B3] mt-1">This link may have expired or been removed.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // R9/KTD8: gate the entire view behind an OTP-entry form when the proposal
+  // is otpGated, isn't already in a terminal state, and hasn't been verified
+  // this browser tab session.
+  const needsOtpGate = !!proposal.otpGated
+    && !isTerminalProposalStatus(proposal.status)
+    && !otpVerified
+    && sessionStorage.getItem(otpSessionKey(slug!)) !== 'true'
+
+  if (needsOtpGate) {
+    return (
+      <div className="min-h-screen bg-[#F5F6FA] flex items-center justify-center px-6">
+        <div className="w-full max-w-md bg-white rounded-2xl border-2 border-[#2563EB] shadow-sm p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
+              <Shield size={18} className="text-[#2563EB]" />
+            </div>
+            <div>
+              <p className="text-[15px] font-bold text-[#101828]">Enter OTP to view this proposal</p>
+              <p className="text-[12px] text-[#667085]">Enter the 6-digit code shared with you by the sender</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="form-label">One-time password (OTP)</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
+                value={otpInput}
+                onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                onKeyDown={e => e.key === 'Enter' && handleVerifyOtp()}
+                className={cn(
+                  'form-input w-full text-center text-[22px] font-extrabold tracking-[0.4em] h-14',
+                  otpError && 'border-[#F04438] focus:border-[#F04438]',
+                )}
+                placeholder="000000"
+                disabled={verifyOtpMutation.isPending}
+              />
+              {otpError && <p className="form-error">{otpError}</p>}
+            </div>
+
+            <button
+              onClick={handleVerifyOtp}
+              disabled={otpInput.length !== 6 || verifyOtpMutation.isPending}
+              className="btn-primary w-full h-12 text-[15px] font-bold justify-center"
+            >
+              {verifyOtpMutation.isPending ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Verifying…
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Lock size={16} strokeWidth={2} />
+                  Unlock proposal
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     )
