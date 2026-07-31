@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { IndianRupee, X } from 'lucide-react'
 import { useRecordPayment } from '../hooks/useInvoices'
+import { currencySymbol } from '@/lib/currency-symbols'
 import type { Invoice } from '../schemas/invoice.schema'
 
 function fmt(n: number) {
@@ -14,6 +15,7 @@ interface Props {
 
 export default function RecordPaymentModal({ invoice, onClose }: Props) {
   const { mutateAsync, isPending } = useRecordPayment()
+  const symbol = currencySymbol(invoice.currency)
 
   const tdsAutoFill = invoice.tdsRate
     ? parseFloat((invoice.total * (invoice.tdsRate / 100)).toFixed(2))
@@ -56,7 +58,7 @@ export default function RecordPaymentModal({ invoice, onClose }: Props) {
           <div>
             <h2 className="text-[16px] font-bold text-[#101828] dark:text-[#ECEEF3]">Record Payment</h2>
             <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
-              Invoice {invoice.invoiceNumber} · Outstanding ₹{fmt(outstanding)}
+              Invoice {invoice.invoiceNumber} · Outstanding {symbol}{fmt(outstanding)}
             </p>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#98A2B3] hover:bg-[#F5F6FA] dark:hover:bg-[#26283A] transition-colors">
@@ -127,7 +129,7 @@ export default function RecordPaymentModal({ invoice, onClose }: Props) {
               <div className="flex items-center justify-between">
                 <span className="text-[#667085] dark:text-[#8B92A8]">After recording</span>
                 <span className={`font-bold ${willBePaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-[#344054] dark:text-[#C5CAD6]'}`}>
-                  ₹{fmt(Math.min(newTotal, total))} of ₹{fmt(total)} settled
+                  {symbol}{fmt(Math.min(newTotal, total))} of {symbol}{fmt(total)} settled
                 </span>
               </div>
               <div className={`mt-1 font-semibold ${willBePaid ? 'text-emerald-700 dark:text-emerald-400' : 'text-[#667085] dark:text-[#8B92A8]'}`}>

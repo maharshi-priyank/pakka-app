@@ -114,6 +114,22 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
     }
   }, [contactsData?.items?.length])
 
+  // R7/KTD8/KTD3: keep currency in sync with the linked Contact — only on an
+  // actual contactId change (not on initial mount for an existing Invoice,
+  // which would clobber a manually-diverged currency, per KTD3). Falls back to
+  // the Workspace currency when the linked Contact has none set (KTD5) or no
+  // Contact is linked at all (R8) — never sets a null currency, which would
+  // fail the DTO's @IsIn check. Mirrors ProposalEditor.tsx / ContractEditor.tsx.
+  const currencyContactRef = useRef<string | undefined>(invoice?.contactId ?? defaultContactId ?? undefined)
+  useEffect(() => {
+    if (!contactsData?.items?.length) return
+    if (watchedContactId === currencyContactRef.current) return
+    currencyContactRef.current = watchedContactId
+    const contact = contactsData.items.find(c => c.id === watchedContactId)
+    const nextCurrency = contact?.currency ?? wsCurrency
+    setValue('currency', nextCurrency)
+  }, [watchedContactId, contactsData?.items?.length])
+
   const subtotal        = lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate)), 0)
   const gstAmount       = isIndia && gstType !== 'EXEMPT'
     ? lineItems.reduce((s, item) => s + (Number(item.qty) * Number(item.rate) * Number(item.gstRate)) / 100, 0)

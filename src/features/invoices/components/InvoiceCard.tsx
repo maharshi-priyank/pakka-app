@@ -1,5 +1,6 @@
 import { ArrowUpRight, IndianRupee, CheckCircle2, Clock, AlertCircle, Trash2, Ban } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import type { Invoice } from '../schemas/invoice.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/invoice.schema'
 
@@ -33,6 +34,7 @@ function fmt(v: number) {
 }
 
 export default function InvoiceCard({ invoice, onClick, onDelete, onVoid }: Props) {
+  const symbol     = currencySymbol(invoice.currency)
   const clientName = invoice.contact?.name ?? invoice.client?.name ?? 'No client'
   const isOverdue  = invoice.status === 'OVERDUE'
   const isPaid     = invoice.status === 'PAID'
@@ -112,7 +114,7 @@ export default function InvoiceCard({ invoice, onClick, onDelete, onVoid }: Prop
       {Number(invoice.gstAmount) > 0 && (
         <div className="flex items-center justify-between gap-2 px-3.5 py-1.5 border-t border-[#F2F4F7] dark:border-[#26283A]">
           <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">GST ({invoice.gstType === 'IGST' ? 'IGST' : 'CGST+SGST'})</span>
-          <span className="text-[11.5px] font-medium text-[#667085] dark:text-[#8B92A8]">₹{fmt(Number(invoice.gstAmount))}</span>
+          <span className="text-[11.5px] font-medium text-[#667085] dark:text-[#8B92A8]">{symbol}{fmt(Number(invoice.gstAmount))}</span>
         </div>
       )}
 
