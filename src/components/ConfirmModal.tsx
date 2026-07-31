@@ -1,4 +1,4 @@
-import { Trash2, XCircle, X } from 'lucide-react'
+import { Trash2, XCircle, X, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ConfirmModalProps {
@@ -8,7 +8,7 @@ interface ConfirmModalProps {
   title: string
   description: string
   confirmLabel: string
-  variant: 'delete' | 'void'
+  variant: 'delete' | 'void' | 'overwrite'
   isLoading?: boolean
 }
 
@@ -25,6 +25,7 @@ export function ConfirmModal({
   if (!open) return null
 
   const isDelete = variant === 'delete'
+  const isOverwrite = variant === 'overwrite'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -41,10 +42,10 @@ export function ConfirmModal({
           <div
             className={cn(
               'flex h-12 w-12 items-center justify-center rounded-full',
-              isDelete ? 'bg-[#FEE4E2] text-[#D92D20]' : 'bg-[#FEF0C7] text-[#DC6803]',
+              isDelete ? 'bg-[#FEE4E2] text-[#D92D20]' : isOverwrite ? 'bg-[#EEF2FF] text-[#6366F1]' : 'bg-[#FEF0C7] text-[#DC6803]',
             )}
           >
-            {isDelete ? <Trash2 size={22} /> : <XCircle size={22} />}
+            {isDelete ? <Trash2 size={22} /> : isOverwrite ? <RefreshCw size={20} /> : <XCircle size={22} />}
           </div>
 
           <div>
@@ -60,7 +61,9 @@ export function ConfirmModal({
                 'w-full rounded-xl px-4 py-2.5 text-[13.5px] font-semibold text-white transition-colors disabled:opacity-60',
                 isDelete
                   ? 'bg-[#D92D20] hover:bg-[#B42318]'
-                  : 'bg-[#DC6803] hover:bg-[#B54708]',
+                  : isOverwrite
+                    ? 'bg-[#0D1117] hover:bg-[#1a1d2e]'
+                    : 'bg-[#DC6803] hover:bg-[#B54708]',
               )}
             >
               {isLoading ? 'Processing…' : confirmLabel}
