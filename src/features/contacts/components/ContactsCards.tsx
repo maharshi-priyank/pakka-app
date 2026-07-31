@@ -104,7 +104,7 @@ export default function ContactsCards({ contacts }: Props) {
             {hasDeal && (
               <div className="px-4 pb-3 -mt-0.5">
                 <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#ECEEF3] tabular-nums">
-                  {formatCurrency(Number(c.dealValue))}
+                  {formatCurrency(Number(c.dealValue), c.currency ?? 'INR')}
                 </span>
               </div>
             )}

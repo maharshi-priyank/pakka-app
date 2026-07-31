@@ -5,6 +5,7 @@ import { X, Loader2 } from 'lucide-react'
 import { createContactSchema, CONTACT_SOURCES, CONTACT_CURRENCIES, SOURCE_LABELS, type CreateContactInput } from '../schemas/contact.schema'
 import { useCreateContact } from '../hooks/useContacts'
 import { ALL_COUNTRIES, getCountryDefaults } from '@/lib/countryDefaults'
+import { currencySymbol } from '@/lib/currency-symbols'
 
 interface Props {
   open:    boolean
@@ -19,11 +20,14 @@ export default function AddContactModal({ open, onClose }: Props) {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<CreateContactInput>({
     resolver: zodResolver(createContactSchema),
     defaultValues: { country: '', currency: undefined },
   })
+
+  const watchedCurrency = watch('currency')
 
   useEffect(() => { if (open) reset({ country: '', currency: undefined }) }, [open, reset])
 
@@ -127,7 +131,7 @@ export default function AddContactModal({ open, onClose }: Props) {
               <input {...register('service')} className="form-input" placeholder="Brand identity" />
             </div>
             <div>
-              <label className="form-label">Deal Value (₹)</label>
+              <label className="form-label">Deal Value ({currencySymbol(watchedCurrency)})</label>
               <input {...register('dealValue')} className="form-input" type="number" placeholder="50000" />
             </div>
           </div>

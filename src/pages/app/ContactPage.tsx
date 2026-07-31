@@ -320,7 +320,7 @@ export default function ContactPage() {
                 {contact.dealValue && Number(contact.dealValue) > 0 && (
                   <FieldRow icon={IndianRupee} label="Deal Value" value={
                     <span className="font-bold text-[#101828] dark:text-[#ECEEF3]">
-                      {formatCurrency(Number(contact.dealValue))}
+                      {formatCurrency(Number(contact.dealValue), contact.currency ?? 'INR')}
                     </span>
                   } />
                 )}
@@ -590,7 +590,7 @@ function MobileProfileStrip({ contact, palette, isOverdueFollowUp, portalCopied,
           {contact.dealValue && Number(contact.dealValue) > 0 && (
             <FieldRow icon={IndianRupee} label="Deal Value" value={
               <span className="font-bold text-[#101828] dark:text-[#ECEEF3]">
-                {formatCurrency(Number(contact.dealValue))}
+                {formatCurrency(Number(contact.dealValue), contact.currency ?? 'INR')}
               </span>
             } />
           )}

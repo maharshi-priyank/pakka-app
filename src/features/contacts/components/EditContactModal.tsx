@@ -5,6 +5,7 @@ import { X, Loader2 } from 'lucide-react'
 import { updateContactSchema, CONTACT_SOURCES, CONTACT_CURRENCIES, SOURCE_LABELS, type UpdateContactInput, type Contact } from '../schemas/contact.schema'
 import { useUpdateContact } from '../hooks/useContacts'
 import { ALL_COUNTRIES, getCountryDefaults } from '@/lib/countryDefaults'
+import { currencySymbol } from '@/lib/currency-symbols'
 
 interface Props {
   contact: Contact
@@ -35,11 +36,14 @@ export default function EditContactModal({ contact, onClose }: Props) {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<UpdateContactInput>({
     resolver: zodResolver(updateContactSchema),
     defaultValues: editDefaults(contact),
   })
+
+  const watchedCurrency = watch('currency')
 
   useEffect(() => { reset(editDefaults(contact)) }, [contact.id, reset]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -135,7 +139,7 @@ export default function EditContactModal({ contact, onClose }: Props) {
               <input {...register('service')} className="form-input" />
             </div>
             <div>
-              <label className="form-label">Deal Value (₹)</label>
+              <label className="form-label">Deal Value ({currencySymbol(watchedCurrency)})</label>
               <input {...register('dealValue')} className="form-input" type="number" />
             </div>
           </div>
