@@ -8,6 +8,7 @@ import {
 import { cn } from '@/lib/utils'
 import {
   createContractSchema,
+  CONTRACT_CURRENCIES,
   type CreateContractInput,
   type ContractClause,
 } from '../schemas/contract.schema'
@@ -15,6 +16,7 @@ import type { Contract, SendContractResponse } from '../schemas/contract.schema'
 import { useCreateContract, useUpdateContract, useSendContract } from '../hooks/useContracts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
 
@@ -47,6 +49,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
   const createMutation = useCreateContract()
   const updateMutation = useUpdateContract()
   const sendMutation   = useSendContract()
+  const { currency: wsCurrency } = useWorkspace()
 
   const isEdit   = !!contract
   const isSaving = createMutation.isPending || updateMutation.isPending
@@ -59,6 +62,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
       title:      contract?.title ?? '',
       contactId:  contract?.contactId ?? defaultContactId ?? undefined,
       proposalId: contract?.proposalId ?? undefined,
+      currency:   (contract?.currency ?? wsCurrency) as CreateContractInput['currency'],
       content: {
         intro:              (c.intro              as string) ?? 'This agreement is entered into between the service provider ("Agency") and the client ("Client") for the services described below.',
         projectDescription: (c.projectDescription as string) ?? '',
@@ -91,6 +95,9 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
   const { data: contactsData } = useContacts({ limit: 200 })
   const { data: projectsData } = useProjects({ contactId: watchedContactId || undefined, limit: 100 })
 
+  const watchedCurrency = watch('currency') ?? wsCurrency
+  const isExport        = watchedCurrency !== 'INR'
+
   const contactSynced = useRef(false)
   useEffect(() => {
     if (contactSynced.current || !contactsData?.items?.length || !defaultContactId) return
@@ -99,6 +106,21 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
       contactSynced.current = true
     }
   }, [contactsData?.items?.length])
+
+  // R7/KTD8/KTD3: keep currency in sync with the linked Contact — only on an
+  // actual contactId change (not on initial mount for an existing Contract,
+  // which would clobber a manually-diverged currency, per KTD3). Falls back
+  // to the Workspace currency when the linked Contact has none set (KTD5) or
+  // no Contact is linked at all (R8) — never sets a null currency.
+  const currencyContactRef = useRef<string | undefined>(contract?.contactId ?? defaultContactId ?? undefined)
+  useEffect(() => {
+    if (!contactsData?.items?.length) return
+    if (watchedContactId === currencyContactRef.current) return
+    currencyContactRef.current = watchedContactId
+    const contact = contactsData.items.find(c => c.id === watchedContactId)
+    const nextCurrency = (contact?.currency ?? wsCurrency) as CreateContractInput['currency']
+    setValue('currency', nextCurrency)
+  }, [watchedContactId, contactsData?.items?.length])
 
   const exclusions = (watch('content.exclusions') ?? []) as string[]
   function addExclusion() { setValue('content.exclusions' as never, [...exclusions, ''] as never) }
@@ -367,7 +389,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
           {activeTab === 'financials' && (
             <>
               <CSection title="Contract value">
-                <div className="grid grid-cols-3 gap-3">
+                <div className={cn('grid gap-3', isExport ? 'grid-cols-3' : 'grid-cols-4')}>
                   <div>
                     <label className="form-label">Total (₹)</label>
                     <input
@@ -387,13 +409,24 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
                     />
                   </div>
                   <div>
-                    <label className="form-label">GST type</label>
-                    <select {...register('content.gstType')} className="form-input w-full">
-                      <option value="IGST">IGST</option>
-                      <option value="CGST_SGST">CGST + SGST</option>
-                      <option value="EXEMPT">Exempt</option>
+                    <label className="form-label">Currency</label>
+                    <select {...register('currency')} className="form-input w-full">
+                      {CONTRACT_CURRENCIES.map(cur => <option key={cur} value={cur}>{cur}</option>)}
                     </select>
                   </div>
+                  {/* R7/KTD4: server-enforces EXEMPT for non-INR contracts — hide
+                      the GST select entirely rather than showing a disabled/stale
+                      value; Contract has no LUT-equivalent replacement field. */}
+                  {!isExport && (
+                    <div>
+                      <label className="form-label">GST type</label>
+                      <select {...register('content.gstType')} className="form-input w-full">
+                        <option value="IGST">IGST</option>
+                        <option value="CGST_SGST">CGST + SGST</option>
+                        <option value="EXEMPT">Exempt</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
               </CSection>
 
