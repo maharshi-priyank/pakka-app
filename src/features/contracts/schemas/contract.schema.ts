@@ -1,6 +1,11 @@
 import { z } from 'zod'
 
-export const CONTRACT_STATUSES = ['DRAFT', 'SENT', 'SIGNED', 'DECLINED'] as const
+// KTD7: VOID added alongside the existing statuses — the backend's
+// ContractStatus enum (pakka-api/prisma/schema.prisma) already includes VOID
+// (set by ContractsService.void()); it was missing here, which would have
+// made a `status === 'VOID'` comparison a type error for the re-apply
+// hide-condition this unit adds to ContractEditor.tsx.
+export const CONTRACT_STATUSES = ['DRAFT', 'SENT', 'SIGNED', 'DECLINED', 'VOID'] as const
 export type ContractStatus = typeof CONTRACT_STATUSES[number]
 
 export const CONTRACT_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED'] as const
@@ -115,6 +120,7 @@ export const STATUS_LABELS: Record<ContractStatus, string> = {
   SENT:     'Sent',
   SIGNED:   'Signed',
   DECLINED: 'Declined',
+  VOID:     'Void',
 }
 
 export const STATUS_BADGE_CLASS: Record<ContractStatus, string> = {
@@ -122,4 +128,25 @@ export const STATUS_BADGE_CLASS: Record<ContractStatus, string> = {
   SENT:     'badge badge-indigo',
   SIGNED:   'badge badge-success',
   DECLINED: 'badge badge-error',
+  VOID:     'badge badge-neutral',
+}
+
+// ─── Template types ───────────────────────────────────────────────────────────
+// Mirrors ProposalTemplate's shape (proposal.schema.ts), adapted for
+// Contract's content fields. Structurally compatible with
+// `LibraryTemplate` (features/templates/types.ts) — isSystem/isDefault are
+// required (not optional) here because Contract templates are real DB rows
+// (KTD2), unlike Proposal's virtual constants.
+export interface ContractTemplate {
+  id:          string
+  name:        string
+  description: string | null
+  category:    string | null
+  isSystem:    boolean
+  isDefault:   boolean
+  content:     ContractContent
+  totalAmount: number
+  usageCount:  number
+  createdAt:   string
+  updatedAt:   string
 }

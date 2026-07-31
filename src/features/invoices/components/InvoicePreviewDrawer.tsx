@@ -215,6 +215,15 @@ export default function InvoicePreviewDrawer({ id, onClose }: Props) {
             </div>
           )}
 
+          {/* Notes — KTD6: the previously-dead `notes` field */}
+          {invoice.notes && (
+            <Section title="Notes">
+              <p className="text-[12.5px] text-[#344054] dark:text-[#C2C8D8] leading-relaxed whitespace-pre-wrap">
+                {invoice.notes}
+              </p>
+            </Section>
+          )}
+
         </div>
       )}
     </DocumentPreviewDrawer>

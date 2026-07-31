@@ -50,6 +50,7 @@ interface PublicInvoice {
   createdAt: string
   currency: string
   lutNumber:     string | null
+  notes:         string | null
   hideBranding?: boolean
   user: PublicUser; client: PublicClient | null
 }
@@ -384,6 +385,20 @@ export default function InvoiceViewPage() {
             </div>
           </div>
         </div>
+
+        {/* Notes — KTD6: the previously-dead `notes` field. This is the only
+            surface where a client actually sees it (boilerplate/payment-terms
+            wording set manually or via the default Invoice template). */}
+        {invoice.notes && (
+          <div className="bg-white rounded-2xl border border-[#EAECF0] shadow-sm overflow-hidden">
+            <div className="px-7 py-4 border-b border-[#F2F4F7]">
+              <h2 className="text-[14px] font-bold text-[#101828]">Notes</h2>
+            </div>
+            <div className="px-7 py-5">
+              <p className="text-[13px] text-[#344054] leading-relaxed whitespace-pre-wrap">{invoice.notes}</p>
+            </div>
+          </div>
+        )}
 
         {/* Deliverables */}
         {attachments.length > 0 && (

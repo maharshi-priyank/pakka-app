@@ -1,4 +1,4 @@
-import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, CheckCircle2, Archive, Ban } from 'lucide-react'
+import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, CheckCircle2, Archive, Ban, LayoutTemplate } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { currencySymbol } from '@/lib/currency-symbols'
 import type { Contract } from '../schemas/contract.schema'
@@ -15,6 +15,7 @@ interface Props {
   onOpen:    (contract: Contract) => void
   onRemove?: (contract: Contract) => void
   onVoid?:   (contract: Contract) => void
+  onSaveAsTemplate?: (contract: Contract) => void
 }
 
 const AVATAR_COLORS = [
@@ -56,7 +57,7 @@ const COLS: Array<{ label: string; field?: SortField; right?: boolean; cls?: str
   { label: '',          cls: 'w-10' },
 ]
 
-export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOpen, onRemove, onVoid }: Props) {
+export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOpen, onRemove, onVoid, onSaveAsTemplate }: Props) {
   return (
     <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] overflow-hidden bg-white dark:bg-[#13141A]">
       <div className="overflow-x-auto">
@@ -170,6 +171,15 @@ export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOp
                   {/* Actions */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      {onSaveAsTemplate && (
+                        <button
+                          onClick={e => { e.stopPropagation(); onSaveAsTemplate(c) }}
+                          title="Save as template"
+                          className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] hover:bg-[#EEF2FF] dark:hover:bg-[#1E2040] flex items-center justify-center text-[#98A2B3] hover:text-[#6366F1] transition-all"
+                        >
+                          <LayoutTemplate size={11} strokeWidth={2.5} />
+                        </button>
+                      )}
                       {onVoid && (c.status === 'SENT' || c.status === 'SIGNED') && (
                         <button
                           onClick={e => { e.stopPropagation(); onVoid(c) }}

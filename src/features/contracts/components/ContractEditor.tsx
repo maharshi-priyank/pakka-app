@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Plus, Trash2, GripVertical, Save, Send, Check, Copy, ExternalLink,
-  FileText, Layers, IndianRupee, ScrollText, User, CheckSquare, XCircle,
+  FileText, Layers, IndianRupee, ScrollText, User, CheckSquare, XCircle, LayoutTemplate,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -12,8 +13,12 @@ import {
   type CreateContractInput,
   type ContractClause,
 } from '../schemas/contract.schema'
-import type { Contract, SendContractResponse } from '../schemas/contract.schema'
+import type { Contract, SendContractResponse, ContractTemplate } from '../schemas/contract.schema'
 import { useCreateContract, useUpdateContract, useSendContract } from '../hooks/useContracts'
+import { useContractTemplates, useReapplyContractTemplate } from '../hooks/useContractTemplates'
+import ContractTemplatePreview from './ContractTemplatePreview'
+import TemplatePickerShell from '@/features/templates/components/TemplatePickerShell'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
@@ -55,12 +60,32 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
   const isEdit   = !!contract
   const isSaving = createMutation.isPending || updateMutation.isPending
 
-  const c = (contract?.content ?? {}) as Record<string, unknown>
+  // R3/KTD9: picking a template on ContractsPage hands off its full content
+  // via router state (navigate(..., {state:{template}})), mirroring
+  // Proposal's TemplatePickerModal → ProposalEditorPage → defaultTemplate
+  // prop wiring. Read directly here (rather than threading a prop through
+  // ContractEditorPage) so only this file needs to change. Only relevant for
+  // a brand-new Contract — ignored once `contract` (an existing one) exists.
+  const location = useLocation()
+  const templateFromState = !isEdit
+    ? (location.state as { template?: ContractTemplate } | null)?.template
+    : undefined
+
+  const c = (contract?.content ?? templateFromState?.content ?? {}) as Record<string, unknown>
+
+  // ─── Re-apply template (R8/R9/KTD7/KTD8) ───────────────────────────────────
+  // Hidden (not disabled) once the Contract is locked for editing — mirrors
+  // the same SIGNED/VOID guard the backend enforces (contracts.service.ts).
+  const canReapplyTemplate = isEdit && contract && contract.status !== 'SIGNED' && contract.status !== 'VOID'
+  const [showReapplyPicker, setShowReapplyPicker] = useState(false)
+  const [reapplyTemplate,   setReapplyTemplate]   = useState<ContractTemplate | null>(null)
+  const { data: reapplyTemplates = [], isLoading: reapplyTemplatesLoading } = useContractTemplates()
+  const reapplyMutation = useReapplyContractTemplate()
 
   const { register, control, handleSubmit, watch, setValue, formState: { errors, isDirty } } = useForm<CreateContractInput>({
     resolver: zodResolver(createContractSchema),
     defaultValues: {
-      title:      contract?.title ?? '',
+      title:      contract?.title ?? templateFromState?.name ?? '',
       contactId:  contract?.contactId ?? defaultContactId ?? undefined,
       proposalId: contract?.proposalId ?? undefined,
       currency:   clampCurrency(contract?.currency ?? wsCurrency) as CreateContractInput['currency'],
@@ -171,6 +196,32 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
 
   const canSend = isEdit && hasPermission(Permission.SEND_CONTRACTS) && (contract?.status === 'DRAFT' || contract?.status === 'SENT')
   const isSigned = isEdit && contract?.status === 'SIGNED'
+
+  function handleUseReapplyTemplate(template: ContractTemplate) {
+    setShowReapplyPicker(false)
+    setReapplyTemplate(template)
+  }
+
+  const onConfirmReapply = useCallback(() => {
+    if (!contract || !reapplyTemplate) return
+    reapplyMutation.mutate(
+      { contractId: contract.id, templateId: reapplyTemplate.id },
+      {
+        onSuccess: updated => {
+          // R9: only clauses change — replace the field array bound to
+          // content.clauses in-place rather than resetting the whole form,
+          // so scope/amounts/payment schedule the member may be mid-editing
+          // are left untouched. The mutation's onSuccess (useContractTemplates.ts)
+          // also invalidates the Contracts query, so other views (list,
+          // preview drawer) refetch and reflect the change too.
+          const updatedClauses = (updated.content as Record<string, unknown>)?.clauses as ContractClause[] | undefined
+          clausesArr.replace(updatedClauses ?? [])
+          setActiveTab('clauses')
+          setReapplyTemplate(null)
+        },
+      },
+    )
+  }, [contract, reapplyTemplate, reapplyMutation, clausesArr])
 
   return (
     <div className="flex flex-col h-full">
@@ -548,6 +599,17 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
             </div>
           )}
 
+          {canReapplyTemplate && (
+            <button
+              type="button"
+              onClick={() => setShowReapplyPicker(true)}
+              className="btn-secondary flex items-center gap-1.5 text-[13px] text-[#6366F1] border-[#C7D2FE] hover:bg-[#EEF2FF]"
+            >
+              <LayoutTemplate size={13} strokeWidth={2} />
+              Re-apply Template
+            </button>
+          )}
+
           {isSigned && onGenerateInvoice && (
             <button
               type="button"
@@ -582,6 +644,29 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
           </button>
         </div>
       </div>
+
+      {/* Re-apply template — pick a template, then confirm before it overwrites clauses */}
+      <TemplatePickerShell
+        open={showReapplyPicker}
+        onClose={() => setShowReapplyPicker(false)}
+        templates={reapplyTemplates}
+        isLoading={reapplyTemplatesLoading}
+        onUse={handleUseReapplyTemplate}
+        renderPreview={template => <ContractTemplatePreview template={template} />}
+      />
+
+      {reapplyTemplate && (
+        <ConfirmModal
+          open={!!reapplyTemplate}
+          onClose={() => setReapplyTemplate(null)}
+          onConfirm={onConfirmReapply}
+          title={`Re-apply "${reapplyTemplate.name}"?`}
+          description="Re-applying will replace this Contract's clauses. Scope, amounts, and status won't change."
+          confirmLabel="Re-apply Template"
+          variant="overwrite"
+          isLoading={reapplyMutation.isPending}
+        />
+      )}
     </div>
   )
 }

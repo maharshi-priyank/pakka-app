@@ -17,6 +17,11 @@ export interface TemplatePickerShellProps<T extends LibraryTemplate = LibraryTem
    */
   onSetDefault?:     (id: string) => Promise<void> | void
   settingDefaultId?: string | null
+  onUpdate?:         (id: string, data: { name?: string; category?: string; description?: string }) => Promise<void> | void
+  updatingId?:       string | null
+  onDelete?:         (id: string) => Promise<void> | void
+  deletingId?:       string | null
+  onEditContent?:    (template: T) => void
   renderPreview:     (template: T) => ReactNode
 }
 
@@ -28,6 +33,11 @@ export default function TemplatePickerShell<T extends LibraryTemplate = LibraryT
   onUse,
   onSetDefault,
   settingDefaultId,
+  onUpdate,
+  updatingId,
+  onDelete,
+  deletingId,
+  onEditContent,
   renderPreview,
 }: TemplatePickerShellProps<T>) {
   const [search,          setSearch]          = useState('')
@@ -131,6 +141,11 @@ export default function TemplatePickerShell<T extends LibraryTemplate = LibraryT
                       isPreviewActive={previewTemplate?.id === t.id}
                       onSetDefault={onSetDefault}
                       isSettingDefault={settingDefaultId === t.id}
+                      onUpdate={onUpdate}
+                      isUpdating={updatingId === t.id}
+                      onDelete={onDelete}
+                      isDeleting={deletingId === t.id}
+                      onEditContent={onEditContent}
                     />
                   ))}
                 </div>

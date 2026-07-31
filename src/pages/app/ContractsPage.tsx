@@ -1,16 +1,27 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileSignature, Search, X, LayoutGrid, List, Archive } from 'lucide-react'
+import { Plus, FileSignature, Search, X, LayoutGrid, List, Archive, LayoutTemplate } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   useContracts,
   useArchiveContract, useUnarchiveContract,
   useDeleteContract, useVoidContract,
 } from '@/features/contracts/hooks/useContracts'
+import {
+  useContractTemplates,
+  useIncrementContractTemplateUsage,
+  useSetDefaultContractTemplate,
+  useSaveContractAsTemplate,
+  useUpdateContractTemplate,
+  useDeleteContractTemplate,
+} from '@/features/contracts/hooks/useContractTemplates'
 import ContractCard, { ContractCardSkeleton } from '@/features/contracts/components/ContractCard'
 import ContractTable, { ContractTableSkeleton } from '@/features/contracts/components/ContractTable'
 import type { SortField, SortDir } from '@/features/contracts/components/ContractTable'
-import type { ContractStatus, Contract } from '@/features/contracts/schemas/contract.schema'
+import ContractTemplatePreview from '@/features/contracts/components/ContractTemplatePreview'
+import TemplatePickerShell from '@/features/templates/components/TemplatePickerShell'
+import SaveAsTemplateModal from '@/features/templates/components/SaveAsTemplateModal'
+import type { ContractStatus, Contract, ContractTemplate } from '@/features/contracts/schemas/contract.schema'
 import { STATUS_LABELS } from '@/features/contracts/schemas/contract.schema'
 import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
 import DateRangePill from '@/components/filters/DateRangePill'
@@ -20,12 +31,15 @@ import { ConfirmModal } from '@/components/ConfirmModal'
 import { toast } from 'sonner'
 import ContractPreviewDrawer from '@/features/contracts/components/ContractPreviewDrawer'
 
-const STATUS_TABS: Array<{ value: ContractStatus | 'ALL'; label: string }> = [
-  { value: 'ALL',      label: 'All' },
-  { value: 'DRAFT',    label: 'Draft' },
-  { value: 'SENT',     label: 'Sent' },
-  { value: 'SIGNED',   label: 'Signed' },
-  { value: 'DECLINED', label: 'Declined' },
+type ActiveTab = ContractStatus | 'ALL' | 'TEMPLATES'
+
+const STATUS_TABS: Array<{ value: ActiveTab; label: string }> = [
+  { value: 'ALL',       label: 'All' },
+  { value: 'DRAFT',     label: 'Draft' },
+  { value: 'SENT',      label: 'Sent' },
+  { value: 'SIGNED',    label: 'Signed' },
+  { value: 'DECLINED',  label: 'Declined' },
+  { value: 'TEMPLATES', label: 'Templates' },
 ]
 
 interface ContractFilters {
@@ -47,7 +61,12 @@ function getStoredView(): ViewMode {
 export default function ContractsPage() {
   const navigate = useNavigate()
 
-  const [statusFilter,    setStatusFilter]    = useState<ContractStatus | 'ALL'>('ALL')
+  const [activeTab,       setActiveTab]        = useState<ActiveTab>('ALL')
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [saveTemplateFor,   setSaveTemplateFor]   = useState<Contract | null>(null)
+  const [settingDefaultId,  setSettingDefaultId]  = useState<string | null>(null)
+  const [updatingTemplateId, setUpdatingTemplateId] = useState<string | null>(null)
+  const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null)
   const [search,          setSearch]          = useState('')
   const [view,            setView]            = useState<ViewMode>(getStoredView)
   const [sortBy,          setSortBy]          = useState<SortField>('createdAt')
@@ -63,6 +82,15 @@ export default function ContractsPage() {
   const unarchiveMut = useUnarchiveContract()
   const deleteMut   = useDeleteContract()
   const voidMut     = useVoidContract()
+
+  const incrementTemplateUsage = useIncrementContractTemplateUsage()
+  const setDefaultTemplateMut  = useSetDefaultContractTemplate()
+  const saveAsTemplateMut      = useSaveContractAsTemplate()
+  const updateTemplateMut      = useUpdateContractTemplate()
+  const deleteTemplateMut      = useDeleteContractTemplate()
+  const { data: templates = [], isLoading: templatesLoading } = useContractTemplates()
+
+  const statusFilter = activeTab === 'TEMPLATES' ? 'ALL' : activeTab as ContractStatus | 'ALL'
 
   const { data, isLoading } = useContracts({ limit: 500, includeArchived: includeArchived || undefined })
   const allContracts  = data?.items ?? []
@@ -82,6 +110,44 @@ export default function ContractsPage() {
   function handleSort(field: SortField) {
     if (field === sortBy) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortBy(field); setSortDir('desc') }
+  }
+
+  // Picking a template for a new Contract hands off the full template
+  // content via router state (mirrors Proposal's TemplatePickerModal.tsx
+  // handleUse → navigate(..., {state:{template}})); ContractEditor reads it
+  // via useLocation() to seed its defaultValues.
+  function handleUseTemplate(template: ContractTemplate) {
+    incrementTemplateUsage.mutate(template.id)
+    setShowTemplatePicker(false)
+    setActiveTab(t => t === 'TEMPLATES' ? 'ALL' : t)
+    navigate('/contracts/new', { state: { template } })
+  }
+
+  async function handleSetDefaultTemplate(id: string) {
+    setSettingDefaultId(id)
+    try {
+      await setDefaultTemplateMut.mutateAsync(id)
+    } finally {
+      setSettingDefaultId(null)
+    }
+  }
+
+  async function handleUpdateTemplate(id: string, data: { name?: string; category?: string; description?: string }) {
+    setUpdatingTemplateId(id)
+    try {
+      await updateTemplateMut.mutateAsync({ id, ...data })
+    } finally {
+      setUpdatingTemplateId(null)
+    }
+  }
+
+  async function handleDeleteTemplate(id: string) {
+    setDeletingTemplateId(id)
+    try {
+      await deleteTemplateMut.mutateAsync(id)
+    } finally {
+      setDeletingTemplateId(null)
+    }
   }
 
   const displayed = useMemo(() => {
@@ -138,6 +204,7 @@ export default function ContractsPage() {
   }, [allContracts, statusFilter, search, filters, sortBy, sortDir])
 
   const hasSearch  = search.trim().length > 0
+  const showContent = activeTab !== 'TEMPLATES'
 
   return (
     <div className="space-y-5 max-w-[1400px]">
@@ -153,28 +220,41 @@ export default function ContractsPage() {
             </p>
           )}
         </div>
-        <button onClick={() => navigate('/contracts/new')} className="btn-primary">
-          <Plus size={14} strokeWidth={2.5} />
-          New Contract
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowTemplatePicker(true)}
+            className="flex items-center gap-1.5 h-9 px-3 sm:px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
+          >
+            <LayoutTemplate size={14} />
+            <span className="hidden sm:inline">From Template</span>
+          </button>
+          <button onClick={() => navigate('/contracts/new')} className="btn-primary">
+            <Plus size={14} strokeWidth={2.5} />
+            New Contract
+          </button>
+        </div>
       </div>
 
       {/* Status tabs */}
       <div className="flex items-center gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
         {STATUS_TABS.map(tab => {
-          const isActive = statusFilter === tab.value
-          const count = tab.value === 'ALL' ? allContracts.length : allContracts.filter(c => c.status === tab.value).length
+          const isActive = activeTab === tab.value
+          const count = tab.value === 'TEMPLATES'
+            ? undefined
+            : tab.value === 'ALL'
+              ? allContracts.length
+              : allContracts.filter(c => c.status === tab.value).length
           return (
             <button
               key={tab.value}
-              onClick={() => setStatusFilter(tab.value)}
+              onClick={() => setActiveTab(tab.value)}
               className={cn(
                 'px-3.5 py-2.5 text-[12.5px] font-medium border-b-2 -mb-px transition-colors whitespace-nowrap flex items-center gap-1.5',
                 isActive ? 'border-[#2563EB] text-[#2563EB]' : 'border-transparent text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8]',
               )}
             >
               {tab.label}
-              {count > 0 && (
+              {typeof count === 'number' && count > 0 && (
                 <span className={cn(
                   'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
                   isActive ? 'bg-[#EFF6FF] dark:bg-[#1E3A5F] text-[#2563EB]' : 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#667085] dark:text-[#8B92A8]',
@@ -188,6 +268,7 @@ export default function ContractsPage() {
       </div>
 
       {/* Toolbar */}
+      {showContent && (
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[160px] max-w-xs">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3] dark:text-[#545C74] pointer-events-none" />
@@ -254,10 +335,11 @@ export default function ContractsPage() {
           </button>
         </div>
       </div>
+      )}
 
 
       {/* Content */}
-      {isLoading ? (
+      {showContent && (isLoading ? (
         view === 'table'
           ? <ContractTableSkeleton />
           : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -294,6 +376,7 @@ export default function ContractsPage() {
           onOpen={(c: Contract) => setContractId(c.id)}
           onRemove={c => setRemoveTarget(c)}
           onVoid={c => setVoidTarget(c)}
+          onSaveAsTemplate={c => setSaveTemplateFor(c)}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -304,10 +387,11 @@ export default function ContractsPage() {
               onClick={(c: Contract) => setContractId(c.id)}
               onRemove={c => setRemoveTarget(c)}
               onVoid={c => setVoidTarget(c)}
+              onSaveAsTemplate={c => setSaveTemplateFor(c)}
             />
           ))}
         </div>
-      )}
+      ))}
       {removeTarget && (
         <RemoveModal
           open={!!removeTarget}
@@ -358,6 +442,43 @@ export default function ContractsPage() {
         id={contractId}
         onClose={() => setContractId(null)}
       />
+
+      {/* Template picker (pick mode) — "From Template" button */}
+      <TemplatePickerShell
+        open={showTemplatePicker}
+        onClose={() => setShowTemplatePicker(false)}
+        templates={templates}
+        isLoading={templatesLoading}
+        onUse={handleUseTemplate}
+        renderPreview={template => <ContractTemplatePreview template={template} />}
+      />
+
+      {/* Template library (manage mode) — "Templates" tab */}
+      <TemplatePickerShell
+        open={activeTab === 'TEMPLATES'}
+        onClose={() => setActiveTab('ALL')}
+        templates={templates}
+        isLoading={templatesLoading}
+        onUse={handleUseTemplate}
+        onSetDefault={handleSetDefaultTemplate}
+        settingDefaultId={settingDefaultId}
+        onUpdate={handleUpdateTemplate}
+        updatingId={updatingTemplateId}
+        onDelete={handleDeleteTemplate}
+        deletingId={deletingTemplateId}
+        renderPreview={template => <ContractTemplatePreview template={template} />}
+      />
+
+      {saveTemplateFor && (
+        <SaveAsTemplateModal
+          open={!!saveTemplateFor}
+          onClose={() => setSaveTemplateFor(null)}
+          defaultName={saveTemplateFor.title}
+          onSave={async data => {
+            await saveAsTemplateMut.mutateAsync({ contractId: saveTemplateFor.id, ...data })
+          }}
+        />
+      )}
     </div>
   )
 }

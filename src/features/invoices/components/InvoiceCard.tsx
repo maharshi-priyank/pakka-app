@@ -1,14 +1,16 @@
-import { ArrowUpRight, CheckCircle2, Clock, AlertCircle, Trash2, Ban } from 'lucide-react'
+import { ArrowUpRight, CheckCircle2, Clock, AlertCircle, Trash2, Ban, LayoutTemplate } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { currencySymbol } from '@/lib/currency-symbols'
 import type { Invoice } from '../schemas/invoice.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/invoice.schema'
 
 interface Props {
-  invoice:   Invoice
-  onClick:   (invoice: Invoice) => void
-  onDelete?: (invoice: Invoice) => void
-  onVoid?:   (invoice: Invoice) => void
+  invoice:           Invoice
+  onClick:           (invoice: Invoice) => void
+  onDelete?:         (invoice: Invoice) => void
+  onVoid?:           (invoice: Invoice) => void
+  /** U11/R2: opens SaveAsTemplateModal for this Invoice, posts to /invoice-templates/from-invoice/:invoiceId */
+  onSaveAsTemplate?: (invoice: Invoice) => void
 }
 
 const AVATAR_COLORS = [
@@ -33,7 +35,7 @@ function fmt(v: number) {
   return v.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 }
 
-export default function InvoiceCard({ invoice, onClick, onDelete, onVoid }: Props) {
+export default function InvoiceCard({ invoice, onClick, onDelete, onVoid, onSaveAsTemplate }: Props) {
   const symbol     = currencySymbol(invoice.currency)
   const clientName = invoice.contact?.name ?? invoice.client?.name ?? 'No client'
   const isOverdue  = invoice.status === 'OVERDUE'
@@ -154,14 +156,26 @@ export default function InvoiceCard({ invoice, onClick, onDelete, onVoid }: Prop
       {/* Footer */}
       <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border-t border-[#F2F4F7] dark:border-[#26283A] bg-[#FAFAFA] dark:bg-[#1A1B23] rounded-b-xl">
         <span className="text-[10px] text-[#98A2B3] dark:text-[#545C74]">{formatDate(invoice.createdAt)}</span>
-        <span className="flex items-center gap-1 text-[10px] font-medium text-[#667085] dark:text-[#8B92A8]">
-          {isPaid
-            ? <><CheckCircle2 size={8} strokeWidth={2} className="text-[#12B76A]" /> Paid</>
-            : isOverdue
-            ? <><AlertCircle size={8} strokeWidth={2} className="text-[#D92D20]" /> Overdue</>
-            : <><Clock size={8} strokeWidth={2} /> {STATUS_LABELS[invoice.status]}</>
-          }
-        </span>
+        <div className="flex items-center gap-2">
+          {onSaveAsTemplate && (
+            <button
+              onClick={e => { e.stopPropagation(); onSaveAsTemplate(invoice) }}
+              title="Save as template"
+              className="flex items-center gap-1 text-[10px] font-semibold text-[#6366F1] dark:text-[#818CF8] hover:bg-[#EEF2FF] dark:hover:bg-[#1E2040] px-1.5 py-0.5 rounded-lg transition-colors"
+            >
+              <LayoutTemplate size={9} strokeWidth={2.5} />
+              Template
+            </button>
+          )}
+          <span className="flex items-center gap-1 text-[10px] font-medium text-[#667085] dark:text-[#8B92A8]">
+            {isPaid
+              ? <><CheckCircle2 size={8} strokeWidth={2} className="text-[#12B76A]" /> Paid</>
+              : isOverdue
+              ? <><AlertCircle size={8} strokeWidth={2} className="text-[#D92D20]" /> Overdue</>
+              : <><Clock size={8} strokeWidth={2} /> {STATUS_LABELS[invoice.status]}</>
+            }
+          </span>
+        </div>
       </div>
     </div>
   )
