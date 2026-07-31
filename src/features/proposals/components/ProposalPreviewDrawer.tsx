@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { IndianRupee, User, Briefcase, Calendar, CheckCircle, Clock, FileText } from 'lucide-react'
+import { User, Briefcase, Calendar, CheckCircle, Clock, FileText } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { currencySymbol } from '@/lib/currency-symbols'
 import DocumentPreviewDrawer from '@/components/shared/DocumentPreviewDrawer'
@@ -100,9 +100,8 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
           {Number(proposal.totalAmount) > 0 && (
             <div className="bg-[#F8F9FF] dark:bg-[#1A1B2E] border border-[#E0E4FF] dark:border-[#2D3060] rounded-xl p-4">
               <div className="flex items-baseline gap-1">
-                <IndianRupee size={14} className="text-[#3538CD] dark:text-indigo-400 shrink-0 mb-0.5" strokeWidth={2.5} />
                 <span className="text-[26px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tabular-nums leading-none">
-                  {fmt(proposal.totalAmount)}
+                  {symbol}{fmt(proposal.totalAmount)}
                 </span>
               </div>
               {Number(proposal.gstAmount) > 0 && (
@@ -173,8 +172,7 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
                 <div className="flex items-center justify-between pt-1.5 border-t border-[#EAECF0] dark:border-[#26283A]">
                   <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Total</span>
                   <span className="flex items-center gap-0.5 text-[16px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tabular-nums">
-                    <IndianRupee size={11} strokeWidth={3} />
-                    {fmt(total)}
+                    {symbol}{fmt(total)}
                   </span>
                 </div>
               </div>

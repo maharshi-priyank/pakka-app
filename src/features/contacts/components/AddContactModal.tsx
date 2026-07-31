@@ -40,7 +40,10 @@ export default function AddContactModal({ open, onClose }: Props) {
     if ((CONTACT_CURRENCIES as readonly string[]).includes(suggested)) {
       setValue('currency', suggested as CreateContactInput['currency'], { shouldValidate: true })
     } else {
-      setValue('currency', undefined, { shouldValidate: true })
+      // '' mirrors the <select>'s own unselected placeholder value -- currency
+      // is a required enum on create (R2), so there's no `undefined` member
+      // to clear back to.
+      setValue('currency', '' as CreateContactInput['currency'], { shouldValidate: true })
     }
   }
 

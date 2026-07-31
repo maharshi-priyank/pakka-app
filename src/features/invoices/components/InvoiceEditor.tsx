@@ -17,6 +17,7 @@ import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
+import { currencySymbol as symbolFor, clampCurrency } from '@/lib/currency-symbols'
 
 const GST_RATE_OPTIONS = [0, 5, 12, 18, 28]
 
@@ -70,7 +71,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
           recurrenceCycle:   invoice.recurrenceCycle    ?? undefined,
           recurrenceDay:     invoice.recurrenceDay      ?? undefined,
           recurrenceEndDate: invoice.recurrenceEndDate  ? invoice.recurrenceEndDate.slice(0, 10) : undefined,
-          currency:          invoice.currency  ?? wsCurrency,
+          currency:          clampCurrency(invoice.currency ?? wsCurrency),
           lutNumber:         invoice.lutNumber ?? (profile?.defaultLutNumber ?? ''),
         }
       : {
@@ -78,7 +79,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
           contactId:  defaultContactId,
           lineItems:  [{ description: '', qty: 1, rate: 0, gstRate: 18 }],
           gstType:    'IGST',
-          currency:   wsCurrency,
+          currency:   clampCurrency(wsCurrency),
           lutNumber:  profile?.defaultLutNumber ?? '',
         },
   })
@@ -89,11 +90,7 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
 
   const currency       = watch('currency')
   const isExport       = isIndia && currency !== 'INR'
-
-  const CURRENCY_SYMBOLS: Record<string, string> = {
-    INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'AED ',
-  }
-  const currencySymbol = CURRENCY_SYMBOLS[currency] ?? currency
+  const currencySymbol = symbolFor(currency)
 
   const lineItems       = watch('lineItems')
   const gstType         = watch('gstType')
@@ -120,13 +117,20 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
   // the Workspace currency when the linked Contact has none set (KTD5) or no
   // Contact is linked at all (R8) — never sets a null currency, which would
   // fail the DTO's @IsIn check. Mirrors ProposalEditor.tsx / ContractEditor.tsx.
-  const currencyContactRef = useRef<string | undefined>(invoice?.contactId ?? defaultContactId ?? undefined)
+  //
+  // review-fix: seeded to the Invoice's OWN contactId, never defaultContactId
+  // -- seeding to defaultContactId made this equal watchedContactId's initial
+  // value on a brand-new Invoice (both derive from the same defaultContactId),
+  // so the guard below immediately no-op'd and the linked Contact's currency
+  // was never pulled in for the single most common creation flow ("New
+  // Invoice" from a Contact's page).
+  const currencyContactRef = useRef<string>(invoice?.contactId ?? '')
   useEffect(() => {
     if (!contactsData?.items?.length) return
     if (watchedContactId === currencyContactRef.current) return
     currencyContactRef.current = watchedContactId
     const contact = contactsData.items.find(c => c.id === watchedContactId)
-    const nextCurrency = contact?.currency ?? wsCurrency
+    const nextCurrency = clampCurrency(contact?.currency ?? wsCurrency)
     setValue('currency', nextCurrency)
   }, [watchedContactId, contactsData?.items?.length])
 

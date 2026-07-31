@@ -1,4 +1,4 @@
-import { ArrowUpRight, IndianRupee, CheckCircle2, Clock, AlertCircle, Trash2, Ban } from 'lucide-react'
+import { ArrowUpRight, CheckCircle2, Clock, AlertCircle, Trash2, Ban } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { currencySymbol } from '@/lib/currency-symbols'
 import type { Invoice } from '../schemas/invoice.schema'
@@ -105,8 +105,7 @@ export default function InvoiceCard({ invoice, onClick, onDelete, onVoid }: Prop
           'flex items-center gap-0.5 text-[14px] font-extrabold',
           isPaid ? 'text-[#027A48]' : isOverdue ? 'text-[#D92D20]' : 'text-[#101828] dark:text-[#ECEEF3]',
         )}>
-          <IndianRupee size={10} strokeWidth={3} />
-          {fmt(Number(invoice.total))}
+          {symbol}{fmt(Number(invoice.total))}
         </span>
       </div>
 

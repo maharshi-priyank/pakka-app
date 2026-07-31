@@ -61,7 +61,15 @@ export default function EditContactModal({ contact, onClose }: Props) {
   }
 
   function onSubmit(data: UpdateContactInput) {
-    mutate({ id: contact.id, ...data }, { onSuccess: onClose })
+    // review-fix: '' means "left unset" for a legacy Contact (KTD5) -- the
+    // backend's @IsIn/@IsString validators reject '' outright, so it must
+    // become undefined (omitted) rather than sent as-is.
+    mutate({
+      id: contact.id,
+      ...data,
+      country:  data.country  || undefined,
+      currency: data.currency || undefined,
+    }, { onSuccess: onClose })
   }
 
   return (

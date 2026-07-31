@@ -17,7 +17,7 @@ export type ContactCurrency = typeof CONTACT_CURRENCIES[number]
 export const createContactSchema = z.object({
   name:       z.string().min(1, 'Name is required').max(100),
   country:    z.string().min(1, 'Country is required'),
-  currency:   z.enum(CONTACT_CURRENCIES, { errorMap: () => ({ message: 'Currency is required' }) }),
+  currency:   z.enum(CONTACT_CURRENCIES, { message: 'Currency is required' }),
   email:      z.string().email('Invalid email').optional().or(z.literal('')),
   phone:      z.string().max(20).optional().or(z.literal('')),
   company:    z.string().max(100).optional().or(z.literal('')),
@@ -29,7 +29,16 @@ export const createContactSchema = z.object({
   stage:      z.enum(CONTACT_STAGES).optional(),
 })
 
-export const updateContactSchema = createContactSchema.partial()
+// review-fix: country/currency need their own `.or(z.literal(''))` here, not
+// just createContactSchema.partial()'s optional() -- a native uncontrolled
+// <select> with an unselected placeholder submits '', not undefined, and
+// .optional() only skips validation for undefined. Without this, editing any
+// pre-existing Contact (all of which have country/currency: null per KTD5's
+// no-backfill policy) without touching those two fields fails validation.
+export const updateContactSchema = createContactSchema.partial().extend({
+  country:  z.string().optional().or(z.literal('')),
+  currency: z.enum(CONTACT_CURRENCIES).optional().or(z.literal('')),
+})
 
 export type CreateContactInput = z.infer<typeof createContactSchema>
 export type UpdateContactInput = z.infer<typeof updateContactSchema>

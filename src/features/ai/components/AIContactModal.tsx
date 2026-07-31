@@ -34,7 +34,9 @@ export default function AIContactModal({ onClose }: Props) {
       await createMutation.mutateAsync({
         name:      data.name,
         country:   data.country,
-        currency:  data.currency,
+        // ContactReviewPanel's submit button is disabled until currency is
+        // non-empty, so this is always a real currency by the time we get here.
+        currency:  data.currency as Exclude<EditableContact['currency'], ''>,
         email:     data.email     || undefined,
         phone:     data.phone     || undefined,
         company:   data.company   || undefined,

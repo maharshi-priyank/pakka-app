@@ -4,7 +4,7 @@ import AIIcon from './AIIcon'
 import { cn } from '@/lib/utils'
 import type { ExtractedLead } from '../hooks/useAIExtract'
 import type { ContactStage } from '@/features/contacts/schemas/contact.schema'
-import { CONTACT_STAGES, CONTACT_SOURCES, CONTACT_CURRENCIES, STAGE_LABELS } from '@/features/contacts/schemas/contact.schema'
+import { CONTACT_STAGES, CONTACT_SOURCES, CONTACT_CURRENCIES, STAGE_LABELS, type ContactCurrency } from '@/features/contacts/schemas/contact.schema'
 import { ALL_COUNTRIES, getCountryDefaults } from '@/lib/countryDefaults'
 import { currencySymbol } from '@/lib/currency-symbols'
 
@@ -21,7 +21,7 @@ export interface EditableContact {
   notes:     string
   stage:     ContactStage
   country:   string
-  currency:  string
+  currency:  ContactCurrency | ''
 }
 
 interface Props {
@@ -103,7 +103,7 @@ export default function ContactReviewPanel({ extracted, onConfirm, onReset, isCr
   function handleCountryChange(code: string) {
     setForm(f => {
       const suggested = getCountryDefaults(code).currency
-      const currency = (CONTACT_CURRENCIES as readonly string[]).includes(suggested) ? suggested : ''
+      const currency = ((CONTACT_CURRENCIES as readonly string[]).includes(suggested) ? suggested : '') as ContactCurrency | ''
       return { ...f, country: code, currency }
     })
   }

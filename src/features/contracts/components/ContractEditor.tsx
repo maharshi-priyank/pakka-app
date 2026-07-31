@@ -19,6 +19,7 @@ import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
+import { currencySymbol, clampCurrency } from '@/lib/currency-symbols'
 
 type Tab = 'parties' | 'scope' | 'financials' | 'clauses'
 
@@ -62,7 +63,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
       title:      contract?.title ?? '',
       contactId:  contract?.contactId ?? defaultContactId ?? undefined,
       proposalId: contract?.proposalId ?? undefined,
-      currency:   (contract?.currency ?? wsCurrency) as CreateContractInput['currency'],
+      currency:   clampCurrency(contract?.currency ?? wsCurrency) as CreateContractInput['currency'],
       content: {
         intro:              (c.intro              as string) ?? 'This agreement is entered into between the service provider ("Agency") and the client ("Client") for the services described below.',
         projectDescription: (c.projectDescription as string) ?? '',
@@ -112,13 +113,20 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
   // which would clobber a manually-diverged currency, per KTD3). Falls back
   // to the Workspace currency when the linked Contact has none set (KTD5) or
   // no Contact is linked at all (R8) — never sets a null currency.
-  const currencyContactRef = useRef<string | undefined>(contract?.contactId ?? defaultContactId ?? undefined)
+  //
+  // review-fix: seeded to the Contract's OWN contactId, never defaultContactId
+  // -- seeding to defaultContactId made this equal watchedContactId's initial
+  // value on a brand-new Contract (both derive from the same defaultContactId),
+  // so the guard below immediately no-op'd and the linked Contact's currency
+  // was never pulled in for the single most common creation flow ("New
+  // Contract" from a Contact's page).
+  const currencyContactRef = useRef<string>(contract?.contactId ?? '')
   useEffect(() => {
     if (!contactsData?.items?.length) return
     if (watchedContactId === currencyContactRef.current) return
     currencyContactRef.current = watchedContactId
     const contact = contactsData.items.find(c => c.id === watchedContactId)
-    const nextCurrency = (contact?.currency ?? wsCurrency) as CreateContractInput['currency']
+    const nextCurrency = clampCurrency(contact?.currency ?? wsCurrency) as CreateContractInput['currency']
     setValue('currency', nextCurrency)
   }, [watchedContactId, contactsData?.items?.length])
 
@@ -391,7 +399,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
               <CSection title="Contract value">
                 <div className={cn('grid gap-3', isExport ? 'grid-cols-3' : 'grid-cols-4')}>
                   <div>
-                    <label className="form-label">Total (₹)</label>
+                    <label className="form-label">Total ({currencySymbol(watchedCurrency)})</label>
                     <input
                       type="number" min="0" step="0.01"
                       {...register('content.totalAmount', { valueAsNumber: true })}
@@ -400,7 +408,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
                     />
                   </div>
                   <div>
-                    <label className="form-label">GST amount (₹)</label>
+                    <label className="form-label">GST amount ({currencySymbol(watchedCurrency)})</label>
                     <input
                       type="number" min="0" step="0.01"
                       {...register('content.gstAmount', { valueAsNumber: true })}
@@ -413,6 +421,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
                     <select {...register('currency')} className="form-input w-full">
                       {CONTRACT_CURRENCIES.map(cur => <option key={cur} value={cur}>{cur}</option>)}
                     </select>
+                    {errors.currency && <p className="form-error">{errors.currency.message}</p>}
                   </div>
                   {/* R7/KTD4: server-enforces EXEMPT for non-INR contracts — hide
                       the GST select entirely rather than showing a disabled/stale
@@ -453,7 +462,7 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-[10px] text-[#98A2B3] mb-1 block">Amount (₹)</label>
+                        <label className="text-[10px] text-[#98A2B3] mb-1 block">Amount ({currencySymbol(watchedCurrency)})</label>
                         <input
                           type="number" min="0" step="0.01"
                           {...register(`content.paymentSchedule.${idx}.amount`, { valueAsNumber: true })}

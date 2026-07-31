@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { IndianRupee, User, Briefcase, Calendar, CheckCircle, FileText } from 'lucide-react'
+import { User, Briefcase, Calendar, CheckCircle, FileText } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { currencySymbol } from '@/lib/currency-symbols'
 import DocumentPreviewDrawer from '@/components/shared/DocumentPreviewDrawer'
@@ -88,9 +88,8 @@ export default function ContractPreviewDrawer({ id, onClose }: Props) {
           {totalAmount > 0 && (
             <div className="bg-[#F8F9FF] dark:bg-[#1A1B2E] border border-[#E0E4FF] dark:border-[#2D3060] rounded-xl p-4">
               <div className="flex items-baseline gap-1">
-                <IndianRupee size={14} className="text-[#3538CD] dark:text-indigo-400 shrink-0 mb-0.5" strokeWidth={2.5} />
                 <span className="text-[26px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tabular-nums leading-none">
-                  {fmt(totalAmount)}
+                  {symbol}{fmt(totalAmount)}
                 </span>
               </div>
               {gstAmount > 0 && (
