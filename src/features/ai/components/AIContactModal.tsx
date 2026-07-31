@@ -33,6 +33,8 @@ export default function AIContactModal({ onClose }: Props) {
     try {
       await createMutation.mutateAsync({
         name:      data.name,
+        country:   data.country,
+        currency:  data.currency,
         email:     data.email     || undefined,
         phone:     data.phone     || undefined,
         company:   data.company   || undefined,
