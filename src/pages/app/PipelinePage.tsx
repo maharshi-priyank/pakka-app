@@ -255,7 +255,7 @@ function NegotiatingContactRow({ contact, onClick }: { contact: Contact; onClick
         )}
         {contact.dealValue && Number(contact.dealValue) > 0 && (
           <p className="text-[11.5px] font-semibold text-[#344054] dark:text-[#C2C8D8] mt-0.5">
-            {formatCurrency(Number(contact.dealValue))}
+            {formatCurrency(Number(contact.dealValue), contact.currency ?? 'INR')}
           </p>
         )}
       </div>

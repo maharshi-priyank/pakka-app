@@ -9,6 +9,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { ArrowUpRight, IndianRupee, CalendarDays, Tag } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import {
   PIPELINE_STAGES, STAGE_LABELS,
   type Contact, type ContactStage,
@@ -131,7 +132,9 @@ function ContactCard({ contact, onClick, overlay }: CardProps) {
         <span className="text-[11px] text-[#98A2B3] dark:text-[#545C74] shrink-0">Value</span>
         {contact.dealValue && Number(contact.dealValue) > 0
           ? <span className="flex items-center gap-0.5 text-[13px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">
-              <IndianRupee size={10} strokeWidth={3} />
+              {!contact.currency || contact.currency === 'INR'
+                ? <IndianRupee size={10} strokeWidth={3} />
+                : currencySymbol(contact.currency)}
               {Number(contact.dealValue).toLocaleString('en-IN')}
             </span>
           : <span className="text-[11px] text-[#D0D5DD] dark:text-[#333649] italic">Not set</span>

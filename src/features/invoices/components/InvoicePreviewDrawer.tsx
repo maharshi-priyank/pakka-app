@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { IndianRupee, User, Calendar, CheckCircle, AlertCircle, FileText } from 'lucide-react'
+import { User, Calendar, CheckCircle, AlertCircle, FileText } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import DocumentPreviewDrawer from '@/components/shared/DocumentPreviewDrawer'
 import { useInvoice } from '../hooks/useInvoices'
 import type { GstType } from '../schemas/invoice.schema'
@@ -37,6 +38,7 @@ export default function InvoicePreviewDrawer({ id, onClose }: Props) {
 
   const lineItems = invoice?.lineItems ?? []
   const gstType   = invoice?.gstType ?? 'IGST'
+  const symbol    = currencySymbol(invoice?.currency)
 
   const isOverdue = invoice?.dueDate
     ? new Date(invoice.dueDate) < new Date() && invoice.status !== 'PAID'
@@ -98,18 +100,8 @@ export default function InvoicePreviewDrawer({ id, onClose }: Props) {
               : 'bg-[#F8F9FF] dark:bg-[#1A1B2E] border-[#E0E4FF] dark:border-[#2D3060]',
           )}>
             <div className="flex items-baseline gap-1">
-              <IndianRupee
-                size={14}
-                strokeWidth={2.5}
-                className={cn(
-                  'shrink-0 mb-0.5',
-                  invoice.status === 'PAID' ? 'text-[#027A48] dark:text-emerald-400'
-                  : isOverdue ? 'text-[#D92D20] dark:text-red-400'
-                  : 'text-[#3538CD] dark:text-indigo-400',
-                )}
-              />
               <span className="text-[26px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tabular-nums leading-none">
-                {fmt(invoice.total)}
+                {symbol}{fmt(invoice.total)}
               </span>
             </div>
             <div className="flex flex-wrap gap-3 mt-2.5">
@@ -160,11 +152,11 @@ export default function InvoicePreviewDrawer({ id, onClose }: Props) {
                             )}
                           </td>
                           <td className="py-2.5 px-3 text-right text-[#667085] dark:text-[#8B92A8] tabular-nums align-top">{item.qty}</td>
-                          <td className="py-2.5 px-3 text-right text-[#667085] dark:text-[#8B92A8] whitespace-nowrap tabular-nums align-top">₹{fmt(item.rate)}</td>
+                          <td className="py-2.5 px-3 text-right text-[#667085] dark:text-[#8B92A8] whitespace-nowrap tabular-nums align-top">{symbol}{fmt(item.rate)}</td>
                           {gstType !== 'EXEMPT' && (
                             <td className="py-2.5 px-3 text-right text-[#667085] dark:text-[#8B92A8] tabular-nums align-top">{item.gstRate ?? 0}%</td>
                           )}
-                          <td className="py-2.5 pl-3 text-right font-semibold text-[#101828] dark:text-[#ECEEF3] whitespace-nowrap tabular-nums align-top">₹{fmt(lineTotal + lineGst)}</td>
+                          <td className="py-2.5 pl-3 text-right font-semibold text-[#101828] dark:text-[#ECEEF3] whitespace-nowrap tabular-nums align-top">{symbol}{fmt(lineTotal + lineGst)}</td>
                         </tr>
                       )
                     })}
@@ -174,31 +166,30 @@ export default function InvoicePreviewDrawer({ id, onClose }: Props) {
 
               {/* Financials summary */}
               <div className="mt-3 border-t border-[#EAECF0] dark:border-[#26283A] pt-3 space-y-1.5">
-                <Row label="Subtotal" value={`₹${fmt(invoice.subtotal)}`} />
+                <Row label="Subtotal" value={`${symbol}${fmt(invoice.subtotal)}`} />
                 {invoice.gstAmount > 0 && (
                   <>
                     {gstType === 'CGST_SGST' ? (
                       <>
-                        <Row label="CGST" value={`₹${fmt(invoice.gstAmount / 2)}`} />
-                        <Row label="SGST" value={`₹${fmt(invoice.gstAmount / 2)}`} />
+                        <Row label="CGST" value={`${symbol}${fmt(invoice.gstAmount / 2)}`} />
+                        <Row label="SGST" value={`${symbol}${fmt(invoice.gstAmount / 2)}`} />
                       </>
                     ) : (
-                      <Row label={GST_LABELS[gstType]} value={`₹${fmt(invoice.gstAmount)}`} />
+                      <Row label={GST_LABELS[gstType]} value={`${symbol}${fmt(invoice.gstAmount)}`} />
                     )}
                   </>
                 )}
                 {invoice.tdsDeducted > 0 && (
-                  <Row label={`TDS (${invoice.tdsRate ?? ''}%)`} value={`−₹${fmt(invoice.tdsDeducted)}`} />
+                  <Row label={`TDS (${invoice.tdsRate ?? ''}%)`} value={`−${symbol}${fmt(invoice.tdsDeducted)}`} />
                 )}
                 <div className="flex items-center justify-between pt-1.5 border-t border-[#EAECF0] dark:border-[#26283A]">
                   <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Total</span>
                   <span className="flex items-center gap-0.5 text-[16px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tabular-nums">
-                    <IndianRupee size={11} strokeWidth={3} />
-                    {fmt(invoice.total)}
+                    {symbol}{fmt(invoice.total)}
                   </span>
                 </div>
                 {invoice.amountPaid > 0 && (
-                  <Row label="Amount Paid" value={`₹${fmt(invoice.amountPaid)}`} />
+                  <Row label="Amount Paid" value={`${symbol}${fmt(invoice.amountPaid)}`} />
                 )}
                 {balanceDue > 0 && invoice.status !== 'PAID' && (
                   <div className="flex items-center justify-between pt-1.5 border-t border-[#EAECF0] dark:border-[#26283A]">
@@ -209,7 +200,7 @@ export default function InvoicePreviewDrawer({ id, onClose }: Props) {
                     <span className={cn(
                       'text-[14px] font-bold tabular-nums',
                       isOverdue ? 'text-[#D92D20] dark:text-red-400' : 'text-[#101828] dark:text-[#ECEEF3]',
-                    )}>₹{fmt(balanceDue)}</span>
+                    )}>{symbol}{fmt(balanceDue)}</span>
                   </div>
                 )}
               </div>

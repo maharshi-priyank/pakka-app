@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { useProposals } from '@/features/proposals/hooks/useProposals'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { ThumbsUp } from 'lucide-react'
 
 function Skeleton({ className }: { className?: string }) {
@@ -43,11 +43,16 @@ function RingChart({ percent, size = 88 }: { percent: number; size?: number }) {
   )
 }
 
+// Contact.stage drives win/loss now, not Proposal.status -- a Contact can
+// reach CLIENT via a signed Contract or a paid Invoice with no Proposal
+// ever accepted, and regress to LOST via a voided Contract or all projects
+// cancelled with no Proposal ever declined. Proposal-status-only undercounted
+// both.
 export default function WinRateWidget() {
-  const { data, isLoading } = useProposals({ limit: 200 })
+  const { data, isLoading } = useContacts({ limit: 200 })
   const items    = data?.items ?? []
-  const accepted = items.filter(p => p.status === 'ACCEPTED').length
-  const declined = items.filter(p => p.status === 'DECLINED').length
+  const accepted = items.filter(c => c.stage === 'CLIENT' || c.stage === 'PAST_CLIENT').length
+  const declined = items.filter(c => c.stage === 'LOST').length
   const decided  = accepted + declined
   const percent  = decided > 0 ? Math.round((accepted / decided) * 100) : 0
 

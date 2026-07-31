@@ -1,6 +1,7 @@
 import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import type { Contact } from '../schemas/contact.schema'
 import { STAGE_LABELS, STAGE_COLORS, SOURCE_LABELS } from '../schemas/contact.schema'
 
@@ -123,7 +124,7 @@ export default function ContactsTable({ contacts, sortBy, sortDir, onSort }: Pro
                 <td className="px-4 py-3 text-right">
                   {contact.dealValue && Number(contact.dealValue) > 0 ? (
                     <span className="text-[13px] font-bold tabular-nums text-[#101828] dark:text-[#ECEEF3]">
-                      ₹{fmt(Number(contact.dealValue))}
+                      {currencySymbol(contact.currency)}{fmt(Number(contact.dealValue))}
                     </span>
                   ) : (
                     <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">—</span>

@@ -2,12 +2,30 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { X, Loader2 } from 'lucide-react'
-import { updateContactSchema, CONTACT_SOURCES, SOURCE_LABELS, type UpdateContactInput, type Contact } from '../schemas/contact.schema'
+import { updateContactSchema, CONTACT_SOURCES, CONTACT_CURRENCIES, SOURCE_LABELS, type UpdateContactInput, type Contact } from '../schemas/contact.schema'
 import { useUpdateContact } from '../hooks/useContacts'
+import { ALL_COUNTRIES, getCountryDefaults } from '@/lib/countryDefaults'
+import { currencySymbol } from '@/lib/currency-symbols'
 
 interface Props {
   contact: Contact
   onClose: () => void
+}
+
+function editDefaults(contact: Contact): UpdateContactInput {
+  return {
+    name:       contact.name,
+    country:    contact.country    ?? '',
+    currency:   (contact.currency as UpdateContactInput['currency']) ?? undefined,
+    email:      contact.email      ?? '',
+    phone:      contact.phone      ?? '',
+    company:    contact.company    ?? '',
+    service:    contact.service    ?? '',
+    dealValue:  contact.dealValue  ?? '',
+    source:     (contact.source as UpdateContactInput['source']) ?? undefined,
+    notes:      contact.notes      ?? '',
+    followUpAt: contact.followUpAt ? contact.followUpAt.slice(0, 10) : '',
+  }
 }
 
 export default function EditContactModal({ contact, onClose }: Props) {
@@ -17,36 +35,41 @@ export default function EditContactModal({ contact, onClose }: Props) {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<UpdateContactInput>({
     resolver: zodResolver(updateContactSchema),
-    defaultValues: {
-      name:       contact.name,
-      email:      contact.email      ?? '',
-      phone:      contact.phone      ?? '',
-      company:    contact.company    ?? '',
-      service:    contact.service    ?? '',
-      dealValue:  contact.dealValue  ?? '',
-      source:     (contact.source as UpdateContactInput['source']) ?? undefined,
-      notes:      contact.notes      ?? '',
-      followUpAt: contact.followUpAt ? contact.followUpAt.slice(0, 10) : '',
-    },
+    defaultValues: editDefaults(contact),
   })
 
-  useEffect(() => { reset({
-    name:       contact.name,
-    email:      contact.email      ?? '',
-    phone:      contact.phone      ?? '',
-    company:    contact.company    ?? '',
-    service:    contact.service    ?? '',
-    dealValue:  contact.dealValue  ?? '',
-    source:     (contact.source as UpdateContactInput['source']) ?? undefined,
-    notes:      contact.notes      ?? '',
-    followUpAt: contact.followUpAt ? contact.followUpAt.slice(0, 10) : '',
-  }) }, [contact.id, reset]) // eslint-disable-line react-hooks/exhaustive-deps
+  const watchedCurrency = watch('currency')
+
+  useEffect(() => { reset(editDefaults(contact)) }, [contact.id, reset]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Same auto-suggest-then-editable behavior as AddContactModal (KTD8) — an
+  // existing Contact's country/currency can be left empty indefinitely (KTD5),
+  // so this mirrors the create form's picker rather than forcing a value.
+  function handleCountryChange(code: string) {
+    setValue('country', code, { shouldDirty: true })
+    const suggested = getCountryDefaults(code).currency
+    if ((CONTACT_CURRENCIES as readonly string[]).includes(suggested)) {
+      setValue('currency', suggested as UpdateContactInput['currency'], { shouldDirty: true })
+    } else {
+      setValue('currency', undefined, { shouldDirty: true })
+    }
+  }
 
   function onSubmit(data: UpdateContactInput) {
-    mutate({ id: contact.id, ...data }, { onSuccess: onClose })
+    // review-fix: '' means "left unset" for a legacy Contact (KTD5) -- the
+    // backend's @IsIn/@IsString validators reject '' outright, so it must
+    // become undefined (omitted) rather than sent as-is.
+    mutate({
+      id: contact.id,
+      ...data,
+      country:  data.country  || undefined,
+      currency: data.currency || undefined,
+    }, { onSuccess: onClose })
   }
 
   return (
@@ -95,11 +118,36 @@ export default function EditContactModal({ contact, onClose }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
+              <label className="form-label">Country</label>
+              <select
+                {...register('country')}
+                onChange={e => handleCountryChange(e.target.value)}
+                className="form-input"
+              >
+                <option value="">Select country</option>
+                {ALL_COUNTRIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="form-label">Currency</label>
+              <select {...register('currency')} className="form-input">
+                <option value="">Select currency</option>
+                {CONTACT_CURRENCIES.map(code => (
+                  <option key={code} value={code}>{code}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
               <label className="form-label">Service</label>
               <input {...register('service')} className="form-input" />
             </div>
             <div>
-              <label className="form-label">Deal Value (₹)</label>
+              <label className="form-label">Deal Value ({currencySymbol(watchedCurrency)})</label>
               <input {...register('dealValue')} className="form-input" type="number" />
             </div>
           </div>

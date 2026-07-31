@@ -16,15 +16,17 @@ import canvaSvg from '@/assets/canva.svg'
 import { cn } from '@/lib/utils'
 import {
   createProposalSchema,
-  GST_TYPES, GST_TYPE_LABELS, GST_RATES,
+  GST_TYPES, GST_TYPE_LABELS, GST_RATES, PROPOSAL_CURRENCIES,
   type CreateProposalInput, type LineItem,
 } from '../schemas/proposal.schema'
 import type { Proposal, ProposalTemplate } from '../schemas/proposal.schema'
 import { useCreateProposal, useUpdateProposal, useSendProposal } from '../hooks/useProposals'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
+import { currencySymbol, clampCurrency } from '@/lib/currency-symbols'
 import SaveTemplateModal from './SaveTemplateModal'
 import { useNavigate } from 'react-router-dom'
 
@@ -95,6 +97,7 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
   const sendMutation   = useSendProposal()
   const { data: contactsData } = useContacts({ limit: 200 })
   const { data: profile } = useProfile()
+  const { currency: wsCurrency } = useWorkspace()
 
   const attachParent      = { proposalId: proposal?.id ?? '' }
   const { data: attachments = [], isLoading: attachmentsLoading } = useAttachments(attachParent)
@@ -128,6 +131,7 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
       title:      proposal?.title ?? defaultTemplate?.name ?? '',
       contactId:  proposal?.contactId ?? defaultContactId ?? undefined,
       validUntil: proposal?.validUntil ? proposal.validUntil.slice(0, 10) : '',
+      currency:   clampCurrency(proposal?.currency ?? wsCurrency) as CreateProposalInput['currency'],
       content: {
         intro:           (c.intro         as string)  ?? '',
         whyUs:           (c.whyUs         as string)  ?? '',
@@ -170,9 +174,35 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
   const watchedTerms       = watch('content.terms')          ?? ''
   const watchedCaseStudies = watch('content.caseStudies')    ?? []
   const watchedFaq         = watch('content.faq')            ?? []
+  const watchedCurrency    = watch('currency') ?? wsCurrency
+  const isExport           = watchedCurrency !== 'INR'
   const { subtotal, gstAmount, total } = calcTotals(watchedLineItems as LineItem[], watchedGstType)
 
   const { data: projectsData } = useProjects({ contactId: watchedContactId || undefined, limit: 100 })
+
+  // R7/KTD8/KTD3: keep currency in sync with the linked Contact — only on an
+  // actual contactId change (not on initial mount for an existing Proposal,
+  // which would clobber a manually-diverged currency, per KTD3). For a brand
+  // new Proposal opened with a defaultContactId, this also performs the
+  // initial resolution once async contacts data loads. Falls back to the
+  // Workspace currency when the linked Contact has none set (KTD5) or no
+  // Contact is linked at all (R8) — never defaults an unsupported value.
+  //
+  // review-fix: seeded to the Proposal's OWN contactId, never defaultContactId
+  // -- seeding to defaultContactId made this equal watchedContactId's initial
+  // value on a brand-new Proposal (both derive from the same defaultContactId),
+  // so the guard below immediately no-op'd and the linked Contact's currency
+  // was never pulled in for the single most common creation flow ("New
+  // Proposal" from a Contact's page).
+  const currencyContactRef = useRef<string>(proposal?.contactId ?? '')
+  useEffect(() => {
+    if (!contactsData?.items?.length) return
+    if (watchedContactId === currencyContactRef.current) return
+    currencyContactRef.current = watchedContactId
+    const contact = contactsData.items.find(c => c.id === watchedContactId)
+    const nextCurrency = clampCurrency(contact?.currency ?? wsCurrency) as CreateProposalInput['currency']
+    setValue('currency', nextCurrency)
+  }, [watchedContactId, contactsData?.items?.length])
 
   const tabCompletion: Record<Tab, boolean> = {
     cover:       !!(watchedIntro?.trim() || watchedWhyUs?.trim()),
@@ -367,17 +397,29 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
                     />
                     {errors.title && <p className="form-error">{errors.title.message}</p>}
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className={cn('grid gap-4', isExport ? 'grid-cols-2' : 'grid-cols-3')}>
                     <div>
                       <label className="form-label">Valid until</label>
                       <input type="date" {...register('validUntil')} className="form-input w-full" />
                     </div>
                     <div>
-                      <label className="form-label">GST type</label>
-                      <select {...register('content.gstType')} className="form-input w-full">
-                        {GST_TYPES.map(t => <option key={t} value={t}>{GST_TYPE_LABELS[t]}</option>)}
+                      <label className="form-label">Currency</label>
+                      <select {...register('currency')} className="form-input w-full">
+                        {PROPOSAL_CURRENCIES.map(cur => <option key={cur} value={cur}>{cur}</option>)}
                       </select>
+                      {errors.currency && <p className="form-error">{errors.currency.message}</p>}
                     </div>
+                    {/* R7/KTD4: server-enforces EXEMPT for non-INR proposals — hide
+                        the GST select entirely rather than showing a disabled/stale
+                        value; Proposal has no LUT-equivalent replacement field. */}
+                    {!isExport && (
+                      <div>
+                        <label className="form-label">GST type</label>
+                        <select {...register('content.gstType')} className="form-input w-full">
+                          {GST_TYPES.map(t => <option key={t} value={t}>{GST_TYPE_LABELS[t]}</option>)}
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Section>
@@ -533,7 +575,7 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] text-[#98A2B3] mb-1 block">Rate (₹)</label>
+                          <label className="text-[10px] text-[#98A2B3] mb-1 block">Rate ({currencySymbol(watchedCurrency)})</label>
                           <input
                             type="number" step="0.01" min="0"
                             {...register(`content.lineItems.${idx}.rate`, { valueAsNumber: true })}
@@ -561,9 +603,9 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
                         </div>
                       </div>
                       <div className="flex items-center justify-end gap-3 text-[11px] text-[#667085] dark:text-[#8B92A8] pt-1">
-                        <span>Line: <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">₹{lineTotal.toLocaleString('en-IN')}</span></span>
+                        <span>Line: <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{currencySymbol(watchedCurrency)}{lineTotal.toLocaleString('en-IN')}</span></span>
                         {lineGst > 0 && (
-                          <span>+ GST: <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">₹{lineGst.toLocaleString('en-IN')}</span></span>
+                          <span>+ GST: <span className="font-semibold text-[#344054] dark:text-[#C2C8D8]">{currencySymbol(watchedCurrency)}{lineGst.toLocaleString('en-IN')}</span></span>
                         )}
                       </div>
                     </div>
@@ -575,19 +617,18 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
                   <div className="card-glass p-4 bg-[#FAFAFA] dark:bg-[#1A1B23] space-y-2">
                     <div className="flex justify-between text-[12px] text-[#667085] dark:text-[#8B92A8]">
                       <span>Subtotal</span>
-                      <span className="font-medium text-[#344054] dark:text-[#C2C8D8]">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      <span className="font-medium text-[#344054] dark:text-[#C2C8D8]">{currencySymbol(watchedCurrency)}{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
                     {gstAmount > 0 && (
                       <div className="flex justify-between text-[12px] text-[#667085] dark:text-[#8B92A8]">
                         <span>{watchedGstType === 'CGST_SGST' ? 'CGST + SGST' : 'IGST'}</span>
-                        <span className="font-medium text-[#344054] dark:text-[#C2C8D8]">₹{gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        <span className="font-medium text-[#344054] dark:text-[#C2C8D8]">{currencySymbol(watchedCurrency)}{gstAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                       </div>
                     )}
                     <div className="flex justify-between pt-2 border-t border-[#EAECF0] dark:border-[#26283A]">
                       <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Total</span>
                       <span className="flex items-center gap-0.5 text-[15px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">
-                        <IndianRupee size={11} strokeWidth={3} />
-                        {total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        {currencySymbol(watchedCurrency)}{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                   </div>
@@ -641,7 +682,7 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-[10px] text-[#98A2B3] mb-1 block">Amount (₹)</label>
+                        <label className="text-[10px] text-[#98A2B3] mb-1 block">Amount ({currencySymbol(watchedCurrency)})</label>
                         <input
                           type="number" min="0" step="0.01"
                           {...register(`content.paymentSchedule.${idx}.amount`, { valueAsNumber: true })}

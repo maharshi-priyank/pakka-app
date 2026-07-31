@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { IndianRupee, User, Briefcase, Calendar, CheckCircle, FileText } from 'lucide-react'
+import { User, Briefcase, Calendar, CheckCircle, FileText } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import DocumentPreviewDrawer from '@/components/shared/DocumentPreviewDrawer'
 import { useContract } from '../hooks/useContracts'
 
@@ -37,6 +38,7 @@ export default function ContractPreviewDrawer({ id, onClose }: Props) {
 
   const clientName = contract?.client?.name ?? undefined
   const clientCo   = contract?.client?.company ?? undefined
+  const symbol     = currencySymbol(contract?.currency)
 
   const statusBadge = contract ? (
     <span className={cn(
@@ -86,14 +88,13 @@ export default function ContractPreviewDrawer({ id, onClose }: Props) {
           {totalAmount > 0 && (
             <div className="bg-[#F8F9FF] dark:bg-[#1A1B2E] border border-[#E0E4FF] dark:border-[#2D3060] rounded-xl p-4">
               <div className="flex items-baseline gap-1">
-                <IndianRupee size={14} className="text-[#3538CD] dark:text-indigo-400 shrink-0 mb-0.5" strokeWidth={2.5} />
                 <span className="text-[26px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tabular-nums leading-none">
-                  {fmt(totalAmount)}
+                  {symbol}{fmt(totalAmount)}
                 </span>
               </div>
               {gstAmount > 0 && (
                 <p className="text-[11.5px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
-                  incl. GST ₹{fmt(gstAmount)}
+                  incl. GST {symbol}{fmt(gstAmount)}
                 </p>
               )}
               {contract.signedAt && (
@@ -154,7 +155,7 @@ export default function ContractPreviewDrawer({ id, onClose }: Props) {
                       <p className="text-[12.5px] font-medium text-[#344054] dark:text-[#C2C8D8]">{m.milestone}</p>
                       {m.dueOn && <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{m.dueOn}</p>}
                     </div>
-                    <span className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] tabular-nums">₹{fmt(m.amount)}</span>
+                    <span className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] tabular-nums">{symbol}{fmt(m.amount)}</span>
                   </div>
                 ))}
               </div>

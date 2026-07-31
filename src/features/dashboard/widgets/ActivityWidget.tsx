@@ -18,7 +18,7 @@ function activityMeta(type: string): { iconBg: string; iconColor: string; icon: 
     case 'proposal_accepted': return { iconBg: 'bg-[#ECFDF3] dark:bg-emerald-950/40', iconColor: 'text-[#027A48] dark:text-[#34D399]', icon: CheckCircle2 }
     case 'proposal_opened':   return { iconBg: 'bg-[#FFFAEB] dark:bg-amber-950/30',   iconColor: 'text-[#B54708] dark:text-amber-400', icon: Bell }
     case 'proposal_sent':     return { iconBg: 'bg-[#EEF2FF] dark:bg-[#1E2040]',      iconColor: 'text-[#4338CA] dark:text-[#818CF8]', icon: FileText }
-    case 'lead_added':        return { iconBg: 'bg-[#FFFAEB] dark:bg-amber-950/30',   iconColor: 'text-[#B54708] dark:text-amber-400', icon: FilePlus }
+    case 'contact_added':     return { iconBg: 'bg-[#FFFAEB] dark:bg-amber-950/30',   iconColor: 'text-[#B54708] dark:text-amber-400', icon: FilePlus }
     default:                  return { iconBg: 'bg-[#F2F4F7] dark:bg-[#21222D]',      iconColor: 'text-[#667085] dark:text-[#8B92A8]', icon: Bell }
   }
 }
@@ -41,7 +41,7 @@ export default function ActivityWidget() {
             </span>
             <span className="text-[11px] text-[#667085] dark:text-[#8B92A8] font-medium">Live</span>
           </div>
-          <a href="/leads" className="flex items-center gap-1 text-[12.5px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">
+          <a href="/contacts" className="flex items-center gap-1 text-[12.5px] font-semibold text-[#6366F1] hover:text-[#4F46E5] transition-colors">
             View all <ArrowUpRight size={13} strokeWidth={2.5} />
           </a>
         </div>
@@ -64,7 +64,7 @@ export default function ActivityWidget() {
               <FileText size={22} className="text-[#98A2B3] dark:text-[#545C74]" strokeWidth={1.5} />
             </div>
             <p className="text-[13.5px] font-semibold text-[#344054] dark:text-[#C2C8D8]">No activity yet</p>
-            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">Add your first lead to get started</p>
+            <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">Add your first contact to get started</p>
           </div>
         ) : activity!.map((a, i) => {
           const { icon: Icon, iconBg, iconColor } = activityMeta(a.type)

@@ -2,8 +2,10 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { X, Loader2 } from 'lucide-react'
-import { createContactSchema, CONTACT_SOURCES, SOURCE_LABELS, type CreateContactInput } from '../schemas/contact.schema'
+import { createContactSchema, CONTACT_SOURCES, CONTACT_CURRENCIES, SOURCE_LABELS, type CreateContactInput } from '../schemas/contact.schema'
 import { useCreateContact } from '../hooks/useContacts'
+import { ALL_COUNTRIES, getCountryDefaults } from '@/lib/countryDefaults'
+import { currencySymbol } from '@/lib/currency-symbols'
 
 interface Props {
   open:    boolean
@@ -17,10 +19,33 @@ export default function AddContactModal({ open, onClose }: Props) {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
-  } = useForm<CreateContactInput>({ resolver: zodResolver(createContactSchema) })
+  } = useForm<CreateContactInput>({
+    resolver: zodResolver(createContactSchema),
+    defaultValues: { country: '', currency: undefined },
+  })
 
-  useEffect(() => { if (open) reset() }, [open, reset])
+  const watchedCurrency = watch('currency')
+
+  useEffect(() => { if (open) reset({ country: '', currency: undefined }) }, [open, reset])
+
+  // R2/R6/KTD8: Country auto-suggests Currency, but only within the 5-value
+  // set every document type validates against -- unlike BusinessTab, there is
+  // no IN/INR fallback when nothing matches (R2 forbids a silent default).
+  function handleCountryChange(code: string) {
+    setValue('country', code, { shouldValidate: true })
+    const suggested = getCountryDefaults(code).currency
+    if ((CONTACT_CURRENCIES as readonly string[]).includes(suggested)) {
+      setValue('currency', suggested as CreateContactInput['currency'], { shouldValidate: true })
+    } else {
+      // '' mirrors the <select>'s own unselected placeholder value -- currency
+      // is a required enum on create (R2), so there's no `undefined` member
+      // to clear back to.
+      setValue('currency', '' as CreateContactInput['currency'], { shouldValidate: true })
+    }
+  }
 
   function onSubmit(data: CreateContactInput) {
     mutate(data, { onSuccess: () => { reset(); onClose() } })
@@ -74,6 +99,34 @@ export default function AddContactModal({ open, onClose }: Props) {
             </div>
           </div>
 
+          {/* Country + Currency */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="form-label">Country *</label>
+              <select
+                {...register('country')}
+                onChange={e => handleCountryChange(e.target.value)}
+                className="form-input"
+              >
+                <option value="">Select country</option>
+                {ALL_COUNTRIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
+              {errors.country && <p className="form-error">{errors.country.message}</p>}
+            </div>
+            <div>
+              <label className="form-label">Currency *</label>
+              <select {...register('currency')} className="form-input">
+                <option value="">Select currency</option>
+                {CONTACT_CURRENCIES.map(code => (
+                  <option key={code} value={code}>{code}</option>
+                ))}
+              </select>
+              {errors.currency && <p className="form-error">{errors.currency.message}</p>}
+            </div>
+          </div>
+
           {/* Service + Deal Value */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -81,7 +134,7 @@ export default function AddContactModal({ open, onClose }: Props) {
               <input {...register('service')} className="form-input" placeholder="Brand identity" />
             </div>
             <div>
-              <label className="form-label">Deal Value (₹)</label>
+              <label className="form-label">Deal Value ({currencySymbol(watchedCurrency)})</label>
               <input {...register('dealValue')} className="form-input" type="number" placeholder="50000" />
             </div>
           </div>

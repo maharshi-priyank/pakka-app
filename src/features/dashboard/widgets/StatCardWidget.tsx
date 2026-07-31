@@ -33,7 +33,7 @@ export default function StatCardWidget({ type }: { type: StatType }) {
     },
     pipeline: {
       label:     'Pipeline value',
-      sub:       s => `${s.activeLeads ?? 0} active lead${s.activeLeads !== 1 ? 's' : ''}`,
+      sub:       s => `${s.activeContacts ?? 0} active contact${s.activeContacts !== 1 ? 's' : ''}`,
       iconBg:    'bg-[#ECFDF3] dark:bg-emerald-950/40',
       iconColor: 'text-[#027A48] dark:text-[#34D399]',
       icon:      TrendingUp,

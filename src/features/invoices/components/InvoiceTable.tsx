@@ -1,5 +1,6 @@
 import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, Trash2, Ban } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import type { Invoice } from '../schemas/invoice.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/invoice.schema'
 
@@ -129,7 +130,7 @@ export default function InvoiceTable({ invoices, sortBy, sortDir, onSort, onOpen
                       'text-[13px] font-bold tabular-nums',
                       isPaid ? 'text-[#027A48]' : isOverdue ? 'text-[#D92D20]' : 'text-[#101828] dark:text-[#ECEEF3]',
                     )}>
-                      ₹{fmt(Number(inv.total))}
+                      {currencySymbol(inv.currency)}{fmt(Number(inv.total))}
                     </span>
                   </td>
 

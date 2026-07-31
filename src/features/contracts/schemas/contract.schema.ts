@@ -3,6 +3,9 @@ import { z } from 'zod'
 export const CONTRACT_STATUSES = ['DRAFT', 'SENT', 'SIGNED', 'DECLINED'] as const
 export type ContractStatus = typeof CONTRACT_STATUSES[number]
 
+export const CONTRACT_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED'] as const
+export type ContractCurrency = typeof CONTRACT_CURRENCIES[number]
+
 // ─── Sub-schemas ──────────────────────────────────────────────────────────────
 
 export const contractClauseSchema = z.object({
@@ -50,6 +53,7 @@ export const createContractSchema = z.object({
   clientEmail: z.string().optional(),
   projectId:   z.string().optional(),
   content:     contractContentSchema.optional(),
+  currency:    z.enum(CONTRACT_CURRENCIES).optional(),
 })
 
 export const updateContractSchema = createContractSchema.partial().extend({
@@ -84,6 +88,7 @@ export interface Contract {
   title:      string
   status:     ContractStatus
   content:    ContractContent
+  currency:   string | null
   signedAt:   string | null
   auditLog:   Record<string, unknown> | null
   archivedAt: string | null

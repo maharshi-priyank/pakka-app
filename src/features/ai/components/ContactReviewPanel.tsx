@@ -4,7 +4,9 @@ import AIIcon from './AIIcon'
 import { cn } from '@/lib/utils'
 import type { ExtractedLead } from '../hooks/useAIExtract'
 import type { ContactStage } from '@/features/contacts/schemas/contact.schema'
-import { CONTACT_STAGES, CONTACT_SOURCES, STAGE_LABELS } from '@/features/contacts/schemas/contact.schema'
+import { CONTACT_STAGES, CONTACT_SOURCES, CONTACT_CURRENCIES, STAGE_LABELS, type ContactCurrency } from '@/features/contacts/schemas/contact.schema'
+import { ALL_COUNTRIES, getCountryDefaults } from '@/lib/countryDefaults'
+import { currencySymbol } from '@/lib/currency-symbols'
 
 const SOURCE_OPTIONS = CONTACT_SOURCES as readonly string[]
 
@@ -18,6 +20,8 @@ export interface EditableContact {
   source:    string
   notes:     string
   stage:     ContactStage
+  country:   string
+  currency:  ContactCurrency | ''
 }
 
 interface Props {
@@ -87,10 +91,22 @@ export default function ContactReviewPanel({ extracted, onConfirm, onReset, isCr
     source:  extracted.source  ?? 'other',
     notes:   extracted.notes   ?? '',
     stage:   'ENQUIRY',
+    // R2/R6/KTD8: no default — extraction has no reliable signal for this,
+    // so it's forced onto the freelancer during review, same as AddContactModal.
+    country:  '',
+    currency: '',
   })
 
   const set = (key: keyof EditableContact) => (v: string) =>
     setForm(f => ({ ...f, [key]: v }))
+
+  function handleCountryChange(code: string) {
+    setForm(f => {
+      const suggested = getCountryDefaults(code).currency
+      const currency = ((CONTACT_CURRENCIES as readonly string[]).includes(suggested) ? suggested : '') as ContactCurrency | ''
+      return { ...f, country: code, currency }
+    })
+  }
 
   const confidence = extracted.confidence
   const confidenceLabel =
@@ -136,7 +152,37 @@ export default function ContactReviewPanel({ extracted, onConfirm, onReset, isCr
           <Field label="Service"  value={form.service} onChange={set('service')} pip={pip(extracted.service)} />
         </div>
         <div className="col-span-2 sm:col-span-1">
-          <Field label="Deal Value (₹)" value={form.budget} onChange={set('budget')} pip={pip(extracted.budget ? String(extracted.budget) : null)} type="number" />
+          <Field label={`Deal Value (${currencySymbol(form.currency)})`} value={form.budget} onChange={set('budget')} pip={pip(extracted.budget ? String(extracted.budget) : null)} type="number" />
+        </div>
+
+        {/* Country select */}
+        <div className="col-span-2 sm:col-span-1 flex flex-col gap-1">
+          <label className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Country *</label>
+          <select
+            value={form.country}
+            onChange={e => handleCountryChange(e.target.value)}
+            className={inputCls}
+          >
+            <option value="">Select country</option>
+            {ALL_COUNTRIES.map(c => (
+              <option key={c.code} value={c.code}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Currency select */}
+        <div className="col-span-2 sm:col-span-1 flex flex-col gap-1">
+          <label className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Currency *</label>
+          <select
+            value={form.currency}
+            onChange={e => set('currency')(e.target.value)}
+            className={inputCls}
+          >
+            <option value="">Select currency</option>
+            {CONTACT_CURRENCIES.map(code => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
         </div>
 
         {/* Source select */}
@@ -186,10 +232,10 @@ export default function ContactReviewPanel({ extracted, onConfirm, onReset, isCr
         </button>
         <button
           onClick={() => onConfirm(form)}
-          disabled={!form.name.trim() || isCreating}
+          disabled={!form.name.trim() || !form.country || !form.currency || isCreating}
           className={cn(
             'flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold transition-all',
-            form.name.trim() && !isCreating
+            form.name.trim() && form.country && form.currency && !isCreating
               ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-500 hover:to-violet-500 shadow-sm'
               : 'bg-[#F2F4F7] dark:bg-[#21222D] text-[#98A2B3] dark:text-[#545C74] cursor-not-allowed',
           )}

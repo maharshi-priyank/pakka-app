@@ -1,5 +1,6 @@
 import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, CheckCircle2, Archive, Ban } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import type { Contract } from '../schemas/contract.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/contract.schema'
 
@@ -131,7 +132,7 @@ export default function ContractTable({ contracts, sortBy, sortDir, onSort, onOp
                   <td className="px-4 py-3 text-right">
                     {totalAmount && totalAmount > 0 ? (
                       <span className="text-[13px] font-bold tabular-nums text-[#101828] dark:text-[#ECEEF3]">
-                        ₹{fmt(totalAmount)}
+                        {currencySymbol(c.currency)}{fmt(totalAmount)}
                       </span>
                     ) : (
                       <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">—</span>
