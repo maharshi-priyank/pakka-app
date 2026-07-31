@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { IndianRupee, User, Briefcase, Calendar, CheckCircle, Clock, FileText } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import DocumentPreviewDrawer from '@/components/shared/DocumentPreviewDrawer'
 import { useProposal } from '../hooks/useProposals'
 import { GST_TYPE_LABELS } from '../schemas/proposal.schema'
@@ -39,6 +40,7 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
   const caseStudies   = content?.caseStudies   ?? []
   const faq           = content?.faq           ?? []
   const gstType       = (content?.gstType ?? 'IGST') as GstType
+  const symbol        = currencySymbol(proposal?.currency)
 
   const subtotal  = lineItems.reduce((s, i) => s + i.qty * i.rate, 0)
   const gstAmount = gstType !== 'EXEMPT'
@@ -105,7 +107,7 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
               </div>
               {Number(proposal.gstAmount) > 0 && (
                 <p className="text-[11.5px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
-                  incl. GST ₹{fmt(proposal.gstAmount)}
+                  incl. GST {symbol}{fmt(proposal.gstAmount)}
                 </p>
               )}
               <div className="flex flex-wrap gap-3 mt-3">
@@ -154,11 +156,11 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
                         <tr key={idx} className="border-b border-[#F9FAFB] dark:border-[#1A1B23]">
                           <td className="py-2.5 pr-3 text-[#344054] dark:text-[#C2C8D8] font-medium leading-snug align-top">{item.description}</td>
                           <td className="py-2.5 px-3 text-right text-[#667085] dark:text-[#8B92A8] tabular-nums align-top">{item.qty}</td>
-                          <td className="py-2.5 px-3 text-right text-[#667085] dark:text-[#8B92A8] whitespace-nowrap tabular-nums align-top">₹{fmt(item.rate)}</td>
+                          <td className="py-2.5 px-3 text-right text-[#667085] dark:text-[#8B92A8] whitespace-nowrap tabular-nums align-top">{symbol}{fmt(item.rate)}</td>
                           {gstType !== 'EXEMPT' && (
                             <td className="py-2.5 px-3 text-right text-[#667085] dark:text-[#8B92A8] tabular-nums align-top">{item.gstRate ?? 0}%</td>
                           )}
-                          <td className="py-2.5 pl-3 text-right font-semibold text-[#101828] dark:text-[#ECEEF3] whitespace-nowrap tabular-nums align-top">₹{fmt(lineTotal + lineGst)}</td>
+                          <td className="py-2.5 pl-3 text-right font-semibold text-[#101828] dark:text-[#ECEEF3] whitespace-nowrap tabular-nums align-top">{symbol}{fmt(lineTotal + lineGst)}</td>
                         </tr>
                       )
                     })}
@@ -166,8 +168,8 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
                 </table>
               </div>
               <div className="mt-3 border-t border-[#EAECF0] dark:border-[#26283A] pt-3 space-y-1.5">
-                <Row label="Subtotal" value={`₹${fmt(subtotal)}`} />
-                {gstAmount > 0 && <Row label={GST_TYPE_LABELS[gstType]} value={`₹${fmt(gstAmount)}`} />}
+                <Row label="Subtotal" value={`${symbol}${fmt(subtotal)}`} />
+                {gstAmount > 0 && <Row label={GST_TYPE_LABELS[gstType]} value={`${symbol}${fmt(gstAmount)}`} />}
                 <div className="flex items-center justify-between pt-1.5 border-t border-[#EAECF0] dark:border-[#26283A]">
                   <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">Total</span>
                   <span className="flex items-center gap-0.5 text-[16px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tabular-nums">
@@ -192,7 +194,7 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
                       <p className="text-[12.5px] font-medium text-[#344054] dark:text-[#C2C8D8]">{m.milestone}</p>
                       {m.dueOn && <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{m.dueOn}</p>}
                     </div>
-                    <span className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] tabular-nums">₹{fmt(m.amount)}</span>
+                    <span className="text-[13px] font-semibold text-[#101828] dark:text-[#ECEEF3] tabular-nums">{symbol}{fmt(m.amount)}</span>
                   </div>
                 ))}
               </div>

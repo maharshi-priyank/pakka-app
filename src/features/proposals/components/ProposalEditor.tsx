@@ -16,13 +16,14 @@ import canvaSvg from '@/assets/canva.svg'
 import { cn } from '@/lib/utils'
 import {
   createProposalSchema,
-  GST_TYPES, GST_TYPE_LABELS, GST_RATES,
+  GST_TYPES, GST_TYPE_LABELS, GST_RATES, PROPOSAL_CURRENCIES,
   type CreateProposalInput, type LineItem,
 } from '../schemas/proposal.schema'
 import type { Proposal, ProposalTemplate } from '../schemas/proposal.schema'
 import { useCreateProposal, useUpdateProposal, useSendProposal } from '../hooks/useProposals'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useProjects } from '@/features/projects/hooks/useProjects'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
 import SaveTemplateModal from './SaveTemplateModal'
@@ -95,6 +96,7 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
   const sendMutation   = useSendProposal()
   const { data: contactsData } = useContacts({ limit: 200 })
   const { data: profile } = useProfile()
+  const { currency: wsCurrency } = useWorkspace()
 
   const attachParent      = { proposalId: proposal?.id ?? '' }
   const { data: attachments = [], isLoading: attachmentsLoading } = useAttachments(attachParent)
@@ -128,6 +130,7 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
       title:      proposal?.title ?? defaultTemplate?.name ?? '',
       contactId:  proposal?.contactId ?? defaultContactId ?? undefined,
       validUntil: proposal?.validUntil ? proposal.validUntil.slice(0, 10) : '',
+      currency:   (proposal?.currency ?? wsCurrency) as CreateProposalInput['currency'],
       content: {
         intro:           (c.intro         as string)  ?? '',
         whyUs:           (c.whyUs         as string)  ?? '',
@@ -170,9 +173,28 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
   const watchedTerms       = watch('content.terms')          ?? ''
   const watchedCaseStudies = watch('content.caseStudies')    ?? []
   const watchedFaq         = watch('content.faq')            ?? []
+  const watchedCurrency    = watch('currency') ?? wsCurrency
+  const isExport           = watchedCurrency !== 'INR'
   const { subtotal, gstAmount, total } = calcTotals(watchedLineItems as LineItem[], watchedGstType)
 
   const { data: projectsData } = useProjects({ contactId: watchedContactId || undefined, limit: 100 })
+
+  // R7/KTD8/KTD3: keep currency in sync with the linked Contact — only on an
+  // actual contactId change (not on initial mount for an existing Proposal,
+  // which would clobber a manually-diverged currency, per KTD3). For a brand
+  // new Proposal opened with a defaultContactId, this also performs the
+  // initial resolution once async contacts data loads. Falls back to the
+  // Workspace currency when the linked Contact has none set (KTD5) or no
+  // Contact is linked at all (R8) — never defaults an unsupported value.
+  const currencyContactRef = useRef<string | undefined>(proposal?.contactId ?? defaultContactId ?? undefined)
+  useEffect(() => {
+    if (!contactsData?.items?.length) return
+    if (watchedContactId === currencyContactRef.current) return
+    currencyContactRef.current = watchedContactId
+    const contact = contactsData.items.find(c => c.id === watchedContactId)
+    const nextCurrency = (contact?.currency ?? wsCurrency) as CreateProposalInput['currency']
+    setValue('currency', nextCurrency)
+  }, [watchedContactId, contactsData?.items?.length])
 
   const tabCompletion: Record<Tab, boolean> = {
     cover:       !!(watchedIntro?.trim() || watchedWhyUs?.trim()),
@@ -367,17 +389,28 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
                     />
                     {errors.title && <p className="form-error">{errors.title.message}</p>}
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className={cn('grid gap-4', isExport ? 'grid-cols-2' : 'grid-cols-3')}>
                     <div>
                       <label className="form-label">Valid until</label>
                       <input type="date" {...register('validUntil')} className="form-input w-full" />
                     </div>
                     <div>
-                      <label className="form-label">GST type</label>
-                      <select {...register('content.gstType')} className="form-input w-full">
-                        {GST_TYPES.map(t => <option key={t} value={t}>{GST_TYPE_LABELS[t]}</option>)}
+                      <label className="form-label">Currency</label>
+                      <select {...register('currency')} className="form-input w-full">
+                        {PROPOSAL_CURRENCIES.map(cur => <option key={cur} value={cur}>{cur}</option>)}
                       </select>
                     </div>
+                    {/* R7/KTD4: server-enforces EXEMPT for non-INR proposals — hide
+                        the GST select entirely rather than showing a disabled/stale
+                        value; Proposal has no LUT-equivalent replacement field. */}
+                    {!isExport && (
+                      <div>
+                        <label className="form-label">GST type</label>
+                        <select {...register('content.gstType')} className="form-input w-full">
+                          {GST_TYPES.map(t => <option key={t} value={t}>{GST_TYPE_LABELS[t]}</option>)}
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Section>

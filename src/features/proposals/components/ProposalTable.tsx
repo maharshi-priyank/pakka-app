@@ -1,5 +1,6 @@
 import { ArrowUpRight, ChevronUp, ChevronDown, ChevronsUpDown, Archive } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { currencySymbol } from '@/lib/currency-symbols'
 import type { Proposal } from '../schemas/proposal.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/proposal.schema'
 
@@ -130,7 +131,7 @@ export default function ProposalTable({ proposals, sortBy, sortDir, onSort, onOp
                   <td className="px-4 py-3 text-right">
                     {Number(p.totalAmount) > 0 ? (
                       <span className="text-[13px] font-bold tabular-nums text-[#101828] dark:text-[#ECEEF3]">
-                        ₹{fmt(Number(p.totalAmount))}
+                        {currencySymbol(p.currency)}{fmt(Number(p.totalAmount))}
                       </span>
                     ) : (
                       <span className="text-[12px] text-[#D0D5DD] dark:text-[#3D4258]">—</span>

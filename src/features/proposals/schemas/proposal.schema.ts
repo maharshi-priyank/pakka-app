@@ -9,6 +9,9 @@ export type GstType = typeof GST_TYPES[number]
 export const GST_RATES = [0, 5, 12, 18, 28] as const
 export type GstRate = typeof GST_RATES[number]
 
+export const PROPOSAL_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED'] as const
+export type ProposalCurrency = typeof PROPOSAL_CURRENCIES[number]
+
 // ─── Sub-schemas ──────────────────────────────────────────────────────────────
 
 export const lineItemSchema = z.object({
@@ -85,6 +88,7 @@ export const createProposalSchema = z.object({
   clientEmail: z.string().email('Invalid email').optional().or(z.literal('')),
   content:     proposalContentSchema.optional(),
   validUntil:  z.string().optional(),
+  currency:    z.enum(PROPOSAL_CURRENCIES).optional(),
 })
 
 export const updateProposalSchema = createProposalSchema.partial().extend({
@@ -127,6 +131,7 @@ export interface Proposal {
   status:      ProposalStatus
   slug:        string
   content:     ProposalContent
+  currency:    string | null
   totalAmount:      string
   gstAmount:        string
   hidePricingTable: boolean
