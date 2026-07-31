@@ -1,18 +1,23 @@
 import { cn } from '@/lib/utils'
-import { useLeads } from '@/features/leads/hooks/useLeads'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { Users } from 'lucide-react'
+import type { ContactStage } from '@/features/contacts/schemas/contact.schema'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
 }
 
-const STAGES = [
+// Contact.stage has two terminal "won" states (CLIENT, PAST_CLIENT) where the
+// old Lead model only had one (WON) -- per KTD, both are merged into a single
+// "Won" bucket here rather than splitting the funnel into 6 bars.
+const STAGES: { key: string; label: string; color: string; darkColor: string; labelCls: string; match: (stage: ContactStage) => boolean }[] = [
   {
     key:       'ENQUIRY',
     label:     'Enquiry',
     color:     '#98A2B3',
     darkColor: '#545C74',
     labelCls:  'bg-[#F2F4F7] dark:bg-[#26283A] text-[#667085] dark:text-[#8B92A8]',
+    match:     s => s === 'ENQUIRY',
   },
   {
     key:       'PROPOSAL_SENT',
@@ -20,6 +25,7 @@ const STAGES = [
     color:     '#6366F1',
     darkColor: '#6366F1',
     labelCls:  'bg-[#EEF2FF] dark:bg-[#1E2040] text-[#4338CA] dark:text-[#818CF8]',
+    match:     s => s === 'PROPOSAL_SENT',
   },
   {
     key:       'NEGOTIATING',
@@ -27,6 +33,7 @@ const STAGES = [
     color:     '#F59E0B',
     darkColor: '#F59E0B',
     labelCls:  'bg-[#FFFAEB] dark:bg-amber-950/30 text-[#B54708] dark:text-amber-400',
+    match:     s => s === 'NEGOTIATING',
   },
   {
     key:       'WON',
@@ -34,6 +41,7 @@ const STAGES = [
     color:     '#12B76A',
     darkColor: '#12B76A',
     labelCls:  'bg-[#ECFDF3] dark:bg-emerald-950/40 text-[#027A48] dark:text-[#34D399]',
+    match:     s => s === 'CLIENT' || s === 'PAST_CLIENT',
   },
   {
     key:       'LOST',
@@ -41,20 +49,21 @@ const STAGES = [
     color:     '#F04438',
     darkColor: '#F04438',
     labelCls:  'bg-[#FEF3F2] dark:bg-red-950/40 text-[#B42318] dark:text-red-400',
+    match:     s => s === 'LOST',
   },
 ]
 
 export default function LeadFunnelWidget() {
-  const { data, isLoading } = useLeads({ limit: 200 })
+  const { data, isLoading } = useContacts({ limit: 200 })
   const items    = data?.items ?? []
-  const maxCount = Math.max(...STAGES.map(s => items.filter(l => l.stage === s.key).length), 1)
+  const maxCount = Math.max(...STAGES.map(s => items.filter(c => s.match(c.stage)).length), 1)
 
   return (
     <div className="card-glass overflow-hidden h-full hover:shadow-lg transition-shadow">
       <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
         <div>
-          <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Lead Pipeline</h2>
-          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{items.length} total lead{items.length !== 1 ? 's' : ''}</p>
+          <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Contact Pipeline</h2>
+          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{items.length} total contact{items.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center">
           <Users size={14} className="text-[#6366F1]" strokeWidth={2} />
@@ -63,7 +72,7 @@ export default function LeadFunnelWidget() {
 
       <div className="px-5 py-4 space-y-3">
         {STAGES.map((stage, idx) => {
-          const count = isLoading ? 0 : items.filter(l => l.stage === stage.key).length
+          const count = isLoading ? 0 : items.filter(c => stage.match(c.stage)).length
           const pct   = isLoading ? 60 - idx * 8 : (count / maxCount) * 100
           return (
             <div key={stage.key} className="flex items-center gap-3">

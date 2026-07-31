@@ -8,7 +8,7 @@ export interface DashboardStats {
   overdueAmount:    number
   overdueCount:     number
   pipelineValue:    number
-  activeLeads:      number
+  activeContacts:   number
   openProposals:    number
 }
 

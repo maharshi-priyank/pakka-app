@@ -1,6 +1,7 @@
 import { CheckCircle2, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUpcomingFollowUps } from '../hooks/useDashboard'
+import { STAGE_LABELS } from '@/features/contacts/schemas/contact.schema'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -13,11 +14,6 @@ const AVATAR_COLORS = [
   'bg-[#FEF3F2] text-[#B42318]',
   'bg-[#F4F3FF] text-[#5925DC]',
 ]
-
-const STAGE_LABEL: Record<string, string> = {
-  ENQUIRY: 'Enquiry', PROPOSAL_SENT: 'Proposal Sent',
-  NEGOTIATING: 'Negotiating', WON: 'Won', LOST: 'Lost',
-}
 
 function urgency(followUpAt: string): { label: string; color: string } {
   const diff = new Date(followUpAt).getTime() - Date.now()
@@ -78,7 +74,7 @@ export default function FollowUpsWidget() {
               </div>
               <div className="text-right shrink-0">
                 <p className={cn('text-[11px] font-bold', color)}>{label}</p>
-                <p className="text-[10px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{STAGE_LABEL[f.stage] ?? f.stage}</p>
+                <p className="text-[10px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{STAGE_LABELS[f.stage as keyof typeof STAGE_LABELS] ?? f.stage}</p>
               </div>
             </div>
           )
