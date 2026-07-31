@@ -11,8 +11,13 @@ export const CONTACT_SOURCES = [
   'instagram', 'referral', 'website', 'linkedin', 'cold_outreach', 'other',
 ] as const
 
+export const CONTACT_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED'] as const
+export type ContactCurrency = typeof CONTACT_CURRENCIES[number]
+
 export const createContactSchema = z.object({
   name:       z.string().min(1, 'Name is required').max(100),
+  country:    z.string().min(1, 'Country is required'),
+  currency:   z.enum(CONTACT_CURRENCIES, { errorMap: () => ({ message: 'Currency is required' }) }),
   email:      z.string().email('Invalid email').optional().or(z.literal('')),
   phone:      z.string().max(20).optional().or(z.literal('')),
   company:    z.string().max(100).optional().or(z.literal('')),
@@ -68,6 +73,8 @@ export interface Contact {
   id:             string
   workspaceId:    string
   name:           string
+  country:        string | null
+  currency:       string | null
   email:          string | null
   phone:          string | null
   company:        string | null
