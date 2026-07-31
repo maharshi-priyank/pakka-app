@@ -1,4 +1,4 @@
-import { ArrowUpRight, FileSignature, IndianRupee, CheckCircle2, Clock, Archive, Ban } from 'lucide-react'
+import { ArrowUpRight, FileSignature, IndianRupee, CheckCircle2, Clock, Archive, Ban, LayoutTemplate } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Contract } from '../schemas/contract.schema'
 import { STATUS_LABELS, STATUS_BADGE_CLASS } from '../schemas/contract.schema'
@@ -8,6 +8,7 @@ interface Props {
   onClick:  (contract: Contract) => void
   onRemove?: (contract: Contract) => void
   onVoid?:   (contract: Contract) => void
+  onSaveAsTemplate?: (contract: Contract) => void
 }
 
 const AVATAR_COLORS = [
@@ -28,7 +29,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export default function ContractCard({ contract, onClick, onRemove, onVoid }: Props) {
+export default function ContractCard({ contract, onClick, onRemove, onVoid, onSaveAsTemplate }: Props) {
   const clientName = contract.contact?.name ?? contract.client?.name ?? 'No client'
   const c = contract.content as Record<string, unknown>
   const totalAmount = c.totalAmount as number | undefined
@@ -71,6 +72,15 @@ export default function ContractCard({ contract, onClick, onRemove, onVoid }: Pr
           <span className={cn(STATUS_BADGE_CLASS[contract.status], 'text-[10px] px-1.5 py-0.5')}>
             {STATUS_LABELS[contract.status]}
           </span>
+          {onSaveAsTemplate && (
+            <button
+              onClick={e => { e.stopPropagation(); onSaveAsTemplate(contract) }}
+              title="Save as template"
+              className="w-6 h-6 rounded-lg bg-[#F5F6FA] dark:bg-[#21222D] opacity-0 group-hover:opacity-100 flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#EEF2FF] dark:hover:bg-[#1E2040] hover:text-[#6366F1] transition-all"
+            >
+              <LayoutTemplate size={11} strokeWidth={2.5} />
+            </button>
+          )}
           {onVoid && (contract.status === 'SENT' || contract.status === 'SIGNED') && (
             <button
               onClick={e => { e.stopPropagation(); onVoid(contract) }}

@@ -1,15 +1,26 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileText, Search, X, LayoutGrid, List } from 'lucide-react'
+import { Plus, FileText, Search, X, LayoutGrid, List, LayoutTemplate, ChevronDown } from 'lucide-react'
 import { usePermissionRedirect } from '@/hooks/usePermissionRedirect'
 import { Permission } from '@/types/permissions'
 import { cn } from '@/lib/utils'
 import { useInvoices, useDeleteInvoice, useVoidInvoice } from '@/features/invoices/hooks/useInvoices'
+import {
+  useInvoiceTemplates,
+  useIncrementInvoiceTemplateUsage,
+  useSetDefaultInvoiceTemplate,
+  useSaveInvoiceAsTemplate,
+  useUpdateInvoiceTemplate,
+  useDeleteInvoiceTemplate,
+} from '@/features/invoices/hooks/useInvoiceTemplates'
 import InvoiceCard, { InvoiceCardSkeleton } from '@/features/invoices/components/InvoiceCard'
 import InvoiceTable, { InvoiceTableSkeleton } from '@/features/invoices/components/InvoiceTable'
 import type { SortField, SortDir } from '@/features/invoices/components/InvoiceTable'
-import type { Invoice, InvoiceStatus } from '@/features/invoices/schemas/invoice.schema'
+import type { Invoice, InvoiceStatus, InvoiceTemplate } from '@/features/invoices/schemas/invoice.schema'
 import { STATUS_LABELS } from '@/features/invoices/schemas/invoice.schema'
+import InvoiceTemplatePreview from '@/features/invoices/components/InvoiceTemplatePreview'
+import TemplatePickerShell from '@/features/templates/components/TemplatePickerShell'
+import SaveAsTemplateModal from '@/features/templates/components/SaveAsTemplateModal'
 import ClientMultiSelect from '@/components/filters/ClientMultiSelect'
 import DateRangePill from '@/components/filters/DateRangePill'
 import AmountRangePill from '@/components/filters/AmountRangePill'
@@ -54,9 +65,23 @@ export default function InvoicesPage() {
   const [voidTarget,    setVoidTarget]    = useState<Invoice | null>(null)
   const [invoiceId,     setInvoiceId]     = useState<string | null>(null)
 
+  // U11: template picker (new invoice) / template library (manage) / save-as-template
+  const [showTemplateDropdown, setShowTemplateDropdown] = useState(false)
+  const [showTemplatePicker,   setShowTemplatePicker]   = useState(false)
+  const [showTemplateLibrary,  setShowTemplateLibrary]  = useState(false)
+  const [saveTemplateFor,      setSaveTemplateFor]      = useState<Invoice | null>(null)
+  const templateDropdownRef = useRef<HTMLDivElement>(null)
+
   const searchRef = useRef<HTMLInputElement>(null)
   const deleteMut = useDeleteInvoice()
   const voidMut   = useVoidInvoice()
+
+  const { data: templates = [], isLoading: templatesLoading } = useInvoiceTemplates()
+  const incrementUsage  = useIncrementInvoiceTemplateUsage()
+  const setDefaultMut   = useSetDefaultInvoiceTemplate()
+  const saveAsTemplate  = useSaveInvoiceAsTemplate()
+  const updateTemplateMut = useUpdateInvoiceTemplate()
+  const deleteTemplateMut = useDeleteInvoiceTemplate()
 
   const { data, isLoading } = useInvoices({ limit: 500 })
   const allInvoices  = data?.items ?? []
@@ -72,6 +97,31 @@ export default function InvoicesPage() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [])
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (templateDropdownRef.current && !templateDropdownRef.current.contains(e.target as Node)) {
+        setShowTemplateDropdown(false)
+      }
+    }
+    if (showTemplateDropdown) document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [showTemplateDropdown])
+
+  // R3/KTD9: hands off template.content via router state, mirroring Proposal's
+  // TemplatePickerModal.tsx:144 navigate(..., { state: { template } }) pattern.
+  function handleUseTemplate(template: InvoiceTemplate) {
+    incrementUsage.mutate(template.id)
+    setShowTemplatePicker(false)
+    setShowTemplateLibrary(false)
+    navigate('/invoices/new', { state: { template } })
+  }
+
+  async function handleSaveTemplate(data: { name: string; category?: string; description?: string }) {
+    if (!saveTemplateFor) return
+    await saveAsTemplate.mutateAsync({ invoiceId: saveTemplateFor.id, ...data })
+    setSaveTemplateFor(null)
+  }
 
   function handleSort(field: SortField) {
     if (field === sortBy) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -137,10 +187,56 @@ export default function InvoicesPage() {
             </p>
           )}
         </div>
-        <button onClick={() => navigate('/invoices/new')} className="btn-primary">
-          <Plus size={14} strokeWidth={2.5} />
-          New Invoice
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Templates dropdown */}
+          <div className="relative" ref={templateDropdownRef}>
+            <button
+              onClick={() => setShowTemplateDropdown(v => !v)}
+              className="flex items-center gap-1.5 h-9 px-3 sm:px-3.5 rounded-lg border border-[#D0D5DD] dark:border-[#3D4258] text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors"
+            >
+              <LayoutTemplate size={14} />
+              <span className="hidden sm:inline">Templates</span>
+              <ChevronDown size={13} className={cn('transition-transform duration-150', showTemplateDropdown && 'rotate-180')} />
+            </button>
+
+            {showTemplateDropdown && (
+              <div className="absolute right-0 top-[calc(100%+6px)] z-50 w-52 bg-white dark:bg-[#13141A] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-lg shadow-black/8 dark:shadow-black/30 py-1.5 anim-fade">
+                <button
+                  onClick={() => { setShowTemplatePicker(true); setShowTemplateDropdown(false) }}
+                  className="w-full flex items-start gap-3 px-3.5 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors text-left group"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center shrink-0 mt-0.5">
+                    <LayoutTemplate size={13} className="text-[#6366F1]" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">New from Template</p>
+                    <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Pick a saved template</p>
+                  </div>
+                </button>
+
+                <div className="mx-3.5 my-1 border-t border-[#F2F4F7] dark:border-[#26283A]" />
+
+                <button
+                  onClick={() => { setShowTemplateLibrary(true); setShowTemplateDropdown(false) }}
+                  className="w-full flex items-start gap-3 px-3.5 py-2.5 hover:bg-[#F9FAFB] dark:hover:bg-[#21222D] transition-colors text-left group"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[#F0FDF4] dark:bg-[#0F2A1A] flex items-center justify-center shrink-0 mt-0.5">
+                    <LayoutTemplate size={13} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Manage Templates</p>
+                    <p className="text-[11.5px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Edit, delete, set default</p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button onClick={() => navigate('/invoices/new')} className="btn-primary">
+            <Plus size={14} strokeWidth={2.5} />
+            New Invoice
+          </button>
+        </div>
       </div>
 
       {/* Status tabs */}
@@ -270,6 +366,7 @@ export default function InvoicesPage() {
           onOpen={(inv: Invoice) => setInvoiceId(inv.id)}
           onDelete={inv => setDeleteTarget(inv)}
           onVoid={inv => setVoidTarget(inv)}
+          onSaveAsTemplate={inv => setSaveTemplateFor(inv)}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -280,6 +377,7 @@ export default function InvoicesPage() {
               onClick={(i: Invoice) => setInvoiceId(i.id)}
               onDelete={i => setDeleteTarget(i)}
               onVoid={i => setVoidTarget(i)}
+              onSaveAsTemplate={i => setSaveTemplateFor(i)}
             />
           ))}
         </div>
@@ -320,6 +418,41 @@ export default function InvoicesPage() {
         id={invoiceId}
         onClose={() => setInvoiceId(null)}
       />
+
+      {/* Template picker — starting a new Invoice from a template (pick mode) */}
+      <TemplatePickerShell
+        open={showTemplatePicker}
+        onClose={() => setShowTemplatePicker(false)}
+        templates={templates}
+        isLoading={templatesLoading}
+        onUse={handleUseTemplate}
+        renderPreview={template => <InvoiceTemplatePreview template={template} />}
+      />
+
+      {/* Template library — manage mode (edit/delete/set default) */}
+      <TemplatePickerShell
+        open={showTemplateLibrary}
+        onClose={() => setShowTemplateLibrary(false)}
+        templates={templates}
+        isLoading={templatesLoading}
+        onUse={handleUseTemplate}
+        onSetDefault={async id => { await setDefaultMut.mutateAsync(id) }}
+        settingDefaultId={setDefaultMut.isPending ? setDefaultMut.variables ?? null : null}
+        onUpdate={async (id, data) => { await updateTemplateMut.mutateAsync({ id, ...data }) }}
+        updatingId={updateTemplateMut.isPending ? updateTemplateMut.variables?.id ?? null : null}
+        onDelete={async id => { await deleteTemplateMut.mutateAsync(id) }}
+        deletingId={deleteTemplateMut.isPending ? deleteTemplateMut.variables ?? null : null}
+        renderPreview={template => <InvoiceTemplatePreview template={template} />}
+      />
+
+      {saveTemplateFor && (
+        <SaveAsTemplateModal
+          open={!!saveTemplateFor}
+          onClose={() => setSaveTemplateFor(null)}
+          defaultName={`${saveTemplateFor.invoiceNumber} Template`}
+          onSave={handleSaveTemplate}
+        />
+      )}
     </div>
   )
 }

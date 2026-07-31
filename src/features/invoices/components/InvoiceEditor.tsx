@@ -1,15 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Plus, Trash2, Send, CheckCircle2,
-  FileText, Save, Copy, Check, ExternalLink, RefreshCw, Wallet,
+  FileText, Save, Copy, Check, ExternalLink, RefreshCw, Wallet, LayoutTemplate,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { invoiceFormSchema, RECURRENCE_CYCLE_LABELS, type InvoiceFormData, type Invoice } from '../schemas/invoice.schema'
+import { invoiceFormSchema, RECURRENCE_CYCLE_LABELS, type InvoiceFormData, type Invoice, type InvoiceTemplate } from '../schemas/invoice.schema'
 import { useCreateInvoice, useUpdateInvoice, useSendInvoice, useMarkPaid } from '../hooks/useInvoices'
+import { useInvoiceTemplates, useReapplyInvoiceTemplate } from '../hooks/useInvoiceTemplates'
 import RecordPaymentModal from './RecordPaymentModal'
 import InvoiceFilesPanel from './InvoiceFilesPanel'
+import InvoiceTemplatePreview from './InvoiceTemplatePreview'
+import TemplatePickerShell from '@/features/templates/components/TemplatePickerShell'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import FieldInfoPopover from '@/features/ai/components/FieldInfoPopover'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
@@ -38,6 +43,14 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
   const isNew     = !invoice
   const isPaid    = invoice?.status === 'PAID'
   const canEdit   = !isPaid
+
+  // R3/KTD9: InvoicesPage.tsx's template picker hands off `template.content`
+  // via router state (mirrors Proposal's TemplatePickerModal.tsx:144); read
+  // directly here rather than threading a prop through InvoiceEditorPage.tsx.
+  const location = useLocation()
+  const templateFromState = isNew
+    ? (location.state as { template?: InvoiceTemplate } | null)?.template
+    : undefined
 
   const { hasPermission } = useWorkspacePermissions()
   const canSendInvoice   = hasPermission(Permission.SEND_INVOICES)
@@ -73,14 +86,20 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
           recurrenceEndDate: invoice.recurrenceEndDate  ? invoice.recurrenceEndDate.slice(0, 10) : undefined,
           currency:          clampCurrency(invoice.currency ?? wsCurrency),
           lutNumber:         invoice.lutNumber ?? (profile?.defaultLutNumber ?? ''),
+          notes:             invoice.notes ?? '',
         }
       : {
           contractId: defaultContractId,
           contactId:  defaultContactId,
-          lineItems:  [{ description: '', qty: 1, rate: 0, gstRate: 18 }],
+          // KTD6 (frontend half): a picked template's `lineItems` is only a
+          // from-scratch starting point (never applied on re-apply/automation).
+          lineItems:  templateFromState?.content?.lineItems?.length
+            ? templateFromState.content.lineItems
+            : [{ description: '', qty: 1, rate: 0, gstRate: 18 }],
           gstType:    'IGST',
           currency:   clampCurrency(wsCurrency),
           lutNumber:  profile?.defaultLutNumber ?? '',
+          notes:      templateFromState?.content?.notes ?? '',
         },
   })
 
@@ -148,6 +167,28 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
   const paidMutation   = useMarkPaid()
 
   const [showRecordPayment, setShowRecordPayment] = useState(false)
+
+  // R8/R9/KTD7/KTD8: re-apply a different template's `notes` onto this
+  // Invoice. Hidden (not disabled) once PAID -- mirrors this file's existing
+  // pattern of conditionally rendering locked-status actions (Send/Mark
+  // paid/Record Payment above) rather than showing them disabled.
+  const [showReapplyPicker, setShowReapplyPicker]   = useState(false)
+  const [reapplyTemplate,   setReapplyTemplate]     = useState<InvoiceTemplate | null>(null)
+  const { data: reapplyTemplates = [], isLoading: reapplyTemplatesLoading } = useInvoiceTemplates()
+  const reapplyMutation = useReapplyInvoiceTemplate()
+
+  function handlePickReapplyTemplate(template: InvoiceTemplate) {
+    setShowReapplyPicker(false)
+    setReapplyTemplate(template)
+  }
+
+  async function confirmReapply() {
+    const target = saved ?? invoice
+    if (!target || !reapplyTemplate) return
+    const updated = await reapplyMutation.mutateAsync({ invoiceId: target.id, templateId: reapplyTemplate.id })
+    setSaved(updated)
+    setReapplyTemplate(null)
+  }
 
   async function onSubmit(data: InvoiceFormData) {
     const payload = { ...data, projectId: projectId || null } as InvoiceFormData & { projectId: string | null }
@@ -389,6 +430,23 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
                   <span className="text-[13px] font-bold">{currencySymbol}</span>{fmt(total)}
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Notes — KTD6: the previously-dead `notes` field, wired end-to-end.
+              Also the boilerplate slot a template's content / re-apply fills. */}
+          <div className="bg-white dark:bg-[#1A1B23] rounded-xl border border-[#EAECF0] dark:border-[#26283A] shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
+              <h3 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Notes</h3>
+            </div>
+            <div className="px-5 py-4">
+              <textarea
+                {...register('notes')}
+                disabled={!canEdit}
+                rows={3}
+                placeholder="Payment terms, a thank-you note, or any other message for your client…"
+                className="form-input w-full resize-none text-[13px]"
+              />
             </div>
           </div>
 
@@ -667,6 +725,19 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
             </button>
           )}
 
+          {/* Re-apply template — hidden (not disabled) once PAID (KTD7) */}
+          {!isNew && displayInvoice && displayInvoice.status !== 'PAID' && (
+            <button
+              type="button"
+              onClick={() => setShowReapplyPicker(true)}
+              className="btn-secondary text-[13px]"
+            >
+              <span className="flex items-center gap-1.5">
+                <LayoutTemplate size={13} strokeWidth={2} /> Re-apply template
+              </span>
+            </button>
+          )}
+
           {/* Save */}
           {canEdit && (
             <button
@@ -694,6 +765,28 @@ export default function InvoiceEditor({ invoice, defaultContractId, defaultConta
 
     {showRecordPayment && displayInvoice && (
       <RecordPaymentModal invoice={displayInvoice} onClose={() => setShowRecordPayment(false)} />
+    )}
+
+    <TemplatePickerShell
+      open={showReapplyPicker}
+      onClose={() => setShowReapplyPicker(false)}
+      templates={reapplyTemplates}
+      isLoading={reapplyTemplatesLoading}
+      onUse={handlePickReapplyTemplate}
+      renderPreview={template => <InvoiceTemplatePreview template={template} />}
+    />
+
+    {reapplyTemplate && (
+      <ConfirmModal
+        open={!!reapplyTemplate}
+        onClose={() => setReapplyTemplate(null)}
+        onConfirm={confirmReapply}
+        title={`Re-apply "${reapplyTemplate.name}"?`}
+        description="Re-applying will replace this Invoice's notes. Line items, amounts, and status won't change."
+        confirmLabel="Re-apply Template"
+        variant="overwrite"
+        isLoading={reapplyMutation.isPending}
+      />
     )}
     </>
   )

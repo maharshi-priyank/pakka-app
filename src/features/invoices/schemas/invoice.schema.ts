@@ -107,6 +107,7 @@ export interface Invoice {
   project:            { id: string; name: string } | null
   currency:           string | null
   lutNumber:          string | null
+  notes:              string | null
 }
 
 export interface InvoiceListResponse {
@@ -114,4 +115,32 @@ export interface InvoiceListResponse {
   total: number
   page:  number
   limit: number
+}
+
+// ─── Template types ───────────────────────────────────────────────────────────
+// U11/KTD6: unlike ProposalTemplate (a virtual constant, no mutable state),
+// InvoiceTemplate rows are real per-workspace DB rows with a mutable
+// `isDefault` flag (KTD2), so this type carries `isDefault` where
+// ProposalTemplate doesn't. `content.notes` is the boilerplate field this
+// plan wires end-to-end; `content.lineItems` is an optional starting point
+// for from-scratch creation only, never applied during automation/re-apply
+// merges (KTD5's Invoice equivalent).
+
+export interface InvoiceTemplateContent {
+  notes:      string
+  lineItems?: LineItem[]
+}
+
+export interface InvoiceTemplate {
+  id:          string
+  name:        string
+  description: string | null
+  category:    string | null
+  isSystem:    boolean
+  isDefault:   boolean
+  content:     InvoiceTemplateContent
+  totalAmount: number
+  usageCount:  number
+  createdAt:   string
+  updatedAt:   string
 }
