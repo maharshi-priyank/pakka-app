@@ -95,7 +95,11 @@ export default function AddContactModal({ open, onClose }: Props) {
             </div>
             <div>
               <label className="form-label">Phone</label>
-              <input {...register('phone')} className="form-input" placeholder="+91 98765 43210" />
+              <input {...register('phone')} className="form-input" type="tel" placeholder="+91 98765 43210" />
+              {errors.phone
+                ? <p className="form-error">{errors.phone.message}</p>
+                : <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Used for WhatsApp notifications</p>
+              }
             </div>
           </div>
 

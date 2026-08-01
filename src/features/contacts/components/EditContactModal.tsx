@@ -112,7 +112,8 @@ export default function EditContactModal({ contact, onClose }: Props) {
             </div>
             <div>
               <label className="form-label">Phone</label>
-              <input {...register('phone')} className="form-input" />
+              <input {...register('phone')} className="form-input" type="tel" placeholder="+91 98765 43210" />
+              {errors.phone && <p className="form-error">{errors.phone.message}</p>}
             </div>
           </div>
 
