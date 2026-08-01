@@ -580,13 +580,15 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
         </button>
 
         <div className="flex items-center gap-2">
-          {/* OTP + sign link result */}
+          {/* Send result: OTP (for OTP method) + sign link */}
           {sendResult && (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 bg-[#FFFAEB] border border-[#FEF0C7] rounded-lg px-3 py-1.5">
-                <span className="text-[10px] text-[#B54708] font-medium">OTP for client:</span>
-                <span className="text-[14px] font-extrabold text-[#B54708] tracking-widest">{sendResult.otp}</span>
-              </div>
+              {sendResult.otp && (
+                <div className="flex items-center gap-2 bg-[#FFFAEB] border border-[#FEF0C7] rounded-lg px-3 py-1.5">
+                  <span className="text-[10px] text-[#B54708] font-medium">OTP for client:</span>
+                  <span className="text-[14px] font-extrabold text-[#B54708] tracking-widest">{sendResult.otp}</span>
+                </div>
+              )}
               <div className="flex items-center gap-1.5 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg px-3 py-1.5">
                 <span className="text-[11px] text-[#166534] font-medium truncate max-w-[160px]">{sendResult.signUrl}</span>
                 <button onClick={copyLink} className="text-[#15803D] hover:text-[#166534]">

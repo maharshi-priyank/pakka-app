@@ -26,6 +26,9 @@ interface PublicContract {
   signedAt: string | null; auditLog: Record<string, unknown> | null
   createdAt: string
   hideBranding?: boolean
+  signingMethod?: string | null
+  opensignSigningUrl?: string | null
+  signedPdfUrl?: string | null
   user: PublicContractUser; client: PublicContractClient | null
 }
 
@@ -346,70 +349,109 @@ export default function ContractSignPage() {
           </ContractSection>
         )}
 
-        {/* ── OTP Signing box ── */}
+        {/* ── Signing section ── */}
         {!isAlreadySigned ? (
-          <div className="print:hidden bg-white rounded-2xl border-2 border-[#2563EB] shadow-sm p-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
-                <Shield size={18} className="text-[#2563EB]" />
-              </div>
-              <div>
-                <p className="text-[15px] font-bold text-[#101828]">Sign this contract</p>
-                <p className="text-[12px] text-[#667085]">Enter the 6-digit OTP shared by {senderName}</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {c.signerName && (
-                <div className="bg-[#F9FAFB] rounded-xl p-3 text-[13px] text-[#344054]">
-                  Signing as <span className="font-semibold">{c.signerName}</span>
-                  {c.signerEmail && <span className="text-[#667085]"> · {c.signerEmail}</span>}
+          contract.signingMethod === 'OPENSIGN' && contract.opensignSigningUrl ? (
+            /* OpenSign: redirect to external signing page */
+            <div className="print:hidden bg-white rounded-2xl border-2 border-[#2563EB] shadow-sm p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
+                  <FileSignature size={18} className="text-[#2563EB]" />
                 </div>
-              )}
-
-              <div>
-                <label className="form-label">One-time password (OTP)</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={6}
-                  value={otp}
-                  onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                  onKeyDown={e => e.key === 'Enter' && handleSign()}
-                  className={cn(
-                    'form-input w-full text-center text-[22px] font-extrabold tracking-[0.4em] h-14',
-                    otpError && 'border-[#F04438] focus:border-[#F04438]',
-                  )}
-                  placeholder="000000"
-                  disabled={signMutation.isPending}
-                />
-                {otpError && <p className="form-error">{otpError}</p>}
+                <div>
+                  <p className="text-[15px] font-bold text-[#101828]">Sign this contract</p>
+                  <p className="text-[12px] text-[#667085]">Click below to review and sign with your signature</p>
+                </div>
               </div>
 
-              <button
-                onClick={handleSign}
-                disabled={otp.length !== 6 || signMutation.isPending}
-                className="btn-primary w-full h-12 text-[15px] font-bold justify-center"
-              >
-                {signMutation.isPending ? (
-                  <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Verifying…
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    <FileSignature size={16} strokeWidth={2} />
-                    Sign contract
-                  </span>
+              <div className="space-y-4">
+                {c.signerName && (
+                  <div className="bg-[#F9FAFB] rounded-xl p-3 text-[13px] text-[#344054]">
+                    Signing as <span className="font-semibold">{c.signerName}</span>
+                    {c.signerEmail && <span className="text-[#667085]"> · {c.signerEmail}</span>}
+                  </div>
                 )}
-              </button>
 
-              <p className="text-[11px] text-[#98A2B3] text-center leading-relaxed">
-                By signing, you agree to all terms stated in this contract. This constitutes a legally binding electronic signature.
-              </p>
+                <a
+                  href={contract.opensignSigningUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary w-full h-12 text-[15px] font-bold justify-center flex items-center gap-2"
+                >
+                  <FileSignature size={16} strokeWidth={2} />
+                  Open signing page
+                </a>
+
+                <p className="text-[11px] text-[#98A2B3] text-center leading-relaxed">
+                  You will be redirected to a secure signing page where you can draw or type your signature.
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* OTP: existing flow */
+            <div className="print:hidden bg-white rounded-2xl border-2 border-[#2563EB] shadow-sm p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center">
+                  <Shield size={18} className="text-[#2563EB]" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-bold text-[#101828]">Sign this contract</p>
+                  <p className="text-[12px] text-[#667085]">Enter the 6-digit OTP shared by {senderName}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {c.signerName && (
+                  <div className="bg-[#F9FAFB] rounded-xl p-3 text-[13px] text-[#344054]">
+                    Signing as <span className="font-semibold">{c.signerName}</span>
+                    {c.signerEmail && <span className="text-[#667085]"> · {c.signerEmail}</span>}
+                  </div>
+                )}
+
+                <div>
+                  <label className="form-label">One-time password (OTP)</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={6}
+                    value={otp}
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                    onKeyDown={e => e.key === 'Enter' && handleSign()}
+                    className={cn(
+                      'form-input w-full text-center text-[22px] font-extrabold tracking-[0.4em] h-14',
+                      otpError && 'border-[#F04438] focus:border-[#F04438]',
+                    )}
+                    placeholder="000000"
+                    disabled={signMutation.isPending}
+                  />
+                  {otpError && <p className="form-error">{otpError}</p>}
+                </div>
+
+                <button
+                  onClick={handleSign}
+                  disabled={otp.length !== 6 || signMutation.isPending}
+                  className="btn-primary w-full h-12 text-[15px] font-bold justify-center"
+                >
+                  {signMutation.isPending ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Verifying…
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <FileSignature size={16} strokeWidth={2} />
+                      Sign contract
+                    </span>
+                  )}
+                </button>
+
+                <p className="text-[11px] text-[#98A2B3] text-center leading-relaxed">
+                  By signing, you agree to all terms stated in this contract. This constitutes a legally binding electronic signature.
+                </p>
+              </div>
+            </div>
+          )
         ) : (
           /* Post-sign audit trail */
           <div className="bg-[#F9FAFB] rounded-2xl border border-[#EAECF0] p-6">
@@ -418,13 +460,34 @@ export default function ContractSignPage() {
               <p className="text-[13px] font-bold text-[#344054]">Signature audit trail</p>
             </div>
             <div className="space-y-1.5 text-[12px] text-[#667085]">
-              <p>✓ OTP verified electronically</p>
-              <p>✓ Signed: {fmtDateTime(displayContract.signedAt ?? new Date().toISOString())}</p>
-              {displayContract.auditLog && (
-                <p>✓ IP address recorded: {(displayContract.auditLog as Record<string, unknown>).ipAddress as string ?? 'captured'}</p>
+              {(displayContract.auditLog as Record<string, unknown>)?.method === 'OPENSIGN' ? (
+                <>
+                  <p>✓ Signed electronically via OpenSign</p>
+                  <p>✓ Signed: {fmtDateTime(displayContract.signedAt ?? new Date().toISOString())}</p>
+                  <p>✓ Signature captured and verified</p>
+                </>
+              ) : (
+                <>
+                  <p>✓ OTP verified electronically</p>
+                  <p>✓ Signed: {fmtDateTime(displayContract.signedAt ?? new Date().toISOString())}</p>
+                  {displayContract.auditLog && (
+                    <p>✓ IP address recorded: {(displayContract.auditLog as Record<string, unknown>).ipAddress as string ?? 'captured'}</p>
+                  )}
+                </>
               )}
               <p>✓ Contract bound to both parties</p>
             </div>
+            {displayContract.signedPdfUrl && (
+              <a
+                href={displayContract.signedPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#E8EBF2] text-[12px] font-semibold text-[#344054] hover:bg-[#F5F6FA] transition-colors"
+              >
+                <Download size={13} strokeWidth={2} />
+                Download signed PDF
+              </a>
+            )}
           </div>
         )}
 

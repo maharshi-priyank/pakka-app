@@ -98,6 +98,9 @@ export interface Contract {
   auditLog:   Record<string, unknown> | null
   archivedAt: string | null
   createdAt:  string
+  signingMethod?:       string | null
+  opensignSigningUrl?:  string | null
+  signedPdfUrl?:        string | null
 }
 
 export interface ContractListResponse {
@@ -110,7 +113,7 @@ export interface ContractListResponse {
 export interface SendContractResponse {
   contract: Contract
   signUrl:  string
-  otp:      string
+  otp?:     string
 }
 
 // ─── Display helpers ──────────────────────────────────────────────────────────
