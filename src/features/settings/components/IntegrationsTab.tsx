@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AlertCircle, Loader2, RefreshCw, ExternalLink, X, Send, Copy, Check, BookOpen } from 'lucide-react'
+import { AlertCircle, Loader2, RefreshCw, ExternalLink, X, Send, Copy, Check, BookOpen, Mail, MessageCircle } from 'lucide-react'
 import canvaSvg from '@/assets/canva.svg'
 import flodeskSvg from '@/assets/flowdesk.svg'
 import outlookSvg from '@/assets/outlook.svg'
@@ -16,6 +16,8 @@ import { useConnectGoogleDocs, useDisconnectGoogleDocs } from '../hooks/useGoogl
 import googleDocsSvg from '@/assets/google-docs.svg'
 import { useConnectGoogleSheets, useDisconnectGoogleSheets, useInitGoogleSheets } from '../hooks/useGoogleSheets'
 import googleSheetsSvg from '@/assets/google-sheets.svg'
+import { useWhatsappConnection, useConnectWhatsapp, useDisconnectWhatsapp } from '@/features/whatsapp/hooks/useWhatsappConnection'
+import { useWhatsappRules, useToggleWhatsappRule } from '@/features/whatsapp/hooks/useWhatsappRules'
 
 function useConnectGoogle() {
   return useMutation({
@@ -54,6 +56,17 @@ function useDisconnectOutlook() {
 
 function BrandIcon({ src, alt }: { src: string; alt: string }) {
   return <img src={src} alt={alt} className="w-7 h-7 object-contain" />
+}
+
+function WhatsappIcon() {
+  return (
+    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: '#25D366' }}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.554 4.124 1.523 5.856L0 24l6.336-1.498A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.782 9.782 0 01-5.002-1.376l-.359-.213-3.722.879.938-3.618-.234-.372A9.787 9.787 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+      </svg>
+    </div>
+  )
 }
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
@@ -96,6 +109,7 @@ interface IntegrationDef {
   onDisconnect: () => void
   extraAction?: React.ReactNode
   learnMoreUrl?: string
+  error?: string | null
   // Flodesk: API key flow
   apiKeyFlow?: boolean
   onApiKeyConnect?: (key: string) => void
@@ -176,6 +190,14 @@ function IntegrationCard(props: IntegrationDef) {
         {/* Title + description */}
         <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-1">{props.title}</p>
         <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] leading-relaxed">{props.description}</p>
+
+        {/* Error message */}
+        {props.error && (
+          <div className="mt-2 flex items-start gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#FEF3F2] dark:bg-[#2A1A1A]">
+            <AlertCircle size={12} className="text-[#B42318] mt-0.5 flex-shrink-0" />
+            <p className="text-[11px] text-[#B42318] leading-snug">{props.error}</p>
+          </div>
+        )}
 
         {/* Connected badge */}
         {props.isConnected && (
@@ -480,6 +502,123 @@ function GoogleFormsSetupModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+// ── WhatsApp Notifications Modal ──────────────────────────────────────────────
+
+const WA_EVENT_LABELS: Record<string, string> = {
+  'wa.proposal.sent':    'Proposal Shared',
+  'wa.contract.sent':    'Contract Sent',
+  'wa.contract.signed':  'Contract Signed',
+  'wa.invoice.sent':     'Invoice Sent',
+  'wa.invoice.due_soon': 'Payment Reminder (3 days before due)',
+  'wa.invoice.paid':     'Payment Received',
+  'wa.project.completed':'Project Completed',
+}
+
+const WA_EVENT_ORDER = [
+  'wa.proposal.sent', 'wa.contract.sent', 'wa.contract.signed',
+  'wa.invoice.sent',  'wa.invoice.due_soon', 'wa.invoice.paid', 'wa.project.completed',
+]
+
+function WhatsappNotificationsModal({ displayPhone, onClose }: { displayPhone?: string; onClose: () => void }) {
+  const { data: rules = [], isLoading } = useWhatsappRules()
+  const toggleMutation = useToggleWhatsappRule()
+
+  const sorted = WA_EVENT_ORDER
+    .map((key) => rules.find((r) => r.key === key))
+    .filter(Boolean) as typeof rules
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white dark:bg-[#13141C] rounded-2xl shadow-2xl w-full max-w-lg border border-[#EAECF0] dark:border-[#2A2B35]">
+
+        {/* Header */}
+        <div className="flex items-start justify-between p-5 border-b border-[#EAECF0] dark:border-[#2A2B35]">
+          <div className="flex items-center gap-3">
+            <WhatsappIcon />
+            <div>
+              <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3]">WhatsApp Notifications</h3>
+              <p className="text-[12px] text-[#667085] dark:text-[#8B92A8] mt-0.5">
+                {displayPhone ? `Sending from ${displayPhone}` : 'Toggle per-event WhatsApp notifications'}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F9FAFB] dark:hover:bg-[#1E1F2B] transition-colors">
+            <X size={16} className="text-[#667085]" />
+          </button>
+        </div>
+
+        {/* Table */}
+        <div>
+          {/* Column headers */}
+          <div className="grid grid-cols-[1fr_72px_72px] px-5 py-2.5 border-b border-[#F1F3F8] dark:border-[#26283A]">
+            <span className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide">Event</span>
+            <span className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide text-center flex items-center justify-center gap-1">
+              <Mail size={11} /> Email
+            </span>
+            <span className="text-[11px] font-semibold text-[#98A2B3] dark:text-[#545C74] uppercase tracking-wide text-center flex items-center justify-center gap-1">
+              <MessageCircle size={11} /> WA
+            </span>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 size={18} className="animate-spin text-[#D0D5DD] dark:text-[#3D4258]" />
+            </div>
+          ) : (
+            sorted.map((rule, i) => (
+              <div
+                key={rule.id}
+                className={`grid grid-cols-[1fr_72px_72px] px-5 py-3 items-center ${
+                  i < sorted.length - 1 ? 'border-b border-[#F9FAFB] dark:border-[#1E1F2A]' : ''
+                }`}
+              >
+                <span className="text-[13px] text-[#374151] dark:text-[#C2C8D8]">
+                  {WA_EVENT_LABELS[rule.key] ?? rule.name}
+                </span>
+
+                {/* Email — always on */}
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 rounded bg-[#6366F1]/10 flex items-center justify-center">
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-5" stroke="#6366F1" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* WhatsApp toggle */}
+                <div className="flex items-center justify-center">
+                  <button
+                    role="switch"
+                    aria-checked={rule.isActive}
+                    disabled={toggleMutation.isPending && toggleMutation.variables?.id === rule.id}
+                    onClick={() => toggleMutation.mutate({ id: rule.id, isActive: !rule.isActive })}
+                    className={`relative inline-flex h-5 w-9 cursor-pointer rounded-full transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-1 disabled:opacity-50 ${
+                      rule.isActive ? 'bg-[#25D366]' : 'bg-[#E5E7EB] dark:bg-[#3D4258]'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-150 mt-[3px] ${
+                        rule.isActive ? 'translate-x-[18px]' : 'translate-x-[3px]'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="px-5 pb-5 pt-3 border-t border-[#EAECF0] dark:border-[#2A2B35]">
+          <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] leading-relaxed">
+            Messages use pre-approved WhatsApp Business templates sent from your verified number.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Tab filter ────────────────────────────────────────────────────────────────
 
 const TABS: { id: Category | 'all'; label: string }[] = [
@@ -495,8 +634,13 @@ export default function IntegrationsTab() {
   const [activeTab, setActiveTab]               = useState<Category | 'all'>('all')
   const [showRequestModal, setShowRequestModal] = useState(false)
   const [showSetupModal, setShowSetupModal]     = useState(false)
+  const [showWaModal, setShowWaModal]           = useState(false)
+  const [waError, setWaError]                   = useState<string | null>(null)
 
   const { data: profile, isLoading } = useProfile()
+  const waConnection     = useWhatsappConnection()
+  const connectWa        = useConnectWhatsapp()
+  const disconnectWa     = useDisconnectWhatsapp()
   const connectGoogle        = useConnectGoogle()
   const disconnectGoogle     = useDisconnectGoogle()
   const connectOutlook       = useConnectOutlook()
@@ -675,6 +819,41 @@ export default function IntegrationsTab() {
       ) : undefined,
       learnMoreUrl: 'https://sheets.google.com',
     },
+    {
+      id:          'whatsapp',
+      icon:        <WhatsappIcon />,
+      title:       'WhatsApp Business',
+      description: 'Send event notifications — proposals, invoices, contracts — from your own WhatsApp Business number. Clients see your name and number, not ClearWork.',
+      category:    'communication' as Category,
+      isConnected: waConnection.data?.connected ?? false,
+      isLoading:   waConnection.isLoading,
+      connectPending:    connectWa.isPending,
+      disconnectPending: disconnectWa.isPending,
+      onConnect: () => {
+        setWaError(null)
+        // TODO(WhatsApp): Replace with FB.login() Embedded Signup flow once Meta App is registered.
+        // See src/features/settings/components/CommunicationTab.tsx for the commented-out FB.login() block.
+        connectWa.mutate('__placeholder__', {
+          onError: (err) => setWaError((err as Error).message),
+        })
+      },
+      onDisconnect: () => {
+        setWaError(null)
+        disconnectWa.mutate(undefined, {
+          onError: (err) => setWaError((err as Error).message),
+        })
+      },
+      error: waError,
+      extraAction: waConnection.data?.connected ? (
+        <button
+          onClick={() => setShowWaModal(true)}
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#6366F1] dark:text-[#818CF8] hover:text-[#4F46E5] transition-colors"
+        >
+          <MessageCircle size={10} />
+          Configure notifications
+        </button>
+      ) : undefined,
+    },
   ]
 
   const filtered = activeTab === 'all'
@@ -726,6 +905,12 @@ export default function IntegrationsTab() {
       )}
       {showSetupModal && (
         <GoogleFormsSetupModal onClose={() => setShowSetupModal(false)} />
+      )}
+      {showWaModal && (
+        <WhatsappNotificationsModal
+          displayPhone={waConnection.data?.displayPhone}
+          onClose={() => setShowWaModal(false)}
+        />
       )}
     </div>
   )

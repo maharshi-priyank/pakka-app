@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { User, Building2, Bell, Puzzle, Globe, MessageCircle, Users } from 'lucide-react'
+import { User, Building2, Bell, Puzzle, Globe, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ProfileTab from '@/features/settings/components/ProfileTab'
 import BusinessTab from '@/features/settings/components/BusinessTab'
 import NotificationsTab from '@/features/notifications/components/NotificationsTab'
 import IntegrationsTab from '@/features/settings/components/IntegrationsTab'
 import PublicProfileTab from '@/features/settings/components/PublicProfileTab'
-import CommunicationTab from '@/features/settings/components/CommunicationTab'
 import TeamTab from '@/features/team/components/TeamTab'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
@@ -18,7 +17,6 @@ const TAB_DEFS = [
   { key: 'public'        as const, label: 'Public Profile', icon: Globe,          permission: null },
   { key: 'notifications' as const, label: 'Notifications',  icon: Bell,           permission: null },
   { key: 'integrations'  as const, label: 'Integrations',   icon: Puzzle,         permission: Permission.MANAGE_INTEGRATIONS },
-  { key: 'communication' as const, label: 'Communication',  icon: MessageCircle,  permission: null },
   { key: 'team'          as const, label: 'Team',           icon: Users,          permission: Permission.MANAGE_MEMBERS },
 ]
 
@@ -67,7 +65,6 @@ export default function SettingsPage() {
       {activeTab === 'public'         && <PublicProfileTab />}
       {activeTab === 'notifications'  && <NotificationsTab />}
       {activeTab === 'integrations'   && <IntegrationsTab />}
-      {activeTab === 'communication'  && <CommunicationTab />}
       {activeTab === 'team'           && <TeamTab />}
 
     </div>
