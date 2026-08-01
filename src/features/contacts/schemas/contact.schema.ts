@@ -19,7 +19,7 @@ export const createContactSchema = z.object({
   country:    z.string().min(1, 'Country is required'),
   currency:   z.enum(CONTACT_CURRENCIES, { message: 'Currency is required' }),
   email:      z.string().email('Invalid email').optional().or(z.literal('')),
-  phone:      z.string().max(20).optional().or(z.literal('')),
+  phone:      z.string().max(20).regex(/^[+\d\s\-().]+$/, 'Enter a valid phone number e.g. +91 98765 43210').optional().or(z.literal('')),
   company:    z.string().max(100).optional().or(z.literal('')),
   service:    z.string().max(200).optional().or(z.literal('')),
   dealValue:  z.string().optional().or(z.literal('')),
