@@ -8,6 +8,7 @@ import {
   Star, CheckSquare, XCircle, MessageSquare, Briefcase,
   Lock, ArrowRight, Paperclip, Upload, Loader2,
   FileArchive, FileImage, File as FileIcon, LayoutTemplate,
+  Share2, ChevronDown, Link2,
 } from 'lucide-react'
 import { useAttachments, useUploadAttachment, useDeleteAttachment, useLinkCanvaDesign, humanSize } from '@/features/attachments/useAttachments'
 import { useProfile } from '@/features/settings/hooks/useProfile'
@@ -87,7 +88,11 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
   const [projectId,        setProjectId]        = useState(proposal?.projectId ?? defaultProjectId ?? '')
   const [showSaveTemplate, setShowSaveTemplate] = useState(false)
   const attachmentInputRef = useRef<HTMLInputElement>(null)
-  const [showCanvaPicker, setShowCanvaPicker] = useState(false)
+  const shareMenuRef       = useRef<HTMLDivElement>(null)
+  const saveMenuRef        = useRef<HTMLDivElement>(null)
+  const [showCanvaPicker,  setShowCanvaPicker]  = useState(false)
+  const [showShareMenu,    setShowShareMenu]    = useState(false)
+  const [showSaveMenu,     setShowSaveMenu]     = useState(false)
   const navigate = useNavigate()
 
   const { hasPermission } = useWorkspacePermissions()
@@ -116,6 +121,26 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
       contactSynced.current = true
     }
   }, [contactsData?.items?.length])
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(e.target as Node)) {
+        setShowShareMenu(false)
+      }
+    }
+    if (showShareMenu) document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [showShareMenu])
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (saveMenuRef.current && !saveMenuRef.current.contains(e.target as Node)) {
+        setShowSaveMenu(false)
+      }
+    }
+    if (showSaveMenu) document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [showSaveMenu])
 
   const isEdit      = !!proposal
   const isSaving    = createMutation.isPending || updateMutation.isPending
@@ -958,81 +983,180 @@ export default function ProposalEditor({ proposal, defaultTemplate, defaultProje
         </div>
 
         <div className="flex items-center gap-2">
-          {sendOtp && (
-            <div className="flex items-center gap-2 bg-[#FFFAEB] border border-[#FEF0C7] rounded-lg px-3 py-1.5">
-              <span className="text-[10px] text-[#B54708] font-medium">OTP for client:</span>
-              <span className="text-[14px] font-extrabold text-[#B54708] tracking-widest">{sendOtp}</span>
-            </div>
-          )}
-
-          {shareUrl && (
-            <div className="flex items-center gap-1.5 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg px-3 py-1.5">
-              <span className="text-[11px] text-[#166534] font-medium truncate max-w-[200px]">{shareUrl}</span>
-              <button onClick={copyLink} className="text-[#15803D] hover:text-[#166534]">
-                {copied ? <Check size={12} strokeWidth={2.5} /> : <Copy size={12} strokeWidth={2} />}
+          {/* ── Share dropdown ── */}
+          {!templateMode && (canSend || isSent) && (
+            <div className="relative" ref={shareMenuRef}>
+              <button
+                type="button"
+                onClick={() => setShowShareMenu(v => !v)}
+                className={cn(
+                  'btn-secondary flex items-center gap-1.5 text-[13px]',
+                  (sendOtp || shareUrl) && 'ring-1 ring-[#FEF0C7] dark:ring-[#4A3310]',
+                )}
+              >
+                <Share2 size={13} strokeWidth={2} />
+                Share
+                {(sendOtp || shareUrl) && (
+                  <span className={cn(
+                    'w-1.5 h-1.5 rounded-full',
+                    sendOtp ? 'bg-[#F79009]' : 'bg-[#12B76A]',
+                  )} />
+                )}
+                <ChevronDown size={11} strokeWidth={2.5} className={cn('transition-transform duration-150', showShareMenu && 'rotate-180')} />
               </button>
-              <a href={shareUrl} target="_blank" rel="noopener noreferrer" className="text-[#15803D] hover:text-[#166534]">
-                <ExternalLink size={12} strokeWidth={2} />
-              </a>
+
+              {showShareMenu && (
+                <div className="absolute bottom-full right-0 mb-2 w-72 bg-white dark:bg-[#1C1D28] rounded-xl shadow-xl border border-[#EAECF0] dark:border-[#2A2B35] overflow-hidden z-50">
+
+                  {/* OTP result */}
+                  {sendOtp && (
+                    <div className="px-4 py-3 bg-[#FFFAEB] dark:bg-[#291F06] border-b border-[#FEF0C7] dark:border-[#4A3310]">
+                      <p className="text-[10px] text-[#B54708] font-semibold uppercase tracking-wider mb-1">OTP for client</p>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[22px] font-extrabold text-[#B54708] tracking-[0.2em]">{sendOtp}</span>
+                        <button
+                          type="button"
+                          onClick={() => navigator.clipboard.writeText(sendOtp)}
+                          className="p-1.5 rounded-md hover:bg-[#FEF0C7] dark:hover:bg-[#4A3310] transition-colors flex-shrink-0"
+                          title="Copy OTP"
+                        >
+                          <Copy size={12} className="text-[#B54708]" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Share URL result */}
+                  {shareUrl && (
+                    <div className="px-4 py-3 bg-[#F0FDF4] dark:bg-[#062012] border-b border-[#BBF7D0] dark:border-[#1A4A2E]">
+                      <p className="text-[10px] text-[#166534] font-semibold uppercase tracking-wider mb-1.5">Share link ready</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-[#166534] dark:text-[#4ADE80] font-mono truncate flex-1">{shareUrl}</span>
+                        <button type="button" onClick={copyLink} className="p-1.5 rounded-md hover:bg-[#BBF7D0] dark:hover:bg-[#1A4A2E] transition-colors flex-shrink-0" title="Copy link">
+                          {copied ? <Check size={12} className="text-[#166534]" strokeWidth={2.5} /> : <Copy size={12} className="text-[#166534]" strokeWidth={2} />}
+                        </button>
+                        <a href={shareUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md hover:bg-[#BBF7D0] dark:hover:bg-[#1A4A2E] transition-colors flex-shrink-0" title="Open link">
+                          <ExternalLink size={12} className="text-[#166534]" strokeWidth={2} />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Secure with OTP toggle + Send to client */}
+                  {canSend && (
+                    <>
+                      <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-4">
+                        <button
+                          type="button"
+                          onClick={() => setOtpGated(v => !v)}
+                          className="flex items-center gap-2 text-[13px] text-[#374151] dark:text-[#C2C8D8] cursor-pointer select-none"
+                        >
+                          <Lock size={13} className="text-[#98A2B3] dark:text-[#545C74]" />
+                          Secure with OTP
+                        </button>
+                        <button
+                          role="switch"
+                          aria-checked={otpGated}
+                          type="button"
+                          onClick={() => setOtpGated(v => !v)}
+                          className={cn(
+                            'relative inline-flex h-5 w-9 rounded-full transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366F1] focus-visible:ring-offset-1 flex-shrink-0',
+                            otpGated ? 'bg-[#6366F1]' : 'bg-[#E5E7EB] dark:bg-[#3D4258]',
+                          )}
+                        >
+                          <span className={cn(
+                            'inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform duration-150 mt-[3px]',
+                            otpGated ? 'translate-x-[18px]' : 'translate-x-[3px]',
+                          )} />
+                        </button>
+                      </div>
+                      <div className="px-3 pb-3">
+                        <button
+                          type="button"
+                          onClick={onSend}
+                          disabled={sendMutation.isPending}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#F4F6FB] dark:bg-[#21222D] hover:bg-[#EAECF0] dark:hover:bg-[#2A2B35] text-[13px] font-semibold text-[#374151] dark:text-[#C2C8D8] transition-colors disabled:opacity-50"
+                        >
+                          <Send size={13} strokeWidth={2} />
+                          {sendMutation.isPending ? 'Sending…' : 'Send to client'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Divider between Send and Get link when both apply */}
+                  {canSend && isSent && !shareUrl && (
+                    <div className="border-t border-[#F1F3F8] dark:border-[#26283A] mx-3" />
+                  )}
+
+                  {/* Get share link */}
+                  {isSent && !shareUrl && (
+                    <div className={cn('px-3', canSend ? 'py-3' : 'pt-3 pb-3')}>
+                      <button
+                        type="button"
+                        onClick={onSend}
+                        disabled={sendMutation.isPending}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#F4F6FB] dark:bg-[#21222D] hover:bg-[#EAECF0] dark:hover:bg-[#2A2B35] text-[13px] font-semibold text-[#374151] dark:text-[#C2C8D8] transition-colors disabled:opacity-50"
+                      >
+                        <Link2 size={13} strokeWidth={2} />
+                        {sendMutation.isPending ? 'Getting link…' : 'Get share link'}
+                      </button>
+                    </div>
+                  )}
+
+                </div>
+              )}
             </div>
           )}
 
-          {!templateMode && isEdit && proposal && (
+          {/* ── Save split button ── */}
+          {!templateMode && isEdit && proposal ? (
+            <div className="relative flex-shrink-0" ref={saveMenuRef}>
+              <div className="flex items-center">
+                <button
+                  type="submit"
+                  form="proposal-form"
+                  disabled={isSaving || isLocked}
+                  className="btn-primary flex items-center gap-1.5 text-[13px] rounded-r-none"
+                >
+                  <Save size={13} strokeWidth={2} />
+                  {isSaving ? 'Saving…' : 'Save changes'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isSaving || isLocked}
+                  onClick={() => setShowSaveMenu(v => !v)}
+                  className="btn-primary rounded-l-none border-l border-white/20 px-2"
+                  title="More save options"
+                >
+                  <ChevronDown size={11} strokeWidth={2.5} className={cn('transition-transform duration-150', showSaveMenu && 'rotate-180')} />
+                </button>
+              </div>
+
+              {showSaveMenu && (
+                <div className="absolute bottom-full right-0 mb-2 w-52 bg-white dark:bg-[#1C1D28] rounded-xl shadow-xl border border-[#EAECF0] dark:border-[#2A2B35] overflow-hidden z-50 py-1">
+                  <button
+                    type="button"
+                    onClick={() => { setShowSaveTemplate(true); setShowSaveMenu(false) }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#374151] dark:text-[#C2C8D8] hover:bg-[#F4F6FB] dark:hover:bg-[#21222D] transition-colors text-left"
+                  >
+                    <LayoutTemplate size={13} className="text-[#98A2B3] dark:text-[#545C74] flex-shrink-0" />
+                    Save as template
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
             <button
-              type="button"
-              onClick={() => setShowSaveTemplate(true)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] hover:text-[#6366F1] transition-colors"
-              title="Save as template"
+              type="submit"
+              form="proposal-form"
+              disabled={isSaving || isLocked}
+              className="btn-primary flex items-center gap-1.5 text-[13px]"
             >
-              <LayoutTemplate size={14} />
+              <Save size={13} strokeWidth={2} />
+              {isSaving ? 'Saving…' : templateMode ? 'Save template' : 'Create proposal'}
             </button>
           )}
-
-          {!templateMode && canSend && (
-            <label className="flex items-center gap-1.5 text-[12px] text-[#667085] dark:text-[#8B92A8] cursor-pointer">
-              <input
-                type="checkbox"
-                checked={otpGated}
-                onChange={e => setOtpGated(e.target.checked)}
-                className="rounded border-[#D0D5DD]"
-              />
-              Secure with OTP
-            </label>
-          )}
-
-          {!templateMode && canSend && (
-            <button
-              type="button"
-              onClick={onSend}
-              disabled={sendMutation.isPending}
-              className="btn-secondary flex items-center gap-1.5 text-[13px]"
-            >
-              <Send size={13} strokeWidth={2} />
-              {sendMutation.isPending ? 'Sending…' : 'Send to client'}
-            </button>
-          )}
-
-          {!templateMode && isSent && !shareUrl && (
-            <button
-              type="button"
-              onClick={onSend}
-              disabled={sendMutation.isPending}
-              className="btn-secondary flex items-center gap-1.5 text-[13px]"
-            >
-              <ExternalLink size={13} strokeWidth={2} />
-              Get share link
-            </button>
-          )}
-
-          <button
-            type="submit"
-            form="proposal-form"
-            disabled={isSaving || isLocked}
-            className="btn-primary flex items-center gap-1.5 text-[13px]"
-          >
-            <Save size={13} strokeWidth={2} />
-            {isSaving ? 'Saving…' : templateMode ? 'Save template' : isEdit ? 'Save changes' : 'Create proposal'}
-          </button>
         </div>
       </div>
 
