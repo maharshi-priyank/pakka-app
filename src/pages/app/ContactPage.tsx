@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Mail, Phone, IndianRupee, Calendar, Briefcase, Globe, Pencil,
   MoreHorizontal, Archive, Trash2, Copy, CheckCheck, Plus, MessageCircle,
-  Video, Clock, Loader2, FolderKanban, AlertCircle, ChevronDown,
+  Video, Clock, Loader2, FolderKanban, AlertCircle, ChevronDown, LayoutDashboard,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
@@ -22,8 +22,9 @@ import { MessageBubble } from '@/features/messages/components/MessageBubble'
 import { ReplyComposer } from '@/features/messages/components/ReplyComposer'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { ContactHistoryTab } from '@/features/contacts/components/ContactHistoryTab'
+import { ContactOverviewTab } from '@/features/contacts/components/ContactOverviewTab'
 
-type Tab = 'projects' | 'messages' | 'meetings' | 'history'
+type Tab = 'overview' | 'projects' | 'messages' | 'meetings' | 'history'
 
 // ─── Avatar helpers ───────────────────────────────────────────────────────────
 
@@ -78,7 +79,7 @@ export default function ContactPage() {
   const navigate = useNavigate()
 
   const { data: contact, isLoading } = useContact(id ?? null)
-  const [activeTab,     setActiveTab]     = useState<Tab>('projects')
+  const [activeTab,     setActiveTab]     = useState<Tab>('overview')
   const [showEdit,      setShowEdit]      = useState(false)
   const [showDelete,    setShowDelete]    = useState(false)
   const [menuOpen,      setMenuOpen]      = useState(false)
@@ -398,6 +399,12 @@ export default function ContactPage() {
           {/* Tab bar */}
           <div className="flex items-end gap-0.5 px-4 pt-1 bg-white dark:bg-[#13141A] border-b border-[#F2F4F7] dark:border-[#26283A] shrink-0 overflow-x-auto scrollbar-none">
             <TabButton
+              active={activeTab === 'overview'}
+              onClick={() => setActiveTab('overview')}
+              icon={LayoutDashboard}
+              label="Overview"
+            />
+            <TabButton
               active={activeTab === 'projects'}
               onClick={() => setActiveTab('projects')}
               icon={FolderKanban}
@@ -429,6 +436,9 @@ export default function ContactPage() {
 
           {/* Tab panels */}
           <div className="flex-1 overflow-y-auto">
+            {activeTab === 'overview' && (
+              <ContactOverviewTab contact={contact} isOverdueFollowUp={isOverdueFollowUp} />
+            )}
             {activeTab === 'projects' && (
               <ProjectsTab
                 projects={projects}
