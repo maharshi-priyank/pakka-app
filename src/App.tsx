@@ -40,11 +40,17 @@ export default function App() {
   const { setSession, setLoading } = useAuthStore()
 
   useEffect(() => {
-    // getSession sets store state; onAuthStateChange handles the sync
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-    })
+    // getSession sets store state; onAuthStateChange handles the sync.
+    // Public routes (e.g. /q/:token embedded in a sandboxed iframe) still
+    // mount this component -- guard against the Locks API SecurityError
+    // GoTrueClient throws in that context so it doesn't surface as an
+    // uncaught rejection on every embedded form view.
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setSession(session)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
