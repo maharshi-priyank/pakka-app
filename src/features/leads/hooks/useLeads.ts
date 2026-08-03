@@ -13,6 +13,7 @@ interface LeadsParams {
   search?:         string
   stage?:          LeadStage
   includeArchived?: boolean
+  hasSourceForm?:  boolean
 }
 
 async function fetchLeads(params: LeadsParams = {}): Promise<LeadsListResponse> {
@@ -164,6 +165,42 @@ export function useConvertLeadToClient() {
       }
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to convert lead'),
+  })
+}
+
+export interface ConvertLeadToContactPayload {
+  leadId:   string
+  name?:    string
+  email?:   string
+  phone?:   string
+  company?: string
+  country?: string
+  currency?: string
+}
+
+interface ConvertLeadToContactResult {
+  contact: { id: string; name: string }
+}
+
+export function useConvertLeadToContact() {
+  const qc       = useQueryClient()
+  const navigate = useNavigate()
+  const { openUpgradeModal } = useUiStore()
+  return useMutation({
+    mutationFn: async ({ leadId, ...body }: ConvertLeadToContactPayload) => {
+      const { data } = await api.post<{ data: ConvertLeadToContactResult }>(`/leads/${leadId}/convert-to-contact`, body)
+      return data.data
+    },
+    onSuccess: (result) => {
+      qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] })
+      qc.invalidateQueries({ queryKey: ['contacts'] })
+      toast.success(`${result.contact.name} added as a contact`)
+      navigate(`/contacts/${result.contact.id}`)
+    },
+    onError: (err: Error & { code?: string }) => {
+      if (err.code === 'PLAN_LIMIT') openUpgradeModal('contacts')
+      else toast.error(err.message || 'Failed to convert lead')
+    },
   })
 }
 

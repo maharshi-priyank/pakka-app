@@ -1,75 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ClipboardList, Plus, Copy, CheckCheck, Pencil, Archive, Loader2 } from 'lucide-react'
+import { ClipboardList, Plus, Copy, CheckCheck, Pencil, Archive } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
-import { useForms, useCreateForm, useUpdateForm, useDeleteForm, useArchiveForm, useUnarchiveForm, type IntakeForm } from '@/features/forms/hooks/useForms'
+import { useForms, useUpdateForm, useDeleteForm, useArchiveForm, useUnarchiveForm, type IntakeForm } from '@/features/forms/hooks/useForms'
+import { CreateFormModal } from '@/features/forms/components/CreateFormModal'
 import { RemoveModal } from '@/components/RemoveModal'
 import { toast } from 'sonner'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
-}
-
-// ─── Create Modal ─────────────────────────────────────────────────────────────
-
-interface CreateModalProps { onClose: () => void }
-
-function CreateFormModal({ onClose }: CreateModalProps) {
-  const navigate = useNavigate()
-  const { mutateAsync, isPending } = useCreateForm()
-  const [title, setTitle]       = useState('')
-  const [desc,  setDesc]        = useState('')
-
-  async function handleCreate() {
-    if (!title.trim()) return
-    const form = await mutateAsync({ title: title.trim(), description: desc.trim() || undefined })
-    onClose()
-    navigate(`/forms/${form.id}`)
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-[#1A1B26] rounded-2xl shadow-2xl w-full max-w-md p-6">
-        <h3 className="text-[15px] font-bold text-[#101828] dark:text-[#ECEEF3] mb-4">New Intake Form</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1">Form title *</label>
-            <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleCreate()}
-              placeholder="e.g. Project Brief"
-              className="form-input w-full"
-              autoFocus
-            />
-          </div>
-          <div>
-            <label className="block text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8] mb-1">Description <span className="font-normal text-[#98A2B3]">(optional)</span></label>
-            <textarea
-              value={desc}
-              onChange={e => setDesc(e.target.value)}
-              placeholder="Tell your client what this form is about"
-              rows={2}
-              className="form-input w-full resize-none"
-            />
-          </div>
-        </div>
-        <div className="flex justify-end gap-2 mt-5">
-          <button type="button" onClick={onClose} className="btn-ghost text-[13px] px-4 py-2">Cancel</button>
-          <button
-            type="button"
-            onClick={handleCreate}
-            disabled={isPending || !title.trim()}
-            className="btn-primary text-[13px] flex items-center gap-2"
-          >
-            {isPending && <Loader2 size={13} className="animate-spin" />}
-            {isPending ? 'Creating…' : 'Create form'}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 // ─── Form Card ────────────────────────────────────────────────────────────────

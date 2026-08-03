@@ -17,7 +17,7 @@ export interface IntakeForm {
   token:          string
   fields:         FormField[]
   isActive:       boolean
-  autoCreateLead: boolean
+  capturesLeads:  boolean
   leadFieldMap:   Record<string, string>
   archivedAt:     string | null
   createdAt:      string
@@ -57,6 +57,17 @@ export function useForm(id: string) {
     },
     staleTime: 30_000,
     enabled:   !!id,
+  })
+}
+
+export function useLeadCaptureForm() {
+  return useQuery({
+    queryKey: ['forms', 'lead-capture'],
+    queryFn:  async () => {
+      const { data } = await api.get<{ data: IntakeForm }>('/forms/lead-capture')
+      return data.data
+    },
+    staleTime: 30_000,
   })
 }
 

@@ -150,6 +150,13 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: '/lead-capture',
+            lazy: async () => {
+              const { default: Component } = await import('@/pages/app/LeadCapturePage')
+              return { Component }
+            },
+          },
+          {
             path: '/contacts',
             lazy: async () => {
               const { default: Component } = await import('@/pages/app/ContactsPage')
