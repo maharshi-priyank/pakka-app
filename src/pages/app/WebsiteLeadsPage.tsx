@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Inbox, UserPlus, Archive, RefreshCw, Code2 } from 'lucide-react'
+import { Inbox, UserPlus, Archive, RefreshCw, Code2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatDate } from '@/lib/utils'
 import { useLeads, useArchiveLead, useUnarchiveLead } from '@/features/leads/hooks/useLeads'
 import type { Lead } from '@/features/leads/schemas/lead.schema'
 import ConvertLeadToContactModal from '@/features/leads/components/ConvertLeadToContactModal'
+import { CreateFormModal } from '@/features/forms/components/CreateFormModal'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -16,6 +17,7 @@ export default function WebsiteLeadsPage() {
   const archiveMutation = useArchiveLead()
   const unarchiveMutation = useUnarchiveLead()
   const [convertLead, setConvertLead] = useState<Lead | null>(null)
+  const [createFormOpen, setCreateFormOpen] = useState(false)
 
   const leads = data?.items ?? []
 
@@ -41,13 +43,22 @@ export default function WebsiteLeadsPage() {
             Review submissions from your embedded forms and convert the ones worth pursuing.
           </p>
         </div>
-        <Link
-          to="/forms"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors shrink-0"
-        >
-          <Code2 size={13} />
-          Get your embed code
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            to="/forms"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12.5px] font-semibold text-[#344054] dark:text-[#C2C8D8] hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors"
+          >
+            <Code2 size={13} />
+            Get your embed code
+          </Link>
+          <button
+            onClick={() => setCreateFormOpen(true)}
+            className="btn-primary flex items-center gap-1.5 text-[12.5px]"
+          >
+            <Plus size={13} />
+            New form
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -80,15 +91,15 @@ export default function WebsiteLeadsPage() {
           </div>
           <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">No leads yet</p>
           <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1 text-center max-w-[280px] leading-relaxed">
-            Share your embed code to start collecting leads from your website.
+            Create a form and embed it on your website to start collecting leads.
           </p>
-          <Link
-            to="/forms"
+          <button
+            onClick={() => setCreateFormOpen(true)}
             className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#EEF4FF] dark:bg-indigo-950/40 text-[#3538CD] dark:text-indigo-400 text-[12.5px] font-semibold hover:bg-[#E0EAFF] transition-colors"
           >
-            <Code2 size={12} />
-            Get your embed code
-          </Link>
+            <Plus size={12} />
+            Create your first form
+          </button>
         </div>
       ) : (
         <div className="space-y-2">
@@ -133,6 +144,14 @@ export default function WebsiteLeadsPage() {
           lead={convertLead}
           open={!!convertLead}
           onClose={() => setConvertLead(null)}
+        />
+      )}
+
+      {createFormOpen && (
+        <CreateFormModal
+          onClose={() => setCreateFormOpen(false)}
+          capturesLeads
+          title="New Website Lead Form"
         />
       )}
     </div>

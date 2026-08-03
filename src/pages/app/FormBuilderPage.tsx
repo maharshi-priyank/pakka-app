@@ -464,7 +464,9 @@ export default function FormBuilderPage() {
 
               <AddFieldMenu onAdd={addField} />
 
-              {/* Lead field mapping */}
+              {/* Lead field mapping -- only for forms created via Website Leads;
+                  a generic form (survey, feedback) has no reason to show this. */}
+              {form.capturesLeads && (
               <div className="rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#13141A] p-5 mt-2">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center shrink-0">
@@ -520,6 +522,7 @@ export default function FormBuilderPage() {
                   )}
                 </div>
               </div>
+              )}
             </div>
           ) : (
             <ResponsesTab submissions={form.submissions} fields={form.fields} />
