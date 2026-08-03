@@ -60,6 +60,17 @@ export function useForm(id: string) {
   })
 }
 
+export function useLeadCaptureForm() {
+  return useQuery({
+    queryKey: ['forms', 'lead-capture'],
+    queryFn:  async () => {
+      const { data } = await api.get<{ data: IntakeForm }>('/forms/lead-capture')
+      return data.data
+    },
+    staleTime: 30_000,
+  })
+}
+
 export function useCreateForm() {
   const queryClient = useQueryClient()
   return useMutation({
