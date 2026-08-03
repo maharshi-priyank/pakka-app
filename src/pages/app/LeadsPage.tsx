@@ -66,7 +66,7 @@ export default function LeadsPage() {
     window.open(url, '_blank', 'noopener,noreferrer')
   }, [])
 
-  const { data, isLoading } = useLeads({ limit: 500, includeArchived: includeArchived || undefined })
+  const { data, isLoading } = useLeads({ limit: 500, includeArchived: includeArchived || undefined, hasSourceForm: false })
   const allLeads      = data?.items ?? []
   const pipelineValue = data?.pipelineValue ? Number(data.pipelineValue) : null
 

@@ -29,6 +29,9 @@ export interface Lead {
   userId:         string
   clientId:       string | null
   client:         { id: string; name: string; company: string | null } | null
+  sourceFormId:   string | null
+  sourceForm:     { title: string } | null
+  contactId:      string | null
   name:           string
   email:          string | null
   phone:          string | null
