@@ -349,12 +349,14 @@ export default function FormBuilderPage() {
 
   return (
     <div className="space-y-5 max-w-[780px]">
-      {/* Back */}
+      {/* Back -- the lead-capture form is hidden from /forms (Forms tab list),
+          so editing it must return to /lead-capture instead, or "Back" would
+          land on a list that doesn't show the form just edited. */}
       <button
-        onClick={() => navigate('/forms')}
+        onClick={() => navigate(form?.capturesLeads ? '/lead-capture' : '/forms')}
         className="flex items-center gap-1.5 text-[12.5px] text-[#667085] dark:text-[#8B92A8] hover:text-[#344054] dark:hover:text-[#C2C8D8] transition-colors font-medium"
       >
-        <ArrowLeft size={14} /> Forms
+        <ArrowLeft size={14} /> {form?.capturesLeads ? 'Lead Capture' : 'Forms'}
       </button>
 
       {isLoading ? (

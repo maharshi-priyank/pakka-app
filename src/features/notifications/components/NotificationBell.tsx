@@ -54,7 +54,7 @@ const ENTITY_ROUTES: Record<string, (id: string) => string> = {
   proposal:     id => `/proposals/${id}`,
   contract:     id => `/contracts/${id}`,
   lead:         () => `/leads`,
-  'website-lead': () => `/website-leads`,
+  'lead-capture': () => `/lead-capture`,
 }
 
 function NotifRow({ n, onRead, onClose }: { n: AppNotification; onRead: (id: string) => void; onClose: () => void }) {

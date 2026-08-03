@@ -31,7 +31,7 @@ import CreateWorkspaceModal from '@/features/settings/components/CreateWorkspace
 const ALL_NAV_ITEMS = [
   { id: 'dashboard',   icon: LayoutDashboard, label: 'Dashboard',   href: '/dashboard',   tourId: 'tour-dashboard', permission: undefined },
   { id: 'contacts',    icon: ContactRound,    label: 'Contacts',     href: '/contacts',    tourId: undefined,         permission: Permission.VIEW_LEADS },
-  { id: 'website-leads', icon: Inbox,         label: 'Website Leads', href: '/website-leads', tourId: undefined,      permission: Permission.VIEW_LEADS },
+  { id: 'lead-capture', icon: Inbox,          label: 'Lead Capture',  href: '/lead-capture',  tourId: undefined,      permission: Permission.VIEW_LEADS },
   { id: 'pipeline',    icon: GitBranch,       label: 'Pipeline',     href: '/pipeline',    tourId: undefined,         permission: Permission.VIEW_LEADS },
   // { id: 'leads',       icon: Users,           label: 'Leads',        href: '/leads',       tourId: 'tour-leads',      permission: Permission.VIEW_LEADS },
   // { id: 'clients',     icon: Building2,       label: 'Clients',      href: '/clients',     tourId: 'tour-clients',    permission: Permission.VIEW_CLIENTS },
@@ -51,7 +51,7 @@ const ALL_NAV_ITEMS = [
 
 // Section groups — defines labels and order for the nav
 const SECTIONS = [
-  { label: null,           ids: ['dashboard', 'contacts', 'website-leads', 'pipeline', 'leads', 'clients', 'projects', 'tasks', 'inbox', 'time'] },
+  { label: null,           ids: ['dashboard', 'contacts', 'lead-capture', 'pipeline', 'leads', 'clients', 'projects', 'tasks', 'inbox', 'time'] },
   { label: 'TOOLS',        ids: ['proposals', 'contracts', 'invoices', 'expenses', 'reports'] },
   { label: 'PRODUCTIVITY', ids: ['calendar', 'forms', 'automations'] },
 ]
