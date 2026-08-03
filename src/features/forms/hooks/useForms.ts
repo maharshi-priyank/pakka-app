@@ -17,7 +17,6 @@ export interface IntakeForm {
   token:          string
   fields:         FormField[]
   isActive:       boolean
-  autoCreateLead: boolean
   leadFieldMap:   Record<string, string>
   archivedAt:     string | null
   createdAt:      string
