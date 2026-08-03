@@ -1,4 +1,7 @@
 import { z } from 'zod'
+import type { ProposalStatus } from '@/features/proposals/schemas/proposal.schema'
+import type { ContractStatus } from '@/features/contracts/schemas/contract.schema'
+import type { InvoiceStatus } from '@/features/invoices/schemas/invoice.schema'
 
 export const CONTACT_STAGES = [
   'ENQUIRY', 'PROPOSAL_SENT', 'NEGOTIATING', 'CLIENT', 'PAST_CLIENT', 'LOST',
@@ -78,6 +81,38 @@ export interface ContactNote {
   createdAt: string
 }
 
+// Already returned by GET /contacts/:id today (contacts.service.ts's
+// findOne() include) -- these three were previously untyped/unused on the
+// frontend even though the data was already on the wire.
+export interface ContactProposal {
+  id:          string
+  title:       string
+  status:      ProposalStatus
+  totalAmount: string | number
+  createdAt:   string
+  acceptedAt:  string | null
+}
+
+export interface ContactContract {
+  id:        string
+  title:     string
+  status:    ContractStatus
+  createdAt: string
+  sentAt:    string | null
+  signedAt:  string | null
+}
+
+export interface ContactInvoice {
+  id:            string
+  invoiceNumber: string
+  status:        InvoiceStatus
+  total:         string | number
+  amountPaid:    string | number
+  dueDate:       string | null
+  createdAt:     string
+  paidAt:        string | null
+}
+
 export interface Contact {
   id:             string
   workspaceId:    string
@@ -102,6 +137,9 @@ export interface Contact {
   projects?:      ContactProject[]
   meetings?:      ContactMeeting[]
   notesList?:     ContactNote[]
+  proposals?:     ContactProposal[]
+  contracts?:     ContactContract[]
+  invoices?:      ContactInvoice[]
   threads?:       { id: string; subject: string | null; updatedAt: string }[]
 }
 
