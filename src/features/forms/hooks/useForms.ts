@@ -63,7 +63,7 @@ export function useForm(id: string) {
 export function useCreateForm() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: { title: string; description?: string; capturesLeads?: boolean }) => {
+    mutationFn: async (payload: { title: string; description?: string }) => {
       const { data } = await api.post<{ data: IntakeForm }>('/forms', payload)
       return data.data
     },

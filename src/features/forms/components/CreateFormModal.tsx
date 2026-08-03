@@ -5,12 +5,13 @@ import { useCreateForm } from '../hooks/useForms'
 
 interface Props {
   onClose: () => void
-  /** Set on the created form, based on where this modal was opened from. */
-  capturesLeads?: boolean
   title?: string
 }
 
-export function CreateFormModal({ onClose, capturesLeads = false, title = 'New Intake Form' }: Props) {
+// capturesLeads is never passed here -- the one lead-capture form is only
+// ever created by the backend's seedLeadCaptureForm(), never through this
+// generic creation flow. See CreateFormDto (pakka-api).
+export function CreateFormModal({ onClose, title = 'New Intake Form' }: Props) {
   const navigate = useNavigate()
   const { mutateAsync, isPending } = useCreateForm()
   const [formTitle, setFormTitle] = useState('')
@@ -18,7 +19,7 @@ export function CreateFormModal({ onClose, capturesLeads = false, title = 'New I
 
   async function handleCreate() {
     if (!formTitle.trim()) return
-    const form = await mutateAsync({ title: formTitle.trim(), description: desc.trim() || undefined, capturesLeads })
+    const form = await mutateAsync({ title: formTitle.trim(), description: desc.trim() || undefined })
     onClose()
     navigate(`/forms/${form.id}`)
   }
