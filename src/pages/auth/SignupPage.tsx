@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Mail } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
+import { captureSignupAttribution } from '@/lib/productTelemetry'
 const schema = z.object({
   name:     z.string().min(2, 'Name is required'),
   email:    z.string().email('Enter a valid email'),
@@ -19,6 +20,10 @@ export default function SignupPage() {
   const [success,     setSuccess]     = useState(false)
   const [params]    = useSearchParams()
   const inviteToken = params.get('invite') ?? ''
+
+  useEffect(() => {
+    captureSignupAttribution(params)
+  }, [params])
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),

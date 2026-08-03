@@ -1,4 +1,5 @@
 import posthog, { type PostHogInterface } from 'posthog-js'
+import { sendProductEvent, type ProductEventName, type ProductEventProperties } from './productTelemetry'
 
 export function initPostHog() {
   const key = import.meta.env.VITE_POSTHOG_KEY as string | undefined
@@ -33,26 +34,31 @@ export function track(event: string, properties?: Record<string, unknown>) {
   posthog.capture(event, properties)
 }
 
+export function trackProductEvent(event: ProductEventName, properties?: ProductEventProperties) {
+  track(event, properties)
+  void sendProductEvent(event, properties)
+}
+
 // ── Activation funnel ────────────────────────────────────────────────────────
 
 export const ph = {
-  leadCreated: () => track('lead_created'),
-  leadConverted: () => track('lead_converted'),
+  leadCreated: () => trackProductEvent('lead_created'),
+  leadConverted: () => trackProductEvent('lead_converted'),
 
-  proposalCreated: () => track('proposal_created'),
-  proposalSent: () => track('proposal_sent'),
+  proposalCreated: () => trackProductEvent('proposal_created'),
+  proposalSent: () => trackProductEvent('proposal_sent'),
 
-  contractCreated: () => track('contract_created'),
-  contractSent: () => track('contract_sent'),
+  contractCreated: () => trackProductEvent('contract_created'),
+  contractSent: () => trackProductEvent('contract_sent'),
 
-  invoiceCreated: () => track('invoice_created'),
-  invoiceSent: () => track('invoice_sent'),
-  invoicePaid: () => track('invoice_paid'),
+  invoiceCreated: () => trackProductEvent('invoice_created'),
+  invoiceSent: () => trackProductEvent('invoice_sent'),
+  invoicePaid: () => trackProductEvent('invoice_paid'),
 
-  clientPortalCopied: () => track('client_portal_copied'),
+  clientPortalCopied: () => trackProductEvent('client_portal_copied'),
 
-  projectCreated: () => track('project_created'),
+  projectCreated: () => trackProductEvent('project_created'),
 
-  expenseLogged: () => track('expense_logged'),
-  timeLogged: () => track('time_logged'),
+  expenseLogged: () => trackProductEvent('expense_logged'),
+  timeLogged: () => trackProductEvent('time_logged'),
 }

@@ -53,6 +53,7 @@ export function useCreateInvoiceFromContract() {
     onSuccess: (invoices) => {
       qc.invalidateQueries({ queryKey: KEYS.all() })
       toast.success(invoices.length > 1 ? `${invoices.length} milestone invoices created` : 'Invoice created from contract')
+      ph.invoiceCreated()
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to create invoice'),
   })
@@ -101,6 +102,7 @@ export function useMarkPaid() {
       qc.setQueryData(KEYS.detail(updated.id), updated)
       qc.invalidateQueries({ queryKey: KEYS.all() })
       toast.success('Invoice marked as paid')
+      ph.invoicePaid()
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to mark as paid'),
   })

@@ -13,7 +13,8 @@ import UpgradeModal from '@/components/UpgradeModal'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import PWAUpdatePrompt from '@/components/PWAUpdatePrompt'
 import { setCurrentRouteName, setCustomAttribute } from '@/lib/newrelic'
-import { identifyUser, resetUser, trackPageview } from '@/lib/posthog'
+import { identifyUser, resetUser, trackPageview, trackProductEvent } from '@/lib/posthog'
+import { clearSignupAttribution, getSignupAttribution } from '@/lib/productTelemetry'
 
 // Track route changes for New Relic + PostHog SPA monitoring
 router.subscribe(({ location }) => {
@@ -30,7 +31,9 @@ async function syncUserWithApi(userId: string) {
   if (syncedUserId === userId) return
   syncedUserId = userId
   try {
-    await api.post('/users/me')
+    await api.post('/users/me', getSignupAttribution())
+    clearSignupAttribution()
+    trackProductEvent('session_started', { surface: 'web' })
   } catch {
     syncedUserId = null // allow retry on next render if it failed
   }
