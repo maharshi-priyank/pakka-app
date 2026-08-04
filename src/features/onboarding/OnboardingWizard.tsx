@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '@/lib/api'
 import { useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronRight, Upload, Loader2, FileText, Receipt, PenLine, Sparkles } from 'lucide-react'
-import { useUploadLogo } from '@/features/settings/hooks/useProfile'
+import { useUploadLogo, useProfile } from '@/features/settings/hooks/useProfile'
 import { toast } from 'sonner'
 import { ALL_COUNTRIES, getCountryDefaults } from '@/lib/countryDefaults'
 
@@ -74,6 +74,7 @@ export default function OnboardingWizard() {
   const STEPS   = getSteps(isIndia)
 
   const { mutateAsync: uploadLogo, isPending: uploadingLogo } = useUploadLogo()
+  const { data: profile } = useProfile()
 
   // Persist wizard state on every change
   useEffect(() => {
@@ -180,6 +181,17 @@ export default function OnboardingWizard() {
     queryClient.invalidateQueries({ queryKey: ['profile'] })
     localStorage.removeItem(STORAGE_KEY)
     setShowWelcome(true)
+    // Ask for a Trustpilot review after the user completes onboarding
+    if (profile?.email) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(window as any).tp?.('createInvitation', {
+        recipientEmail: profile.email,
+        recipientName:  profile.name ?? profile.email,
+        referenceId:    profile.id,
+        source:         'InvitationScript',
+        tags:           ['onboarded'],
+      })
+    }
   }
 
   const slideVariants = {
