@@ -1,37 +1,25 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import {
-  LayoutDashboard, FileText, Receipt, MoreHorizontal,
-  PenLine, Settings, LogOut, X,
-  FolderKanban, BarChart3, CalendarDays, ClipboardList, Zap,
-  Clock, Wallet,
-} from 'lucide-react'
+import { MoreHorizontal, Settings, LogOut, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
-
-const PRIMARY_TABS = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  // { icon: Users,           label: 'Leads',     href: '/leads' },
-  // { icon: Building2,       label: 'Clients',   href: '/clients' },
-  { icon: FolderKanban,    label: 'Projects',  href: '/projects' },
-]
-
-const MORE_ITEMS = [
-  { icon: Clock,         label: 'Time Log',    href: '/time' },
-  { icon: Wallet,        label: 'Expenses',    href: '/expenses' },
-  { icon: FileText,      label: 'Proposals',   href: '/proposals' },
-  { icon: Receipt,       label: 'Invoices',    href: '/invoices' },
-  { icon: PenLine,       label: 'Contracts',   href: '/contracts' },
-  { icon: BarChart3,     label: 'Reports',     href: '/reports' },
-  { icon: CalendarDays,  label: 'Calendar',    href: '/calendar' },
-  { icon: ClipboardList, label: 'Forms',       href: '/forms' },
-  { icon: Zap,           label: 'Automations', href: '/automations' },
-  { icon: Settings,      label: 'Settings',    href: '/settings' },
-]
+import { useMessageUnreadCount } from '@/features/messages/hooks/useMessages'
+import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
+import { ALL_NAV_ITEMS, PRIMARY_IDS } from './navItems'
 
 export default function BottomNav() {
   const [moreOpen, setMoreOpen] = useState(false)
   const navigate = useNavigate()
+
+  const { hasPermission } = useWorkspacePermissions()
+  const { data: inboxUnread = 0 } = useMessageUnreadCount()
+
+  const visibleItems = ALL_NAV_ITEMS.filter(
+    item => !item.permission || hasPermission(item.permission),
+  )
+
+  const primaryTabs = visibleItems.filter(item => PRIMARY_IDS.includes(item.id))
+  const moreItems   = visibleItems.filter(item => !PRIMARY_IDS.includes(item.id))
 
   async function handleSignOut() {
     setMoreOpen(false)
@@ -50,7 +38,7 @@ export default function BottomNav() {
         className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white dark:bg-[#13141A] border-t border-[#EAECF0] dark:border-[#26283A] flex items-stretch transition-colors"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        {PRIMARY_TABS.map(({ icon: Icon, label, href }) => (
+        {primaryTabs.map(({ id, icon: Icon, label, href }) => (
           <NavLink
             key={href}
             to={href}
@@ -64,10 +52,15 @@ export default function BottomNav() {
             {({ isActive }) => (
               <>
                 <div className={cn(
-                  'w-9 h-7 rounded-xl flex items-center justify-center transition-colors',
+                  'relative w-9 h-7 rounded-xl flex items-center justify-center transition-colors',
                   isActive ? 'bg-[#EEF2FF] dark:bg-[#1E2040]' : '',
                 )}>
                   <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                  {id === 'inbox' && inboxUnread > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] text-[9px] font-bold bg-indigo-600 text-white rounded-full flex items-center justify-center px-0.5 leading-none">
+                      {inboxUnread > 9 ? '9+' : inboxUnread}
+                    </span>
+                  )}
                 </div>
                 <span>{label}</span>
               </>
@@ -106,32 +99,49 @@ export default function BottomNav() {
             className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white dark:bg-[#13141A] rounded-t-2xl shadow-2xl anim-slide-up"
             style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}
           >
-            {/* Handle */}
+            {/* Handle + header */}
             <div className="flex items-center justify-between px-5 pt-4 pb-2">
               <div className="w-10 h-1 rounded-full bg-[#E4E7EC] dark:bg-[#26283A] mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
               <span className="text-[13px] font-bold text-[#101828] dark:text-[#ECEEF3]">More</span>
               <button
                 onClick={() => setMoreOpen(false)}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] dark:text-[#545C74] hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors"
+                aria-label="Close"
               >
                 <X size={15} strokeWidth={2} />
               </button>
             </div>
 
-            <div className="px-4 pb-2">
+            <div className="px-4 pb-2 max-h-[60vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-1.5">
-                {MORE_ITEMS.map(({ icon: Icon, label, href }) => (
+                {moreItems.map(({ id, icon: Icon, label, href }) => (
                   <button
                     key={href}
                     onClick={() => goTo(href)}
                     className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors text-left"
                   >
-                    <div className="w-8 h-8 rounded-xl bg-[#F4F5F8] dark:bg-[#21222D] flex items-center justify-center shrink-0">
+                    <div className="relative w-8 h-8 rounded-xl bg-[#F4F5F8] dark:bg-[#21222D] flex items-center justify-center shrink-0">
                       <Icon size={16} className="text-[#344054] dark:text-[#C2C8D8]" strokeWidth={2} />
+                      {id === 'inbox' && inboxUnread > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] text-[9px] font-bold bg-indigo-600 text-white rounded-full flex items-center justify-center px-0.5 leading-none">
+                          {inboxUnread > 9 ? '9+' : inboxUnread}
+                        </span>
+                      )}
                     </div>
                     <span className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{label}</span>
                   </button>
                 ))}
+
+                {/* Settings always appears in More */}
+                <button
+                  onClick={() => goTo('/settings')}
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[#F4F5F8] dark:hover:bg-[#21222D] transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-[#F4F5F8] dark:bg-[#21222D] flex items-center justify-center shrink-0">
+                    <Settings size={16} className="text-[#344054] dark:text-[#C2C8D8]" strokeWidth={2} />
+                  </div>
+                  <span className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Settings</span>
+                </button>
               </div>
 
               <div className="my-2 border-t border-[#F2F4F7] dark:border-[#26283A]" />
