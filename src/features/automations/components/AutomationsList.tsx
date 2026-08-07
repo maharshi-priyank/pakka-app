@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Zap, ChevronDown, ChevronUp, IndianRupee, FileText, FileSignature, Users, BarChart2, type LucideIcon } from 'lucide-react'
+import { Zap, ChevronDown, ChevronUp, IndianRupee, FileText, FileSignature, Users, BarChart2, MessageCircle, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   useAutomations, useToggleAutomation,
@@ -17,6 +17,7 @@ const CATEGORY_ICONS: Record<string, { icon: LucideIcon; bg: string; color: stri
   contract: { icon: FileSignature,  bg: 'bg-[#F4F3FF] dark:bg-violet-950/40',  color: 'text-[#5925DC] dark:text-[#A78BFA]' },
   lead:     { icon: Users,          bg: 'bg-[#FFFAEB] dark:bg-amber-950/30',   color: 'text-[#B54708] dark:text-amber-400' },
   business: { icon: BarChart2,      bg: 'bg-[#F8F9FC] dark:bg-[#21222D]',      color: 'text-[#344054] dark:text-[#C2C8D8]' },
+  whatsapp: { icon: MessageCircle,  bg: 'bg-[#F0FDF4] dark:bg-green-950/40',   color: 'text-[#16A34A] dark:text-[#4ADE80]' },
 }
 
 export default function AutomationsList() {
