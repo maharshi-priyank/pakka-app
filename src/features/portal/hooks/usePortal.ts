@@ -17,14 +17,16 @@ export interface PortalProposal {
   validUntil:  string | null
   acceptedAt:  string | null
   createdAt:   string
+  projectId:   string | null
 }
 
 export interface PortalContract {
-  id:       string
-  title:    string
-  status:   string
-  signedAt: string | null
+  id:        string
+  title:     string
+  status:    string
+  signedAt:  string | null
   createdAt: string
+  projectId: string | null
 }
 
 export interface PortalInvoice {
@@ -35,6 +37,7 @@ export interface PortalInvoice {
   dueDate:       string | null
   paidAt:        string | null
   createdAt:     string
+  projectId:     string | null
 }
 
 export interface PortalMeeting {
@@ -57,6 +60,13 @@ export interface PortalProjectExpense {
   amount: string; date: string; isBilled: boolean
 }
 
+export interface PortalProjectUpdate {
+  id:        string
+  content:   string
+  createdAt: string
+  author: { id: string; name: string }
+}
+
 export interface PortalProject {
   id:                  string
   name:                string
@@ -67,6 +77,7 @@ export interface PortalProject {
   shareRateWithClient: boolean
   timeEntries:         PortalProjectTimeEntry[]
   expenses:            PortalProjectExpense[]
+  updates:             PortalProjectUpdate[]
 }
 
 export interface PortalData {

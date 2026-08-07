@@ -336,12 +336,12 @@ export default function LeadDrawer({ lead, onClose }: Props) {
                   </button>
 
                   {/* Convert / Won */}
-                  {lead.clientId && lead.client ? (
+                  {lead.contactId && lead.contact ? (
                     <Link
-                      to={`/clients/${lead.clientId}`}
+                      to={`/contacts/${lead.contactId}`}
                       className="flex items-center gap-1.5 h-9 px-4 rounded-xl border border-emerald-200 text-[12.5px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
                     >
-                      <CheckCircle2 size={13} /> Won · View Client <ArrowRight size={12} />
+                      <CheckCircle2 size={13} /> Won · View Contact <ArrowRight size={12} />
                     </Link>
                   ) : (
                     <button

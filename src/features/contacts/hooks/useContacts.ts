@@ -55,8 +55,8 @@ async function updateContact(id: string, input: UpdateContactInput): Promise<Con
   return data.data
 }
 
-async function updateContactStage(id: string, stage: ContactStage): Promise<Contact> {
-  const { data } = await api.patch<{ data: Contact }>(`/contacts/${id}/stage`, { stage })
+async function updateContactStage(id: string, stage: ContactStage, lostReason?: string): Promise<Contact> {
+  const { data } = await api.patch<{ data: Contact }>(`/contacts/${id}/stage`, { stage, lostReason })
   return data.data
 }
 
@@ -111,7 +111,8 @@ export function useUpdateContact() {
 export function useUpdateContactStage() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, stage }: { id: string; stage: ContactStage }) => updateContactStage(id, stage),
+    mutationFn: ({ id, stage, lostReason }: { id: string; stage: ContactStage; lostReason?: string }) =>
+      updateContactStage(id, stage, lostReason),
     onSuccess: () => qc.invalidateQueries({ queryKey: [CONTACTS_QUERY_KEY] }),
     onError: (err: Error) => toast.error(err.message || 'Failed to update stage'),
   })

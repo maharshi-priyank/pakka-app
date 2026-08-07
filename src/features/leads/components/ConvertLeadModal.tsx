@@ -81,7 +81,7 @@ export default function ConvertLeadModal({ lead, open, onClose }: Props) {
             </div>
             <div>
               <p className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Win lead</p>
-              <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Convert {lead.name} to a client</p>
+              <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74]">Convert {lead.name} to a contact</p>
             </div>
           </div>
           <button onClick={onClose} className="w-7 h-7 rounded-lg flex items-center justify-center text-[#98A2B3] hover:text-[#667085] hover:bg-[#F5F6FA] dark:hover:bg-[#21222D] transition-colors">
@@ -91,9 +91,9 @@ export default function ConvertLeadModal({ lead, open, onClose }: Props) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 space-y-5">
 
-          {/* Client details */}
+          {/* Contact details */}
           <div>
-            <p className="text-[11.5px] font-semibold uppercase tracking-wide text-[#98A2B3] dark:text-[#545C74] mb-3">Client details</p>
+            <p className="text-[11.5px] font-semibold uppercase tracking-wide text-[#98A2B3] dark:text-[#545C74] mb-3">Contact details</p>
             <div className="space-y-3">
               <div>
                 <label className="form-label">Name *</label>
@@ -170,8 +170,8 @@ export default function ConvertLeadModal({ lead, open, onClose }: Props) {
               {convertMutation.isPending
                 ? <><Loader2 size={13} className="animate-spin" /> Converting…</>
                 : createProject
-                  ? 'Win Lead, Create Client + Project'
-                  : 'Win Lead & Create Client'
+                  ? 'Win Lead, Create Contact + Project'
+                  : 'Win Lead & Create Contact'
               }
             </button>
           </div>

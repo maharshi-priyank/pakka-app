@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   DndContext,
   PointerSensor,
@@ -14,7 +15,6 @@ import { cn } from '@/lib/utils'
 import { LEAD_STAGES, STAGE_LABELS, type Lead, type LeadStage } from '../schemas/lead.schema'
 import { useLeads, useUpdateLeadStage } from '../hooks/useLeads'
 import LeadCard, { LeadCardSkeleton } from './LeadCard'
-import LeadDrawer from './LeadDrawer'
 import ConvertLeadModal from './ConvertLeadModal'
 
 const COLUMN_ACCENTS: Record<LeadStage, { bar: string; count: string }> = {
@@ -101,7 +101,7 @@ interface Props {
 }
 
 export default function LeadsKanban({ search, onNewProposal }: Props) {
-  const [selectedLead,    setSelectedLead]    = useState<Lead | null>(null)
+  const navigate = useNavigate()
   const [convertingLead,  setConvertingLead]  = useState<Lead | null>(null)
   const [activeId,        setActiveId]        = useState<string | null>(null)
   const [localLeads,      setLocalLeads]      = useState<Lead[] | null>(null)
@@ -196,7 +196,7 @@ export default function LeadsKanban({ search, onNewProposal }: Props) {
               key={stage}
               stage={stage}
               leads={stageMap[stage]}
-              onCardClick={setSelectedLead}
+              onCardClick={lead => navigate(`/leads/${lead.id}`)}
               onNewProposal={onNewProposal}
               onConvertToClient={setConvertingLead}
               convertingLeadId={null}
@@ -212,8 +212,6 @@ export default function LeadsKanban({ search, onNewProposal }: Props) {
           )}
         </DragOverlay>
       </DndContext>
-
-      <LeadDrawer lead={selectedLead} onClose={() => setSelectedLead(null)} />
 
       {convertingLead && (
         <ConvertLeadModal

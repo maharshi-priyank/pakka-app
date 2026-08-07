@@ -148,7 +148,7 @@ export default function LeadCard({ lead, onClick, onNewProposal, onConvertToClie
             </button>
           )}
           {onConvertToClient && (
-            lead.clientId ? (
+            lead.contactId ? (
               <div className="flex-1 flex items-center justify-center gap-1.5 text-[11.5px] font-semibold text-[#027A48] bg-[#ECFDF3] dark:bg-emerald-950/40 rounded-lg py-2">
                 <Building2 size={12} strokeWidth={2.5} />
                 Client

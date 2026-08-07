@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { User, Briefcase, Calendar, CheckCircle, Clock, FileText } from 'lucide-react'
+import { User, Briefcase, Calendar, CheckCircle, Clock, FileText, ArrowRight, PenLine } from 'lucide-react'
 import { cn, formatDate } from '@/lib/utils'
 import { currencySymbol } from '@/lib/currency-symbols'
 import DocumentPreviewDrawer from '@/components/shared/DocumentPreviewDrawer'
@@ -48,8 +48,9 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
     : 0
   const total = subtotal + gstAmount
 
-  const clientName  = (proposal?.client?.name ?? proposal?.lead?.name) ?? undefined
-  const clientCo    = proposal?.client?.company ?? undefined
+  const clientName  = (proposal?.client?.name ?? proposal?.contact?.name ?? proposal?.lead?.name) ?? undefined
+  const clientCo    = proposal?.client?.company ?? proposal?.contact?.company ?? undefined
+  const contractId  = proposal?.contracts?.[0]?.id
 
   const statusBadge = proposal ? (
     <span className={cn(
@@ -121,6 +122,30 @@ export default function ProposalPreviewDrawer({ id, onClose }: Props) {
                   </span>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Contract-ready CTA — shown when proposal is accepted and a contract draft exists */}
+          {proposal.status === 'ACCEPTED' && contractId && (
+            <div className="flex items-center gap-3 p-3.5 bg-[#ECFDF3] dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-xl">
+              <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                <PenLine size={13} className="text-emerald-700 dark:text-emerald-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12.5px] font-semibold text-emerald-800 dark:text-emerald-300 leading-snug">
+                  Contract draft ready
+                </p>
+                <p className="text-[11.5px] text-emerald-700/70 dark:text-emerald-400/70 mt-0.5">
+                  Send it to {clientName ?? 'the client'} for signing
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { onClose(); navigate(`/contracts/${contractId}`) }}
+                className="flex items-center gap-1 text-[12px] font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 shrink-0 transition-colors"
+              >
+                View contract <ArrowRight size={12} />
+              </button>
             </div>
           )}
 

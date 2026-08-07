@@ -38,9 +38,10 @@ export const CATEGORY_LABELS: Record<string, string> = {
   contract: 'Contract Automations',
   lead:     'Lead Automations',
   business: 'Business & Reminders',
+  whatsapp: 'WhatsApp Notifications',
 }
 
-export const CATEGORY_ORDER = ['invoice', 'proposal', 'contract', 'lead', 'business']
+export const CATEGORY_ORDER = ['invoice', 'proposal', 'contract', 'lead', 'business', 'whatsapp']
 
 export function useAutomations() {
   return useQuery({
@@ -102,7 +103,7 @@ export function useCreateFromAI() {
       const { data } = await api.post<{ data: unknown[] }>('/automations/ai-create', { rules })
       return data.data
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['workflows'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['automations'] }),
   })
 }
 
