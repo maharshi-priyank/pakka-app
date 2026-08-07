@@ -141,7 +141,7 @@ export interface ConvertLeadPayload {
 }
 
 interface ConvertLeadResult {
-  client:  { id: string; name: string }
+  contact: { id: string; name: string }
   project: { id: string; name: string } | null
 }
 
@@ -155,13 +155,13 @@ export function useConvertLeadToClient() {
     },
     onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY] })
-      qc.invalidateQueries({ queryKey: ['clients'] })
+      qc.invalidateQueries({ queryKey: ['contacts'] })
       qc.invalidateQueries({ queryKey: ['projects'] })
-      toast.success(`${result.client.name} added as a client`); ph.leadConverted()
+      toast.success(`${result.contact.name} added as a client`); ph.leadConverted()
       if (result.project) {
         navigate(`/projects/${result.project.id}`)
       } else {
-        navigate(`/clients/${result.client.id}`)
+        navigate(`/contacts/${result.contact.id}`)
       }
     },
     onError: (err: Error) => toast.error(err.message || 'Failed to convert lead'),
@@ -219,5 +219,44 @@ export function useUnarchiveLead() {
     mutationFn: (id: string) => api.patch(`/leads/${id}/unarchive`).then(r => r.data.data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leads'] }),
     onError: (err: Error) => toast.error(err.message || 'Failed to unarchive lead'),
+  })
+}
+
+// ─── Activity log ─────────────────────────────────────────────────────────────
+
+export type ActivityType = 'NOTE' | 'CALL' | 'EMAIL' | 'MEETING'
+
+export interface LeadActivity {
+  id:         string
+  leadId:     string
+  type:       ActivityType
+  content:    string
+  metadata:   Record<string, unknown> | null
+  createdAt:  string
+}
+
+export function useLeadActivities(leadId: string | null) {
+  return useQuery({
+    queryKey: [LEADS_QUERY_KEY, leadId, 'activities'],
+    queryFn:  async () => {
+      const { data } = await api.get<{ data: LeadActivity[] }>(`/leads/${leadId}/activities`)
+      return data.data
+    },
+    enabled: !!leadId,
+  })
+}
+
+export function useCreateLeadActivity(leadId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: { type: ActivityType; content: string; metadata?: Record<string, unknown> }) => {
+      const { data } = await api.post<{ data: LeadActivity }>(`/leads/${leadId}/activities`, payload)
+      return data.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY, leadId, 'activities'] })
+      qc.invalidateQueries({ queryKey: [LEADS_QUERY_KEY, leadId] })
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to log activity'),
   })
 }

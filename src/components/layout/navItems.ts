@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, FileText, PenLine, Receipt, CalendarDays,
   ClipboardList, Zap, BarChart3, FolderKanban, CheckSquare,
-  MessageSquare, ContactRound, GitBranch, Clock, Wallet, Inbox,
+  MessageSquare, ContactRound, Clock, Wallet, GitBranch,
 } from 'lucide-react'
 import { Permission } from '@/types/permissions'
 
@@ -18,8 +18,7 @@ export interface NavItem {
 export const ALL_NAV_ITEMS: NavItem[] = [
   { id: 'dashboard',    icon: LayoutDashboard, label: 'Dashboard',    href: '/dashboard',    tourId: 'tour-dashboard', permission: undefined },
   { id: 'contacts',     icon: ContactRound,    label: 'Contacts',      href: '/contacts',     permission: Permission.VIEW_LEADS },
-  { id: 'lead-capture', icon: Inbox,           label: 'Lead Capture',  href: '/lead-capture', permission: Permission.VIEW_LEADS },
-  { id: 'pipeline',     icon: GitBranch,       label: 'Pipeline',      href: '/pipeline',     permission: Permission.VIEW_LEADS },
+  { id: 'leads',        icon: GitBranch,       label: 'Leads',         href: '/leads',        permission: Permission.VIEW_LEADS },
   { id: 'projects',     icon: FolderKanban,    label: 'Projects',      href: '/projects',     permission: Permission.VIEW_PROJECTS },
   { id: 'tasks',        icon: CheckSquare,     label: 'Tasks',         href: '/tasks',        permission: Permission.VIEW_TASKS },
   { id: 'inbox',        icon: MessageSquare,   label: 'Inbox',         href: '/inbox',        permission: Permission.VIEW_INBOX },
@@ -38,7 +37,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
 export const PRIMARY_IDS = ['dashboard', 'contacts', 'projects', 'inbox']
 
 export const SECTIONS = [
-  { label: null,           ids: ['dashboard', 'contacts', 'lead-capture', 'pipeline', 'projects', 'tasks', 'inbox', 'time'] },
+  { label: null,           ids: ['dashboard', 'contacts', 'leads', 'projects', 'tasks', 'inbox', 'time'] },
   { label: 'TOOLS',        ids: ['proposals', 'contracts', 'invoices', 'expenses', 'reports'] },
   { label: 'PRODUCTIVITY', ids: ['calendar', 'forms', 'automations'] },
 ]

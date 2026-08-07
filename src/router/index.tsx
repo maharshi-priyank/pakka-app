@@ -150,11 +150,15 @@ export const router = createBrowserRouter([
             },
           },
           {
-            path: '/lead-capture',
+            path: '/leads/:id',
             lazy: async () => {
-              const { default: Component } = await import('@/pages/app/LeadCapturePage')
+              const { default: Component } = await import('@/pages/app/LeadDetailPage')
               return { Component }
             },
+          },
+          {
+            path: '/lead-capture',
+            element: <Navigate to="/leads?tab=capture" replace />,
           },
           {
             path: '/contacts',
@@ -172,10 +176,7 @@ export const router = createBrowserRouter([
           },
           {
             path: '/pipeline',
-            lazy: async () => {
-              const { default: Component } = await import('@/pages/app/PipelinePage')
-              return { Component }
-            },
+            element: <Navigate to="/projects" replace />,
           },
           {
             path: '/proposals',

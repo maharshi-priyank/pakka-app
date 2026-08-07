@@ -32,6 +32,7 @@ export interface Lead {
   sourceFormId:   string | null
   sourceForm:     { title: string } | null
   contactId:      string | null
+  contact:        { id: string; name: string; company: string | null } | null
   name:           string
   email:          string | null
   phone:          string | null

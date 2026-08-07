@@ -124,9 +124,9 @@ export default function LeadTable({ leads, sortBy, sortDir, onSort, onOpen, onNe
                     <span className={cn(STAGE_BADGE_CLASS[lead.stage], 'text-[10.5px] whitespace-nowrap')}>
                       {STAGE_LABELS[lead.stage]}
                     </span>
-                    {lead.clientId && lead.client && (
+                    {lead.contactId && lead.contact && (
                       <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
-                        {lead.client.name}
+                        {lead.contact.name}
                       </span>
                     )}
                   </div>
