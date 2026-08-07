@@ -510,7 +510,6 @@ function ProjectList({ projects, proposals, contracts, invoices, onOpenProject }
     <div className="space-y-3">
       {projects.map(p => {
         const totalHours    = p.timeEntries.reduce((s, e) => s + e.durationMins, 0) / 60
-        const expenseTotal  = p.expenses.reduce((s, e) => s + Number(e.amount), 0)
         const projProposals = proposals.filter(pr => pr.projectId === p.id)
         const projContracts = contracts.filter(c  => c.projectId  === p.id)
         const projInvoices  = invoices.filter(i   => i.projectId  === p.id)
