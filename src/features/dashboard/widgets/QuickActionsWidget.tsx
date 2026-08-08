@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UserPlus, FileText, Receipt, FileSignature, Video, FolderKanban } from 'lucide-react'
+import { UserPlus, FileText, Receipt, FileSignature, Video, FolderKanban, Clock, Target } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 
 const NAV_ACTIONS = [
   { icon: UserPlus,       label: 'New Contact',  href: '/contacts',       bg: 'bg-[#EEF2FF] dark:bg-[#1E2040]',      iconColor: 'text-[#6366F1]',                    hoverBg: 'hover:bg-[#E0E7FF] dark:hover:bg-[#252850]'    },
+  { icon: Target,         label: 'Add Lead',     href: '/leads',          bg: 'bg-[#F5F3FF] dark:bg-violet-950/30',  iconColor: 'text-[#7C3AED] dark:text-violet-400', hoverBg: 'hover:bg-[#EDE9FE] dark:hover:bg-violet-950/50' },
   { icon: FileText,       label: 'New Proposal', href: '/proposals/new',  bg: 'bg-[#FFFAEB] dark:bg-amber-950/30',    iconColor: 'text-[#B54708] dark:text-amber-400', hoverBg: 'hover:bg-[#FEF3C7] dark:hover:bg-amber-950/50' },
   { icon: Receipt,        label: 'New Invoice',  href: '/invoices/new',   bg: 'bg-[#ECFDF3] dark:bg-emerald-950/40', iconColor: 'text-[#027A48] dark:text-[#34D399]', hoverBg: 'hover:bg-[#D1FAE5] dark:hover:bg-emerald-950/60' },
   { icon: FileSignature,  label: 'New Contract', href: '/contracts/new',  bg: 'bg-[#FEF3F2] dark:bg-red-950/40',     iconColor: 'text-[#D92D20] dark:text-red-400',   hoverBg: 'hover:bg-[#FEE2E2] dark:hover:bg-red-950/60'   },
   { icon: FolderKanban,   label: 'New Project',  href: '/projects',       bg: 'bg-[#EFF6FF] dark:bg-blue-950/40',    iconColor: 'text-[#2563EB] dark:text-[#60A5FA]', hoverBg: 'hover:bg-[#DBEAFE] dark:hover:bg-blue-950/60'  },
+  { icon: Clock,          label: 'Log Time',     href: '/time',           bg: 'bg-[#FFF1F2] dark:bg-rose-950/30',    iconColor: 'text-[#E11D48] dark:text-rose-400',  hoverBg: 'hover:bg-[#FFE4E6] dark:hover:bg-rose-950/50'  },
 ]
 
 export default function QuickActionsWidget() {

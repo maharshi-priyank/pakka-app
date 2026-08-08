@@ -57,6 +57,8 @@ import FollowUpsWidget      from '@/features/dashboard/widgets/FollowUpsWidget'
 import ActivityWidget       from '@/features/dashboard/widgets/ActivityWidget'
 import UpcomingCallsWidget  from '@/features/meetings/components/UpcomingCallsWidget'
 import PrioritiesStrip      from '@/features/dashboard/components/PrioritiesStrip'
+import OnboardingChecklist  from '@/features/dashboard/components/OnboardingChecklist'
+import { useCelebrateWins } from '@/features/dashboard/hooks/useCelebrateWins'
 
 // ─── Widget renderer ─────────────────────────────────────────────────────────
 
@@ -272,6 +274,7 @@ export default function DashboardPage() {
   const initials = generateInitials(userName)
   const { isDark, toggle: toggleTheme } = useThemeToggle()
   const { visible: sidebarVisible, setVisible: setSidebarVisible } = useSidebarState()
+  useCelebrateWins()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -412,6 +415,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Getting started checklist — hidden once the workspace has real activity ── */}
+      <OnboardingChecklist />
 
       {/* ── Priorities strip ── */}
       <PrioritiesStrip />

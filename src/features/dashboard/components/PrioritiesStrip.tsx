@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, FileText, CalendarDays, ArrowRight } from 'lucide-react'
+import { AlertCircle, FileText, CalendarDays, ArrowRight, MessageSquare } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { useDashboardStats } from '../hooks/useDashboard'
 import { useUpcomingMeetings } from '@/features/meetings/hooks/useMeetings'
@@ -50,11 +50,24 @@ export default function PrioritiesStrip() {
   const hasOverdue   = (stats?.overdueCount ?? 0) > 0
   const hasProposals = (stats?.openProposals ?? 0) > 0
   const hasMeetings  = todayMeetings.length > 0
+  const hasUnread    = (stats?.unreadClientMessages ?? 0) > 0
 
-  if (!hasOverdue && !hasProposals && !hasMeetings) return null
+  if (!hasOverdue && !hasProposals && !hasMeetings && !hasUnread) return null
 
   return (
     <div className="flex flex-wrap gap-3">
+      {hasUnread && (
+        <ActionCard
+          icon={MessageSquare}
+          iconBg="bg-[#EEF2FF] dark:bg-[#1E2040]"
+          iconColor="text-[#6366F1]"
+          borderColor="border-[#C7D2FE] dark:border-[#6366F1]/40"
+          title={`${stats!.unreadClientMessages} unread client message${stats!.unreadClientMessages !== 1 ? 's' : ''}`}
+          sub="Waiting for your reply"
+          ctaLabel="View messages"
+          onClick={() => navigate('/inbox')}
+        />
+      )}
       {hasOverdue && (
         <ActionCard
           icon={AlertCircle}

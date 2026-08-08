@@ -25,6 +25,7 @@ export interface Workspace {
   defaultHsnSac:   string | null
   defaultLutNumber: string | null
   emailSignature:  string | null
+  monthlyRevenueGoal: number | null
   createdAt:       string
   role:     'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER'
   roleId:   string

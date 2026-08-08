@@ -2,14 +2,23 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 
 export interface DashboardStats {
-  revenueThisMonth: number
-  revenueLastMonth: number
-  revenueChange:    number | null
-  overdueAmount:    number
-  overdueCount:     number
-  pipelineValue:    number
-  activeContacts:   number
-  openProposals:    number
+  revenueThisMonth:     number
+  revenueLastMonth:     number
+  revenueChange:        number | null
+  overdueAmount:        number
+  overdueCount:         number
+  pipelineValue:        number
+  activeContacts:       number
+  openProposals:        number
+  monthlyRevenueGoal:   number | null
+  unreadClientMessages: number
+  hasAnyActivity:       boolean
+  onboarding: {
+    hasContact:  boolean
+    hasProposal: boolean
+    hasContract: boolean
+    hasInvoice:  boolean
+  }
 }
 
 export interface ActivityEvent {
