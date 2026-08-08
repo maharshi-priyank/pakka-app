@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertTriangle, Video, CalendarDays, ExternalLink, FolderKanban,
   Clock, IndianRupee, Download, Lock, MessageSquare,
   Paperclip, FileArchive, FileImage, File as FileIconLucide,
   LayoutDashboard, ArrowLeft, Bell, ChevronRight, Megaphone,
-  Receipt, FileSignature, FileText,
+  Receipt, FileSignature, FileText, Plus,
 } from 'lucide-react'
 import { usePortalThread, useSendPortalReply, useMarkPortalRead } from '@/features/messages/hooks/useMessages'
 import { MessageBubble } from '@/features/messages/components/MessageBubble'
@@ -13,22 +14,25 @@ import { ReplyComposer } from '@/features/messages/components/ReplyComposer'
 import { cn } from '@/lib/utils'
 import {
   usePortalData,
+  useRaiseChangeRequest,
   type PortalProposal, type PortalContract, type PortalInvoice,
   type PortalMeeting, type PortalProject, type PortalProjectUpdate,
 } from '@/features/portal/hooks/usePortal'
 import { usePortalAttachments, humanSize } from '@/features/attachments/useAttachments'
 import type { PortalAttachment } from '@/features/attachments/types'
 import { STAGE_LABELS, STAGE_OUTLINE_COLORS, type ContactStage } from '@/features/contacts/schemas/contact.schema'
-import PortalProposalCard from '@/features/portal/components/PortalProposalCard'
-import PortalContractCard from '@/features/portal/components/PortalContractCard'
-import PortalInvoiceCard  from '@/features/portal/components/PortalInvoiceCard'
+import PortalProposalCard       from '@/features/portal/components/PortalProposalCard'
+import PortalContractCard       from '@/features/portal/components/PortalContractCard'
+import PortalInvoiceCard        from '@/features/portal/components/PortalInvoiceCard'
+import PortalChangeRequestCard  from '@/features/portal/components/PortalChangeRequestCard'
+import PortalApprovalCard       from '@/features/portal/components/PortalApprovalCard'
 
 const APP_URL = (import.meta.env.VITE_APP_URL as string | undefined) || window.location.origin
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Tab        = 'overview' | 'projects' | 'messages' | 'meetings'
-type ProjectTab = 'updates' | 'proposals' | 'contracts' | 'invoices' | 'time'
+type ProjectTab = 'updates' | 'proposals' | 'contracts' | 'invoices' | 'time' | 'approvals'
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
@@ -615,7 +619,28 @@ function ProjectDetail({
   project, proposals, contracts, invoices, contactStage, token, initialTab,
   onProposalStatusChange, onContractStatusChange, onInvoiceStatusChange, onBack,
 }: ProjectDetailProps) {
+  const queryClient = useQueryClient()
   const [pTab, setPTab] = useState<ProjectTab>(initialTab)
+
+  // Raise Change Request form state
+  const [showCRForm, setShowCRForm] = useState(false)
+  const [crDesc,     setCrDesc]     = useState('')
+  const [crError,    setCrError]    = useState('')
+
+  const raiseChangeRequest = useRaiseChangeRequest(token, project.id)
+
+  async function handleRaiseCR() {
+    if (!crDesc.trim()) { setCrError('Please describe the change request.'); return }
+    setCrError('')
+    try {
+      await raiseChangeRequest.mutateAsync(crDesc.trim())
+      queryClient.invalidateQueries({ queryKey: ['portal', token] })
+      setShowCRForm(false)
+      setCrDesc('')
+    } catch {
+      setCrError('Failed to submit. Please try again.')
+    }
+  }
 
   // Re-sync initialTab when it changes (e.g. navigated from overview attention item)
   useEffect(() => { setPTab(initialTab) }, [initialTab])
@@ -634,12 +659,15 @@ function ProjectDetail({
 
   const statusBadge = STATUS_BADGE[project.status] ?? STATUS_BADGE['ACTIVE']
 
+  const approvalsCount = (project.changeRequests?.length ?? 0) + (project.approvalRequests?.length ?? 0)
+
   const subTabs: { key: ProjectTab; label: string; count?: number }[] = [
     { key: 'updates',   label: 'Updates',      count: project.updates.length },
     { key: 'proposals', label: 'Proposals',    count: projProposals.length },
     { key: 'contracts', label: 'Contracts',    count: projContracts.length },
     { key: 'invoices',  label: 'Invoices',     count: projInvoices.length },
     { key: 'time',      label: 'Time & Expenses' },
+    { key: 'approvals', label: 'Approvals',    count: approvalsCount },
   ]
 
   return (
@@ -854,6 +882,88 @@ function ProjectDetail({
             </div>
           )
       )}
+
+      {/* Approvals */}
+      {pTab === 'approvals' && (
+        <div className="space-y-4">
+
+          {/* Raise Change Request button / form */}
+          {project.status !== 'COMPLETED' && (
+            !showCRForm ? (
+              <button
+                onClick={() => setShowCRForm(true)}
+                style={{ minHeight: '44px' }}
+                className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-dashed border-[#CBD5E1] text-[13px] font-medium text-[#64748B] hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
+              >
+                <Plus size={14} /> Raise Change Request
+              </button>
+            ) : (
+              <div className="bg-white rounded-xl border border-[#EAECF0] p-4 space-y-3">
+                <p className="text-[13px] font-semibold text-[#344054]">New Change Request</p>
+                <textarea
+                  value={crDesc}
+                  onChange={e => { setCrDesc(e.target.value); setCrError('') }}
+                  placeholder="Describe the change you need…"
+                  rows={3}
+                  autoFocus
+                  className="w-full px-3 py-2 text-[13px] text-[#344054] border border-[#EAECF0] rounded-lg focus:outline-none focus:border-[#667085] resize-none"
+                />
+                {crError && (
+                  <p className="text-[12px] text-[#D92D20]" role="alert">{crError}</p>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleRaiseCR}
+                    disabled={raiseChangeRequest.isPending || !crDesc.trim()}
+                    style={{ minHeight: '44px' }}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13px] font-semibold transition-colors disabled:opacity-60"
+                  >
+                    {raiseChangeRequest.isPending ? 'Submitting…' : 'Submit Request'}
+                  </button>
+                  <button
+                    onClick={() => { setShowCRForm(false); setCrDesc(''); setCrError('') }}
+                    style={{ minHeight: '44px' }}
+                    className="px-4 py-2 rounded-lg border border-[#EAECF0] text-[13px] text-[#667085] hover:text-[#344054] font-medium bg-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+
+          {/* Change Requests */}
+          {(project.changeRequests?.length ?? 0) > 0 && (
+            <div className="space-y-3">
+              {project.changeRequests!.map(cr => (
+                <PortalChangeRequestCard key={cr.id} changeRequest={cr} token={token} />
+              ))}
+            </div>
+          )}
+
+          {/* Project Sign-off Approvals */}
+          {(project.approvalRequests?.length ?? 0) > 0 && (
+            <div className="space-y-3">
+              {project.approvalRequests!.map(ar => (
+                <PortalApprovalCard key={ar.id} approvalRequest={ar} token={token} />
+              ))}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {(project.changeRequests?.length ?? 0) === 0 &&
+           (project.approvalRequests?.length ?? 0) === 0 &&
+           !showCRForm && (
+            <EmptyState
+              icon={FileText}
+              label="No approvals yet"
+              sub="Change requests and sign-off requests will appear here"
+            />
+          )}
+
+        </div>
+      )}
+
     </div>
   )
 }
