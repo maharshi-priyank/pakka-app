@@ -67,6 +67,27 @@ export interface PortalProjectUpdate {
   author: { id: string; name: string }
 }
 
+export interface PortalApprovalRequest {
+  id:           string
+  kind:         string
+  status:       string
+  requiresOtp:  boolean
+  decisionNote: string | null
+  decidedAt:    string | null
+  otpEmailSent: boolean
+  createdAt:    string
+}
+
+export interface PortalChangeRequest {
+  id:               string
+  description:      string
+  status:           string
+  raisedByEmail:    string
+  freelancerNote:   string | null
+  createdAt:        string
+  approvalRequests: PortalApprovalRequest[]
+}
+
 export interface PortalProject {
   id:                  string
   name:                string
@@ -78,6 +99,9 @@ export interface PortalProject {
   timeEntries:         PortalProjectTimeEntry[]
   expenses:            PortalProjectExpense[]
   updates:             PortalProjectUpdate[]
+  changeRequests?:     PortalChangeRequest[]
+  approvalRequests?:   PortalApprovalRequest[]
+  reviews?:            { token: string; status: string }[]
 }
 
 export interface PortalData {
@@ -171,6 +195,43 @@ export function usePortalSignContract() {
       const { data } = await publicApi.post<{ data: { status: string; signedAt: string } }>(
         `/contracts/sign/${id}`,
         { otp },
+      )
+      return data.data
+    },
+  })
+}
+
+export function useRaiseChangeRequest(token: string, projectId: string) {
+  return useMutation({
+    mutationFn: async (description: string) => {
+      const { data } = await publicApi.post(
+        `/portal/${token}/projects/${projectId}/change-requests`,
+        { description },
+      )
+      return data.data
+    },
+  })
+}
+
+export function useDecideApproval(token: string) {
+  return useMutation({
+    mutationFn: async ({ id, action, otp, decisionNote }: {
+      id: string; action: string; otp?: string; decisionNote?: string
+    }) => {
+      const { data } = await publicApi.post(
+        `/portal/${token}/approval-requests/${id}/decide`,
+        { action, otp, decisionNote },
+      )
+      return data.data
+    },
+  })
+}
+
+export function useResendApprovalOtp(token: string) {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await publicApi.post(
+        `/portal/${token}/approval-requests/${id}/resend-otp`,
       )
       return data.data
     },

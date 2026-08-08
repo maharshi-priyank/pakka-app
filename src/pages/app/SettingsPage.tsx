@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { User, Building2, Bell, Puzzle, Globe, Users } from 'lucide-react'
+import { User, Building2, Bell, Puzzle, Globe, Users, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ProfileTab from '@/features/settings/components/ProfileTab'
 import BusinessTab from '@/features/settings/components/BusinessTab'
@@ -8,6 +8,7 @@ import NotificationsTab from '@/features/notifications/components/NotificationsT
 import IntegrationsTab from '@/features/settings/components/IntegrationsTab'
 import PublicProfileTab from '@/features/settings/components/PublicProfileTab'
 import TeamTab from '@/features/team/components/TeamTab'
+import WorkspaceReviewsSection from '@/features/reviews/components/WorkspaceReviewsSection'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
 
@@ -18,6 +19,7 @@ const TAB_DEFS = [
   { key: 'notifications' as const, label: 'Notifications',  icon: Bell,           permission: null },
   { key: 'integrations'  as const, label: 'Integrations',   icon: Puzzle,         permission: Permission.MANAGE_INTEGRATIONS },
   { key: 'team'          as const, label: 'Team',           icon: Users,          permission: Permission.MANAGE_MEMBERS },
+  { key: 'reviews'       as const, label: 'Reviews',        icon: Star,           permission: null },
 ]
 
 type TabKey = typeof TAB_DEFS[number]['key']
@@ -66,6 +68,7 @@ export default function SettingsPage() {
       {activeTab === 'notifications'  && <NotificationsTab />}
       {activeTab === 'integrations'   && <IntegrationsTab />}
       {activeTab === 'team'           && <TeamTab />}
+      {activeTab === 'reviews'        && <WorkspaceReviewsSection />}
 
     </div>
   )

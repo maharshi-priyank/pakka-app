@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import * as Icons from 'lucide-react'
 import {
   CheckCircle2,
@@ -9,8 +10,9 @@ import {
   ArrowRight,
   ArrowUpRight,
   MessageCircle,
+  Star,
 } from 'lucide-react'
-import type { PublicProfileData, PublicPortfolioItem } from '../hooks/usePublicProfile'
+import type { PublicProfileData, PublicPortfolioItem, PublicReview } from '../hooks/usePublicProfile'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -89,6 +91,114 @@ function PortfolioCard({ item }: { item: PublicPortfolioItem }) {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+// ─── Star row ─────────────────────────────────────────────────────────────────
+
+function StarRow({ rating, size = 13 }: { rating: number; size?: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }, (_, i) => (
+        <Star
+          key={i}
+          size={size}
+          fill={i + 1 <= rating ? '#FBBF24' : 'none'}
+          color={i + 1 <= rating ? '#FBBF24' : '#E4E7EC'}
+          strokeWidth={i + 1 <= rating ? 0 : 1.5}
+        />
+      ))}
+    </div>
+  )
+}
+
+// ─── Review card ──────────────────────────────────────────────────────────────
+
+function formatReviewDate(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })
+}
+
+function ReviewCard({ review }: { review: PublicReview }) {
+  return (
+    <div className="bg-white border border-[#EAECF0] rounded-xl p-5 mb-3 last:mb-0">
+      <StarRow rating={review.rating} size={13} />
+      {review.body && (
+        <p
+          className="text-[13px] leading-relaxed text-[#475467] italic mt-2"
+          style={{ quotes: '"\\201C""\\201D""\\2018""\\2019"' }}
+        >
+          <span className="before:content-[open-quote] after:content-[close-quote]">
+            {review.body}
+          </span>
+        </p>
+      )}
+      <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[12px] font-semibold text-[#344054]">
+            — {review.authorName ?? 'Anonymous'}
+          </span>
+          <span className="text-[11px] text-[#98A2B3]">
+            on {review.project.name}
+          </span>
+        </div>
+        {review.submittedAt && (
+          <span className="text-[11px] text-[#98A2B3]">
+            {formatReviewDate(review.submittedAt)}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Reviews section ──────────────────────────────────────────────────────────
+
+function ReviewsSection({ profile }: { profile: PublicProfileData }) {
+  const [showAll, setShowAll] = useState(false)
+  const reviews = profile.reviews ?? []
+  const reviewCount = profile.reviewCount ?? 0
+  const averageRating = profile.averageRating ?? null
+
+  const visibleReviews = showAll ? reviews : reviews.slice(0, 5)
+
+  return (
+    <div className="bg-white border border-[#EAECF0] rounded-2xl p-6">
+      <div className="flex items-center justify-between mb-4">
+        <CardLabel>Client Reviews</CardLabel>
+        {reviewCount > 0 && averageRating !== null && (
+          <div className="flex items-center gap-1.5 -mt-4">
+            <StarRow rating={Math.round(averageRating)} size={14} />
+            <span className="text-[13px] font-bold text-[#101828]">{averageRating}</span>
+            <span className="text-[13px] text-[#98A2B3]">({reviewCount} reviews)</span>
+          </div>
+        )}
+      </div>
+
+      {reviewCount === 0 ? (
+        <p className="text-[13px] text-[#98A2B3] text-center py-2">No reviews yet</p>
+      ) : (
+        <>
+          <div>
+            {visibleReviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+          {reviews.length > 5 && (
+            <div className="mt-3 text-center">
+              <button
+                onClick={() => setShowAll((v) => !v)}
+                className="text-[12px] text-[#6366F1] hover:text-[#4F46E5] font-medium transition-colors cursor-pointer"
+              >
+                {showAll ? 'Show less' : `Show all ${reviewCount} reviews`}
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
@@ -243,6 +353,9 @@ export default function ProfileMain({ profile, onContact }: Props) {
           </div>
         </div>
       )}
+
+      {/* ── Client Reviews ── */}
+      <ReviewsSection profile={profile} />
 
       {/* ── Hire CTA ── */}
       <div className="bg-white border border-[#EAECF0] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">

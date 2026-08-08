@@ -98,6 +98,14 @@ export const router = createBrowserRouter([
       return { Component }
     },
   },
+  // ── Public review submission (no auth required) ────────────────────────────
+  {
+    path: '/review/:token',
+    lazy: async () => {
+      const { default: Component } = await import('@/pages/public/ReviewPage')
+      return { Component }
+    },
+  },
   // ── Public freelancer profile (no auth required) ────────────────────────────
   {
     path: '/u/:username',

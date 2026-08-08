@@ -6,7 +6,7 @@ import { z } from 'zod'
 import {
   ArrowLeft, FolderKanban, Building2, Calendar, IndianRupee,
   Clock, Receipt, FileText, PenLine, Wallet, Pencil, Archive,
-  X, Loader2, Plus, ChevronDown, ChevronUp,
+  X, Loader2, Plus, ChevronDown, ChevronUp, CheckSquare, AlertCircle, CheckCircle,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import {
@@ -22,6 +22,8 @@ import ProjectNotesTab from '@/features/projects/components/ProjectNotesTab'
 import ProjectTasksTab from '@/features/tasks/components/ProjectTasksTab'
 import ProjectTeamTab from '@/features/projects/components/ProjectTeamTab'
 import ProjectUpdatesTab from '@/features/projects/components/ProjectUpdatesTab'
+import ProjectChangeRequestsTab from '@/features/projects/components/ProjectChangeRequestsTab'
+import { useRequestSignoff, useProjectApprovalRequests } from '@/features/projects/hooks/useChangeRequests'
 import InvoiceQuickView, { type InvoiceSnap } from '@/features/invoices/components/InvoiceQuickView'
 import ProposalQuickView, { type ProposalSnap } from '@/features/proposals/components/ProposalQuickView'
 import ContractQuickView, { type ContractSnap } from '@/features/contracts/components/ContractQuickView'
@@ -216,18 +218,19 @@ function StatCard({ label, value, sub, icon: Icon, accent = false }: {
 
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'documents' | 'time' | 'files' | 'notes' | 'tasks' | 'team' | 'updates'
+type Tab = 'overview' | 'documents' | 'time' | 'files' | 'notes' | 'tasks' | 'team' | 'updates' | 'change-requests'
 type DocSubTab = 'proposals' | 'contracts' | 'invoices'
 
 const TABS: Array<{ value: Tab; label: string }> = [
-  { value: 'overview',   label: 'Overview' },
-  { value: 'tasks',      label: 'Tasks' },
-  { value: 'updates',    label: 'Updates' },
-  { value: 'documents',  label: 'Documents' },
-  { value: 'time',       label: 'Time & Expenses' },
-  { value: 'files',      label: 'Files' },
-  { value: 'notes',      label: 'Notes' },
-  { value: 'team',       label: 'Team' },
+  { value: 'overview',        label: 'Overview' },
+  { value: 'tasks',           label: 'Tasks' },
+  { value: 'updates',         label: 'Updates' },
+  { value: 'change-requests', label: 'Change Requests' },
+  { value: 'documents',       label: 'Documents' },
+  { value: 'time',            label: 'Time & Expenses' },
+  { value: 'files',           label: 'Files' },
+  { value: 'notes',           label: 'Notes' },
+  { value: 'team',            label: 'Team' },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -250,9 +253,11 @@ export default function ProjectPage() {
 
   const { data: project, isLoading } = useProject(id!)
   const { data: stats,   isLoading: statsLoading } = useProjectStats(id!)
-  const deleteMut  = useDeleteProject()
-  const archiveMut = useArchiveProject()
+  const deleteMut    = useDeleteProject()
+  const archiveMut   = useArchiveProject()
   const unarchiveMut = useUnarchiveProject()
+  const signoffMut   = useRequestSignoff(id!)
+  const { data: approvalRequests } = useProjectApprovalRequests(id!)
 
   if (isLoading) {
     return (
@@ -315,6 +320,55 @@ export default function ProjectPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {project.status === 'ACTIVE' && (() => {
+            const latestSignoff = approvalRequests
+              ?.filter(ar => ar.kind === 'PROJECT_SIGNOFF')
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+            const pendingSignoff   = latestSignoff?.status === 'PENDING'             ? latestSignoff : undefined
+            const revisionSignoff  = latestSignoff?.status === 'REVISION_REQUESTED'  ? latestSignoff : undefined
+            if (pendingSignoff) {
+              return (
+                <span className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-amber-200 dark:border-amber-800 text-[12px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 cursor-default">
+                  <Clock size={12} />
+                  Awaiting client sign-off
+                </span>
+              )
+            }
+            const hasOutstanding = (stats?.outstanding ?? 0) > 0
+            const requestSignoff = () => {
+              if (hasOutstanding) {
+                toast.error('Settle all outstanding invoices before requesting sign-off')
+                return
+              }
+              signoffMut.mutate(undefined, {
+                onSuccess: () => toast.success('Sign-off request sent to client'),
+                onError:   (e: unknown) => toast.error(e instanceof Error ? e.message : 'Could not send sign-off request'),
+              })
+            }
+            if (revisionSignoff) {
+              return (
+                <button
+                  onClick={requestSignoff}
+                  disabled={signoffMut.isPending}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-200 dark:border-red-800 text-[12px] font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title={revisionSignoff.decisionNote ?? 'Client requested revision'}
+                >
+                  {signoffMut.isPending ? <Loader2 size={12} className="animate-spin" /> : <AlertCircle size={12} />}
+                  Revision requested — Re-send
+                </button>
+              )
+            }
+            return (
+              <button
+                onClick={requestSignoff}
+                disabled={signoffMut.isPending}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-indigo-200 dark:border-indigo-800 text-[12px] font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-950/60 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {signoffMut.isPending ? <Loader2 size={12} className="animate-spin" /> : <CheckSquare size={12} />}
+                Request Sign-off
+              </button>
+            )
+          })()}
           <button
             onClick={() => setShowEdit(true)}
             className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12px] font-medium text-[#344054] dark:text-[#C2C8D8] bg-white dark:bg-[#13141A] hover:border-[#D0D5DD] dark:hover:border-[#3D4258] transition-colors"
@@ -338,6 +392,44 @@ export default function ProjectPage() {
           )}
         </div>
       </div>
+
+      {/* Sign-off status banner */}
+      {(() => {
+        const latestSignoff = approvalRequests
+          ?.filter(ar => ar.kind === 'PROJECT_SIGNOFF')
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+        if (!latestSignoff) return null
+
+        if (latestSignoff.status === 'APPROVED') {
+          return (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <CheckCircle size={15} className="text-green-600 dark:text-green-400 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-semibold text-green-800 dark:text-green-300">Client signed off the project</p>
+                {latestSignoff.decidedAt && (
+                  <p className="text-[12px] text-green-700 dark:text-green-400 mt-0.5">
+                    Approved on {new Date(latestSignoff.decidedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
+                )}
+              </div>
+            </div>
+          )
+        }
+
+        if (latestSignoff.status === 'REVISION_REQUESTED' && latestSignoff.decisionNote) {
+          return (
+            <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+              <AlertCircle size={15} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-semibold text-amber-800 dark:text-amber-300">Client requested revision before sign-off</p>
+                <p className="text-[12px] text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">{latestSignoff.decisionNote}</p>
+              </div>
+            </div>
+          )
+        }
+
+        return null
+      })()}
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -656,6 +748,12 @@ export default function ProjectPage() {
         {activeTab === 'updates' && !isTasksRoute && (
           <div className="max-w-2xl">
             <ProjectUpdatesTab projectId={project.id} />
+          </div>
+        )}
+
+        {activeTab === 'change-requests' && !isTasksRoute && (
+          <div className="max-w-2xl">
+            <ProjectChangeRequestsTab projectId={project.id} />
           </div>
         )}
 
