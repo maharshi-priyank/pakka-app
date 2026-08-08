@@ -101,6 +101,7 @@ export interface PortalProject {
   updates:             PortalProjectUpdate[]
   changeRequests?:     PortalChangeRequest[]
   approvalRequests?:   PortalApprovalRequest[]
+  reviews?:            { token: string; status: string }[]
 }
 
 export interface PortalData {

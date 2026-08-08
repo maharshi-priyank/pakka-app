@@ -6,7 +6,7 @@ import {
   Clock, IndianRupee, Download, Lock, MessageSquare,
   Paperclip, FileArchive, FileImage, File as FileIconLucide,
   LayoutDashboard, ArrowLeft, Bell, ChevronRight, Megaphone,
-  Receipt, FileSignature, FileText, Plus,
+  Receipt, FileSignature, FileText, Plus, CheckCircle2,
 } from 'lucide-react'
 import { usePortalThread, useSendPortalReply, useMarkPortalRead } from '@/features/messages/hooks/useMessages'
 import { MessageBubble } from '@/features/messages/components/MessageBubble'
@@ -135,6 +135,27 @@ function SubTabBar({ tabs, active, onChange }: {
   )
 }
 
+function StatTile({ icon: Icon, label, value, tone = 'default' }: {
+  icon: React.ComponentType<{ size?: number; className?: string }>
+  label: string
+  value: string
+  tone?: 'default' | 'warn' | 'good'
+}) {
+  const iconBg = tone === 'warn' ? 'bg-[#FFFAEB]' : tone === 'good' ? 'bg-[#F0FDF4]' : 'bg-[#F1F5FD]'
+  const iconColor = tone === 'warn' ? 'text-[#B45309]' : tone === 'good' ? 'text-[#16A34A]' : 'text-[#2563EB]'
+  return (
+    <div className="bg-white rounded-xl border border-[#E4ECFC] px-4 py-3.5 flex items-center gap-3">
+      <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', iconBg)}>
+        <Icon size={16} className={iconColor} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[17px] font-bold text-[#0F172A] leading-tight truncate">{value}</p>
+        <p className="text-[11.5px] text-[#64748B] truncate">{label}</p>
+      </div>
+    </div>
+  )
+}
+
 // ─── Portal Update Entry ──────────────────────────────────────────────────────
 
 function PortalUpdateEntry({ update }: { update: PortalProjectUpdate }) {
@@ -205,6 +226,43 @@ function PortalMeetingCard({ meeting }: { meeting: PortalMeeting }) {
   )
 }
 
+// ─── Meetings Tab ──────────────────────────────────────────────────────────────
+
+function MeetingsTab({ meetings }: { meetings: PortalMeeting[] }) {
+  const now = new Date()
+  const upcoming = meetings
+    .filter(m => m.status === 'SCHEDULED' && new Date(m.scheduledAt) >= now)
+    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
+  const past = meetings
+    .filter(m => !(m.status === 'SCHEDULED' && new Date(m.scheduledAt) >= now))
+    .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())
+
+  return (
+    <div className="space-y-6">
+      {upcoming.length > 0 && (
+        <div>
+          <h2 className="text-[12.5px] font-semibold text-[#64748B] uppercase tracking-wide mb-2.5">
+            Upcoming ({upcoming.length})
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {upcoming.map(m => <PortalMeetingCard key={m.id} meeting={m} />)}
+          </div>
+        </div>
+      )}
+      {past.length > 0 && (
+        <div>
+          <h2 className="text-[12.5px] font-semibold text-[#64748B] uppercase tracking-wide mb-2.5">
+            Past ({past.length})
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {past.map(m => <PortalMeetingCard key={m.id} meeting={m} />)}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Portal Messages Panel ────────────────────────────────────────────────────
 
 function PortalMessagesPanel({ token }: { token: string }) {
@@ -224,8 +282,11 @@ function PortalMessagesPanel({ token }: { token: string }) {
   const businessName = data?.businessName ?? 'Your service provider'
 
   return (
-    <SectionCard title={`Messages from ${businessName}`}>
-      <div className="px-4 py-4 flex flex-col gap-3 min-h-[180px]">
+    <div className="bg-white rounded-xl border border-[#E4ECFC] overflow-hidden flex flex-col h-[calc(100dvh-11.5rem)] min-h-[420px] max-h-[720px]">
+      <div className="px-5 py-3.5 border-b border-[#E4ECFC] shrink-0">
+        <h2 className="text-[13.5px] font-semibold text-[#0F172A]">Messages from {businessName}</h2>
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
         {messages.length === 0 && (
           <p className="text-center text-[13px] text-[#94A3B8] py-6">No messages yet from {businessName}.</p>
         )}
@@ -234,12 +295,14 @@ function PortalMessagesPanel({ token }: { token: string }) {
         ))}
         <div ref={bottomRef} />
       </div>
-      <ReplyComposer
-        isPending={sendReply.isPending}
-        placeholder={`Message ${businessName}…`}
-        onSend={async body => { await sendReply.mutateAsync(body) }}
-      />
-    </SectionCard>
+      <div className="shrink-0">
+        <ReplyComposer
+          isPending={sendReply.isPending}
+          placeholder={`Message ${businessName}…`}
+          onSend={async body => { await sendReply.mutateAsync(body) }}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -288,211 +351,233 @@ function OverviewTab({
 
   const hasLinkedPending = linkedProposals.length > 0 || linkedContracts.length > 0 || linkedInvoices.length > 0
   const hasUnlinkedPending = unlinkedProposals.length > 0 || unlinkedContracts.length > 0 || unlinkedInvoices.length > 0
+  const totalPending = linkedProposals.length + linkedContracts.length + linkedInvoices.length
+    + unlinkedProposals.length + unlinkedContracts.length + unlinkedInvoices.length
+
+  const amountDue = [...linkedInvoices, ...unlinkedInvoices]
+    .reduce((s, i) => s + Number(i.total), 0)
+
+  const nextMeeting = upcomingMeetings[0] ?? null
+  const visibleFiles = portalFiles.slice(0, 5)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
 
-      {/* Welcome card */}
-      <div className="bg-white rounded-xl border border-[#E4ECFC] px-5 py-5">
+      {/* Welcome */}
+      <div>
         <p className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider mb-1">Client Portal</p>
-        <h1 className="text-[20px] font-bold text-[#0F172A]">Welcome, {clientFirstName}</h1>
+        <h1 className="text-[22px] font-bold text-[#0F172A]">Welcome, {clientFirstName}</h1>
         <p className="text-[13px] text-[#64748B] mt-0.5">
           Workspace with <span className="font-semibold text-[#1E293B]">{freelancerName}</span>
         </p>
-        {(activeCount > 0 || upcomingMeetings.length > 0) && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {activeCount > 0 && (
-              <button
-                onClick={() => onOpenProject(projects.find(p => p.status === 'ACTIVE')?.id ?? projects[0]?.id ?? '')}
-                className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#475569] bg-[#F8FAFC] border border-[#E4ECFC] px-3 py-1.5 rounded-lg hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
-              >
-                <FolderKanban size={13} className="text-[#2563EB]" />
-                {activeCount} active {activeCount === 1 ? 'project' : 'projects'}
-              </button>
-            )}
-            {upcomingMeetings.length > 0 && (
-              <span className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#475569] bg-[#F8FAFC] border border-[#E4ECFC] px-3 py-1.5 rounded-lg">
-                <Video size={13} className="text-[#2563EB]" />
-                {upcomingMeetings.length} upcoming {upcomingMeetings.length === 1 ? 'meeting' : 'meetings'}
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Linked pending items — compact rows with "Open in project" */}
-      {hasLinkedPending && (
-        <SectionCard>
-          <div className="px-5 py-3.5 border-b border-[#E4ECFC] flex items-center gap-2">
-            <Bell size={14} className="text-[#B45309]" />
-            <h2 className="text-[13.5px] font-semibold text-[#0F172A]">Needs your attention</h2>
-            <span className="ml-auto text-[11px] font-bold bg-[#FFFAEB] text-[#B45309] px-2 py-0.5 rounded-full">
-              {linkedProposals.length + linkedContracts.length + linkedInvoices.length}
-            </span>
-          </div>
-          <div className="divide-y divide-[#F8FAFC]">
-            {linkedInvoices.map(i => (
-              <div key={i.id} className="flex items-center gap-3 px-5 py-3">
-                <div className={cn(
-                  'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-                  i.status === 'OVERDUE' ? 'bg-[#FEF3F2]' : 'bg-[#FFFAEB]',
-                )}>
-                  <Receipt size={14} className={i.status === 'OVERDUE' ? 'text-[#D92D20]' : 'text-[#B45309]'} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12.5px] font-semibold text-[#1E293B] truncate">
-                    {i.status === 'OVERDUE' ? '⚠ ' : ''}Invoice {i.invoiceNumber}
-                    {' — '}₹{fmt(i.total)}
-                  </p>
-                  <p className="text-[11.5px] text-[#64748B]">
-                    {i.status === 'OVERDUE' ? 'Overdue' : 'Awaiting payment'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => onOpenProject(i.projectId!, 'invoices')}
-                  className="flex items-center gap-1 text-[12px] font-semibold text-[#2563EB] hover:underline shrink-0"
-                >
-                  View <ChevronRight size={12} />
-                </button>
-              </div>
-            ))}
-            {linkedContracts.map(c => (
-              <div key={c.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="w-8 h-8 rounded-lg bg-[#F0FDF4] flex items-center justify-center shrink-0">
-                  <FileSignature size={14} className="text-[#16A34A]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12.5px] font-semibold text-[#1E293B] truncate">"{c.title}"</p>
-                  <p className="text-[11.5px] text-[#64748B]">Awaiting your signature</p>
-                </div>
-                <button
-                  onClick={() => onOpenProject(c.projectId!, 'contracts')}
-                  className="flex items-center gap-1 text-[12px] font-semibold text-[#2563EB] hover:underline shrink-0"
-                >
-                  Sign <ChevronRight size={12} />
-                </button>
-              </div>
-            ))}
-            {linkedProposals.map(p => (
-              <div key={p.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="w-8 h-8 rounded-lg bg-[#F0F9FF] flex items-center justify-center shrink-0">
-                  <FileText size={14} className="text-[#0369A1]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12.5px] font-semibold text-[#1E293B] truncate">"{p.title}"</p>
-                  <p className="text-[11.5px] text-[#64748B]">Awaiting your response</p>
-                </div>
-                <button
-                  onClick={() => onOpenProject(p.projectId!, 'proposals')}
-                  className="flex items-center gap-1 text-[12px] font-semibold text-[#2563EB] hover:underline shrink-0"
-                >
-                  Review <ChevronRight size={12} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </SectionCard>
-      )}
-
-      {/* Unlinked pending docs — full interactive cards */}
-      {hasUnlinkedPending && (
-        <SectionCard title="Documents awaiting action">
-          <div className="px-4 py-4 space-y-3">
-            {unlinkedInvoices.map(i => (
-              <PortalInvoiceCard
-                key={i.id} invoice={i} appUrl={APP_URL} portalToken={token}
-                clientName={data.client.name} clientEmail={data.client.email ?? ''}
-                freelancerName={data.freelancer.businessName ?? ''}
-                onStatusChange={onInvoiceStatusChange}
-              />
-            ))}
-            {unlinkedContracts.map(c => (
-              <PortalContractCard key={c.id} contract={c} appUrl={APP_URL} onStatusChange={onContractStatusChange} />
-            ))}
-            {unlinkedProposals.map(p => (
-              <PortalProposalCard key={p.id} proposal={p} appUrl={APP_URL} onStatusChange={onProposalStatusChange} />
-            ))}
-          </div>
-        </SectionCard>
-      )}
-
-      {/* Recent updates across projects */}
-      {recentUpdates.length > 0 && (
-        <SectionCard title="Recent updates">
-          <div className="px-5 py-4 space-y-5">
-            {recentUpdates.map(u => (
-              <div key={u.id}>
-                <button
-                  onClick={() => onOpenProject(u.projectId, 'updates')}
-                  className="flex items-center gap-1 text-[11px] font-semibold text-[#2563EB] hover:underline mb-1.5"
-                >
-                  <FolderKanban size={10} />
-                  {u.projectName}
-                  <ChevronRight size={10} />
-                </button>
-                <PortalUpdateEntry update={u} />
-              </div>
-            ))}
-          </div>
-        </SectionCard>
-      )}
-
-      {/* Upcoming meetings preview */}
-      {upcomingMeetings.length > 0 && (
-        <SectionCard title="Upcoming meetings">
-          <div className="px-4 py-4 space-y-3">
-            {upcomingMeetings.slice(0, 2).map(m => <PortalMeetingCard key={m.id} meeting={m} />)}
-          </div>
-        </SectionCard>
-      )}
-
-      {/* Shared files */}
-      {portalFiles.length > 0 && (
-        <SectionCard title={`Shared files (${portalFiles.length})`}>
-          <div className="divide-y divide-[#F8FAFC]">
-            {portalFiles.map((f: PortalAttachment) => {
-              let icon = <FileIconLucide size={14} className="text-[#94A3B8] shrink-0" />
-              if (f.mimeType.startsWith('image/'))  icon = <FileImage   size={14} className="text-[#94A3B8] shrink-0" />
-              if (f.mimeType === 'application/pdf') icon = <FileText    size={14} className="text-[#D92D20] shrink-0" />
-              if (f.mimeType.includes('zip') || f.mimeType.includes('tar') || f.mimeType.includes('rar'))
-                                                    icon = <FileArchive size={14} className="text-[#F79009] shrink-0" />
-              return (
-                <div key={f.id} className="flex items-center gap-3 px-4 py-3">
-                  {icon}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12.5px] font-semibold text-[#1E293B] truncate">{f.fileName}</p>
-                    <p className="text-[11px] text-[#94A3B8]">
-                      {humanSize(f.fileSize)}
-                      {f.parentLabel && <> · <span className="text-[#64748B]">{f.parentLabel}</span></>}
-                    </p>
-                  </div>
-                  {f.fileUrl ? (
-                    <a
-                      href={f.fileUrl} download={f.fileName}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] text-white text-[12px] font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0"
-                    >
-                      <Download size={12} strokeWidth={2.5} /> Download
-                    </a>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-[12px] text-[#94A3B8] shrink-0">
-                      <Lock size={12} strokeWidth={2} /> Locked
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </SectionCard>
-      )}
-
-      {/* Empty state */}
-      {!hasLinkedPending && !hasUnlinkedPending && recentUpdates.length === 0 && upcomingMeetings.length === 0 && (
-        <EmptyState
-          icon={FolderKanban}
-          label="You're all caught up"
-          sub="No pending items. Check Projects for your latest work."
+      {/* Stat row — glanceable status, no reading required */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile icon={FolderKanban} label={activeCount === 1 ? 'Active project' : 'Active projects'} value={String(activeCount)} />
+        <StatTile
+          icon={Bell} label={totalPending === 1 ? 'Pending action' : 'Pending actions'} value={String(totalPending)}
+          tone={totalPending > 0 ? 'warn' : 'good'}
         />
-      )}
+        <StatTile
+          icon={IndianRupee} label="Amount due" value={amountDue > 0 ? `₹${fmt(amountDue)}` : '₹0'}
+          tone={amountDue > 0 ? 'warn' : 'good'}
+        />
+        <StatTile
+          icon={Video} label={nextMeeting ? 'Next meeting' : 'No meetings'}
+          value={nextMeeting ? new Date(nextMeeting.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
+        />
+      </div>
+
+      {/* Dashboard grid — priority feed (left, wider) + quick info (right, narrower) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* ── Left: priority feed ── */}
+        <div className="lg:col-span-2 space-y-5">
+
+          {/* Needs your attention — linked (compact) + unlinked (full action cards) */}
+          {(hasLinkedPending || hasUnlinkedPending) ? (
+            <SectionCard>
+              <div className="px-5 py-3.5 border-b border-[#E4ECFC] flex items-center gap-2">
+                <Bell size={14} className="text-[#B45309]" />
+                <h2 className="text-[13.5px] font-semibold text-[#0F172A]">Needs your attention</h2>
+                <span className="ml-auto text-[11px] font-bold bg-[#FFFAEB] text-[#B45309] px-2 py-0.5 rounded-full">
+                  {totalPending}
+                </span>
+              </div>
+
+              {hasLinkedPending && (
+                <div className="divide-y divide-[#F8FAFC]">
+                  {linkedInvoices.map(i => (
+                    <div key={i.id} className="flex items-center gap-3 px-5 py-3">
+                      <div className={cn(
+                        'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
+                        i.status === 'OVERDUE' ? 'bg-[#FEF3F2]' : 'bg-[#FFFAEB]',
+                      )}>
+                        <Receipt size={14} className={i.status === 'OVERDUE' ? 'text-[#D92D20]' : 'text-[#B45309]'} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12.5px] font-semibold text-[#1E293B] truncate">
+                          {i.status === 'OVERDUE' ? '⚠ ' : ''}Invoice {i.invoiceNumber}
+                          {' — '}₹{fmt(i.total)}
+                        </p>
+                        <p className="text-[11.5px] text-[#64748B]">
+                          {i.status === 'OVERDUE' ? 'Overdue' : 'Awaiting payment'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => onOpenProject(i.projectId!, 'invoices')}
+                        className="flex items-center gap-1 text-[12px] font-semibold text-[#2563EB] hover:underline shrink-0"
+                      >
+                        View <ChevronRight size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  {linkedContracts.map(c => (
+                    <div key={c.id} className="flex items-center gap-3 px-5 py-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#F0FDF4] flex items-center justify-center shrink-0">
+                        <FileSignature size={14} className="text-[#16A34A]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12.5px] font-semibold text-[#1E293B] truncate">"{c.title}"</p>
+                        <p className="text-[11.5px] text-[#64748B]">Awaiting your signature</p>
+                      </div>
+                      <button
+                        onClick={() => onOpenProject(c.projectId!, 'contracts')}
+                        className="flex items-center gap-1 text-[12px] font-semibold text-[#2563EB] hover:underline shrink-0"
+                      >
+                        Sign <ChevronRight size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  {linkedProposals.map(p => (
+                    <div key={p.id} className="flex items-center gap-3 px-5 py-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#F0F9FF] flex items-center justify-center shrink-0">
+                        <FileText size={14} className="text-[#0369A1]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12.5px] font-semibold text-[#1E293B] truncate">"{p.title}"</p>
+                        <p className="text-[11.5px] text-[#64748B]">Awaiting your response</p>
+                      </div>
+                      <button
+                        onClick={() => onOpenProject(p.projectId!, 'proposals')}
+                        className="flex items-center gap-1 text-[12px] font-semibold text-[#2563EB] hover:underline shrink-0"
+                      >
+                        Review <ChevronRight size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Unlinked docs — no project to drill into, so the full action card lives right here */}
+              {hasUnlinkedPending && (
+                <div className={cn('px-4 py-4 space-y-3', hasLinkedPending && 'border-t border-[#E4ECFC] bg-[#F8FAFC]/60')}>
+                  {unlinkedInvoices.map(i => (
+                    <PortalInvoiceCard
+                      key={i.id} invoice={i} appUrl={APP_URL} portalToken={token}
+                      clientName={data.client.name} clientEmail={data.client.email ?? ''}
+                      freelancerName={data.freelancer.businessName ?? ''}
+                      onStatusChange={onInvoiceStatusChange}
+                    />
+                  ))}
+                  {unlinkedContracts.map(c => (
+                    <PortalContractCard key={c.id} contract={c} appUrl={APP_URL} onStatusChange={onContractStatusChange} />
+                  ))}
+                  {unlinkedProposals.map(p => (
+                    <PortalProposalCard key={p.id} proposal={p} appUrl={APP_URL} onStatusChange={onProposalStatusChange} />
+                  ))}
+                </div>
+              )}
+            </SectionCard>
+          ) : (
+            <div className="bg-white rounded-xl border border-[#E4ECFC] px-5 py-8 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#F0FDF4] flex items-center justify-center shrink-0">
+                <CheckCircle2 size={18} className="text-[#16A34A]" />
+              </div>
+              <div>
+                <p className="text-[13.5px] font-semibold text-[#0F172A]">You're all caught up</p>
+                <p className="text-[12.5px] text-[#64748B]">Nothing needs your action right now.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Recent updates across projects */}
+          {recentUpdates.length > 0 && (
+            <SectionCard title="Recent updates">
+              <div className="px-5 py-4 space-y-5">
+                {recentUpdates.map(u => (
+                  <div key={u.id}>
+                    <button
+                      onClick={() => onOpenProject(u.projectId, 'updates')}
+                      className="flex items-center gap-1 text-[11px] font-semibold text-[#2563EB] hover:underline mb-1.5"
+                    >
+                      <FolderKanban size={10} />
+                      {u.projectName}
+                      <ChevronRight size={10} />
+                    </button>
+                    <PortalUpdateEntry update={u} />
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
+          )}
+        </div>
+
+        {/* ── Right: quick info sidebar ── */}
+        <div className="space-y-5">
+
+          {/* Next meeting only — full list lives in the Meetings tab */}
+          {nextMeeting && (
+            <SectionCard title="Next meeting">
+              <div className="p-4">
+                <PortalMeetingCard meeting={nextMeeting} />
+              </div>
+            </SectionCard>
+          )}
+
+          {/* Shared files — condensed, top 5 */}
+          {portalFiles.length > 0 && (
+            <SectionCard title={`Shared files (${portalFiles.length})`}>
+              <div className="divide-y divide-[#F8FAFC]">
+                {visibleFiles.map((f: PortalAttachment) => {
+                  let icon = <FileIconLucide size={13} className="text-[#94A3B8] shrink-0" />
+                  if (f.mimeType.startsWith('image/'))  icon = <FileImage   size={13} className="text-[#94A3B8] shrink-0" />
+                  if (f.mimeType === 'application/pdf') icon = <FileText    size={13} className="text-[#D92D20] shrink-0" />
+                  if (f.mimeType.includes('zip') || f.mimeType.includes('tar') || f.mimeType.includes('rar'))
+                                                        icon = <FileArchive size={13} className="text-[#F79009] shrink-0" />
+                  return (
+                    <div key={f.id} className="flex items-center gap-2.5 px-4 py-2.5">
+                      {icon}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-semibold text-[#1E293B] truncate">{f.fileName}</p>
+                        <p className="text-[10.5px] text-[#94A3B8]">{humanSize(f.fileSize)}</p>
+                      </div>
+                      {f.fileUrl ? (
+                        <a
+                          href={f.fileUrl} download={f.fileName}
+                          className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#F1F5FD] text-[#2563EB] hover:bg-[#DBEAFE] transition-colors shrink-0"
+                        >
+                          <Download size={12} strokeWidth={2.5} />
+                        </a>
+                      ) : (
+                        <Lock size={12} strokeWidth={2} className="text-[#94A3B8] shrink-0" />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              {portalFiles.length > visibleFiles.length && (
+                <div className="px-4 py-2.5 border-t border-[#E4ECFC] text-center">
+                  <span className="text-[11.5px] text-[#94A3B8]">
+                    +{portalFiles.length - visibleFiles.length} more in Projects
+                  </span>
+                </div>
+              )}
+            </SectionCard>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -511,7 +596,7 @@ function ProjectList({ projects, proposals, contracts, invoices, onOpenProject }
   }
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
       {projects.map(p => {
         const totalHours    = p.timeEntries.reduce((s, e) => s + e.durationMins, 0) / 60
         const projProposals = proposals.filter(pr => pr.projectId === p.id)
@@ -829,7 +914,11 @@ function ProjectDetail({
         project.timeEntries.length === 0 && project.expenses.length === 0
           ? <EmptyState icon={Clock} label="No time or expenses logged" sub="Logged time and expenses will appear here" />
           : (
-            <div className="space-y-4">
+            <div className={cn(
+              project.timeEntries.length > 0 && project.expenses.length > 0
+                ? 'grid grid-cols-1 md:grid-cols-2 gap-4 items-start'
+                : 'space-y-4',
+            )}>
               {project.timeEntries.length > 0 && (
                 <SectionCard title="Time Log">
                   <div className="divide-y divide-[#F8FAFC]">
@@ -941,14 +1030,19 @@ function ProjectDetail({
             </div>
           )}
 
-          {/* Project Sign-off Approvals */}
-          {(project.approvalRequests?.length ?? 0) > 0 && (
-            <div className="space-y-3">
-              {project.approvalRequests!.map(ar => (
-                <PortalApprovalCard key={ar.id} approvalRequest={ar} token={token} />
-              ))}
-            </div>
-          )}
+          {/* Project Sign-off — latest AR only */}
+          {(project.approvalRequests?.length ?? 0) > 0 && (() => {
+            const latestAr = project.approvalRequests![0]
+            const review   = project.reviews?.[0] ?? null
+            return (
+              <PortalApprovalCard
+                key={latestAr.id}
+                approvalRequest={latestAr}
+                token={token}
+                review={review}
+              />
+            )
+          })()}
 
           {/* Empty state */}
           {(project.changeRequests?.length ?? 0) === 0 &&
@@ -1049,7 +1143,7 @@ export default function ClientPortalPage() {
 
       {/* ─── Header ─────────────────────────────────────────────────────── */}
       <header className="bg-white border-b border-[#E4ECFC] sticky top-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             {isLoading ? (
               <Skeleton className="h-7 w-28 rounded-lg" />
@@ -1079,11 +1173,11 @@ export default function ClientPortalPage() {
       </header>
 
       {/* ─── Body ───────────────────────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-        <div className="flex gap-6 items-start">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex gap-8 items-start">
 
           {/* Sidebar — desktop only */}
-          <aside className="hidden md:flex flex-col gap-1 w-48 shrink-0 sticky top-20">
+          <aside className="hidden md:flex flex-col gap-1 w-52 shrink-0 sticky top-20">
             {NAV_ITEMS.map(({ key, label, Icon }) => (
               <button
                 key={key}
@@ -1155,20 +1249,23 @@ export default function ClientPortalPage() {
 
                 {tab === 'projects' && (
                   activeProject ? (
-                    <ProjectDetail
-                      project={activeProject}
-                      proposals={activeProposals}
-                      contracts={activeContracts}
-                      invoices={activeInvoices}
-                      contactStage={data?.client.stage}
-                      token={token!}
-                      initialTab={projectTab}
-                      onProposalStatusChange={handleProposalStatusChange}
-                      onContractStatusChange={handleContractStatusChange}
-                      onInvoiceStatusChange={handleInvoiceStatusChange}
-                      onBack={closeProject}
-                    />
+                    <div className="max-w-3xl">
+                      <ProjectDetail
+                        project={activeProject}
+                        proposals={activeProposals}
+                        contracts={activeContracts}
+                        invoices={activeInvoices}
+                        contactStage={data?.client.stage}
+                        token={token!}
+                        initialTab={projectTab}
+                        onProposalStatusChange={handleProposalStatusChange}
+                        onContractStatusChange={handleContractStatusChange}
+                        onInvoiceStatusChange={handleInvoiceStatusChange}
+                        onBack={closeProject}
+                      />
+                    </div>
                   ) : (
+                    // List view — no width cap, so project cards can lay out in a grid
                     <ProjectList
                       projects={activeProjects}
                       proposals={activeProposals}
@@ -1180,17 +1277,15 @@ export default function ClientPortalPage() {
                 )}
 
                 {tab === 'messages' && token && (
-                  <PortalMessagesPanel token={token} />
+                  <div className="max-w-3xl">
+                    <PortalMessagesPanel token={token} />
+                  </div>
                 )}
 
                 {tab === 'meetings' && (
                   activeMeetings.length === 0
                     ? <EmptyState icon={Video} label="No meetings scheduled" sub="Your meetings will appear here" />
-                    : (
-                      <div className="space-y-3">
-                        {activeMeetings.map(m => <PortalMeetingCard key={m.id} meeting={m} />)}
-                      </div>
-                    )
+                    : <MeetingsTab meetings={activeMeetings} />
                 )}
               </>
             )}

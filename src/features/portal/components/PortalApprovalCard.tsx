@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { CheckCircle, RefreshCw, AlertCircle, Loader2 } from 'lucide-react'
+import { CheckCircle, RefreshCw, AlertCircle, Loader2, Star, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { api } from '@/lib/api'
 import { useDecideApproval, useResendApprovalOtp, type PortalApprovalRequest } from '../hooks/usePortal'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -23,9 +24,10 @@ const STATUS_STYLE: Record<string, string> = {
 interface Props {
   approvalRequest: PortalApprovalRequest
   token:           string
+  review?:         { token: string; status: string } | null
 }
 
-export default function PortalApprovalCard({ approvalRequest, token }: Props) {
+export default function PortalApprovalCard({ approvalRequest, token, review }: Props) {
   const queryClient = useQueryClient()
 
   const [mode,           setMode]           = useState<'idle' | 'otp' | 'revision'>('idle')
@@ -36,6 +38,14 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
   // Optimistic: immediately reflect the decision locally so the card
   // doesn't revert to "Approve with OTP" while the portal query refetches.
   const [localStatus, setLocalStatus] = useState<string | null>(null)
+
+  // Inline review state
+  const [reviewRating,    setReviewRating]    = useState(0)
+  const [reviewHover,     setReviewHover]     = useState(0)
+  const [reviewBody,      setReviewBody]      = useState('')
+  const [reviewSubmitting, setReviewSubmitting] = useState(false)
+  const [reviewError,     setReviewError]     = useState('')
+  const [reviewDone,      setReviewDone]      = useState(review?.status === 'SUBMITTED')
 
   const decide    = useDecideApproval(token)
   const resendOtp = useResendApprovalOtp(token)
@@ -266,15 +276,102 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
           </>
         )}
 
-        {/* APPROVED — confirmation message */}
+        {/* APPROVED — sign-off confirmation + inline review */}
         {effectiveStatus === 'APPROVED' && (
-          <div className="flex items-center gap-2 text-[#027A48]">
-            <CheckCircle size={16} />
-            <p className="text-[13px] font-semibold">Project signed off</p>
-            {approvalRequest.decidedAt && (
-              <span className="text-[12px] text-[#98A2B3] ml-1">
-                · {new Date(approvalRequest.decidedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </span>
+          <div className="space-y-4">
+            {/* Sign-off confirmation row */}
+            <div className="flex items-center gap-2 text-[#027A48]">
+              <CheckCircle size={16} />
+              <p className="text-[13px] font-semibold">Project signed off</p>
+              {approvalRequest.decidedAt && (
+                <span className="text-[12px] text-[#98A2B3] ml-1">
+                  · {new Date(approvalRequest.decidedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+              )}
+            </div>
+
+            {/* Inline review — only when review record exists */}
+            {review && (
+              <div className="border-t border-[#EAECF0] pt-4">
+                {reviewDone ? (
+                  <div className="flex items-center gap-2 text-[#027A48]">
+                    <Star size={14} className="fill-amber-400 text-amber-400" />
+                    <p className="text-[13px] font-semibold">Thank you for your review!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare size={14} className="text-[#667085]" />
+                      <p className="text-[13px] font-semibold text-[#344054]">How was your experience?</p>
+                    </div>
+                    {/* Star rating */}
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewRating(star)}
+                          onMouseEnter={() => setReviewHover(star)}
+                          onMouseLeave={() => setReviewHover(0)}
+                          style={{ minHeight: '36px', minWidth: '36px' }}
+                          className="flex items-center justify-center rounded-lg transition-transform hover:scale-110"
+                        >
+                          <Star
+                            size={24}
+                            className={cn(
+                              'transition-colors',
+                              (reviewHover || reviewRating) >= star
+                                ? 'fill-amber-400 text-amber-400'
+                                : 'text-[#D0D5DD]',
+                            )}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    {/* Optional note */}
+                    <textarea
+                      value={reviewBody}
+                      onChange={e => setReviewBody(e.target.value)}
+                      placeholder="Share a few words about the project (optional)…"
+                      rows={3}
+                      maxLength={1000}
+                      className="w-full px-3 py-2 text-[13px] text-[#344054] border border-[#EAECF0] rounded-lg focus:outline-none focus:border-[#667085] resize-none"
+                    />
+                    {reviewError && (
+                      <p className="text-[12px] text-[#D92D20]" role="alert">{reviewError}</p>
+                    )}
+                    <button
+                      onClick={async () => {
+                        if (reviewRating === 0) {
+                          setReviewError('Please select a star rating.')
+                          return
+                        }
+                        setReviewError('')
+                        setReviewSubmitting(true)
+                        try {
+                          await api.post(`/reviews/token/${review.token}/submit`, {
+                            rating: reviewRating,
+                            body:   reviewBody.trim() || undefined,
+                          })
+                          setReviewDone(true)
+                        } catch {
+                          setReviewError('Failed to submit review. Please try again.')
+                        } finally {
+                          setReviewSubmitting(false)
+                        }
+                      }}
+                      disabled={reviewSubmitting || reviewRating === 0}
+                      style={{ minHeight: '40px' }}
+                      className="flex items-center justify-center gap-1.5 px-5 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13px] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {reviewSubmitting
+                        ? <><Loader2 size={13} className="animate-spin" /> Submitting…</>
+                        : 'Submit Review'
+                      }
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
