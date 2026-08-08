@@ -6,7 +6,7 @@ import { z } from 'zod'
 import {
   ArrowLeft, FolderKanban, Building2, Calendar, IndianRupee,
   Clock, Receipt, FileText, PenLine, Wallet, Pencil, Archive,
-  X, Loader2, Plus, ChevronDown, ChevronUp,
+  X, Loader2, Plus, ChevronDown, ChevronUp, CheckSquare, AlertCircle,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import {
@@ -23,6 +23,7 @@ import ProjectTasksTab from '@/features/tasks/components/ProjectTasksTab'
 import ProjectTeamTab from '@/features/projects/components/ProjectTeamTab'
 import ProjectUpdatesTab from '@/features/projects/components/ProjectUpdatesTab'
 import ProjectChangeRequestsTab from '@/features/projects/components/ProjectChangeRequestsTab'
+import { useRequestSignoff, useProjectApprovalRequests } from '@/features/projects/hooks/useChangeRequests'
 import InvoiceQuickView, { type InvoiceSnap } from '@/features/invoices/components/InvoiceQuickView'
 import ProposalQuickView, { type ProposalSnap } from '@/features/proposals/components/ProposalQuickView'
 import ContractQuickView, { type ContractSnap } from '@/features/contracts/components/ContractQuickView'
@@ -252,9 +253,11 @@ export default function ProjectPage() {
 
   const { data: project, isLoading } = useProject(id!)
   const { data: stats,   isLoading: statsLoading } = useProjectStats(id!)
-  const deleteMut  = useDeleteProject()
-  const archiveMut = useArchiveProject()
+  const deleteMut    = useDeleteProject()
+  const archiveMut   = useArchiveProject()
   const unarchiveMut = useUnarchiveProject()
+  const signoffMut   = useRequestSignoff(id!)
+  const { data: approvalRequests } = useProjectApprovalRequests(id!)
 
   if (isLoading) {
     return (
@@ -317,6 +320,47 @@ export default function ProjectPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {project.status === 'ACTIVE' && (() => {
+            const pendingSignoff   = approvalRequests?.find(ar => ar.kind === 'PROJECT_SIGNOFF' && ar.status === 'PENDING')
+            const revisionSignoff  = approvalRequests?.find(ar => ar.kind === 'PROJECT_SIGNOFF' && ar.status === 'REVISION_REQUESTED')
+            if (pendingSignoff) {
+              return (
+                <span className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-amber-200 dark:border-amber-800 text-[12px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30">
+                  <Loader2 size={12} className="animate-spin" />
+                  Awaiting client sign-off
+                </span>
+              )
+            }
+            if (revisionSignoff) {
+              return (
+                <button
+                  onClick={() => signoffMut.mutate(undefined, {
+                    onSuccess: () => toast.success('Sign-off re-requested'),
+                    onError:   (e: unknown) => toast.error(e instanceof Error ? e.message : 'Could not send sign-off request'),
+                  })}
+                  disabled={signoffMut.isPending}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-200 dark:border-red-800 text-[12px] font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title={revisionSignoff.decisionNote ?? 'Client requested revision'}
+                >
+                  {signoffMut.isPending ? <Loader2 size={12} className="animate-spin" /> : <AlertCircle size={12} />}
+                  Revision requested — Re-send
+                </button>
+              )
+            }
+            return (
+              <button
+                onClick={() => signoffMut.mutate(undefined, {
+                  onSuccess: () => toast.success('Sign-off request sent to client'),
+                  onError:   (e: unknown) => toast.error(e instanceof Error ? e.message : 'Could not send sign-off request'),
+                })}
+                disabled={signoffMut.isPending}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-indigo-200 dark:border-indigo-800 text-[12px] font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-950/60 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {signoffMut.isPending ? <Loader2 size={12} className="animate-spin" /> : <CheckSquare size={12} />}
+                Request Sign-off
+              </button>
+            )
+          })()}
           <button
             onClick={() => setShowEdit(true)}
             className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12px] font-medium text-[#344054] dark:text-[#C2C8D8] bg-white dark:bg-[#13141A] hover:border-[#D0D5DD] dark:hover:border-[#3D4258] transition-colors"
@@ -340,6 +384,21 @@ export default function ProjectPage() {
           )}
         </div>
       </div>
+
+      {/* Revision note banner — shown when client requested revision on sign-off */}
+      {(() => {
+        const revisionSignoff = approvalRequests?.find(ar => ar.kind === 'PROJECT_SIGNOFF' && ar.status === 'REVISION_REQUESTED')
+        if (!revisionSignoff?.decisionNote) return null
+        return (
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+            <AlertCircle size={15} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[12.5px] font-semibold text-amber-800 dark:text-amber-300">Client requested revision before sign-off</p>
+              <p className="text-[12px] text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">{revisionSignoff.decisionNote}</p>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

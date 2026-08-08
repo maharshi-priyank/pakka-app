@@ -33,21 +33,43 @@ export function useChangeRequests(projectId: string) {
   })
 }
 
+export function useRequestSignoff(projectId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post(`/projects/${projectId}/approval-requests/signoff`)
+      return data.data
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['project', projectId] }),
+  })
+}
+
+export function useProjectApprovalRequests(projectId: string) {
+  return useQuery({
+    queryKey: ['project-approval-requests', projectId],
+    queryFn: async () => {
+      const { data } = await api.get<{ data: ApprovalRequest[] }>(`/projects/${projectId}/approval-requests`)
+      return data.data
+    },
+    enabled: !!projectId,
+  })
+}
+
 export function useRespondChangeRequest(projectId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async ({
       id,
-      action,
-      freelancerNote,
+      responseType,
+      note,
     }: {
       id: string
-      action: string
-      freelancerNote?: string
+      responseType: string
+      note?: string
     }) => {
       const { data } = await api.post(
         `/projects/${projectId}/change-requests/${id}/respond`,
-        { action, freelancerNote },
+        { responseType, note },
       )
       return data.data
     },

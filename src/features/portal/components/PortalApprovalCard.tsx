@@ -28,11 +28,14 @@ interface Props {
 export default function PortalApprovalCard({ approvalRequest, token }: Props) {
   const queryClient = useQueryClient()
 
-  const [mode,         setMode]         = useState<'idle' | 'otp' | 'revision'>('idle')
-  const [otpValue,     setOtpValue]     = useState('')
-  const [decisionNote, setDecisionNote] = useState('')
-  const [error,        setError]        = useState('')
+  const [mode,           setMode]           = useState<'idle' | 'otp' | 'revision'>('idle')
+  const [otpValue,       setOtpValue]       = useState('')
+  const [decisionNote,   setDecisionNote]   = useState('')
+  const [error,          setError]          = useState('')
   const [resendCooldown, setResendCooldown] = useState(0)
+  // Optimistic: immediately reflect the decision locally so the card
+  // doesn't revert to "Approve with OTP" while the portal query refetches.
+  const [localStatus, setLocalStatus] = useState<string | null>(null)
 
   const decide    = useDecideApproval(token)
   const resendOtp = useResendApprovalOtp(token)
@@ -52,6 +55,7 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
     setError('')
     try {
       await decide.mutateAsync({ id: approvalRequest.id, action: 'APPROVE', otp: otpValue })
+      setLocalStatus('APPROVED')
       queryClient.invalidateQueries({ queryKey: ['portal', token] })
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? ''
@@ -67,6 +71,7 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
     setError('')
     try {
       await decide.mutateAsync({ id: approvalRequest.id, action: 'REQUEST_REVISION', decisionNote: decisionNote.trim() })
+      setLocalStatus('REVISION_REQUESTED')
       queryClient.invalidateQueries({ queryKey: ['portal', token] })
     } catch {
       setError('Failed to submit revision request. Please try again.')
@@ -89,6 +94,8 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
     }
   }
 
+  const effectiveStatus = localStatus ?? approvalRequest.status
+
   return (
     <div className="bg-white rounded-xl border border-[#EAECF0]">
       <div className="p-4">
@@ -108,14 +115,14 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
           </div>
           <span className={cn(
             'text-[10.5px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap shrink-0',
-            STATUS_STYLE[approvalRequest.status] ?? 'bg-[#F2F4F7] text-[#667085]',
+            STATUS_STYLE[effectiveStatus] ?? 'bg-[#F2F4F7] text-[#667085]',
           )}>
-            {STATUS_LABEL[approvalRequest.status] ?? approvalRequest.status}
+            {STATUS_LABEL[effectiveStatus] ?? effectiveStatus}
           </span>
         </div>
 
         {/* PENDING — action UI */}
-        {approvalRequest.status === 'PENDING' && (
+        {effectiveStatus === 'PENDING' && (
           <>
             {/* OTP email warning — only shown when in OTP mode and email failed */}
             {mode === 'otp' && !approvalRequest.otpEmailSent && (
@@ -245,7 +252,7 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
         )}
 
         {/* APPROVED — confirmation message */}
-        {approvalRequest.status === 'APPROVED' && (
+        {effectiveStatus === 'APPROVED' && (
           <div className="flex items-center gap-2 text-[#027A48]">
             <CheckCircle size={16} />
             <p className="text-[13px] font-semibold">Project signed off</p>
@@ -258,7 +265,7 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
         )}
 
         {/* REVISION_REQUESTED — show the note */}
-        {approvalRequest.status === 'REVISION_REQUESTED' && (
+        {effectiveStatus === 'REVISION_REQUESTED' && (
           <div className="mt-1">
             <p className="text-[11.5px] font-semibold text-[#B54708] mb-1">Revision requested</p>
             {approvalRequest.decisionNote && (
