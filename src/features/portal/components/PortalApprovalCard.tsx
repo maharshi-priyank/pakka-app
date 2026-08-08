@@ -138,7 +138,18 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
             {mode === 'idle' && (
               <div className="flex gap-2">
                 <button
-                  onClick={() => { setMode('otp'); setError('') }}
+                  onClick={() => {
+                    setMode('otp')
+                    setError('')
+                    // Auto-send a fresh OTP so the client doesn't have to manually resend
+                    // (the original OTP sent at sign-off creation may have expired)
+                    if (resendCooldown === 0) {
+                      resendOtp.mutate(approvalRequest.id, {
+                        onSuccess: () => setResendCooldown(60),
+                        onError: () => { /* silently ignore — user can still manually resend */ },
+                      })
+                    }
+                  }}
                   style={{ minHeight: '44px' }}
                   className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#101828] hover:bg-[#1e293b] text-white text-[13px] font-semibold transition-colors"
                 >
@@ -161,7 +172,11 @@ export default function PortalApprovalCard({ approvalRequest, token }: Props) {
               <div className="space-y-3">
                 <div>
                   <p className="text-[12.5px] font-semibold text-[#344054]">Enter the OTP sent to your email</p>
-                  <p className="text-[12px] text-[#98A2B3] mt-0.5">Check your inbox for a 6-digit verification code</p>
+                  <p className="text-[12px] text-[#98A2B3] mt-0.5">
+                    {resendOtp.isPending
+                      ? 'Sending a fresh code to your inbox…'
+                      : 'Check your inbox for a 6-digit verification code'}
+                  </p>
                 </div>
                 <input
                   type="text"

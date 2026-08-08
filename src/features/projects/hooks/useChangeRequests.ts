@@ -40,7 +40,10 @@ export function useRequestSignoff(projectId: string) {
       const { data } = await api.post(`/projects/${projectId}/approval-requests/signoff`)
       return data.data
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['project', projectId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['project', projectId] })
+      qc.invalidateQueries({ queryKey: ['project-approval-requests', projectId] })
+    },
   })
 }
 
@@ -52,6 +55,8 @@ export function useProjectApprovalRequests(projectId: string) {
       return data.data
     },
     enabled: !!projectId,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   })
 }
 

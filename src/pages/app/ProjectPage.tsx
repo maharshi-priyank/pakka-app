@@ -325,8 +325,8 @@ export default function ProjectPage() {
             const revisionSignoff  = approvalRequests?.find(ar => ar.kind === 'PROJECT_SIGNOFF' && ar.status === 'REVISION_REQUESTED')
             if (pendingSignoff) {
               return (
-                <span className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-amber-200 dark:border-amber-800 text-[12px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30">
-                  <Loader2 size={12} className="animate-spin" />
+                <span className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-amber-200 dark:border-amber-800 text-[12px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 cursor-default">
+                  <Clock size={12} />
                   Awaiting client sign-off
                 </span>
               )
