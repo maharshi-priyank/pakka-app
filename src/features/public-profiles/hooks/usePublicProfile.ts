@@ -26,6 +26,15 @@ export interface PublicPortfolioItem {
   liveUrl: string | null
 }
 
+export interface PublicReview {
+  id: string
+  authorName: string | null
+  rating: number
+  body: string | null
+  submittedAt: string | null
+  project: { name: string }
+}
+
 export interface PublicProfileData {
   username: string
   name: string
@@ -46,6 +55,9 @@ export interface PublicProfileData {
   statsAcceptanceRate: number
   statsAvgResponseHrs: number
   statsLastCalculatedAt: string | null
+  reviews?: PublicReview[]
+  averageRating?: number | null
+  reviewCount?: number
 }
 
 export function usePublicProfile(username: string) {
