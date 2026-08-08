@@ -6,7 +6,7 @@ import { z } from 'zod'
 import {
   ArrowLeft, FolderKanban, Building2, Calendar, IndianRupee,
   Clock, Receipt, FileText, PenLine, Wallet, Pencil, Archive,
-  X, Loader2, Plus, ChevronDown, ChevronUp, CheckSquare, AlertCircle,
+  X, Loader2, Plus, ChevronDown, ChevronUp, CheckSquare, AlertCircle, CheckCircle,
 } from 'lucide-react'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import {
@@ -321,8 +321,11 @@ export default function ProjectPage() {
 
         <div className="flex items-center gap-2">
           {project.status === 'ACTIVE' && (() => {
-            const pendingSignoff   = approvalRequests?.find(ar => ar.kind === 'PROJECT_SIGNOFF' && ar.status === 'PENDING')
-            const revisionSignoff  = approvalRequests?.find(ar => ar.kind === 'PROJECT_SIGNOFF' && ar.status === 'REVISION_REQUESTED')
+            const latestSignoff = approvalRequests
+              ?.filter(ar => ar.kind === 'PROJECT_SIGNOFF')
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+            const pendingSignoff   = latestSignoff?.status === 'PENDING'             ? latestSignoff : undefined
+            const revisionSignoff  = latestSignoff?.status === 'REVISION_REQUESTED'  ? latestSignoff : undefined
             if (pendingSignoff) {
               return (
                 <span className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-amber-200 dark:border-amber-800 text-[12px] font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 cursor-default">
@@ -331,13 +334,21 @@ export default function ProjectPage() {
                 </span>
               )
             }
+            const hasOutstanding = (stats?.outstanding ?? 0) > 0
+            const requestSignoff = () => {
+              if (hasOutstanding) {
+                toast.error('Settle all outstanding invoices before requesting sign-off')
+                return
+              }
+              signoffMut.mutate(undefined, {
+                onSuccess: () => toast.success('Sign-off request sent to client'),
+                onError:   (e: unknown) => toast.error(e instanceof Error ? e.message : 'Could not send sign-off request'),
+              })
+            }
             if (revisionSignoff) {
               return (
                 <button
-                  onClick={() => signoffMut.mutate(undefined, {
-                    onSuccess: () => toast.success('Sign-off re-requested'),
-                    onError:   (e: unknown) => toast.error(e instanceof Error ? e.message : 'Could not send sign-off request'),
-                  })}
+                  onClick={requestSignoff}
                   disabled={signoffMut.isPending}
                   className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-red-200 dark:border-red-800 text-[12px] font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   title={revisionSignoff.decisionNote ?? 'Client requested revision'}
@@ -349,10 +360,7 @@ export default function ProjectPage() {
             }
             return (
               <button
-                onClick={() => signoffMut.mutate(undefined, {
-                  onSuccess: () => toast.success('Sign-off request sent to client'),
-                  onError:   (e: unknown) => toast.error(e instanceof Error ? e.message : 'Could not send sign-off request'),
-                })}
+                onClick={requestSignoff}
                 disabled={signoffMut.isPending}
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-indigo-200 dark:border-indigo-800 text-[12px] font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-950/60 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
@@ -385,19 +393,42 @@ export default function ProjectPage() {
         </div>
       </div>
 
-      {/* Revision note banner — shown when client requested revision on sign-off */}
+      {/* Sign-off status banner */}
       {(() => {
-        const revisionSignoff = approvalRequests?.find(ar => ar.kind === 'PROJECT_SIGNOFF' && ar.status === 'REVISION_REQUESTED')
-        if (!revisionSignoff?.decisionNote) return null
-        return (
-          <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-            <AlertCircle size={15} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[12.5px] font-semibold text-amber-800 dark:text-amber-300">Client requested revision before sign-off</p>
-              <p className="text-[12px] text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">{revisionSignoff.decisionNote}</p>
+        const latestSignoff = approvalRequests
+          ?.filter(ar => ar.kind === 'PROJECT_SIGNOFF')
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+        if (!latestSignoff) return null
+
+        if (latestSignoff.status === 'APPROVED') {
+          return (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <CheckCircle size={15} className="text-green-600 dark:text-green-400 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-semibold text-green-800 dark:text-green-300">Client signed off the project</p>
+                {latestSignoff.decidedAt && (
+                  <p className="text-[12px] text-green-700 dark:text-green-400 mt-0.5">
+                    Approved on {new Date(latestSignoff.decidedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )
+          )
+        }
+
+        if (latestSignoff.status === 'REVISION_REQUESTED' && latestSignoff.decisionNote) {
+          return (
+            <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+              <AlertCircle size={15} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-semibold text-amber-800 dark:text-amber-300">Client requested revision before sign-off</p>
+                <p className="text-[12px] text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">{latestSignoff.decisionNote}</p>
+              </div>
+            </div>
+          )
+        }
+
+        return null
       })()}
 
       {/* Stat cards */}

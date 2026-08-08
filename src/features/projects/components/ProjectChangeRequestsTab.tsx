@@ -81,8 +81,8 @@ function RespondPanel({
     try {
       await respond.mutateAsync({
         id: requestId,
-        action: selected,
-        freelancerNote: note.trim() || undefined,
+        responseType: selected,
+        note: note.trim() || undefined,
       })
       setSelected(null)
       setNote('')
@@ -96,7 +96,7 @@ function RespondPanel({
       // fire immediately — no note needed
       setError(null)
       respond.mutate(
-        { id: requestId, action: 'IN_SCOPE' },
+        { id: requestId, responseType: 'IN_SCOPE' },
         {
           onError: (err) =>
             setError(err instanceof Error ? err.message : 'Something went wrong.'),
