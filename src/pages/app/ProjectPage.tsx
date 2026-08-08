@@ -22,6 +22,7 @@ import ProjectNotesTab from '@/features/projects/components/ProjectNotesTab'
 import ProjectTasksTab from '@/features/tasks/components/ProjectTasksTab'
 import ProjectTeamTab from '@/features/projects/components/ProjectTeamTab'
 import ProjectUpdatesTab from '@/features/projects/components/ProjectUpdatesTab'
+import ProjectChangeRequestsTab from '@/features/projects/components/ProjectChangeRequestsTab'
 import InvoiceQuickView, { type InvoiceSnap } from '@/features/invoices/components/InvoiceQuickView'
 import ProposalQuickView, { type ProposalSnap } from '@/features/proposals/components/ProposalQuickView'
 import ContractQuickView, { type ContractSnap } from '@/features/contracts/components/ContractQuickView'
@@ -216,18 +217,19 @@ function StatCard({ label, value, sub, icon: Icon, accent = false }: {
 
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'documents' | 'time' | 'files' | 'notes' | 'tasks' | 'team' | 'updates'
+type Tab = 'overview' | 'documents' | 'time' | 'files' | 'notes' | 'tasks' | 'team' | 'updates' | 'change-requests'
 type DocSubTab = 'proposals' | 'contracts' | 'invoices'
 
 const TABS: Array<{ value: Tab; label: string }> = [
-  { value: 'overview',   label: 'Overview' },
-  { value: 'tasks',      label: 'Tasks' },
-  { value: 'updates',    label: 'Updates' },
-  { value: 'documents',  label: 'Documents' },
-  { value: 'time',       label: 'Time & Expenses' },
-  { value: 'files',      label: 'Files' },
-  { value: 'notes',      label: 'Notes' },
-  { value: 'team',       label: 'Team' },
+  { value: 'overview',        label: 'Overview' },
+  { value: 'tasks',           label: 'Tasks' },
+  { value: 'updates',         label: 'Updates' },
+  { value: 'change-requests', label: 'Change Requests' },
+  { value: 'documents',       label: 'Documents' },
+  { value: 'time',            label: 'Time & Expenses' },
+  { value: 'files',           label: 'Files' },
+  { value: 'notes',           label: 'Notes' },
+  { value: 'team',            label: 'Team' },
 ]
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -656,6 +658,12 @@ export default function ProjectPage() {
         {activeTab === 'updates' && !isTasksRoute && (
           <div className="max-w-2xl">
             <ProjectUpdatesTab projectId={project.id} />
+          </div>
+        )}
+
+        {activeTab === 'change-requests' && !isTasksRoute && (
+          <div className="max-w-2xl">
+            <ProjectChangeRequestsTab projectId={project.id} />
           </div>
         )}
 
