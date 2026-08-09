@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -287,7 +288,7 @@ function ColumnHeader({
         </div>
       </div>
 
-      {showDel && (
+      {showDel && createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-[2px] p-4">
           <div className="glass-modal rounded-2xl w-full max-w-sm">
             <div className="p-5 space-y-4">
@@ -321,7 +322,7 @@ function ColumnHeader({
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -72,7 +73,7 @@ export default function EditContactModal({ contact, onClose }: Props) {
     }, { onSuccess: onClose })
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={onClose} />
 
@@ -189,5 +190,5 @@ export default function EditContactModal({ contact, onClose }: Props) {
         </form>
       </div>
     </div>
-  )
+  , document.body)
 }

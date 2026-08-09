@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useCancelSubscription } from '../hooks/useSubscription'
 
@@ -15,7 +16,7 @@ export default function CancelSubscriptionModal({ open, onClose }: Props) {
     cancel(undefined, { onSuccess: onClose })
   }
 
-  return (
+  return createPortal(
     <>
       <div
         className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px]"
@@ -57,5 +58,5 @@ export default function CancelSubscriptionModal({ open, onClose }: Props) {
         </div>
       </div>
     </>
-  )
+  , document.body)
 }

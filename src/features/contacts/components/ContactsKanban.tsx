@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useCallback } from 'react'
 import {
   DndContext, PointerSensor, useSensor, useSensors,
@@ -353,7 +354,7 @@ export default function ContactsKanban({ search }: Props) {
       </DndContext>
 
       {/* TODO U12: ContactDrawer goes here */}
-      {openContact && (
+      {openContact && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={() => setOpenContact(null)}
@@ -366,7 +367,7 @@ export default function ContactsKanban({ search }: Props) {
             {openContact.phone   && <p className="text-[12px] text-[#9CA3AF]">{openContact.phone}</p>}
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   )
 }

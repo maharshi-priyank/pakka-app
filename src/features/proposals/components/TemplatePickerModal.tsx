@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Search, LayoutTemplate, FileUp, IndianRupee } from 'lucide-react'
@@ -146,7 +147,7 @@ export default function TemplatePickerModal({ open, onClose, defaultProjectId, d
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4">
         <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={onClose} />
@@ -254,5 +255,5 @@ export default function TemplatePickerModal({ open, onClose, defaultProjectId, d
         onTemplateCreated={onClose}
       />
     </>
-  )
+  , document.body)
 }

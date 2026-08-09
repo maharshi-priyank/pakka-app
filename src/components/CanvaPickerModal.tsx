@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { Search, X, Loader2, ExternalLink, ImageOff } from 'lucide-react'
 import { useCanvaDesigns, type CanvaDesign } from '@/features/settings/hooks/useCanva'
@@ -21,7 +22,7 @@ export default function CanvaPickerModal({ onSelect, onClose, isPicking }: Props
     setSearch(query)
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
@@ -116,7 +117,7 @@ export default function CanvaPickerModal({ onSelect, onClose, isPicking }: Props
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }
 
 function DesignCard({ design, onSelect, disabled }: { design: CanvaDesign; onSelect: (d: CanvaDesign) => void; disabled?: boolean }) {

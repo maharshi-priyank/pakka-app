@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
 import { X, Video, AlertTriangle, Loader2, UserRound, Plus, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -183,7 +184,7 @@ export default function ScheduleCallModal({
 
   const isLocked = !!propContactId
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg mx-4 card overflow-hidden anim-modal-in max-h-[90vh] overflow-y-auto">
@@ -449,6 +450,7 @@ export default function ScheduleCallModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

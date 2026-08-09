@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, LayoutTemplate, FileText } from 'lucide-react'
@@ -30,7 +31,7 @@ export default function LeadProposalPickerModal({ lead, onClose }: Props) {
     return <TemplatePickerModal open onClose={onClose} />
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
 
@@ -117,5 +118,5 @@ export default function LeadProposalPickerModal({ lead, onClose }: Props) {
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }

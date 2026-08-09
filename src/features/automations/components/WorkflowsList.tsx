@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Zap, Edit2, Trash2, GitBranch, Sparkles } from 'lucide-react'
@@ -19,7 +20,7 @@ function NewWorkflowModal({ onClose }: { onClose: () => void }) {
     mutate(trimmed)
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
       <div className="bg-white dark:bg-[#1A1B26] rounded-2xl shadow-xl border border-[#EAECF0] dark:border-[#26283A] w-full max-w-sm p-6 space-y-4">
         <h2 className="text-[16px] font-extrabold text-[#101828] dark:text-[#ECEEF3]">New Workflow</h2>
@@ -51,7 +52,7 @@ function NewWorkflowModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }
 
 // ─── Workflow Card ────────────────────────────────────────────────────────────

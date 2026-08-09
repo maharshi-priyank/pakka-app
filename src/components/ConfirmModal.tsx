@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { Trash2, XCircle, X, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -27,7 +28,7 @@ export function ConfirmModal({
   const isDelete = variant === 'delete'
   const isOverwrite = variant === 'overwrite'
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="glass-modal relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
@@ -78,5 +79,5 @@ export function ConfirmModal({
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }

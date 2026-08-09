@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -200,7 +201,7 @@ export default function OnboardingWizard() {
     exit:   (dir: number) => ({ x: dir * -40, opacity: 0 }),
   }
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-50 bg-white dark:bg-[#0C0D10] flex">
 
@@ -374,7 +375,7 @@ export default function OnboardingWizard() {
         )}
       </AnimatePresence>
     </>
-  )
+  , document.body)
 }
 
 // ─── Step sub-components ──────────────────────────────────────────────────────
@@ -864,7 +865,7 @@ function WelcomeModal({
   businessName: string
   onAction: (dest: 'proposals' | 'contracts' | 'invoices' | 'dashboard') => void
 }) {
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -924,5 +925,5 @@ function WelcomeModal({
         </button>
       </motion.div>
     </motion.div>
-  )
+  , document.body)
 }

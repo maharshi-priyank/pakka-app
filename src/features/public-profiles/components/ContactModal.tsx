@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -57,7 +58,7 @@ export default function ContactModal({ profile, open, onClose }: Props) {
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full sm:max-w-[480px] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
@@ -202,5 +203,5 @@ export default function ContactModal({ profile, open, onClose }: Props) {
         )}
       </div>
     </div>
-  )
+  , document.body)
 }

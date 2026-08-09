@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -39,7 +40,7 @@ export default function AddClientModal({ onClose }: Props) {
     onClose()
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] p-4 anim-fade">
       <div className="glass-modal rounded-2xl w-full max-w-lg anim-modal-in">
         {/* Header */}
@@ -96,7 +97,7 @@ export default function AddClientModal({ onClose }: Props) {
         </form>
       </div>
     </div>
-  )
+  , document.body)
 }
 
 function Field({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {

@@ -1,4 +1,5 @@
 // pakka-app/src/features/tasks/components/BoardColumnCard.tsx
+import { createPortal } from 'react-dom'
 import { useState, useRef, useEffect } from 'react'
 import { MoreHorizontal, Check, Trash2, Pencil, Plus, Loader2, AlertTriangle } from 'lucide-react'
 import { useCreateTask } from '../hooks/useTasks'
@@ -16,7 +17,7 @@ function DeleteColumnModal({ columnName, onClose, onConfirm, isPending }: {
   onConfirm:  () => void
   isPending:  boolean
 }) {
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] p-4">
       <div className="glass-modal rounded-2xl w-full max-w-sm">
         <div className="p-5 space-y-4">
@@ -51,7 +52,7 @@ function DeleteColumnModal({ columnName, onClose, onConfirm, isPending }: {
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }
 
 export default function BoardColumnCard({ column, boardId, children }: Props) {

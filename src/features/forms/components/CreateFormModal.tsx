@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
@@ -24,7 +25,7 @@ export function CreateFormModal({ onClose, title = 'New Intake Form' }: Props) {
     navigate(`/forms/${form.id}`)
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white dark:bg-[#1A1B26] rounded-2xl shadow-2xl w-full max-w-md p-6">
@@ -66,5 +67,5 @@ export function CreateFormModal({ onClose, title = 'New Intake Form' }: Props) {
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }

@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -103,7 +104,7 @@ export default function LeadDrawer({ lead, onClose }: Props) {
 
   const ac = avatarColor(lead.name)
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -417,5 +418,5 @@ export default function LeadDrawer({ lead, onClose }: Props) {
         isDeleting={deleteLead.isPending}
       />
     </>
-  )
+  , document.body)
 }

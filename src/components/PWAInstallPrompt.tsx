@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useEffect, useState } from 'react'
 import { Download, X, Share, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -154,7 +155,7 @@ export default function PWAInstallPrompt() {
       </div>
 
       {/* iOS instructions modal */}
-      {showIosInstructions && (
+      {showIosInstructions && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
           onClick={dismiss}
@@ -205,7 +206,7 @@ export default function PWAInstallPrompt() {
             </button>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   )
 }

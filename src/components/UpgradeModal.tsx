@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { X, Check, Zap, Star, Loader2 } from 'lucide-react'
 import { useUiStore } from '@/store/uiStore'
 import { cn } from '@/lib/utils'
@@ -49,7 +50,7 @@ export default function UpgradeModal() {
   const isFounding = pricing?.window === 'founding'
   const windowLabel = pricing ? WINDOW_LABELS[pricing.window] : null
 
-  return (
+  return createPortal(
     <>
       <div
         className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px]"
@@ -206,5 +207,5 @@ export default function UpgradeModal() {
         </div>
       </div>
     </>
-  )
+  , document.body)
 }

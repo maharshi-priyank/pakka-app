@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -68,7 +69,7 @@ export default function ConvertLeadModal({ lead, open, onClose }: Props) {
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white dark:bg-[#1A1B26] rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -178,5 +179,5 @@ export default function ConvertLeadModal({ lead, open, onClose }: Props) {
         </form>
       </div>
     </div>
-  )
+  , document.body)
 }

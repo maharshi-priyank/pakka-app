@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { X, Loader2, LayoutTemplate } from 'lucide-react'
@@ -50,7 +51,7 @@ export default function SaveAsTemplateModal({ open, onClose, defaultName, onSave
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={onClose} />
       <div className="relative z-10 w-full max-w-sm mx-4 card overflow-hidden anim-modal-in">
@@ -125,5 +126,5 @@ export default function SaveAsTemplateModal({ open, onClose, defaultName, onSave
         </form>
       </div>
     </div>
-  )
+  , document.body)
 }

@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useEffect } from 'react'
 import { IndianRupee, X } from 'lucide-react'
 import { useRecordPayment } from '../hooks/useInvoices'
@@ -48,7 +49,7 @@ export default function RecordPaymentModal({ invoice, onClose }: Props) {
     onClose()
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative glass-modal rounded-2xl w-full max-w-md">
@@ -154,5 +155,5 @@ export default function RecordPaymentModal({ invoice, onClose }: Props) {
         </form>
       </div>
     </div>
-  )
+  , document.body)
 }

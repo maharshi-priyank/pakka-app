@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { X, Sparkles, Loader2, Zap, Check, ChevronRight, AlertCircle, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
@@ -90,7 +91,7 @@ export default function AIAutomationModal({ onClose, onDone }: Props) {
     })
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
@@ -281,5 +282,5 @@ export default function AIAutomationModal({ onClose, onDone }: Props) {
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }

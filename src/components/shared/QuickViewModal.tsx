@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ExternalLink, Download } from 'lucide-react'
@@ -32,7 +33,7 @@ export default function QuickViewModal({
     return () => window.removeEventListener('keydown', handler)
   }, [open, onClose])
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -98,7 +99,7 @@ export default function QuickViewModal({
         </>
       )}
     </AnimatePresence>
-  )
+  , document.body)
 }
 
 /** Reusable labeled field inside a QuickView body */

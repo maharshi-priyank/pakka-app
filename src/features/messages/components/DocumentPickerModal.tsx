@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
@@ -59,7 +60,7 @@ export function DocumentPickerModal({ clientId, onPick, onClose }: Props) {
     { id: 'CONTRACT', label: 'Contracts', icon: PenLine  },
   ]
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/30 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
@@ -115,5 +116,5 @@ export function DocumentPickerModal({ clientId, onPick, onClose }: Props) {
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }

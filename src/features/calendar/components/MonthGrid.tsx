@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import {
   startOfWeek, endOfWeek, startOfMonth, endOfMonth,
@@ -101,7 +102,7 @@ export default function MonthGrid({ cursor, events, onEventClick, onDayClick }: 
       </div>
 
       {/* Overflow popup */}
-      {overflow && (
+      {overflow && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/20 p-4 sm:p-0"
           onClick={() => setOverflow(null)}
@@ -130,7 +131,7 @@ export default function MonthGrid({ cursor, events, onEventClick, onDayClick }: 
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </div>
   )
 }

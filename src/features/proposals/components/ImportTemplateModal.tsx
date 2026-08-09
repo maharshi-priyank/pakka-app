@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { X, Upload, FileText, Loader2, LayoutTemplate, ChevronLeft, IndianRupee, Check, Search } from 'lucide-react'
@@ -151,7 +152,7 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] anim-fade" onClick={handleClose} />
       <div className="relative z-10 w-full max-w-xl glass-modal rounded-2xl overflow-hidden anim-modal-in flex flex-col max-h-[88vh]">
@@ -602,5 +603,5 @@ export default function ImportTemplateModal({ open, onClose, onTemplateCreated }
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }

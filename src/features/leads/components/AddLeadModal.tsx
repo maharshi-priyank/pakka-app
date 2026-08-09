@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -44,7 +45,7 @@ export default function AddLeadModal({ open, onClose }: Props) {
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
@@ -195,5 +196,5 @@ export default function AddLeadModal({ open, onClose }: Props) {
         </form>
       </div>
     </div>
-  )
+  , document.body)
 }

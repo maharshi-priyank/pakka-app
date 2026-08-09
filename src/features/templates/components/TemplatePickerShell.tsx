@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { X, Search, LayoutTemplate } from 'lucide-react'
@@ -65,7 +66,7 @@ export default function TemplatePickerShell<T extends LibraryTemplate = LibraryT
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] anim-fade" onClick={onClose} />
       <div className={cn(
@@ -180,5 +181,5 @@ export default function TemplatePickerShell<T extends LibraryTemplate = LibraryT
         </div>
       </div>
     </div>
-  )
+  , document.body)
 }

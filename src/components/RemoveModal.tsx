@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState } from 'react'
 import { Archive, Trash2, X, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -36,7 +37,7 @@ export function RemoveModal({
     onClose()
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleClose} />
       <div className="glass-modal relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
@@ -148,5 +149,5 @@ export function RemoveModal({
         )}
       </div>
     </div>
-  )
+  , document.body)
 }
