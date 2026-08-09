@@ -1066,7 +1066,7 @@ function ProjectDetail({
 
 export default function ClientPortalPage() {
   const { token } = useParams<{ token: string }>()
-  const { data, isLoading, isError } = usePortalData(token!)
+  const { data, isLoading, isError, error } = usePortalData(token!)
   const { data: portalFiles = [] } = usePortalAttachments(token ?? '')
 
   const [tab,             setTab]             = useState<Tab>('overview')
@@ -1123,16 +1123,15 @@ export default function ClientPortalPage() {
   ]
 
   if (isError) {
+    const isLocked = String(error).includes('PORTAL_LOCKED') || String(error).toLowerCase().includes('requires a pro')
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-sm border border-[#E4ECFC] p-10 max-w-sm w-full text-center">
           <div className="w-12 h-12 rounded-2xl bg-[#FEF3F2] flex items-center justify-center mx-auto mb-4">
             <AlertTriangle size={22} className="text-[#D92D20]" />
           </div>
-          <h1 className="text-[16px] font-bold text-[#0F172A] mb-1">Portal link invalid</h1>
-          <p className="text-[13px] text-[#64748B]">
-            This portal link is invalid or has expired. Contact the sender for a new link.
-          </p>
+          <h1 className="text-[16px] font-bold text-[#101828] mb-1">{isLocked ? 'Client Portal unavailable' : 'Portal link invalid'}</h1>
+          <p className="text-[13px] text-[#667085]">{isLocked ? 'This portal is temporarily unavailable because the account needs a Pro or Studio plan.' : 'This portal link is invalid or has expired. Contact the sender for a new link.'}</p>
         </div>
       </div>
     )

@@ -23,6 +23,7 @@ import { ReplyComposer } from '@/features/messages/components/ReplyComposer'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { ContactHistoryTab } from '@/features/contacts/components/ContactHistoryTab'
 import { ContactOverviewTab } from '@/features/contacts/components/ContactOverviewTab'
+import { useEntitlementSummary } from '@/features/billing/hooks/useEntitlementSummary'
 
 type Tab = 'overview' | 'projects' | 'messages' | 'meetings' | 'history'
 
@@ -79,7 +80,8 @@ export default function ContactPage() {
   const navigate = useNavigate()
 
   const { data: contact, isLoading } = useContact(id ?? null)
-  const [activeTab,     setActiveTab]     = useState<Tab>('overview')
+  const [activeTab, setActiveTab] = useState<Tab>('overview')
+  const { data: entitlements } = useEntitlementSummary()
   const [showEdit,      setShowEdit]      = useState(false)
   const [showDelete,    setShowDelete]    = useState(false)
   const [menuOpen,      setMenuOpen]      = useState(false)
@@ -366,13 +368,19 @@ export default function ContactPage() {
               <div className="mx-4 h-px bg-[#F2F4F7] dark:bg-[#26283A]" />
               <div className="p-4">
                 <p className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74] font-medium mb-2">Client Portal</p>
-                <button
-                  onClick={handleCopyPortal}
-                  className="flex items-center gap-2 w-full px-3 py-2 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12px] font-medium text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors"
-                >
-                  {portalCopied ? <CheckCheck size={12} className="text-[#17B26A]" /> : <Copy size={12} />}
-                  {portalCopied ? 'Copied!' : 'Copy portal link'}
-                </button>
+                {entitlements?.plan === 'FREE' ? (
+                  <button onClick={() => navigate('/billing')} className="w-full text-left px-3 py-2 rounded-lg bg-[#FFF7ED] border border-[#FED7AA] text-[12px] font-semibold text-[#C2410C]">
+                    Unlock the Client Portal from ₹149/month
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleCopyPortal}
+                    className="flex items-center gap-2 w-full px-3 py-2 rounded-lg border border-[#E4E7EC] dark:border-[#26283A] text-[12px] font-medium text-[#667085] dark:text-[#8B92A8] hover:bg-[#F9FAFB] dark:hover:bg-[#1A1B23] transition-colors"
+                  >
+                    {portalCopied ? <CheckCheck size={12} className="text-[#17B26A]" /> : <Copy size={12} />}
+                    {portalCopied ? 'Copied!' : 'Copy portal link'}
+                  </button>
+                )}
               </div>
             </>
           )}

@@ -16,7 +16,7 @@ async function fetchSubscription(): Promise<SubscriptionState> {
   return data.data
 }
 
-async function createSubscription(tier: 'SOLO' | 'STUDIO'): Promise<{ checkoutUrl: string }> {
+async function createSubscription(tier: 'PRO' | 'STUDIO'): Promise<{ checkoutUrl: string }> {
   const { data } = await api.post<{ data: { checkoutUrl: string } }>('/payments/create-subscription', { tier })
   return data.data
 }
@@ -37,7 +37,7 @@ export function useCreateSubscription() {
   const { data: profile } = useProfile()
 
   return useMutation({
-    mutationFn: async (tier: 'SOLO' | 'STUDIO') => {
+    mutationFn: async (tier: 'PRO' | 'STUDIO') => {
       const { checkoutUrl: subscriptionId } = await createSubscription(tier)
 
       return new Promise<void>((resolve, reject) => {
@@ -76,23 +76,6 @@ export function useCreateSubscription() {
 
         rzp.open()
       })
-    },
-    onError: () => {
-      toast.error('Failed to start checkout. Please try again.')
-    },
-  })
-}
-
-async function createStripeCheckout(tier: 'SOLO' | 'STUDIO'): Promise<{ checkoutUrl: string }> {
-  const { data } = await api.post<{ data: { checkoutUrl: string } }>('/payments/stripe/checkout', { tier })
-  return data.data
-}
-
-export function useCreateStripeCheckout() {
-  return useMutation({
-    mutationFn: async (tier: 'SOLO' | 'STUDIO') => {
-      const { checkoutUrl } = await createStripeCheckout(tier)
-      window.location.href = checkoutUrl
     },
     onError: () => {
       toast.error('Failed to start checkout. Please try again.')

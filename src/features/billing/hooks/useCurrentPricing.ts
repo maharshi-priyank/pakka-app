@@ -4,8 +4,9 @@ import { api } from '@/lib/api'
 export interface PricingWindow {
   window: 'founding' | 'earlyaccess' | 'regular'
   windowEnds?: string
-  solo:   { planId: string; price: number }
-  studio: { planId: string; price: number }
+  pro:    { planId: string | null; price: number }
+  solo:   { planId: string | null; price: number }
+  studio: { planId: string | null; price: number }
 }
 
 async function fetchCurrentPricing(): Promise<PricingWindow> {

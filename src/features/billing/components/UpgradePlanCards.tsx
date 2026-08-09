@@ -18,12 +18,12 @@ export default function UpgradePlanCards() {
   const activeStatus  = subscription?.subscriptionStatus ?? 'NONE'
   const hasActivePlan = activePlan !== 'FREE' && activeStatus === 'ACTIVE'
 
-  function handleSubscribe(tier: 'SOLO' | 'STUDIO') {
+  function handleSubscribe(tier: 'PRO' | 'STUDIO') {
     if (hasActivePlan) return
     subscribe(tier)
   }
 
-  function getPlanButton(tier: 'SOLO' | 'STUDIO', accent: string, hoverAccent: string) {
+  function getPlanButton(tier: 'PRO' | 'STUDIO', accent: string, hoverAccent: string) {
     const isCurrentPlan = activePlan === tier && hasActivePlan
 
     if (isCurrentPlan) {
@@ -53,7 +53,7 @@ export default function UpgradePlanCards() {
         )}
       >
         {isPending ? <Loader2 size={13} className="animate-spin" /> : null}
-        Get {tier === 'SOLO' ? 'Solo' : 'Studio'}
+        Get {tier === 'PRO' ? 'Pro' : 'Studio'}
       </button>
     )
   }
@@ -118,7 +118,7 @@ export default function UpgradePlanCards() {
               </li>
             ))}
           </ul>
-          {getPlanButton('SOLO', 'bg-[#6366F1]', 'hover:bg-[#4F46E5]')}
+          {getPlanButton('PRO', 'bg-[#6366F1]', 'hover:bg-[#4F46E5]')}
         </div>
 
         {/* Studio */}

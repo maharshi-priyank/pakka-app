@@ -150,7 +150,7 @@ export default function UpgradeModal() {
                 ))}
               </ul>
               <button
-                onClick={() => createSubscription('SOLO', { onSuccess: () => { window.location.href = '/billing/success' } })}
+                onClick={() => createSubscription('PRO', { onSuccess: () => { window.location.href = '/billing/success' } })}
                 disabled={isPending || pricingLoading}
                 className={cn(
                   'mt-4 w-full h-9 rounded-lg text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer',

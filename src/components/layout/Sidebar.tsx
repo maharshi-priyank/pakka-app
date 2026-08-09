@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom'
 import {
   Settings, Mail,
   LogOut, Telescope, ExternalLink,
+  Clock, Wallet, CreditCard,
 } from 'lucide-react'
 import { useMessageUnreadCount } from '@/features/messages/hooks/useMessages'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
@@ -25,7 +26,6 @@ import { useAuthStore } from '@/store/authStore'
 import { generateInitials } from '@/lib/utils'
 import WorkspaceSwitcher from '@/features/settings/components/WorkspaceSwitcher'
 import CreateWorkspaceModal from '@/features/settings/components/CreateWorkspaceModal'
-
 
 function loadOrder(): string[] {
   try {

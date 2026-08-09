@@ -110,7 +110,7 @@ export default function BillingSuccessPage() {
               Check again
             </button>
             <button
-              onClick={() => navigate('/settings?tab=billing', { replace: true })}
+              onClick={() => navigate('/billing', { replace: true })}
               className="w-full h-11 border border-[#EAECF0] text-[#344054] text-[13px] font-semibold rounded-xl hover:bg-[#F9FAFB] transition-colors cursor-pointer"
             >
               Go to billing settings
