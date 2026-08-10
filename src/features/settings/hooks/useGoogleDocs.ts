@@ -2,6 +2,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
+function toastGoogleDocsError(err: unknown) {
+  const msg = (err as Error)?.message ?? 'Failed to export to Google Docs'
+  const needsReconnect = msg.toLowerCase().includes('reconnect') || msg.toLowerCase().includes('expired')
+  if (needsReconnect) {
+    toast.error('Google Docs connection expired', {
+      description: 'Please reconnect Google Docs to continue exporting.',
+      action: { label: 'Go to Integrations', onClick: () => { window.location.href = '/settings?tab=integrations' } },
+      duration: 8000,
+    })
+  } else {
+    toast.error(msg)
+  }
+}
+
 export interface DriveFile {
   id:           string
   name:         string
@@ -71,7 +85,7 @@ export function useExportProposalToGoogleDocs() {
       window.open(docUrl, '_blank', 'noopener,noreferrer')
       toast.success('Opened in Google Docs')
     },
-    onError: () => toast.error('Failed to export to Google Docs'),
+    onError: toastGoogleDocsError,
   })
 }
 
@@ -87,6 +101,6 @@ export function useExportContractToGoogleDocs() {
       window.open(docUrl, '_blank', 'noopener,noreferrer')
       toast.success('Opened in Google Docs')
     },
-    onError: () => toast.error('Failed to export to Google Docs'),
+    onError: toastGoogleDocsError,
   })
 }
