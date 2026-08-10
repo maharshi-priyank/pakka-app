@@ -8,13 +8,13 @@
 
 **ClearWork** is a client management SaaS built specifically for Indian freelancers, consultants, and growing creative agencies. It replaces the cobbled-together mess of WhatsApp, Canva, Google Sheets, and UPI QR codes with one professional workflow — from the first lead to the final payment.
 
-**Tagline:** "Proposals to payments, all in one place."
+**Tagline:** "Find clients. Win them. Get paid."
 
-**Hero headline (landing page):** "Proposals to payments, all in one place."
+**Hero headline (landing page):** "Find clients. Win them. Get paid."
 
-**Hero subtext:** "The client management software for freelancers, consultants, and growing agencies. Proposals, contracts, invoices, and payments — one place, zero spreadsheets."
+**Hero subtext:** ClearWork is the end-to-end business platform for Indian freelancers and agencies — from finding clients to tracked proposals, e-sign contracts, GST invoices, and UPI payments, all in one place.
 
-**Brand badge copy:** "Client CRM for Freelancers & Agencies · Early Access"
+**Brand badge copy:** "Client CRM for Freelancers & Agencies" — ClearWork is publicly launched and generally available (no longer early access / waitlist).
 
 **Websites:**
 - Landing page: `getclearwork.in`
@@ -147,36 +147,43 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 
 ## Pricing
 
+**Live pricing, permanent — no "early access" or "founding price" framing. This is what every plan costs, indefinitely.**
+
 ### Free Plan — ₹0/mo
-- 3 active projects
+- Up to 5 clients
+- Up to 10 active projects
+- Full lead & CRM pipeline — unlimited leads
 - 3 proposals per month
 - GST invoice generator
 - Basic e-sign
-- ClearWork watermark on documents
+- Meetings & reminders
 - Community support
 
-### Solo Plan — ₹149/mo (founding price, ₹299/mo after Aug 31 2026)
-- Up to 25 clients
-- Unlimited projects and leads
+### Pro Plan — ₹149/mo
+- Up to 30 clients
+- Up to 60 active projects
+- Up to 5 team members
+- Unlimited proposals & leads
 - E-sign contracts (IT Act 2000)
 - GST invoice + TDS flagging
 - UPI + card payment link in invoices
-- Auto payment reminders (WhatsApp + email)
-- Client portal
+- Auto WhatsApp + email payment reminders
+- White-label client portal
 - Revenue dashboard
 - AI proposal drafter
-- Email support
-
-### Studio Plan — ₹349/mo (founding price, ₹699/mo after Aug 31 2026)
-- Everything in Solo
-- Unlimited clients
-- 1 team member seat
-- White-label documents (no "Powered by ClearWork" badge)
-- White-label client portal
-- Multi-currency invoicing
-- GST report export
-- AI proposal drafter
 - Priority email support
+
+### Studio Plan — ₹649/mo
+- Unlimited clients
+- Unlimited projects
+- Unlimited team members
+- Everything in Pro
+- White-label documents (no "Powered by ClearWork" badge)
+- White-label client portal on your own domain
+- Multi-currency invoicing
+- GST quarterly report export
+- Team task allocation & payouts
+- Dedicated priority support
 
 **No transaction fees** — we earn from subscriptions, not a cut of your earnings.
 
@@ -188,7 +195,7 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 
 | Product | Price | India-ready? |
 |---|---|---|
-| **ClearWork Solo** | **₹149/mo** | **Full India workflow** (GST, UPI, IT Act e-sign) |
+| **ClearWork Pro** | **₹149/mo** | **Full India workflow** (GST, UPI, IT Act e-sign) |
 | Bonsai Essential | ₹1,600/mo | No GST, no India support |
 | HoneyBook Starter | ₹3,000/mo | Blocked / unavailable in India |
 | Dubsado Basic | ₹2,500/mo | No UPI payments, USD pricing only |
@@ -202,7 +209,7 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 **Tone:** Direct, confident, warm. Not corporate. Writes like a fellow freelancer who figured it out.
 
 **Key messages:**
-- "Proposals to payments, all in one place."
+- "Find clients. Win them. Get paid."
 - "One tool, done." (vs. "Before: the chaos")
 - "GST invoices that pay themselves."
 - "Your full pipeline, front and centre."
@@ -224,8 +231,7 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 - **Type:** SaaS subscription (monthly, no contracts)
 - **Model:** Freemium (generous free tier → paid conversion)
 - **Revenue:** Subscriptions only, zero transaction fees on user payments
-- **Stage:** Early access / waitlist. Launching live June 2026.
-- **Founding pricing:** 50% discount locked in for early users until Aug 31 2026
+- **Stage:** Publicly launched and generally available. No waitlist, no early access — Free/Pro/Studio pricing is live for everyone.
 - **Bootstrap:** Yes. Founder moonlighting. No external funding.
 
 ---
@@ -267,7 +273,7 @@ Follow-up set              Invoice generated (from contract)
 
 ## Current Growth Goals
 
-1. Get to 100 paying users before founding pricing ends (Aug 31, 2026)
+1. Convert Free-plan signups into paying Pro/Studio customers post-launch
 2. Build audience on LinkedIn and Instagram in the Indian freelancer community
 3. Rank for SEO keywords: "GST invoice software for freelancers India", "proposal software India", "client CRM for agencies", "freelancer CRM India"
 4. Product Hunt launch (planned)
@@ -287,7 +293,7 @@ Follow-up set              Invoice generated (from contract)
 
 ## Frequently Asked Questions (from landing page / support)
 
-**Is ClearWork free?** Yes — we have a free plan with 3 projects and 3 proposals/month, no credit card required.
+**Is ClearWork free?** Yes — the Free plan (up to 5 clients, 10 active projects, 3 proposals/month) is free forever, no credit card required. Pro (₹149/mo) and Studio (₹649/mo) remove the limits and add more features.
 
 **Is GST calculation automatic?** Yes. Enter your client's GSTIN and state — CGST/SGST or IGST is calculated automatically.
 
@@ -299,8 +305,8 @@ Follow-up set              Invoice generated (from contract)
 
 **Can I use ClearWork from outside India?** Yes. The app works globally. Billing is in INR but we display approximate prices in USD, EUR, GBP, and AED.
 
-**What happens after the founding pricing ends?** If you sign up before Aug 31, 2026, your price is locked at the founding rate for as long as you're subscribed.
+**What happens if I outgrow the Free plan?** You'll be prompted to upgrade to Pro or Studio once you pass 5 clients or 10 active projects. Your existing data is never deleted — you just can't add more until you upgrade.
 
 ---
 
-*Last updated: June 2026. For technical questions, see the codebase at pakka-api (backend) and pakka-app (frontend).*
+*Last updated: August 2026. For technical questions, see the codebase at pakka-api (backend) and pakka-app (frontend).*
