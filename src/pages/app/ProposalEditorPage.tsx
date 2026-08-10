@@ -10,6 +10,7 @@ import { useProject } from '@/features/projects/hooks/useProjects'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { useExportProposalToGoogleDocs } from '@/features/settings/hooks/useGoogleDocs'
 import googleDocsSvg from '@/assets/google-docs.svg'
+import { toast } from 'sonner'
 
 export default function ProposalEditorPage() {
   const { id } = useParams<{ id: string }>()
@@ -99,7 +100,7 @@ export default function ProposalEditorPage() {
           <button
             onClick={() => {
               if (!profile?.googleDocsConnected) {
-                window.location.href = '/settings?tab=integrations'
+                toast.info('Connect Google Docs first — go to Settings → Integrations to enable it.')
                 return
               }
               exportToGoogleDocs.mutate(proposal.id)
