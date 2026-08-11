@@ -6,13 +6,18 @@ import { supabase } from '@/lib/supabase'
 import { useMessageUnreadCount } from '@/features/messages/hooks/useMessages'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { ALL_NAV_ITEMS, PRIMARY_IDS } from './navItems'
+import { BottomNavSkeleton } from './SidebarSkeleton'
+import { useAppShellBootstrap } from '@/hooks/useAppShellBootstrap'
 
 export default function BottomNav() {
   const [moreOpen, setMoreOpen] = useState(false)
   const navigate = useNavigate()
+  const { isReady: shellReady } = useAppShellBootstrap()
 
   const { hasPermission } = useWorkspacePermissions()
   const { data: inboxUnread = 0 } = useMessageUnreadCount()
+
+  if (!shellReady) return <BottomNavSkeleton />
 
   const visibleItems = ALL_NAV_ITEMS.filter(
     item => !item.permission || hasPermission(item.permission),

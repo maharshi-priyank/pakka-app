@@ -25,6 +25,8 @@ import { useAuthStore } from '@/store/authStore'
 import { generateInitials } from '@/lib/utils'
 import WorkspaceSwitcher from '@/features/settings/components/WorkspaceSwitcher'
 import CreateWorkspaceModal from '@/features/settings/components/CreateWorkspaceModal'
+import SidebarSkeleton from './SidebarSkeleton'
+import { useAppShellBootstrap } from '@/hooks/useAppShellBootstrap'
 
 function loadOrder(): string[] {
   try {
@@ -71,6 +73,7 @@ interface Props {
 export default function Sidebar({ onClose }: Props) {
   const [order] = useState<string[]>(loadOrder)
   const [createWsOpen, setCreateWsOpen] = useState(false)
+  const { isReady: shellReady } = useAppShellBootstrap()
 
   const { user } = useAuthStore()
   const { hasPermission } = useWorkspacePermissions()
@@ -120,6 +123,8 @@ export default function Sidebar({ onClose }: Props) {
   //   localStorage.removeItem(STORAGE_KEY)
   //   setOrder(DEFAULT_ORDER)
   // }
+
+  if (!shellReady) return <SidebarSkeleton />
 
   return (
     <aside className="w-[240px] shrink-0 bg-transparent flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-black/[0.06]">

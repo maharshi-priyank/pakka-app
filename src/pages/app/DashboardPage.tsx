@@ -58,7 +58,9 @@ import ActivityWidget       from '@/features/dashboard/widgets/ActivityWidget'
 import UpcomingCallsWidget  from '@/features/meetings/components/UpcomingCallsWidget'
 import PrioritiesStrip      from '@/features/dashboard/components/PrioritiesStrip'
 import OnboardingChecklist  from '@/features/dashboard/components/OnboardingChecklist'
+import DashboardSkeleton, { DashboardHeaderSkeleton } from '@/features/dashboard/components/DashboardSkeleton'
 import { useCelebrateWins } from '@/features/dashboard/hooks/useCelebrateWins'
+import { useDashboardBootstrap } from '@/features/dashboard/hooks/useDashboardBootstrap'
 
 // ─── Widget renderer ─────────────────────────────────────────────────────────
 
@@ -274,6 +276,7 @@ export default function DashboardPage() {
   const initials = generateInitials(userName)
   const { isDark, toggle: toggleTheme } = useThemeToggle()
   const { visible: sidebarVisible, setVisible: setSidebarVisible } = useSidebarState()
+  const { isReady: dashboardReady } = useDashboardBootstrap()
   useCelebrateWins()
 
   const sensors = useSensors(
@@ -334,6 +337,9 @@ export default function DashboardPage() {
     <div className="space-y-5 max-w-[1440px] mx-auto">
 
       {/* ── Inline page header — Dreelio style ── */}
+      {!dashboardReady ? (
+        <DashboardHeaderSkeleton />
+      ) : (
       <div className="flex items-center gap-3 md:gap-5 mb-6">
 
         {/* Re-open sidebar button (desktop only, when collapsed) */}
@@ -415,7 +421,12 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      )}
 
+      {!dashboardReady ? (
+        <DashboardSkeleton visibleOrder={visibleOrder} sizes={sizes} />
+      ) : (
+      <>
       {/* ── Getting started checklist — hidden once the workspace has real activity ── */}
       <OnboardingChecklist />
 
@@ -490,6 +501,8 @@ export default function DashboardPage() {
           ) : null}
         </DragOverlay>
       </DndContext>
+      </>
+      )}
 
       {/* ── Add widget panel ── */}
       {showAddPanel && (

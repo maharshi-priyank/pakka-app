@@ -63,7 +63,9 @@ export default function LeadFunnelWidget() {
       <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
         <div>
           <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Contact Pipeline</h2>
-          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{items.length} total contact{items.length !== 1 ? 's' : ''}</p>
+          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">
+            {isLoading ? 'Loading…' : `${items.length} total contact${items.length !== 1 ? 's' : ''}`}
+          </p>
         </div>
         <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center">
           <Users size={14} className="text-[#6366F1]" strokeWidth={2} />
@@ -71,9 +73,17 @@ export default function LeadFunnelWidget() {
       </div>
 
       <div className="px-5 py-4 space-y-3">
-        {STAGES.map((stage, idx) => {
-          const count = isLoading ? 0 : items.filter(c => stage.match(c.stage)).length
-          const pct   = isLoading ? 60 - idx * 8 : (count / maxCount) * 100
+        {isLoading ? (
+          Array.from({ length: STAGES.length }).map((_, idx) => (
+            <div key={idx} className="flex items-center gap-3">
+              <Skeleton className="w-[108px] h-6 rounded-lg shrink-0" />
+              <Skeleton className="flex-1 h-6 rounded-lg" />
+              <Skeleton className="w-4 h-4 rounded shrink-0" />
+            </div>
+          ))
+        ) : STAGES.map((stage) => {
+          const count = items.filter(c => stage.match(c.stage)).length
+          const pct   = (count / maxCount) * 100
           return (
             <div key={stage.key} className="flex items-center gap-3">
               <div className={cn(
@@ -86,16 +96,12 @@ export default function LeadFunnelWidget() {
                 <div
                   className="h-full rounded-lg flex items-center justify-end pr-2 transition-all duration-500"
                   style={{
-                    width: `${isLoading ? pct : Math.max(pct, count > 0 ? 8 : 0)}%`,
+                    width: `${Math.max(pct, count > 0 ? 8 : 0)}%`,
                     background: stage.color,
-                    opacity: isLoading ? 0.3 : 1,
                   }}
                 />
               </div>
-              {isLoading
-                ? <Skeleton className="h-4 w-4 rounded" />
-                : <span className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8] w-6 text-right shrink-0">{count}</span>
-              }
+              <span className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8] w-6 text-right shrink-0">{count}</span>
             </div>
           )
         })}

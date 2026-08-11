@@ -31,7 +31,9 @@ export default function InvoiceStatusWidget() {
       <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7] dark:border-[#26283A]">
         <div>
           <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Invoice Status</h2>
-          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">{total} total invoice{total !== 1 ? 's' : ''}</p>
+          <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">
+            {isLoading ? 'Loading…' : `${total} total invoice${total !== 1 ? 's' : ''}`}
+          </p>
         </div>
         <div className="w-8 h-8 rounded-xl bg-[#FFFAEB] dark:bg-amber-950/30 flex items-center justify-center">
           <FileText size={14} className="text-[#B54708] dark:text-amber-400" strokeWidth={2} />

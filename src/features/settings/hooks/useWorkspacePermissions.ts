@@ -13,7 +13,7 @@ export interface WorkspaceRole {
 }
 
 export function useWorkspacePermissions() {
-  const { data: permissions = [] } = useQuery({
+  const { data: permissions = [], isPending } = useQuery({
     queryKey: ['workspace-permissions'],
     queryFn:  async () => {
       const { data } = await api.get<{ data: Permission[] }>('/workspaces/my-permissions')
@@ -27,7 +27,7 @@ export function useWorkspacePermissions() {
     [permissions],
   )
 
-  return { permissions, hasPermission }
+  return { permissions, hasPermission, isPending }
 }
 
 export function useWorkspaceRoles() {
