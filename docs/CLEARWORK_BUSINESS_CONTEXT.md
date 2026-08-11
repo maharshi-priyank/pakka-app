@@ -149,11 +149,17 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 
 ## Pricing
 
-**Live pricing, permanent — no "early access" or "founding price" framing. This is what every plan costs, indefinitely.**
+**Free plan is permanent and always ₹0.** Pro and Studio have a **regular price** and a currently-active **"Early Access Offer"** discounted price — both prices should be shown together (regular struck through, early access price highlighted) wherever pricing is displayed.
+
+| Plan | Early Access Offer (current) | Regular price |
+|---|---|---|
+| Free | ₹0/mo | ₹0/mo (always free) |
+| Pro | **₹149/mo** | ₹249/mo |
+| Studio | **₹649/mo** | ₹799/mo |
 
 **Trial:** Every new signup automatically starts on a 15-day free trial of Pro — full Pro features, no credit card required. If the account doesn't upgrade to a paid plan before the trial ends, it's automatically downgraded to the Free plan (no data loss, no card charged, no action needed on the user's or our end — this is handled automatically).
 
-### Free Plan — ₹0/mo
+### Free Plan — ₹0/mo (always)
 - Up to 5 clients
 - Up to 10 active projects
 - Full lead & CRM pipeline — unlimited leads
@@ -163,7 +169,7 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 - Meetings & reminders
 - Community support
 
-### Pro Plan — ₹149/mo
+### Pro Plan — ₹149/mo (Early Access Offer) · ₹249/mo regular
 - Up to 30 clients
 - Up to 60 active projects
 - Up to 5 team members
@@ -177,7 +183,7 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 - AI proposal drafter
 - Priority email support
 
-### Studio Plan — ₹649/mo
+### Studio Plan — ₹649/mo (Early Access Offer) · ₹799/mo regular
 - Unlimited clients
 - Unlimited projects
 - Unlimited team members
@@ -235,7 +241,7 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 - **Type:** SaaS subscription (monthly, no contracts)
 - **Model:** Freemium (generous free tier → paid conversion)
 - **Revenue:** Subscriptions only, zero transaction fees on user payments
-- **Stage:** Publicly launched and generally available. No waitlist, no early access — Free/Pro/Studio pricing is live for everyone.
+- **Stage:** Publicly launched and generally available. No waitlist, no gated/beta access — Free/Pro/Studio pricing is live for everyone. Note: "Early Access Offer" is used only as the *name of the current promotional discount* on Pro/Studio (see Pricing section) — it does not mean the product itself is gated or in beta.
 - **Bootstrap:** Yes. Founder moonlighting. No external funding.
 
 ---
@@ -297,7 +303,7 @@ Follow-up set              Invoice generated (from contract)
 
 ## Frequently Asked Questions (from landing page / support)
 
-**Is ClearWork free?** Yes — the Free plan (up to 5 clients, 10 active projects, 3 proposals/month) is free forever, no credit card required. Pro (₹149/mo) and Studio (₹649/mo) remove the limits and add more features.
+**Is ClearWork free?** Yes — the Free plan (up to 5 clients, 10 active projects, 3 proposals/month) is free forever, no credit card required. Pro and Studio remove the limits and add more features — currently ₹149/mo and ₹649/mo respectively as part of the Early Access Offer (regular pricing is ₹249/mo and ₹799/mo).
 
 **Is GST calculation automatic?** Yes. Enter your client's GSTIN and state — CGST/SGST or IGST is calculated automatically.
 
