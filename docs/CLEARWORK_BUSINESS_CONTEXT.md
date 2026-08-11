@@ -6,13 +6,15 @@
 
 ## What is ClearWork?
 
-**ClearWork** is a client management SaaS built specifically for Indian freelancers, consultants, and growing creative agencies. It replaces the cobbled-together mess of WhatsApp, Canva, Google Sheets, and UPI QR codes with one professional workflow — from the first lead to the final payment.
+**ClearWork** is a client management SaaS built for **service businesses** in India — freelancers, consultants, agencies, and studios of any kind whose work runs on proposals, contracts, and invoices rather than a product catalog. It replaces the cobbled-together mess of WhatsApp, Canva, Google Sheets, and UPI QR codes with one professional workflow — from the first lead to the final payment.
+
+**Primary positioning noun:** "Service businesses" — this is the umbrella category (mirroring how Bonsai/HoneyBook position themselves globally as "the platform for service businesses"). "Freelancers and agencies" remain the two biggest sub-segments within that category and should still appear prominently, but as supporting detail under the "service businesses" framing, not as the headline noun on its own.
 
 **Tagline:** "Find clients. Win them. Get paid."
 
 **Hero headline (landing page):** "Find clients. Win them. Get paid."
 
-**Hero subtext:** ClearWork is the end-to-end business platform for Indian freelancers and agencies — from finding clients to tracked proposals, e-sign contracts, GST invoices, and UPI payments, all in one place.
+**Hero subtext:** ClearWork is the all-in-one platform for service businesses — freelancers, consultants, and agencies — from finding clients to tracked proposals, e-sign contracts, GST invoices, and UPI payments, all in one place.
 
 **Brand badge copy:** "Client CRM for Freelancers & Agencies" — ClearWork is publicly launched and generally available (no longer early access / waitlist).
 
