@@ -149,6 +149,8 @@ Indian freelancers and small agencies manage their entire business across 4+ dis
 
 **Live pricing, permanent — no "early access" or "founding price" framing. This is what every plan costs, indefinitely.**
 
+**Trial:** Every new signup automatically starts on a 15-day free trial of Pro — full Pro features, no credit card required. If the account doesn't upgrade to a paid plan before the trial ends, it's automatically downgraded to the Free plan (no data loss, no card charged, no action needed on the user's or our end — this is handled automatically).
+
 ### Free Plan — ₹0/mo
 - Up to 5 clients
 - Up to 10 active projects
