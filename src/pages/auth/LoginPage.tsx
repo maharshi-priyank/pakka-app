@@ -68,10 +68,10 @@ export default function LoginPage() {
         {/* Headline + badges */}
         <div className="relative z-10 mt-12">
           <h2 className="text-[44px] font-black text-gray-950 leading-[1.08] tracking-tight">
-            Run your freelance<br />business like a pro.
+            Run your service<br />business like a pro.
           </h2>
           <p className="mt-4 text-gray-600 text-[15px] leading-relaxed max-w-[300px]">
-            The all-in-one platform for Indian freelancers &amp; agencies — proposal to payment.
+            The all-in-one platform for Indian service businesses — proposal to payment, in one place.
           </p>
           <div className="flex flex-wrap gap-2 mt-6">
             {['GST invoicing', 'Razorpay payments', 'E-sign contracts'].map(b => (

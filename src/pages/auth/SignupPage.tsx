@@ -103,7 +103,7 @@ export default function SignupPage() {
             Everything you need<br />to close more clients.
           </h2>
           <p className="mt-4 text-gray-600 text-[15px] leading-relaxed max-w-[300px]">
-            Join freelancers across India managing their pipeline, proposals, contracts, and invoices in one place.
+            Join service businesses across India managing their pipeline, proposals, contracts, and invoices in one place.
           </p>
           <div className="flex flex-wrap gap-2 mt-6">
             {['GST invoicing', 'Razorpay payments', 'E-sign contracts'].map(b => (
@@ -140,7 +140,7 @@ export default function SignupPage() {
           </div>
 
           <h1 className="text-[26px] font-black text-[#0F172A] tracking-tight mb-1">Create your account</h1>
-          <p className="text-[14px] text-[#64748B] mb-8">Free forever · no credit card needed</p>
+          <p className="text-[14px] text-[#64748B] mb-8">15-day Pro trial · no credit card needed</p>
 
           {serverError && (
             <div className="mb-5 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-[13px] text-red-600">

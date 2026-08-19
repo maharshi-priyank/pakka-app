@@ -183,9 +183,12 @@ export default function ContractEditor({ contract, defaultProjectId, defaultCont
 
   const onSend = useCallback(async () => {
     if (!contract) return
+    // Flush any unsaved form state (e.g. signerEmail) before triggering send,
+    // so the backend can read content.signerEmail for OTP delivery.
+    if (isDirty) await handleSubmit(onSave)()
     const result = await sendMutation.mutateAsync(contract.id)
     setSendResult(result)
-  }, [contract, sendMutation])
+  }, [contract, isDirty, handleSubmit, onSave, sendMutation])
 
   const copyLink = useCallback(() => {
     if (!sendResult) return
