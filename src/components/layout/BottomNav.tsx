@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { MoreHorizontal, Settings, LogOut, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { supabase } from '@/lib/supabase'
+import { signOutCurrentDevice } from '@/lib/auth'
 import { useMessageUnreadCount } from '@/features/messages/hooks/useMessages'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { ALL_NAV_ITEMS, PRIMARY_IDS } from './navItems'
@@ -28,7 +28,7 @@ export default function BottomNav() {
 
   async function handleSignOut() {
     setMoreOpen(false)
-    await supabase.auth.signOut()
+    await signOutCurrentDevice()
   }
 
   function goTo(href: string) {

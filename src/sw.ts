@@ -68,9 +68,12 @@ registerRoute(
 )
 
 registerRoute(
-  ({ url }) => url.pathname.startsWith('/api/'),
+  ({ url, request }) =>
+    url.pathname.startsWith('/api/')
+    && request.method === 'GET'
+    && !request.headers.has('Authorization'),
   new NetworkFirst({
-    cacheName: 'api',
+    cacheName: 'public-api',
     networkTimeoutSeconds: 5,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -83,7 +86,12 @@ registerRoute(
 
 self.addEventListener('install', () => { self.skipWaiting() })
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim())
+  event.waitUntil(Promise.all([
+    // Older workers cached authenticated API responses by URL alone. Purge the
+    // legacy cache so session/device data cannot survive a user switch.
+    caches.delete('api'),
+    self.clients.claim(),
+  ]))
 })
 
 // ─── Push notifications ────────────────────────────────────────────────────────

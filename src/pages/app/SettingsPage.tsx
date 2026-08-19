@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
-import { User, Building2, Bell, Puzzle, Globe, Users, Star } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { User, Building2, Bell, Puzzle, Globe, Users, Star, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ProfileTab from '@/features/settings/components/ProfileTab'
 import BusinessTab from '@/features/settings/components/BusinessTab'
@@ -9,6 +8,7 @@ import IntegrationsTab from '@/features/settings/components/IntegrationsTab'
 import PublicProfileTab from '@/features/settings/components/PublicProfileTab'
 import TeamTab from '@/features/team/components/TeamTab'
 import WorkspaceReviewsSection from '@/features/reviews/components/WorkspaceReviewsSection'
+import LoginManagementTab from '@/features/settings/components/LoginManagementTab'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
 import { Permission } from '@/types/permissions'
 
@@ -17,6 +17,7 @@ const TAB_DEFS = [
   { key: 'business'      as const, label: 'Business',       icon: Building2,      permission: null },
   { key: 'public'        as const, label: 'Public Profile', icon: Globe,          permission: null },
   { key: 'notifications' as const, label: 'Notifications',  icon: Bell,           permission: null },
+  { key: 'security'      as const, label: 'Security',       icon: ShieldCheck,    permission: null },
   { key: 'integrations'  as const, label: 'Integrations',   icon: Puzzle,         permission: Permission.MANAGE_INTEGRATIONS },
   { key: 'team'          as const, label: 'Team',           icon: Users,          permission: Permission.MANAGE_MEMBERS },
   { key: 'reviews'       as const, label: 'Reviews',        icon: Star,           permission: null },
@@ -25,30 +26,33 @@ const TAB_DEFS = [
 type TabKey = typeof TAB_DEFS[number]['key']
 
 export default function SettingsPage() {
-  const { search }                    = useLocation()
-  const [activeTab, setActiveTab]     = useState<TabKey>('profile')
-
+  const [searchParams, setSearchParams] = useSearchParams()
   const { hasPermission } = useWorkspacePermissions()
   const visibleTabs = TAB_DEFS.filter(t => !t.permission || hasPermission(t.permission))
+  const requestedTab = searchParams.get('tab') as TabKey | null
+  const activeTab = requestedTab && visibleTabs.some(tab => tab.key === requestedTab)
+    ? requestedTab
+    : 'profile'
 
-  useEffect(() => {
-    const tab = new URLSearchParams(search).get('tab') as TabKey | null
-    if (tab && visibleTabs.some(t => t.key === tab)) setActiveTab(tab)
-  }, [search])
+  function selectTab(tab: TabKey) {
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.set('tab', tab)
+    setSearchParams(nextParams, { replace: true })
+  }
 
   return (
     <div className="max-w-[860px] space-y-5">
 
       <div>
         <h1 className="text-[22px] font-extrabold text-[#101828] dark:text-[#ECEEF3] tracking-tight">Settings</h1>
-        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Manage your profile, business details, and integrations.</p>
+        <p className="text-[13px] text-[#667085] dark:text-[#8B92A8] mt-0.5">Manage your profile, security, business details, and integrations.</p>
       </div>
 
       <div className="flex gap-1 border-b border-[#EAECF0] dark:border-[#26283A] overflow-x-auto scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0">
         {visibleTabs.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
-            onClick={() => setActiveTab(key)}
+            onClick={() => selectTab(key)}
             className={cn(
               'flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold border-b-2 -mb-px transition-colors whitespace-nowrap',
               activeTab === key
@@ -66,6 +70,7 @@ export default function SettingsPage() {
       {activeTab === 'business'      && <BusinessTab />}
       {activeTab === 'public'         && <PublicProfileTab />}
       {activeTab === 'notifications'  && <NotificationsTab />}
+      {activeTab === 'security'       && <LoginManagementTab />}
       {activeTab === 'integrations'   && <IntegrationsTab />}
       {activeTab === 'team'           && <TeamTab />}
       {activeTab === 'reviews'        && <WorkspaceReviewsSection />}

@@ -65,6 +65,7 @@ export default function App() {
       }
       if (event === 'SIGNED_OUT') {
         syncedUserId = null // reset so next login syncs again
+        queryClient.clear()
         resetUser()
       }
     })

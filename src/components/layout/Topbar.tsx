@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/store/authStore'
-import { supabase } from '@/lib/supabase'
+import { signOutCurrentDevice } from '@/lib/auth'
 import { LogOut, ChevronDown, Sun, Moon, Search, PanelLeft } from 'lucide-react'
 import NotificationBell from '@/features/notifications/components/NotificationBell'
 import CalendarBell     from '@/features/meetings/components/CalendarBell'
@@ -27,7 +27,7 @@ export default function Topbar({ onMenuToggle, onDesktopSidebarToggle, desktopSi
     null
 
   async function handleSignOut() {
-    await supabase.auth.signOut()
+    await signOutCurrentDevice()
   }
 
   return (

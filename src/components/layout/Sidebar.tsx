@@ -21,6 +21,7 @@ import { ALL_NAV_ITEMS, SECTIONS, DEFAULT_ORDER, STORAGE_KEY } from './navItems'
 // import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { signOutCurrentDevice } from '@/lib/auth'
 import { useAuthStore } from '@/store/authStore'
 import { generateInitials } from '@/lib/utils'
 import WorkspaceSwitcher from '@/features/settings/components/WorkspaceSwitcher'
@@ -89,7 +90,7 @@ export default function Sidebar({ onClose }: Props) {
   const firstName = name.split(' ')[0]
 
   async function handleSignOut() {
-    await supabase.auth.signOut()
+    await signOutCurrentDevice()
   }
 
   const openLeadFinder = useCallback(async (e: React.MouseEvent<HTMLAnchorElement>) => {
