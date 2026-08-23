@@ -14,23 +14,23 @@ const WINDOW_LABELS: Record<string, string> = {
 const FEATURES = {
   FREE: [
     '3 proposals / month',
-    '3 active leads',
-    '1 client',
-    'ClearWork watermark on docs',
+    '30 active leads',
+    '2 active clients',
+    '"Powered by ClearWork" on docs',
   ],
   SOLO: [
-    'Up to 25 clients',
-    'Unlimited proposals & leads',
+    'Unlimited clients & leads',
+    'Unlimited proposals & invoices',
     'E-sign contracts',
     'GST invoice + TDS flagging',
     'Client portal',
-    'Revenue dashboard',
+    '1 seat — just you',
   ],
   STUDIO: [
     'Everything in Solo',
-    'Unlimited clients',
-    '1 team member seat',
+    'Unlimited team members',
     'White-label documents & portal',
+    'Custom domain for client portal',
     'No "Powered by ClearWork" branding',
     'Priority email support',
   ],
@@ -133,12 +133,12 @@ export default function UpgradeModal() {
               <div className="leading-none">
                 {pricingLoading ? <PriceSkeleton /> : (
                   <p className="text-[22px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">
-                    ₹{pricing?.solo.price ?? 299}
+                    ₹{pricing?.solo.price ?? 249}
                     <span className="text-[11px] font-medium text-[#98A2B3] ml-0.5">/mo</span>
                   </p>
                 )}
                 {!pricingLoading && isFounding && (
-                  <p className="text-[10px] text-[#9CA3AF] mt-0.5 line-through">₹299/mo</p>
+                  <p className="text-[10px] text-[#9CA3AF] mt-0.5 line-through">₹249/mo</p>
                 )}
               </div>
               <ul className="mt-3 space-y-1.5">
@@ -168,12 +168,12 @@ export default function UpgradeModal() {
               <div className="leading-none">
                 {pricingLoading ? <PriceSkeleton /> : (
                   <p className="text-[22px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">
-                    ₹{pricing?.studio.price ?? 699}
+                    ₹{pricing?.studio.price ?? 799}
                     <span className="text-[11px] font-medium text-[#98A2B3] ml-0.5">/mo</span>
                   </p>
                 )}
                 {!pricingLoading && isFounding && (
-                  <p className="text-[10px] text-[#9CA3AF] mt-0.5 line-through">₹699/mo</p>
+                  <p className="text-[10px] text-[#9CA3AF] mt-0.5 line-through">₹799/mo</p>
                 )}
               </div>
               <ul className="mt-3 space-y-1.5">

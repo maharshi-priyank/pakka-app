@@ -4,8 +4,8 @@ import { useCurrentPricing } from '../hooks/useCurrentPricing'
 import { useCreateSubscription, useSubscriptionStatus } from '../hooks/useSubscription'
 
 const FEATURES = {
-  SOLO:   ['Up to 25 clients', 'Unlimited proposals & leads', 'E-sign contracts', 'GST invoice + TDS flagging', 'Client portal'],
-  STUDIO: ['Everything in Solo', 'Unlimited clients', '1 team member seat', 'White-label docs & portal', 'No ClearWork branding', 'Priority support'],
+  SOLO:   ['Unlimited clients & leads', 'Unlimited proposals & invoices', 'E-sign contracts', 'GST invoice + TDS flagging', 'Client portal', '1 seat — just you'],
+  STUDIO: ['Everything in Solo', 'Unlimited team members', 'White-label docs & portal', 'Custom domain for client portal', 'No ClearWork branding', 'Priority support'],
 }
 
 export default function UpgradePlanCards() {
@@ -99,14 +99,14 @@ export default function UpgradePlanCards() {
                 ) : (
                   <>
                     <span className="text-[24px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">
-                      ₹{pricing?.solo.price ?? 299}
+                      ₹{pricing?.solo.price ?? 249}
                     </span>
                     <span className="text-[12px] text-[#98A2B3]">/mo</span>
                   </>
                 )}
               </div>
               {!pricingLoading && isFounding && (
-                <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹299/mo regular</p>
+                <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹249/mo regular</p>
               )}
             </div>
           </div>
@@ -140,14 +140,14 @@ export default function UpgradePlanCards() {
                 ) : (
                   <>
                     <span className="text-[24px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">
-                      ₹{pricing?.studio.price ?? 699}
+                      ₹{pricing?.studio.price ?? 799}
                     </span>
                     <span className="text-[12px] text-[#98A2B3]">/mo</span>
                   </>
                 )}
               </div>
               {!pricingLoading && isFounding && (
-                <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹699/mo regular</p>
+                <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹799/mo regular</p>
               )}
             </div>
           </div>

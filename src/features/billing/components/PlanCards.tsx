@@ -10,9 +10,9 @@ interface Props {
 }
 
 const FEATURES = {
-  FREE:   ['Up to 5 clients', '10 projects', '30 active leads', 'Just you — no team members', '100 MB storage'],
-  PRO:    ['Up to 30 clients', 'Up to 300 active leads', '60 projects', 'Client portal', '2 GB storage'],
-  STUDIO: ['Everything in Pro', 'Unlimited clients, leads & projects', 'Unlimited team members', 'Unlimited storage', 'Priority support'],
+  FREE:   ['Up to 2 active clients', '10 projects', '30 active leads', 'Just you — no team members', '100 MB storage'],
+  PRO:    ['Unlimited clients & leads', 'Unlimited projects', 'E-sign contracts', 'Client portal', '1 seat — just you', '2 GB storage'],
+  STUDIO: ['Everything in Pro', 'Unlimited team members', 'White-label docs & portal', 'Custom domain', 'Multi-currency invoicing', 'Priority support'],
 }
 
 function StatusDetails({
@@ -242,12 +242,12 @@ export default function PlanCards({ subscription, onCancel }: Props) {
                       <div className="h-7 w-16 bg-[#EAECF0] rounded animate-pulse" />
                     ) : (
                       <>
-                        <span className="text-[26px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">₹{pricing?.pro.price ?? 149}</span>
+                        <span className="text-[26px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">₹{pricing?.pro.price ?? 249}</span>
                         <span className="text-[12px] text-[#98A2B3]">/mo</span>
                       </>
                     )}
                   </div>
-                  {!isLoading && isFounding && <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹149/mo</p>}
+                  {!isLoading && isFounding && <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹249/mo</p>}
                 </div>
               </div>
 
@@ -311,12 +311,12 @@ export default function PlanCards({ subscription, onCancel }: Props) {
                       <div className="h-7 w-16 bg-[#EAECF0] rounded animate-pulse" />
                     ) : (
                       <>
-                        <span className="text-[26px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">₹{pricing?.studio.price ?? 650}</span>
+                        <span className="text-[26px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">₹{pricing?.studio.price ?? 799}</span>
                         <span className="text-[12px] text-[#98A2B3]">/mo</span>
                       </>
                     )}
                   </div>
-                  {!isLoading && isFounding && <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹650/mo</p>}
+                  {!isLoading && isFounding && <p className="text-[11px] text-[#9CA3AF] line-through mt-0.5">₹799/mo</p>}
                 </div>
               </div>
 
