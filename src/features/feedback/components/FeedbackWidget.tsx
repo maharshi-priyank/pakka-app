@@ -60,16 +60,19 @@ export default function FeedbackWidget() {
         />
       )}
 
-      {/* Popup */}
+      {/* Popup — full-width on mobile (above bottom nav), fixed 340px on lg+ */}
       <div
         className={cn(
-          'fixed bottom-20 right-4 lg:bottom-24 lg:right-5 z-[9999]',
-          'w-[340px] rounded-2xl bg-white shadow-2xl border border-gray-100',
+          'fixed z-[9999]',
+          'left-3 right-3 lg:left-auto lg:right-5',
+          'bottom-[144px] lg:bottom-20',
+          'lg:w-[340px] rounded-2xl bg-white shadow-2xl border border-gray-100',
           'transition-all duration-200 origin-bottom-right',
           open
             ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
             : 'opacity-0 scale-95 translate-y-2 pointer-events-none'
         )}
+        style={{ maxHeight: 'calc(100dvh - 180px)', overflowY: 'auto' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100">
@@ -168,19 +171,27 @@ export default function FeedbackWidget() {
         )}
       </div>
 
-      {/* FAB trigger */}
+      {/* FAB trigger — icon-only circle above bottom nav on mobile, pill on lg+ */}
       <button
         onClick={() => setOpen(v => !v)}
+        aria-label="Open feedback"
         className={cn(
-          'fixed bottom-5 right-4 lg:bottom-5 lg:right-5 z-[9999]',
-          'flex items-center gap-2 px-4 py-2.5 rounded-full',
+          'fixed right-4 lg:right-5 z-[9999]',
+          /* bottom-[88px] clears the 72px bottom nav on mobile; lg+ has no bottom nav */
+          'bottom-[88px] lg:bottom-5',
+          /* Mobile: 44×44 circle */
+          'w-11 h-11 lg:w-auto lg:h-auto',
+          'rounded-full',
+          /* Desktop: pill */
+          'lg:flex lg:items-center lg:gap-2 lg:px-4 lg:py-2.5',
+          'flex items-center justify-center',
           'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700',
           'text-xs font-medium transition-all hover:shadow-xl',
           open && 'opacity-0 pointer-events-none scale-90'
         )}
       >
         <MessageCircle size={15} strokeWidth={2} />
-        Feedback
+        <span className="hidden lg:inline">Feedback</span>
       </button>
     </>
   )
