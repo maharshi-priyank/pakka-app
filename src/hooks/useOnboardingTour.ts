@@ -4,89 +4,103 @@ import 'driver.js/dist/driver.css'
 
 const TOUR_KEY = 'clearwork_tour_v1_seen'
 
-function icon(path: string, color = '#2563EB') {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:7px">${path}</svg>`
-}
-
-const ICONS = {
-  sparkle: '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>',
-  check:   '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>',
+declare global {
+  interface Window {
+    _cwStartExtended?: () => void
+  }
 }
 
 export function useOnboardingTour() {
-  const startTour = useCallback(() => {
-    const driverObj = driver({
+  const startExtendedTour = useCallback(() => {
+    const extDriver = driver({
       showProgress: true,
-      animate: true,
-      smoothScroll: true,
-      overlayColor: 'rgba(0,0,0,0.55)',
-      stagePadding: 6,
-      stageRadius: 12,
-      popoverClass: 'clearwork-tour-popover',
-      nextBtnText: 'Next →',
-      prevBtnText: '← Back',
-      doneBtnText: 'Done',
+      popoverClass: 'pakka-tour-popover',
       steps: [
         {
+          element: '#tour-projects',
           popover: {
-            title: `${icon(ICONS.sparkle)}Welcome to ClearWork!`,
-            description: "Let's take a quick 30-second tour so you know exactly where everything is.",
-            side: 'over',
-            align: 'center',
-          },
-        },
-        {
-          element: '#tour-leads',
-          popover: {
-            title: 'Leads — your pipeline',
-            description: 'Add prospects here and track them through your sales stages — from first contact to closed won.',
+            title: 'Projects',
+            description: 'Organise client work into projects with tasks, timelines, and milestones.',
             side: 'right',
+            align: 'start',
           },
         },
         {
-          element: '#tour-proposals',
+          element: '#tour-tasks',
           popover: {
-            title: 'Proposals',
-            description: 'Create beautiful, branded proposals and send them to clients with a single link. Track opens and acceptances.',
+            title: 'Tasks',
+            description: 'Your personal task board — across all projects and standalone work.',
             side: 'right',
+            align: 'start',
           },
         },
         {
-          element: '#tour-contracts',
+          element: '#tour-inbox',
           popover: {
-            title: 'Contracts',
-            description: 'Send e-sign ready contracts. Once a client signs, everything is locked and stored here.',
+            title: 'Inbox',
+            description: 'Messages and notifications from clients and your team in one place.',
             side: 'right',
+            align: 'start',
           },
         },
         {
-          element: '#tour-invoices',
+          element: '#tour-timelog',
           popover: {
-            title: 'Invoices',
-            description: 'Generate GST-compliant invoices and collect payments via Razorpay — directly from ClearWork.',
+            title: 'Time Log',
+            description: 'Track billable hours and export to invoices with one click.',
             side: 'right',
+            align: 'start',
           },
         },
         {
-          element: '#tour-clients',
+          element: '#tour-expenses',
           popover: {
-            title: 'Clients',
-            description: 'All your clients in one place, with their full history — proposals, contracts, invoices, and meetings.',
+            title: 'Expenses',
+            description: 'Log and categorise business expenses. Attach receipts and tag projects.',
             side: 'right',
+            align: 'start',
           },
         },
         {
-          element: '#tour-settings',
+          element: '#tour-reports',
           popover: {
-            title: 'Settings',
-            description: "Add your business name, logo, GST number, and bank details here — they'll auto-fill into all your documents.",
+            title: 'Reports',
+            description: 'Revenue trends, outstanding invoices, and client performance — all in one view.',
             side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          element: '#tour-calendar',
+          popover: {
+            title: 'Calendar',
+            description: 'Schedule meetings and deadlines. Sync with Google or Apple Calendar.',
+            side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          element: '#tour-forms',
+          popover: {
+            title: 'Forms',
+            description: 'Collect client briefs, feedback, or intake information — no third-party tools needed.',
+            side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          element: '#tour-automations',
+          popover: {
+            title: 'Automations',
+            description: 'Set up triggers to handle repetitive tasks — follow-ups, reminders, and status updates.',
+            side: 'right',
+            align: 'start',
           },
         },
         {
           popover: {
-            title: `${icon(ICONS.check, '#16A34A')}You're all set!`,
-            description: 'Start by adding your first lead. The whole workflow — proposal → contract → invoice — flows from there.',
+            title: "You know the whole app",
+            description: "Welcome aboard. Everything you need to run your freelance business is right here.",
             side: 'over',
             align: 'center',
           },
@@ -94,11 +108,124 @@ export function useOnboardingTour() {
       ],
       onDestroyed: () => {
         localStorage.setItem(TOUR_KEY, 'true')
+        delete window._cwStartExtended
+      },
+    })
+    extDriver.drive()
+  }, [])
+
+  const startTour = useCallback(() => {
+    const driverObj = driver({
+      showProgress: true,
+      popoverClass: 'pakka-tour-popover',
+      steps: [
+        {
+          popover: {
+            title: 'Welcome to ClearWork',
+            description: "Let's show you where everything lives. Takes about 90 seconds.",
+            side: 'over',
+            align: 'center',
+          },
+        },
+        {
+          element: '#tour-dashboard',
+          popover: {
+            title: 'Dashboard',
+            description: 'Your business at a glance — revenue, activity, and what needs attention.',
+            side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          element: '#tour-leads',
+          popover: {
+            title: 'Leads',
+            description: 'Track every prospect in your pipeline before they become a client.',
+            side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          element: '#tour-contacts',
+          popover: {
+            title: 'Contacts',
+            description: 'Everyone you have worked with — clients, collaborators, and vendors.',
+            side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          element: '#tour-proposals',
+          popover: {
+            title: 'Proposals',
+            description: 'Send polished proposals and track opens, views, and acceptances.',
+            side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          element: '#tour-contracts',
+          popover: {
+            title: 'Contracts',
+            description: 'E-sign agreements in minutes. No PDFs, no chasing.',
+            side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          element: '#tour-invoices',
+          popover: {
+            title: 'Invoices',
+            description: 'GST-ready invoices with UPI payment links built in.',
+            side: 'right',
+            align: 'start',
+          },
+        },
+        {
+          popover: {
+            title: "That's the core",
+            description: `
+              <p style="margin:0 0 12px">You now know where the essentials live.</p>
+              <button
+                id="cw-tour-explore"
+                style="
+                  display:inline-flex;align-items:center;gap:6px;
+                  padding:7px 14px;border-radius:8px;border:1.5px solid #6366F1;
+                  background:transparent;color:#6366F1;font-size:13px;font-weight:600;
+                  cursor:pointer;transition:background 0.15s,color 0.15s;
+                "
+                onmouseover="this.style.background='#6366F1';this.style.color='#fff'"
+                onmouseout="this.style.background='transparent';this.style.color='#6366F1'"
+              >
+                Explore all features →
+              </button>
+            `,
+            side: 'over',
+            align: 'center',
+          },
+        },
+      ],
+      onHighlighted: (_element, _step, opts) => {
+        if (opts.state.activeIndex !== 7) return
+        setTimeout(() => {
+          const btn = document.getElementById('cw-tour-explore')
+          if (btn) {
+            btn.addEventListener('click', () => {
+              driverObj.destroy()
+              startExtendedTour()
+            }, { once: true })
+          }
+        }, 0)
+      },
+      onDestroyed: () => {
+        localStorage.setItem(TOUR_KEY, 'true')
+        delete window._cwStartExtended
       },
     })
 
+    window._cwStartExtended = startExtendedTour
     driverObj.drive()
-  }, [])
+  }, [startExtendedTour])
 
   const startIfFirstVisit = useCallback(() => {
     if (!localStorage.getItem(TOUR_KEY)) {

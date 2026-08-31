@@ -16,22 +16,22 @@ export interface NavItem {
 
 // Single source of truth — add a new item here and it appears in Sidebar + BottomNav automatically
 export const ALL_NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard',    icon: LayoutDashboard, label: 'Dashboard',    href: '/dashboard',    tourId: 'tour-dashboard', permission: undefined },
-  { id: 'contacts',     icon: ContactRound,    label: 'Contacts',      href: '/contacts',     permission: Permission.VIEW_LEADS },
-  { id: 'leads',        icon: GitBranch,       label: 'Leads',         href: '/leads',        permission: Permission.VIEW_LEADS },
-  { id: 'projects',     icon: FolderKanban,    label: 'Projects',      href: '/projects',     permission: Permission.VIEW_PROJECTS },
-  { id: 'tasks',        icon: CheckSquare,     label: 'Tasks',         href: '/tasks',        permission: Permission.VIEW_TASKS },
-  { id: 'inbox',        icon: MessageSquare,   label: 'Inbox',         href: '/inbox',        permission: Permission.VIEW_INBOX },
-  { id: 'time',         icon: Clock,           label: 'Time Log',      href: '/time' },
-  { id: 'proposals',    icon: FileText,        label: 'Proposals',     href: '/proposals',    tourId: 'tour-proposals', permission: Permission.VIEW_PROPOSALS },
-  { id: 'contracts',    icon: PenLine,         label: 'Contracts',     href: '/contracts',    tourId: 'tour-contracts', permission: Permission.VIEW_CONTRACTS },
-  { id: 'invoices',     icon: Receipt,         label: 'Invoices',      href: '/invoices',     tourId: 'tour-invoices',  permission: Permission.VIEW_INVOICES },
-  { id: 'expenses',     icon: Wallet,          label: 'Expenses',      href: '/expenses' },
-  { id: 'billing',      icon: CreditCard,      label: 'Billing',       href: '/billing' },
-  { id: 'reports',      icon: BarChart3,       label: 'Reports',       href: '/reports',      permission: Permission.VIEW_REPORTS },
-  { id: 'calendar',     icon: CalendarDays,    label: 'Calendar',      href: '/calendar',     permission: Permission.VIEW_CALENDAR },
-  { id: 'forms',        icon: ClipboardList,   label: 'Forms',         href: '/forms',        permission: Permission.VIEW_FORMS },
-  { id: 'automations',  icon: Zap,             label: 'Automations',   href: '/automations',  permission: Permission.VIEW_AUTOMATIONS },
+  { id: 'dashboard',    icon: LayoutDashboard, label: 'Dashboard',    href: '/dashboard',    tourId: 'tour-dashboard',    permission: undefined },
+  { id: 'contacts',     icon: ContactRound,    label: 'Contacts',      href: '/contacts',     tourId: 'tour-contacts',     permission: Permission.VIEW_LEADS },
+  { id: 'leads',        icon: GitBranch,       label: 'Leads',         href: '/leads',        tourId: 'tour-leads',        permission: Permission.VIEW_LEADS },
+  { id: 'projects',     icon: FolderKanban,    label: 'Projects',      href: '/projects',     tourId: 'tour-projects',     permission: Permission.VIEW_PROJECTS },
+  { id: 'tasks',        icon: CheckSquare,     label: 'Tasks',         href: '/tasks',        tourId: 'tour-tasks',        permission: Permission.VIEW_TASKS },
+  { id: 'inbox',        icon: MessageSquare,   label: 'Inbox',         href: '/inbox',        tourId: 'tour-inbox',        permission: Permission.VIEW_INBOX },
+  { id: 'time',         icon: Clock,           label: 'Time Log',      href: '/time',         tourId: 'tour-timelog' },
+  { id: 'proposals',    icon: FileText,        label: 'Proposals',     href: '/proposals',    tourId: 'tour-proposals',    permission: Permission.VIEW_PROPOSALS },
+  { id: 'contracts',    icon: PenLine,         label: 'Contracts',     href: '/contracts',    tourId: 'tour-contracts',    permission: Permission.VIEW_CONTRACTS },
+  { id: 'invoices',     icon: Receipt,         label: 'Invoices',      href: '/invoices',     tourId: 'tour-invoices',     permission: Permission.VIEW_INVOICES },
+  { id: 'expenses',     icon: Wallet,          label: 'Expenses',      href: '/expenses',     tourId: 'tour-expenses' },
+  { id: 'billing',      icon: CreditCard,      label: 'Billing',       href: '/billing',      tourId: 'tour-billing' },
+  { id: 'reports',      icon: BarChart3,       label: 'Reports',       href: '/reports',      tourId: 'tour-reports',      permission: Permission.VIEW_REPORTS },
+  { id: 'calendar',     icon: CalendarDays,    label: 'Calendar',      href: '/calendar',     tourId: 'tour-calendar',     permission: Permission.VIEW_CALENDAR },
+  { id: 'forms',        icon: ClipboardList,   label: 'Forms',         href: '/forms',        tourId: 'tour-forms',        permission: Permission.VIEW_FORMS },
+  { id: 'automations',  icon: Zap,             label: 'Automations',   href: '/automations',  tourId: 'tour-automations',  permission: Permission.VIEW_AUTOMATIONS },
 ]
 
 // The IDs shown as primary bottom tabs on mobile (max 4 — 5th slot is the "More" button)

@@ -1,10 +1,11 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, lazy, Suspense, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import BottomNav from './BottomNav'
 import { useProfile } from '@/features/settings/hooks/useProfile'
 import { SidebarContext } from '@/contexts/SidebarContext'
 import FeedbackWidget from '@/features/feedback/components/FeedbackWidget'
+import { useOnboardingTour } from '@/hooks/useOnboardingTour'
 
 const OnboardingWizard = lazy(() => import('@/features/onboarding/OnboardingWizard'))
 
@@ -14,6 +15,15 @@ export default function AppShell() {
   const { pathname } = useLocation()
   const { data: profile, isLoading: profileLoading } = useProfile()
   const showWizard = !profileLoading && !!profile && !profile.onboardingComplete
+  const { startIfFirstVisit } = useOnboardingTour()
+
+  useEffect(() => {
+    const flag = sessionStorage.getItem('clearwork_post_onboard')
+    if (!flag) return
+    sessionStorage.removeItem('clearwork_post_onboard')
+    if (window.innerWidth < 1024) return
+    startIfFirstVisit()
+  }, [pathname, startIfFirstVisit])
 
   return (
     <SidebarContext.Provider value={{ visible: desktopSidebarVisible, setVisible: setDesktopSidebarVisible }}>

@@ -365,6 +365,7 @@ export default function OnboardingWizard() {
             businessName={businessName}
             onAction={(dest) => {
               setShowWelcome(false)
+              sessionStorage.setItem('clearwork_post_onboard', '1')
               if (dest === 'dashboard') {
                 navigate('/dashboard')
               } else {
