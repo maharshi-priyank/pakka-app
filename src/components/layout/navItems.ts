@@ -39,8 +39,8 @@ export const PRIMARY_IDS = ['dashboard', 'contacts', 'projects', 'inbox']
 
 export const SECTIONS = [
   { label: null,           ids: ['dashboard', 'contacts', 'leads', 'projects', 'tasks', 'inbox', 'time'] },
-  { label: 'TOOLS',        ids: ['proposals', 'contracts', 'invoices', 'expenses', 'reports', 'billing'] },
-  { label: 'PRODUCTIVITY', ids: ['calendar', 'forms', 'automations'] },
+  { label: 'Tools',        ids: ['proposals', 'contracts', 'invoices', 'expenses', 'reports', 'billing'] },
+  { label: 'Productivity', ids: ['calendar', 'forms', 'automations'] },
 ]
 
 export const DEFAULT_ORDER = ALL_NAV_ITEMS.map(i => i.id)

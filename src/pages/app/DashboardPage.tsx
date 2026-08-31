@@ -154,7 +154,7 @@ function SortableWidget({
         {editMode && (
           <>
             {/* Inset ring */}
-            <div className="absolute inset-0 rounded-[14px] ring-2 ring-[#6366F1]/25 pointer-events-none z-10" />
+            <div className="absolute inset-0 rounded-[14px] ring-2 ring-[#E2E8F0] pointer-events-none z-10" />
 
             {/* Grip (drag handle) */}
             <button
@@ -340,7 +340,7 @@ export default function DashboardPage() {
       {!dashboardReady ? (
         <DashboardHeaderSkeleton />
       ) : (
-      <div className="flex items-center gap-3 md:gap-5 mb-6">
+      <div className="flex items-center gap-3 md:gap-4 mb-5">
 
         {/* Re-open sidebar button (desktop only, when collapsed) */}
         {!sidebarVisible && (
@@ -355,24 +355,23 @@ export default function DashboardPage() {
 
         {/* Greeting */}
         <div className="flex-1 min-w-0">
-          <h1 className="text-[18px] md:text-[22px] font-bold text-[#101828] dark:text-[#ECEEF3] tracking-tight leading-none truncate">
+          <h1 className="text-[20px] font-semibold text-[#0F172A] dark:text-[#ECEEF3] tracking-[-0.3px] leading-none truncate">
             {getGreeting(firstName)}
           </h1>
-          <p className="text-[13px] text-[#98A2B3] dark:text-[#545C74] mt-1">What are you working on?</p>
         </div>
 
-        {/* Search — truly centered via fixed width */}
-        <div className="hidden md:block w-[280px] shrink-0">
+        {/* Search */}
+        <div className="hidden md:block w-[240px] shrink-0">
           <div className="relative">
             <Search
-              size={14}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#545C74] pointer-events-none"
+              size={13}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8] dark:text-[#545C74] pointer-events-none"
               strokeWidth={2}
             />
             <input
               type="text"
-              placeholder="Search..."
-              className="w-full h-9 pl-10 pr-4 rounded-xl text-[13px] bg-[#F5F6FA] dark:bg-[#1A1B23] border border-transparent focus:border-[#6366F1]/30 focus:bg-white dark:focus:bg-[#13141A] focus:ring-2 focus:ring-[#6366F1]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-[#545C74] text-gray-900 dark:text-[#ECEEF3]"
+              placeholder="Search…"
+              className="w-full h-8 pl-9 pr-3 rounded-lg text-[13px] bg-black/[0.04] dark:bg-[#1A1B23] border border-transparent focus:border-[#E2E8F0] focus:bg-white dark:focus:bg-[#13141A] outline-none transition-all placeholder-[#94A3B8] dark:placeholder-[#545C74] text-[#0F172A] dark:text-[#ECEEF3]"
             />
           </div>
         </div>
@@ -388,7 +387,7 @@ export default function DashboardPage() {
           >
             {isDark ? <Sun size={15} strokeWidth={2} /> : <Moon size={15} strokeWidth={2} />}
           </button>
-          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0 select-none">
+          <div className="w-8 h-8 rounded-full bg-[#1E293B] flex items-center justify-center text-white text-[11px] font-bold shrink-0 select-none">
             {initials}
           </div>
 
@@ -435,7 +434,7 @@ export default function DashboardPage() {
 
       {/* ── Edit mode hint ── */}
       {editMode && (
-        <div className="flex items-center gap-2 px-3.5 py-2.5 bg-[#EEF2FF] border border-[#C7D2FE] rounded-xl text-[12px] text-[#4338CA] font-medium anim-modal-in">
+        <div className="flex items-center gap-2 px-3.5 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-[12px] text-[#64748B] font-medium anim-modal-in">
           <GripVertical size={14} strokeWidth={2} className="shrink-0" />
           <span>
             <span className="font-bold">Drag</span> to reorder ·&nbsp;
@@ -491,7 +490,7 @@ export default function DashboardPage() {
           {activeWidget ? (
             <div
               className={cn(
-                'rounded-[14px] shadow-2xl ring-2 ring-[#6366F1]/30 opacity-90',
+                'rounded-[14px] shadow-2xl ring-2 ring-[#E2E8F0] opacity-90',
                 effectiveCols(activeId!) === 4 ? 'w-[calc(100vw-8rem)] max-w-[900px]' :
                 effectiveCols(activeId!) === 2 ? 'w-[340px]' : 'w-[200px]',
               )}

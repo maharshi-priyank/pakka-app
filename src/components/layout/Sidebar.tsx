@@ -128,15 +128,15 @@ export default function Sidebar({ onClose }: Props) {
   if (!shellReady) return <SidebarSkeleton />
 
   return (
-    <aside className="w-[240px] shrink-0 bg-transparent flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-black/[0.06]">
+    <aside className="w-[232px] shrink-0 bg-transparent flex flex-col h-screen sticky top-0 relative overflow-hidden border-r border-black/[0.05]">
 
       {/* Workspace switcher */}
-      <div className="pt-3 pb-2 shrink-0 border-b border-gray-100">
+      <div className="pt-2.5 pb-1.5 shrink-0">
         <WorkspaceSwitcher />
       </div>
 
       {/* Nav — scrollable */}
-      <div className="flex-1 pt-2 pb-3 pl-4 pr-3 overflow-y-auto min-h-0">
+      <div className="flex-1 py-1 px-2.5 overflow-y-auto min-h-0">
         {SECTIONS.map((section, si) => {
           const sectionItems = orderedItems.filter(item => section.ids.includes(item.id))
           const visibleItems = sectionItems.filter(item =>
@@ -144,13 +144,13 @@ export default function Sidebar({ onClose }: Props) {
           )
           if (visibleItems.length === 0) return null
           return (
-            <div key={si} className={si > 0 ? 'mt-6' : ''}>
+            <div key={si} className={si > 0 ? 'mt-4' : ''}>
               {section.label && (
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 px-3 mb-2">
+                <p className="text-[10.5px] font-medium text-[#94A3B8] px-2 pt-1 pb-0.5">
                   {section.label}
                 </p>
               )}
-              <nav className="space-y-0.5">
+              <nav>
                 {visibleItems.map(({ id, icon: Icon, label, href, tourId }) => (
                   <NavLink
                     key={href}
@@ -159,10 +159,10 @@ export default function Sidebar({ onClose }: Props) {
                     onClick={onClose}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium transition-all duration-100',
+                        'flex items-center gap-2 px-2 h-8 rounded-md text-[13px] font-medium transition-all duration-100 w-full',
                         isActive
-                          ? 'bg-white/70 backdrop-blur-sm text-gray-900 font-semibold shadow-sm border border-white/80'
-                          : 'text-gray-500 hover:bg-white/40 hover:text-gray-800',
+                          ? 'bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#0F172A]'
+                          : 'text-[#64748B] hover:bg-black/[0.04] hover:text-[#1E293B]',
                       )
                     }
                   >
@@ -170,12 +170,12 @@ export default function Sidebar({ onClose }: Props) {
                       <>
                         <Icon
                           size={15}
-                          strokeWidth={isActive ? 2.5 : 2}
-                          className={cn('shrink-0 transition-colors', isActive ? 'text-gray-900' : 'text-gray-400')}
+                          strokeWidth={isActive ? 2.2 : 1.75}
+                          className={cn('shrink-0 transition-colors', isActive ? 'text-[#0F172A]' : 'text-[#94A3B8]')}
                         />
-                        <span>{label}</span>
+                        <span className="flex-1 truncate">{label}</span>
                         {id === 'inbox' && inboxUnread > 0 && (
-                          <span className="ml-auto text-[10px] font-bold bg-indigo-600 text-white rounded-full px-1.5 py-0.5 leading-none">
+                          <span className="text-[9.5px] font-bold bg-[#1E293B] text-white rounded-full min-w-[16px] h-[16px] px-1 flex items-center justify-center">
                             {inboxUnread > 9 ? '9+' : inboxUnread}
                           </span>
                         )}
@@ -190,76 +190,71 @@ export default function Sidebar({ onClose }: Props) {
       </div>
 
       {/* Bottom actions */}
-      <div className="border-t border-gray-100 pl-4 pr-3 py-3 space-y-0.5 shrink-0">
-        <a
-          href={import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'}
-          onClick={openLeadFinder}
-          className="flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium text-gray-500 hover:bg-white/40 hover:text-gray-800 transition-all duration-100 cursor-pointer"
-        >
-          <Telescope size={15} strokeWidth={2} className="shrink-0 text-gray-400" />
-          <span className="flex-1">Lead Finder</span>
-          <ExternalLink size={11} className="text-gray-300" />
-        </a>
+      <div className="border-t border-black/[0.05] px-2.5 pt-1.5 pb-2.5 shrink-0">
+        {/* Secondary links */}
+        <nav className="mb-1.5">
+          <a
+            href={import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'}
+            onClick={openLeadFinder}
+            className="flex items-center gap-2 px-2 h-8 rounded-md text-[13px] font-medium text-[#64748B] hover:bg-black/[0.04] hover:text-[#1E293B] transition-all duration-100 cursor-pointer w-full"
+          >
+            <Telescope size={15} strokeWidth={1.75} className="shrink-0 text-[#94A3B8]" />
+            <span className="flex-1 truncate">Lead Finder</span>
+            <ExternalLink size={11} className="text-[#C1C9D4] shrink-0" />
+          </a>
 
-        <NavLink
-          to="/email-templates"
-          onClick={onClose}
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all duration-100',
-              isActive ? 'bg-white/70 backdrop-blur-sm text-gray-900 font-semibold shadow-sm border border-white/80' : 'text-gray-500 hover:bg-white/40 hover:text-gray-800',
-            )
-          }
-        >
-          {({ isActive }) => (
-            <>
-              <Mail size={15} strokeWidth={isActive ? 2.5 : 2} className={cn('shrink-0', isActive ? 'text-gray-900' : 'text-gray-400')} />
-              Email Templates
-            </>
-          )}
-        </NavLink>
+          <NavLink
+            to="/email-templates"
+            onClick={onClose}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-2 px-2 h-8 rounded-md text-[13px] font-medium transition-all duration-100',
+                isActive
+                  ? 'bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#0F172A]'
+                  : 'text-[#64748B] hover:bg-black/[0.04] hover:text-[#1E293B]',
+              )
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Mail size={15} strokeWidth={isActive ? 2.2 : 1.75} className={cn('shrink-0', isActive ? 'text-[#0F172A]' : 'text-[#94A3B8]')} />
+                <span className="flex-1 truncate">Email Templates</span>
+              </>
+            )}
+          </NavLink>
 
-        <NavLink
-          to="/settings"
-          id="tour-settings"
-          onClick={onClose}
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 px-3 py-2 rounded-xl text-[13.5px] font-medium transition-all duration-100',
-              isActive ? 'bg-white/70 backdrop-blur-sm text-gray-900 font-semibold shadow-sm border border-white/80' : 'text-gray-500 hover:bg-white/40 hover:text-gray-800',
-            )
-          }
-        >
-          {({ isActive }) => (
-            <>
-              <Settings size={15} strokeWidth={isActive ? 2.5 : 2} className={cn('shrink-0', isActive ? 'text-gray-900' : 'text-gray-400')} />
-              Settings
-            </>
-          )}
-        </NavLink>
+          <NavLink
+            to="/settings"
+            id="tour-settings"
+            onClick={onClose}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-2 px-2 h-8 rounded-md text-[13px] font-medium transition-all duration-100',
+                isActive
+                  ? 'bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#0F172A]'
+                  : 'text-[#64748B] hover:bg-black/[0.04] hover:text-[#1E293B]',
+              )
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Settings size={15} strokeWidth={isActive ? 2.2 : 1.75} className={cn('shrink-0', isActive ? 'text-[#0F172A]' : 'text-[#94A3B8]')} />
+                <span className="flex-1 truncate">Settings</span>
+              </>
+            )}
+          </NavLink>
+        </nav>
 
-        {/* Customise button — disabled until sidebar customisation is ready
-        <button
-          onClick={() => setCustomizing(true)}
-          className="flex items-center gap-3 px-3 py-2 rounded-xl w-full text-[13px] font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-all"
-        >
-          <GripVertical size={14} className="text-gray-300 shrink-0" />
-          Customise
-        </button>
-        */}
-
-        <div className="h-px bg-gray-100 my-1.5" />
-
-        {/* User + sign out */}
+        {/* User row */}
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-[13.5px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all group"
+          className="flex items-center gap-2.5 px-2 py-1.5 w-full rounded-md text-left transition-all group hover:bg-black/[0.04]"
         >
-          <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+          <div className="w-6 h-6 rounded-md bg-[#1E293B] flex items-center justify-center text-white text-[9.5px] font-bold shrink-0 leading-none">
             {initials}
           </div>
-          <span className="flex-1 text-left">{firstName}</span>
-          <LogOut size={13} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
+          <span className="flex-1 text-[12.5px] font-medium text-[#475569] truncate">{firstName}</span>
+          <LogOut size={12} className="text-[#C1C9D4] group-hover:text-[#64748B] transition-colors shrink-0" />
         </button>
       </div>
 
@@ -267,41 +262,6 @@ export default function Sidebar({ onClose }: Props) {
         <CreateWorkspaceModal open={createWsOpen} onClose={() => setCreateWsOpen(false)} />,
         document.body,
       )}
-
-      {/* Customise overlay — disabled until sidebar customisation is ready
-      {customizing && (
-        <div className="absolute inset-0 bg-white flex flex-col z-50 border-r border-gray-100">
-          <div className="h-[60px] flex items-center justify-between px-5 border-b border-gray-100 shrink-0">
-            <span className="text-[13px] font-semibold text-gray-800">Customise sidebar</span>
-            <button
-              onClick={() => setCustomizing(false)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              <X size={15} strokeWidth={2} />
-            </button>
-          </div>
-
-          <div className="flex-1 py-3 px-2 overflow-y-auto min-h-0">
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={order} strategy={verticalListSortingStrategy}>
-                {orderedItems.map(item => (
-                  <SortableNavRow key={item.id} item={item} />
-                ))}
-              </SortableContext>
-            </DndContext>
-          </div>
-
-          <div className="border-t border-gray-100 px-5 py-4 shrink-0">
-            <button
-              onClick={resetOrder}
-              className="text-[12px] text-gray-400 hover:text-gray-700 transition-colors"
-            >
-              Reset to default
-            </button>
-          </div>
-        </div>
-      )}
-      */}
     </aside>
   )
 }
