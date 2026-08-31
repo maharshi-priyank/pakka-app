@@ -370,7 +370,7 @@ export default function ContactPage() {
                 <p className="text-[10.5px] text-[#98A2B3] dark:text-[#545C74] font-medium mb-2">Client Portal</p>
                 {entitlements?.plan === 'FREE' ? (
                   <button onClick={() => navigate('/billing')} className="w-full text-left px-3 py-2 rounded-lg bg-[#FFF7ED] border border-[#FED7AA] text-[12px] font-semibold text-[#C2410C]">
-                    Unlock the Client Portal from ₹149/month
+                    Unlock the Client Portal from ₹249/month
                   </button>
                 ) : (
                   <button

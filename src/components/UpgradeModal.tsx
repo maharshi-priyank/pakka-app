@@ -27,7 +27,7 @@ const FEATURES = {
     '1 seat — just you',
   ],
   STUDIO: [
-    'Everything in Solo',
+    'Everything in Pro',
     'Unlimited team members',
     'White-label documents & portal',
     'Custom domain for client portal',
@@ -124,12 +124,12 @@ export default function UpgradeModal() {
               </ul>
             </div>
 
-            {/* Solo */}
+            {/* Pro */}
             <div className="relative rounded-xl p-4 bg-[#EEF2FF] dark:bg-[#1E2040] ring-1 ring-[#6366F1]/40">
               <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 bg-[#6366F1] text-white text-[10px] font-bold rounded-full whitespace-nowrap">
                 Popular
               </span>
-              <p className="text-[13px] font-bold text-[#6366F1] mb-0.5">Solo</p>
+              <p className="text-[13px] font-bold text-[#6366F1] mb-0.5">Pro</p>
               <div className="leading-none">
                 {pricingLoading ? <PriceSkeleton /> : (
                   <p className="text-[22px] font-black text-[#101828] dark:text-[#ECEEF3] tabular-nums">

@@ -5,7 +5,7 @@ import { useCreateSubscription, useSubscriptionStatus } from '../hooks/useSubscr
 
 const FEATURES = {
   SOLO:   ['Unlimited clients & leads', 'Unlimited proposals & invoices', 'E-sign contracts', 'GST invoice + TDS flagging', 'Client portal', '1 seat — just you'],
-  STUDIO: ['Everything in Solo', 'Unlimited team members', 'White-label docs & portal', 'Custom domain for client portal', 'No ClearWork branding', 'Priority support'],
+  STUDIO: ['Everything in Pro', 'Unlimited team members', 'White-label docs & portal', 'Custom domain for client portal', 'No ClearWork branding', 'Priority support'],
 }
 
 export default function UpgradePlanCards() {
@@ -75,7 +75,7 @@ export default function UpgradePlanCards() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Solo */}
+        {/* Pro */}
         <div className={cn(
           'bg-white dark:bg-[#1A1B27] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-5 relative',
           activePlan === 'SOLO' && hasActivePlan ? 'ring-2 ring-[#17B26A]/40' : 'ring-1 ring-[#6366F1]/20',
@@ -92,7 +92,7 @@ export default function UpgradePlanCards() {
           )}
           <div className="flex items-start justify-between mb-3">
             <div>
-              <p className="text-[13px] font-bold text-[#6366F1] mb-0.5">Solo</p>
+              <p className="text-[13px] font-bold text-[#6366F1] mb-0.5">Pro</p>
               <div className="flex items-baseline gap-1">
                 {pricingLoading ? (
                   <div className="h-7 w-16 bg-[#EAECF0] rounded animate-pulse" />

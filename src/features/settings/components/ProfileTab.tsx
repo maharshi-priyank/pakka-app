@@ -226,7 +226,7 @@ export default function ProfileTab() {
           <h3 className="text-[13px] font-bold text-[#344054] dark:text-[#C2C8D8]">Promo Code</h3>
         </div>
         <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mb-3">
-          Have a promo code? Redeem it to unlock Solo or Studio features for 30 days.
+          Have a promo code? Redeem it to unlock Pro or Studio features for 30 days.
         </p>
         <div className="flex gap-2">
           <input
