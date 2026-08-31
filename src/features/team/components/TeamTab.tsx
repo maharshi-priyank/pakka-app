@@ -3,6 +3,7 @@ import { UserPlus, Trash2, Clock, Loader2, ChevronDown, Check, Shield } from 'lu
 import { cn } from '@/lib/utils'
 import { useTeam, useInviteMember, useCancelInvite, useRemoveMember, useUpdateMemberRole } from '../hooks/useTeam'
 import { useWorkspaceRoles } from '@/features/settings/hooks/useWorkspacePermissions'
+import PlanGate from '@/features/billing/components/PlanGate'
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -110,7 +111,7 @@ function RoleDropdown({
   )
 }
 
-export default function TeamTab() {
+function TeamTabContent() {
   const { data: team, isLoading } = useTeam()
   const { mutate: invite, isPending: inviting } = useInviteMember()
   const { mutate: cancelInvite, isPending: cancelling } = useCancelInvite()
@@ -258,5 +259,23 @@ export default function TeamTab() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function TeamTab() {
+  return (
+    <PlanGate
+      requiredPlan="STUDIO"
+      feature="Team members"
+      description="Invite collaborators to your workspace and control exactly what they can see and do."
+      bullets={[
+        'Unlimited team members',
+        'Assign roles — Designer, Account Manager, Contractor',
+        'Granular per-feature permissions',
+        'White-label docs & client portal',
+      ]}
+    >
+      <TeamTabContent />
+    </PlanGate>
   )
 }

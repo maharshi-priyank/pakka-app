@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { User, Building2, Bell, Puzzle, Globe, Users, Star, ShieldCheck } from 'lucide-react'
+import { User, Building2, Bell, Puzzle, Globe, Users, Star, ShieldCheck, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ProfileTab from '@/features/settings/components/ProfileTab'
 import BusinessTab from '@/features/settings/components/BusinessTab'
@@ -7,6 +7,7 @@ import NotificationsTab from '@/features/notifications/components/NotificationsT
 import IntegrationsTab from '@/features/settings/components/IntegrationsTab'
 import PublicProfileTab from '@/features/settings/components/PublicProfileTab'
 import TeamTab from '@/features/team/components/TeamTab'
+import RolesTab from '@/features/workspace-roles/components/RolesTab'
 import WorkspaceReviewsSection from '@/features/reviews/components/WorkspaceReviewsSection'
 import LoginManagementTab from '@/features/settings/components/LoginManagementTab'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
@@ -20,6 +21,7 @@ const TAB_DEFS = [
   { key: 'security'      as const, label: 'Security',       icon: ShieldCheck,    permission: null },
   { key: 'integrations'  as const, label: 'Integrations',   icon: Puzzle,         permission: Permission.MANAGE_INTEGRATIONS },
   { key: 'team'          as const, label: 'Team',           icon: Users,          permission: Permission.MANAGE_MEMBERS },
+  { key: 'roles'         as const, label: 'Roles',          icon: Shield,         permission: Permission.MANAGE_MEMBERS },
   { key: 'reviews'       as const, label: 'Reviews',        icon: Star,           permission: null },
 ]
 
@@ -73,6 +75,7 @@ export default function SettingsPage() {
       {activeTab === 'security'       && <LoginManagementTab />}
       {activeTab === 'integrations'   && <IntegrationsTab />}
       {activeTab === 'team'           && <TeamTab />}
+      {activeTab === 'roles'          && <RolesTab />}
       {activeTab === 'reviews'        && <WorkspaceReviewsSection />}
 
     </div>

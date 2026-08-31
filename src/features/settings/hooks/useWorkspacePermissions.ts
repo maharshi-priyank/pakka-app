@@ -3,6 +3,12 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import type { Permission } from '@/types/permissions'
 
+export interface WorkspaceRolePermission {
+  id:         string
+  roleId:     string
+  permission: string
+}
+
 export interface WorkspaceRole {
   id:          string
   key:         string
@@ -10,6 +16,9 @@ export interface WorkspaceRole {
   description: string | null
   isSystem:    boolean
   sortOrder:   number
+  workspaceId: string | null
+  permissions: WorkspaceRolePermission[]
+  _count:      { members: number }
 }
 
 export function useWorkspacePermissions() {
