@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { Plus, Search, X, LayoutGrid, List, Archive, Telescope, ExternalLink } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { Plus, Search, X, LayoutGrid, List, Archive } from 'lucide-react'
 import { AddContactModal, ContactsCards, ContactsTable, ContactsTableSkeleton } from '@/features/contacts'
 import { useContacts } from '@/features/contacts'
 import { cn, formatCurrency } from '@/lib/utils'
-import { supabase } from '@/lib/supabase'
 import AIIcon from '@/features/ai/components/AIIcon'
 import AIContactModal from '@/features/ai/components/AIContactModal'
 import type { ContactStage } from '@/features/contacts/schemas/contact.schema'
@@ -43,16 +42,6 @@ export default function ContactsPage() {
   const [includeArchived, setIncludeArchived] = useState(false)
 
   const searchRef = useRef<HTMLInputElement>(null)
-
-  const openContactFinder = useCallback(async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    const { data: { session } } = await supabase.auth.getSession()
-    const base = import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'
-    const url = session
-      ? `${base}?at=${encodeURIComponent(session.access_token)}&rt=${encodeURIComponent(session.refresh_token)}`
-      : base
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }, [])
 
   const { data, isLoading } = useContacts({ limit: 500, includeArchived: includeArchived || undefined })
   const allContacts   = data?.items ?? []
@@ -141,17 +130,6 @@ export default function ContactsPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* Find Contacts */}
-          <a
-            href={import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'}
-            onClick={openContactFinder}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer"
-          >
-            <Telescope size={13} />
-            Find Contacts
-            <ExternalLink size={10} className="opacity-60" />
-          </a>
-
           {/* Add with AI */}
           <button
             onClick={() => setShowAI(true)}

@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink } from 'react-router-dom'
 import {
   Settings, Mail,
-  LogOut, Telescope, ExternalLink,
+  LogOut,
 } from 'lucide-react'
 import { useMessageUnreadCount } from '@/features/messages/hooks/useMessages'
 import { useWorkspacePermissions } from '@/features/settings/hooks/useWorkspacePermissions'
@@ -20,7 +20,6 @@ import { ALL_NAV_ITEMS, SECTIONS, DEFAULT_ORDER, STORAGE_KEY } from './navItems'
 // } from '@dnd-kit/sortable'
 // import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/lib/utils'
-import { supabase } from '@/lib/supabase'
 import { signOutCurrentDevice } from '@/lib/auth'
 import { useAuthStore } from '@/store/authStore'
 import { generateInitials } from '@/lib/utils'
@@ -93,15 +92,6 @@ export default function Sidebar({ onClose }: Props) {
     await signOutCurrentDevice()
   }
 
-  const openLeadFinder = useCallback(async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    const { data: { session } } = await supabase.auth.getSession()
-    const base = import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'
-    const url = session
-      ? `${base}?at=${encodeURIComponent(session.access_token)}&rt=${encodeURIComponent(session.refresh_token)}`
-      : base
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }, [])
 
   const orderedItems = order.map(id => ALL_NAV_ITEMS.find(n => n.id === id)!).filter(Boolean)
 
@@ -193,16 +183,6 @@ export default function Sidebar({ onClose }: Props) {
       <div className="border-t border-black/[0.05] px-2.5 pt-1.5 pb-2.5 shrink-0">
         {/* Secondary links */}
         <nav className="mb-1.5">
-          <a
-            href={import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'}
-            onClick={openLeadFinder}
-            className="flex items-center gap-2 px-2 h-8 rounded-md text-[13px] font-medium text-[#64748B] hover:bg-black/[0.04] hover:text-[#1E293B] transition-all duration-100 cursor-pointer w-full"
-          >
-            <Telescope size={15} strokeWidth={1.75} className="shrink-0 text-[#94A3B8]" />
-            <span className="flex-1 truncate">Lead Finder</span>
-            <ExternalLink size={11} className="text-[#C1C9D4] shrink-0" />
-          </a>
-
           <NavLink
             to="/email-templates"
             onClick={onClose}

@@ -1,12 +1,11 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import {
   Plus, Search, X, IndianRupee, LayoutGrid, List, Archive,
-  Telescope, ExternalLink, Inbox, UserPlus, RefreshCw, Copy,
+  ExternalLink, Inbox, UserPlus, RefreshCw, Copy,
   CheckCheck, GitBranch, Code2,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
 import { cn, formatDate } from '@/lib/utils'
 import AIIcon from '@/features/ai/components/AIIcon'
 import AILeadModal from '@/features/ai/components/AILeadModal'
@@ -467,16 +466,6 @@ export default function LeadsPage() {
   const [showAdd, setShowAdd] = useState(false)
   const [showAI,  setShowAI]  = useState(false)
 
-  const openLeadFinder = useCallback(async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    const { data: { session } } = await supabase.auth.getSession()
-    const base = import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'
-    const url  = session
-      ? `${base}?at=${encodeURIComponent(session.access_token)}&rt=${encodeURIComponent(session.refresh_token)}`
-      : base
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }, [])
-
   const { data: pipelineData } = useLeads({ limit: 1, hasSourceForm: false })
   const pipelineValue = pipelineData?.pipelineValue ? Number(pipelineData.pipelineValue) : null
 
@@ -502,15 +491,6 @@ export default function LeadsPage() {
         {/* Pipeline-only actions */}
         {tab === 'pipeline' && (
           <div className="flex items-center gap-2">
-            <a
-              href={import.meta.env.VITE_LEADS_APP_URL ?? 'https://leads.getclearwork.in'}
-              onClick={openLeadFinder}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer"
-            >
-              <Telescope size={13} />
-              Find Leads
-              <ExternalLink size={10} className="opacity-60" />
-            </a>
             <button
               onClick={() => setShowAI(true)}
               className={cn(
