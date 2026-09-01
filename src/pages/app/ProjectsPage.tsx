@@ -421,7 +421,8 @@ function ProjectCard({ project, onClick, onRemove, onUnarchive }: {
 
   return (
     <div className={cn(
-      'relative bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-2xl p-5 hover:border-[#2563EB]/40 dark:hover:border-[#2563EB]/40 hover:shadow-md transition-all group',
+      'relative bg-white dark:bg-[#13141A] border border-[#EAECF0] dark:border-[#26283A] rounded-xl p-5 transition-all duration-150 group',
+      'hover:border-[#D0D5DD] dark:hover:border-[#344054] hover:shadow-[0_4px_12px_rgba(0,0,0,0.07)] hover:-translate-y-px',
       project.archivedAt && 'opacity-60',
     )}>
       {project.archivedAt && (
@@ -464,11 +465,11 @@ function ProjectCard({ project, onClick, onRemove, onUnarchive }: {
       <button onClick={onClick} className="w-full text-left">
         <div className="flex items-start gap-3 mb-4 pr-6">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] dark:bg-[#1E3A5F] flex items-center justify-center shrink-0">
-              <FolderKanban size={18} className="text-[#2563EB]" strokeWidth={2} />
+            <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] dark:bg-[#1E1F40] flex items-center justify-center shrink-0">
+              <FolderKanban size={18} className="text-[#6366F1]" strokeWidth={2} />
             </div>
             <div className="min-w-0">
-              <p className="text-[14.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate group-hover:text-[#2563EB] transition-colors">
+              <p className="text-[14.5px] font-semibold text-[#101828] dark:text-[#ECEEF3] truncate">
                 {project.name}
               </p>
               {project.client && (
@@ -498,9 +499,9 @@ function ProjectCard({ project, onClick, onRemove, onUnarchive }: {
                     <p className="text-[14px] font-semibold text-[#667085] dark:text-[#8B92A8] tabular-nums leading-none">{format(budget)}</p>
                   </div>
                 </div>
-                <div className="h-2 rounded-full bg-[#F2F4F7] dark:bg-[#21222D] overflow-hidden">
+                <div className="h-1.5 rounded-full bg-[#F2F4F7] dark:bg-[#21222D] overflow-hidden">
                   <div
-                    className={cn('h-full rounded-full transition-all', progress && progress >= 100 ? 'bg-[#D92D20]' : 'bg-[#2563EB]')}
+                    className={cn('h-full rounded-full transition-all', progress && progress >= 100 ? 'bg-[#EF4444]' : 'bg-[#6366F1]')}
                     style={{ width: `${progress ?? 0}%` }}
                   />
                 </div>

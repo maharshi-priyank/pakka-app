@@ -18,14 +18,10 @@ function initials(name: string) {
     .join('')
 }
 
-// Cool-tone only palette — no warm/rainbow colours
 const AVATAR_PALETTES = [
-  { bg: 'bg-indigo-50 dark:bg-indigo-950/40',   text: 'text-indigo-600 dark:text-indigo-400'  },
-  { bg: 'bg-slate-100 dark:bg-slate-800/60',     text: 'text-slate-600 dark:text-slate-300'   },
-  { bg: 'bg-blue-50 dark:bg-blue-950/40',        text: 'text-blue-600 dark:text-blue-400'     },
-  { bg: 'bg-violet-50 dark:bg-violet-950/40',    text: 'text-violet-600 dark:text-violet-400' },
-  { bg: 'bg-sky-50 dark:bg-sky-950/40',          text: 'text-sky-600 dark:text-sky-400'       },
-  { bg: 'bg-slate-50 dark:bg-[#1E2030]',         text: 'text-slate-500 dark:text-slate-400'   },
+  { bg: 'bg-indigo-50 dark:bg-indigo-950/40',  text: 'text-indigo-600 dark:text-indigo-400' },
+  { bg: 'bg-slate-100 dark:bg-slate-800/60',   text: 'text-slate-600 dark:text-slate-300'  },
+  { bg: 'bg-blue-50 dark:bg-blue-950/40',      text: 'text-blue-600 dark:text-blue-400'    },
 ]
 
 function avatarPalette(name: string) {
@@ -61,8 +57,8 @@ export default function ContactsCards({ contacts }: Props) {
               'border border-[#E4E7EC] dark:border-[#26283A]',
               'shadow-[0_1px_2px_rgba(0,0,0,0.05)]',
               'transition-all duration-150',
-              'hover:border-[#2563EB]/40 dark:hover:border-[#3B4A72]',
-              'hover:shadow-[0_4px_16px_rgba(37,99,235,0.08)]',
+              'hover:border-[#D0D5DD] dark:hover:border-[#344054]',
+              'hover:shadow-[0_4px_12px_rgba(0,0,0,0.07)]',
               'hover:-translate-y-px',
             )}
           >
@@ -79,11 +75,7 @@ export default function ContactsCards({ contacts }: Props) {
 
               {/* Name + Company */}
               <div className="flex-1 min-w-0 pt-0.5">
-                <p className={cn(
-                  'text-[13px] font-semibold leading-tight truncate',
-                  'text-[#0F172A] dark:text-[#ECEEF3]',
-                  'group-hover:text-[#2563EB] dark:group-hover:text-[#93C5FD] transition-colors duration-150',
-                )}>
+                <p className="text-[13px] font-semibold leading-tight truncate text-[#0F172A] dark:text-[#ECEEF3]">
                   {c.name}
                 </p>
                 <p className="text-[11.5px] text-[#94A3B8] dark:text-[#545C74] truncate leading-snug mt-0.5">
@@ -110,7 +102,7 @@ export default function ContactsCards({ contacts }: Props) {
             )}
 
             {/* ── Meta (only populated rows) ─────────────────── */}
-            <div className="flex-1 px-4 pb-4 flex flex-col gap-2 min-h-[40px]">
+            <div className="flex-1 px-4 pb-3 flex flex-col gap-1.5 min-h-[44px]">
               {followUpDate && (isOverdue || isThisWeek || true) && (
                 <div className="flex items-center gap-2">
                   <Calendar
@@ -145,9 +137,9 @@ export default function ContactsCards({ contacts }: Props) {
             </div>
 
             {/* ── Footer ─────────────────────────────────────── */}
-            <div className="flex items-center gap-1.5 px-4 py-2.5 border-t border-[#F1F5F9] dark:border-[#1E2030] bg-[#F8FAFC] dark:bg-[#15161D]">
+            <div className="flex items-center gap-1.5 px-4 py-2.5 border-t border-[#F1F5F9] dark:border-[#1E2030]">
               {totalActivity === 0 ? (
-                <span className="text-[11px] text-[#CBD5E1] dark:text-[#3D4258]">No activity yet</span>
+                <span className="text-[11px] text-[#94A3B8] dark:text-[#545C74]">No activity yet</span>
               ) : (
                 <>
                   {(c._count?.projects ?? 0) > 0 && (
