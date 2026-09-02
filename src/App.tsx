@@ -14,6 +14,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import PWAUpdatePrompt from '@/components/PWAUpdatePrompt'
 import { setCurrentRouteName, setCustomAttribute } from '@/lib/newrelic'
 import { identifyUser, resetUser, trackPageview } from '@/lib/posthog'
+import { identifyOaiqUser, trackRegistrationCompleted } from '@/lib/oaiq'
 
 // Track route changes for New Relic + PostHog SPA monitoring
 router.subscribe(({ location }) => {
@@ -25,6 +26,24 @@ router.subscribe(({ location }) => {
 // Prevents duplicate calls from getSession + onAuthStateChange both firing,
 // React strict-mode double-effect, and token refreshes.
 let syncedUserId: string | null = null
+
+// Supabase has no explicit "is this a brand-new account" flag on SIGNED_IN,
+// so treat first-ever sign-in (created_at ~= last_sign_in_at) as a signup —
+// covers both the email-confirmation redirect and a fresh Google OAuth account.
+function isFreshSignup(user: { created_at: string; last_sign_in_at?: string | null }) {
+  if (!user.last_sign_in_at) return false
+  const createdAt   = new Date(user.created_at).getTime()
+  const lastSignIn  = new Date(user.last_sign_in_at).getTime()
+  return Math.abs(lastSignIn - createdAt) < 60_000
+}
+
+function trackRegistrationIfFresh(user: { id: string; email?: string; created_at: string; last_sign_in_at?: string | null }) {
+  if (!user.email || !isFreshSignup(user)) return
+  const key = `oaiq_registration_tracked:${user.id}`
+  if (localStorage.getItem(key)) return
+  localStorage.setItem(key, '1')
+  identifyOaiqUser({ email: user.email, userId: user.id }).then(trackRegistrationCompleted)
+}
 
 async function syncUserWithApi(userId: string) {
   if (syncedUserId === userId) return
@@ -62,6 +81,9 @@ export default function App() {
         syncUserWithApi(session.user.id)
         setCustomAttribute('userId', session.user.id)
         identifyUser(session.user.id, { email: session.user.email })
+      }
+      if (session && event === 'SIGNED_IN') {
+        trackRegistrationIfFresh(session.user)
       }
       if (event === 'SIGNED_OUT') {
         syncedUserId = null // reset so next login syncs again
