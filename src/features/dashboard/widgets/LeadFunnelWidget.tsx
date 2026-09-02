@@ -22,9 +22,9 @@ const STAGES: { key: string; label: string; color: string; darkColor: string; la
   {
     key:       'PROPOSAL_SENT',
     label:     'Proposal Sent',
-    color:     '#6366F1',
-    darkColor: '#6366F1',
-    labelCls:  'bg-[#EEF2FF] dark:bg-[#1E2040] text-[#4338CA] dark:text-[#818CF8]',
+    color:     '#2563EB',
+    darkColor: '#60A5FA',
+    labelCls:  'bg-[#EFF6FF] dark:bg-blue-950/40 text-[#1D4ED8] dark:text-[#60A5FA]',
     match:     s => s === 'PROPOSAL_SENT',
   },
   {
@@ -67,8 +67,8 @@ export default function LeadFunnelWidget() {
             {isLoading ? 'Loading…' : `${items.length} total contact${items.length !== 1 ? 's' : ''}`}
           </p>
         </div>
-        <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center">
-          <Users size={14} className="text-[#6366F1]" strokeWidth={2} />
+        <div className="w-8 h-8 rounded-xl bg-[#EFF6FF] dark:bg-blue-950/40 flex items-center justify-center">
+          <Users size={14} className="text-[#2563EB] dark:text-[#60A5FA]" strokeWidth={2} />
         </div>
       </div>
 

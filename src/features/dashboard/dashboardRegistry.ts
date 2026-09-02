@@ -6,22 +6,29 @@ export interface WidgetMeta {
 }
 
 export const WIDGET_REGISTRY: WidgetMeta[] = [
-  { id: 'revenue_month',  name: 'Revenue This Month', description: 'Paid invoice revenue this month with % change vs last month', cols: 1 },
-  { id: 'pipeline',       name: 'Pipeline Value',     description: 'Total estimated value of all active contacts',               cols: 1 },
-  { id: 'overdue',        name: 'Overdue Invoices',   description: 'Outstanding overdue invoice amount and count',               cols: 1 },
-  { id: 'open_proposals', name: 'Open Proposals',     description: 'Proposals currently sent or viewed by clients',              cols: 1 },
-  { id: 'win_rate',       name: 'Win Rate',           description: 'Contact win rate across your pipeline as a progress ring',   cols: 1 },
-  { id: 'collection',     name: 'Pending Collection', description: 'Total receivables across all sent and overdue invoices',     cols: 1 },
-  { id: 'invoice_status', name: 'Invoice Status',     description: 'Donut chart breakdown of invoices by status',                cols: 2 },
-  { id: 'lead_funnel',    name: 'Contact Pipeline',   description: 'Horizontal funnel bars showing contacts at each stage',      cols: 2 },
-  { id: 'quick_actions',  name: 'Quick Actions',      description: 'One-tap shortcuts to create contacts, proposals and invoices', cols: 2 },
-  { id: 'followups',      name: 'Follow-ups',         description: 'Contacts that are due for a follow-up this week',            cols: 2 },
-  { id: 'upcoming_calls', name: 'Upcoming Calls',    description: 'Scheduled Google Meet calls this week with Join links',       cols: 2 },
-  { id: 'revenue_chart',  name: 'Revenue Trend',      description: '6-month bar chart of paid invoice revenue',                  cols: 4 },
-  { id: 'activity',       name: 'Recent Activity',    description: 'Live event feed across your entire pipeline',                cols: 4 },
+  { id: 'revenue_month',    name: 'Revenue This Month',  description: 'Paid invoice revenue this month with % change vs last month', cols: 1 },
+  { id: 'pipeline',         name: 'Pipeline Value',      description: 'Total estimated value of all active contacts',               cols: 1 },
+  { id: 'overdue',          name: 'Overdue Invoices',    description: 'Outstanding overdue invoice amount and count',               cols: 1 },
+  { id: 'open_proposals',   name: 'Open Proposals',      description: 'Proposals currently sent or viewed by clients',              cols: 1 },
+  { id: 'unbilled',         name: 'Unbilled Time & Expenses', description: 'Billable time and expenses not yet invoiced',           cols: 1 },
+  { id: 'win_rate',         name: 'Win Rate',            description: 'Contact win rate across your pipeline as a progress ring',   cols: 1 },
+  { id: 'collection',       name: 'Pending Collection',  description: 'Total receivables across all sent and overdue invoices',     cols: 1 },
+  { id: 'today',            name: 'Today',               description: 'Tasks due today or overdue',                                cols: 2 },
+  { id: 'invoice_status',   name: 'Invoice Status',      description: 'Donut chart breakdown of invoices by status',                cols: 2 },
+  { id: 'lead_funnel',      name: 'Contact Pipeline',    description: 'Horizontal funnel bars showing contacts at each stage',      cols: 2 },
+  { id: 'quick_actions',    name: 'Quick Actions',       description: 'One-tap shortcuts to create contacts, proposals and invoices', cols: 2 },
+  { id: 'followups',        name: 'Follow-ups',          description: 'Contacts that are due for a follow-up this week',            cols: 2 },
+  { id: 'upcoming_calls',   name: 'Upcoming Calls',      description: 'Scheduled Google Meet calls this week with Join links',       cols: 2 },
+  { id: 'project_budgets',  name: 'Project Budgets',     description: 'Active projects with budget-vs-invoiced tracking',           cols: 2 },
+  { id: 'revenue_chart',    name: 'Revenue Trend',       description: '6-month bar chart of paid invoice revenue',                  cols: 4 },
+  { id: 'activity',         name: 'Recent Activity',     description: 'Live event feed across your entire pipeline',                cols: 4 },
 ]
 
 export const DEFAULT_ORDER = WIDGET_REGISTRY.map(w => w.id)
+
+// All widgets visible by default — the four stat cards (revenue, pipeline, overdue,
+// open proposals) form the dashboard's top row alongside the HeroMetric band above them.
+export const DEFAULT_HIDDEN: string[] = []
 
 const ORDER_KEY  = 'clearwork_dash_order_v2'
 const HIDDEN_KEY = 'clearwork_dash_hidden_v2'
@@ -31,12 +38,12 @@ export function loadDashboardState(): { order: string[]; hidden: string[] } {
     const order  = JSON.parse(localStorage.getItem(ORDER_KEY)  ?? 'null')
     const hidden = JSON.parse(localStorage.getItem(HIDDEN_KEY) ?? 'null')
     const savedOrder  = Array.isArray(order)  ? order  : [...DEFAULT_ORDER]
-    const savedHidden = Array.isArray(hidden) ? hidden : []
+    const savedHidden = Array.isArray(hidden) ? hidden : [...DEFAULT_HIDDEN]
     // ensure any new widgets not yet in saved order get appended
     const newIds = DEFAULT_ORDER.filter(id => !savedOrder.includes(id))
     return { order: [...savedOrder, ...newIds], hidden: savedHidden }
   } catch {
-    return { order: [...DEFAULT_ORDER], hidden: [] }
+    return { order: [...DEFAULT_ORDER], hidden: [...DEFAULT_HIDDEN] }
   }
 }
 

@@ -1,39 +1,10 @@
-import { useState } from 'react'
-import { TrendingUp, AlertCircle, FileText, ArrowUp, ArrowDown, DollarSign, Target, Pencil } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { TrendingUp, AlertCircle, FileText, ArrowUp, ArrowDown, ArrowRight, DollarSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useDashboardStats } from '../hooks/useDashboard'
+import { useDashboardStats, useRevenueChart } from '../hooks/useDashboard'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useProfile } from '@/features/settings/hooks/useProfile'
-import { useUpdateWorkspace } from '@/features/settings/hooks/useWorkspaces'
-
-function GoalEditor({ value, onSave, onClose }: {
-  value:   number | null
-  onSave:  (v: number) => void
-  onClose: () => void
-}) {
-  const [input, setInput] = useState(value != null ? String(value) : '')
-  return (
-    <form
-      onClick={e => e.stopPropagation()}
-      onSubmit={e => {
-        e.preventDefault()
-        const n = Number(input)
-        if (n > 0) onSave(n)
-      }}
-      className="flex items-center gap-1.5 mt-2"
-    >
-      <input
-        type="number" min={0} step={1000} autoFocus
-        value={input}
-        onChange={e => setInput(e.target.value)}
-        placeholder="Monthly goal"
-        className="w-full h-7 px-2 rounded-lg text-[12px] border border-[#D0D5DD] dark:border-[#3D4258] bg-white dark:bg-[#1A1B23] text-[#101828] dark:text-[#ECEEF3] outline-none focus:border-[#6366F1]"
-      />
-      <button type="submit" className="text-[11px] font-semibold text-[#6366F1] shrink-0">Save</button>
-      <button type="button" onClick={onClose} className="text-[11px] text-[#98A2B3] shrink-0">Cancel</button>
-    </form>
-  )
-}
+import RevenueGoalTracker from '../components/RevenueGoalTracker'
+import Sparkline from '../components/Sparkline'
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse bg-[#F2F4F7] dark:bg-[#21222D] rounded', className)} />
@@ -43,11 +14,8 @@ type StatType = 'revenue_month' | 'pipeline' | 'overdue' | 'open_proposals'
 
 export default function StatCardWidget({ type }: { type: StatType }) {
   const { data: stats, isLoading } = useDashboardStats()
+  const { data: revenueChart } = useRevenueChart({ enabled: type === 'revenue_month' })
   const { format } = useCurrency()
-  const { data: profile } = useProfile()
-  const workspaceId = profile?.activeWorkspaceId ?? profile?.id ?? ''
-  const { mutate: updateWorkspace } = useUpdateWorkspace(workspaceId)
-  const [editingGoal, setEditingGoal] = useState(false)
 
   const META: Record<StatType, {
     label:     string
@@ -62,8 +30,8 @@ export default function StatCardWidget({ type }: { type: StatType }) {
       sub:       s => s.revenueChange != null
         ? `${s.revenueChange >= 0 ? '+' : ''}${s.revenueChange}% vs last month`
         : `Last month: ${format(s.revenueLastMonth ?? 0)}`,
-      iconBg:    'bg-[#EEF2FF] dark:bg-[#1E2040]',
-      iconColor: 'text-[#6366F1]',
+      iconBg:    'bg-[#F3EAFB] dark:bg-[#3B1F5C]',
+      iconColor: 'text-[#5F259F] dark:text-[#D8B9F5]',
       icon:      DollarSign,
       value:     s => format(s.revenueThisMonth ?? 0),
     },
@@ -129,42 +97,27 @@ export default function StatCardWidget({ type }: { type: StatType }) {
         : <p className="text-[11px] text-[#98A2B3] dark:text-[#545C74] mt-1">{stats ? m.sub(stats) : ''}</p>
       }
 
+      {/* Real 6-month trend — the only stat card with actual historical data */}
+      {type === 'revenue_month' && !isLoading && revenueChart && revenueChart.length >= 2 && (
+        <div className="mt-2">
+          <Sparkline data={revenueChart.map(p => ({ value: p.revenue }))} color="#5F259F" />
+        </div>
+      )}
+
       {/* Monthly goal progress — only on the revenue card */}
       {type === 'revenue_month' && !isLoading && stats && (
-        editingGoal ? (
-          <GoalEditor
-            value={stats.monthlyRevenueGoal}
-            onClose={() => setEditingGoal(false)}
-            onSave={v => { updateWorkspace({ monthlyRevenueGoal: v }); setEditingGoal(false) }}
-          />
-        ) : stats.monthlyRevenueGoal ? (
-          <button
-            onClick={e => { e.stopPropagation(); setEditingGoal(true) }}
-            className="w-full text-left mt-3 group/goal"
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="flex items-center gap-1 text-[10.5px] font-semibold text-[#6366F1]">
-                <Target size={10} strokeWidth={2.5} />
-                {Math.min(100, Math.round((stats.revenueThisMonth / stats.monthlyRevenueGoal) * 100))}% of goal
-              </span>
-              <Pencil size={10} className="text-[#D0D5DD] opacity-0 group-hover/goal:opacity-100 transition-opacity" />
-            </div>
-            <div className="h-1.5 rounded-full bg-[#EEF2FF] dark:bg-[#1E2040] overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[#6366F1] transition-all"
-                style={{ width: `${Math.min(100, (stats.revenueThisMonth / stats.monthlyRevenueGoal) * 100)}%` }}
-              />
-            </div>
-          </button>
-        ) : (
-          <button
-            onClick={e => { e.stopPropagation(); setEditingGoal(true) }}
-            className="flex items-center gap-1 text-[10.5px] font-semibold text-[#98A2B3] hover:text-[#6366F1] mt-3 transition-colors"
-          >
-            <Target size={10} strokeWidth={2.5} />
-            Set a monthly goal
-          </button>
-        )
+        <RevenueGoalTracker revenueThisMonth={stats.revenueThisMonth ?? 0} monthlyGoal={stats.monthlyRevenueGoal} />
+      )}
+
+      {/* Resolution path for the highest-anxiety number on the dashboard */}
+      {type === 'overdue' && !isLoading && (stats?.overdueCount ?? 0) > 0 && (
+        <Link
+          to="/invoices"
+          state={{ statusFilter: 'OVERDUE' }}
+          className="flex items-center gap-1 text-[10.5px] font-semibold text-[#D92D20] dark:text-red-400 hover:text-[#B42318] dark:hover:text-red-300 mt-3 transition-colors"
+        >
+          Send reminder <ArrowRight size={10} strokeWidth={2.5} />
+        </Link>
       )}
     </div>
   )

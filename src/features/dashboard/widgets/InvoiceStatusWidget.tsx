@@ -9,7 +9,7 @@ function Skeleton({ className }: { className?: string }) {
 
 const STATUS_CONFIG = [
   { key: 'PAID',    label: 'Paid',    color: '#12B76A', bg: '#ECFDF3', text: '#027A48' },
-  { key: 'SENT',    label: 'Sent',    color: '#6366F1', bg: '#EEF2FF', text: '#4338CA' },
+  { key: 'SENT',    label: 'Sent',    color: '#2563EB', bg: '#EFF6FF', text: '#1D4ED8' },
   { key: 'OVERDUE', label: 'Overdue', color: '#F04438', bg: '#FEF3F2', text: '#B42318' },
   { key: 'DRAFT',   label: 'Draft',   color: '#D0D5DD', bg: '#F2F4F7', text: '#667085' },
 ]

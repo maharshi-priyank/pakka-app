@@ -76,7 +76,7 @@ export function useUpcomingFollowUps() {
   })
 }
 
-export function useRevenueChart() {
+export function useRevenueChart(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['dashboard', 'revenue-chart'],
     queryFn:  async () => {
@@ -84,5 +84,6 @@ export function useRevenueChart() {
       return data.data
     },
     staleTime: 60_000,
+    enabled:   options?.enabled ?? true,
   })
 }

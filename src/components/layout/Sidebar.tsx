@@ -73,6 +73,7 @@ interface Props {
 export default function Sidebar({ onClose }: Props) {
   const [order] = useState<string[]>(loadOrder)
   const [createWsOpen, setCreateWsOpen] = useState(false)
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false)
   const { isReady: shellReady } = useAppShellBootstrap()
 
   const { user } = useAuthStore()
@@ -151,7 +152,7 @@ export default function Sidebar({ onClose }: Props) {
                       cn(
                         'flex items-center gap-2 px-2 h-8 rounded-md text-[13px] font-medium transition-all duration-100 w-full',
                         isActive
-                          ? 'bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#0F172A]'
+                          ? 'bg-[#F3EAFB] dark:bg-[#3B1F5C] shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#5F259F] dark:text-[#D8B9F5]'
                           : 'text-[#64748B] hover:bg-black/[0.04] hover:text-[#1E293B]',
                       )
                     }
@@ -161,7 +162,7 @@ export default function Sidebar({ onClose }: Props) {
                         <Icon
                           size={15}
                           strokeWidth={isActive ? 2.2 : 1.75}
-                          className={cn('shrink-0 transition-colors', isActive ? 'text-[#0F172A]' : 'text-[#94A3B8]')}
+                          className={cn('shrink-0 transition-colors', isActive ? 'text-[#5F259F] dark:text-[#D8B9F5]' : 'text-[#94A3B8]')}
                         />
                         <span className="flex-1 truncate">{label}</span>
                         {id === 'inbox' && inboxUnread > 0 && (
@@ -190,14 +191,14 @@ export default function Sidebar({ onClose }: Props) {
               cn(
                 'flex items-center gap-2 px-2 h-8 rounded-md text-[13px] font-medium transition-all duration-100',
                 isActive
-                  ? 'bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#0F172A]'
+                  ? 'bg-[#F3EAFB] dark:bg-[#3B1F5C] shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#5F259F] dark:text-[#D8B9F5]'
                   : 'text-[#64748B] hover:bg-black/[0.04] hover:text-[#1E293B]',
               )
             }
           >
             {({ isActive }) => (
               <>
-                <Mail size={15} strokeWidth={isActive ? 2.2 : 1.75} className={cn('shrink-0', isActive ? 'text-[#0F172A]' : 'text-[#94A3B8]')} />
+                <Mail size={15} strokeWidth={isActive ? 2.2 : 1.75} className={cn('shrink-0', isActive ? 'text-[#5F259F] dark:text-[#D8B9F5]' : 'text-[#94A3B8]')} />
                 <span className="flex-1 truncate">Email Templates</span>
               </>
             )}
@@ -211,14 +212,14 @@ export default function Sidebar({ onClose }: Props) {
               cn(
                 'flex items-center gap-2 px-2 h-8 rounded-md text-[13px] font-medium transition-all duration-100',
                 isActive
-                  ? 'bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#0F172A]'
+                  ? 'bg-[#F3EAFB] dark:bg-[#3B1F5C] shadow-[0_1px_2px_0_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] text-[#5F259F] dark:text-[#D8B9F5]'
                   : 'text-[#64748B] hover:bg-black/[0.04] hover:text-[#1E293B]',
               )
             }
           >
             {({ isActive }) => (
               <>
-                <Settings size={15} strokeWidth={isActive ? 2.2 : 1.75} className={cn('shrink-0', isActive ? 'text-[#0F172A]' : 'text-[#94A3B8]')} />
+                <Settings size={15} strokeWidth={isActive ? 2.2 : 1.75} className={cn('shrink-0', isActive ? 'text-[#5F259F] dark:text-[#D8B9F5]' : 'text-[#94A3B8]')} />
                 <span className="flex-1 truncate">Settings</span>
               </>
             )}
@@ -226,16 +227,37 @@ export default function Sidebar({ onClose }: Props) {
         </nav>
 
         {/* User row */}
-        <button
-          onClick={handleSignOut}
-          className="flex items-center gap-2.5 px-2 py-1.5 w-full rounded-md text-left transition-all group hover:bg-black/[0.04]"
-        >
-          <div className="w-6 h-6 rounded-md bg-[#1E293B] flex items-center justify-center text-white text-[9.5px] font-bold shrink-0 leading-none">
-            {initials}
+        {confirmingSignOut ? (
+          <div className="flex items-center gap-2 px-2 py-1.5 w-full rounded-md">
+            <span className="flex-1 text-[12px] font-medium text-[#64748B]">Sign out?</span>
+            <button
+              onClick={() => setConfirmingSignOut(false)}
+              className="text-[11.5px] font-semibold text-[#64748B] hover:text-[#344054] px-1.5 py-0.5 rounded transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="text-[11.5px] font-semibold text-[#D92D20] hover:text-[#B42318] px-1.5 py-0.5 rounded transition-colors"
+            >
+              Sign out
+            </button>
           </div>
-          <span className="flex-1 text-[12.5px] font-medium text-[#475569] truncate">{firstName}</span>
-          <LogOut size={12} className="text-[#C1C9D4] group-hover:text-[#64748B] transition-colors shrink-0" />
-        </button>
+        ) : (
+          <div className="flex items-center gap-2.5 px-2 py-1.5 w-full rounded-md transition-all group hover:bg-black/[0.04]">
+            <div className="w-6 h-6 rounded-md bg-[#1E293B] flex items-center justify-center text-white text-[9.5px] font-bold shrink-0 leading-none">
+              {initials}
+            </div>
+            <span className="flex-1 text-[12.5px] font-medium text-[#475569] truncate text-left">{firstName}</span>
+            <button
+              onClick={() => setConfirmingSignOut(true)}
+              aria-label="Sign out"
+              className="text-[#C1C9D4] group-hover:text-[#64748B] transition-colors shrink-0 p-0.5 -m-0.5"
+            >
+              <LogOut size={12} />
+            </button>
+          </div>
+        )}
       </div>
 
       {createPortal(

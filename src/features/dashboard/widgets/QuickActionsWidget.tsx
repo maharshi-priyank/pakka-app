@@ -5,13 +5,13 @@ import { cn } from '@/lib/utils'
 import ScheduleCallModal from '@/features/meetings/components/ScheduleCallModal'
 
 const NAV_ACTIONS = [
-  { icon: UserPlus,       label: 'New Contact',  href: '/contacts',       bg: 'bg-[#EEF2FF] dark:bg-[#1E2040]',      iconColor: 'text-[#6366F1]',                    hoverBg: 'hover:bg-[#E0E7FF] dark:hover:bg-[#252850]'    },
-  { icon: Target,         label: 'Add Lead',     href: '/leads',          bg: 'bg-[#F5F3FF] dark:bg-violet-950/30',  iconColor: 'text-[#7C3AED] dark:text-violet-400', hoverBg: 'hover:bg-[#EDE9FE] dark:hover:bg-violet-950/50' },
-  { icon: FileText,       label: 'New Proposal', href: '/proposals/new',  bg: 'bg-[#FFFAEB] dark:bg-amber-950/30',    iconColor: 'text-[#B54708] dark:text-amber-400', hoverBg: 'hover:bg-[#FEF3C7] dark:hover:bg-amber-950/50' },
-  { icon: Receipt,        label: 'New Invoice',  href: '/invoices/new',   bg: 'bg-[#ECFDF3] dark:bg-emerald-950/40', iconColor: 'text-[#027A48] dark:text-[#34D399]', hoverBg: 'hover:bg-[#D1FAE5] dark:hover:bg-emerald-950/60' },
-  { icon: FileSignature,  label: 'New Contract', href: '/contracts/new',  bg: 'bg-[#FEF3F2] dark:bg-red-950/40',     iconColor: 'text-[#D92D20] dark:text-red-400',   hoverBg: 'hover:bg-[#FEE2E2] dark:hover:bg-red-950/60'   },
-  { icon: FolderKanban,   label: 'New Project',  href: '/projects',       bg: 'bg-[#EFF6FF] dark:bg-blue-950/40',    iconColor: 'text-[#2563EB] dark:text-[#60A5FA]', hoverBg: 'hover:bg-[#DBEAFE] dark:hover:bg-blue-950/60'  },
-  { icon: Clock,          label: 'Log Time',     href: '/time',           bg: 'bg-[#FFF1F2] dark:bg-rose-950/30',    iconColor: 'text-[#E11D48] dark:text-rose-400',  hoverBg: 'hover:bg-[#FFE4E6] dark:hover:bg-rose-950/50'  },
+  { icon: UserPlus,       label: 'New Contact',  href: '/contacts',       bg: 'bg-[#F3EAFB] dark:bg-[#3B1F5C]',      iconColor: 'text-[#5F259F] dark:text-[#D8B9F5]', hoverBg: 'hover:bg-[#EAD6F7] dark:hover:bg-[#3B1F5C]/70' },
+  { icon: Target,         label: 'Add Lead',     href: '/leads',          bg: 'bg-[#FDF2F8] dark:bg-pink-950/30',    iconColor: 'text-[#DB2777] dark:text-pink-400',   hoverBg: 'hover:bg-[#FCE7F3] dark:hover:bg-pink-950/50'  },
+  { icon: FileText,       label: 'New Proposal', href: '/proposals/new',  bg: 'bg-[#FFFAEB] dark:bg-amber-950/30',   iconColor: 'text-[#B54708] dark:text-amber-400',  hoverBg: 'hover:bg-[#FEF3C7] dark:hover:bg-amber-950/50' },
+  { icon: Receipt,        label: 'New Invoice',  href: '/invoices/new',   bg: 'bg-[#ECFDF3] dark:bg-emerald-950/40', iconColor: 'text-[#027A48] dark:text-[#34D399]',  hoverBg: 'hover:bg-[#D1FAE5] dark:hover:bg-emerald-950/60' },
+  { icon: FileSignature,  label: 'New Contract', href: '/contracts/new',  bg: 'bg-[#FEF3F2] dark:bg-red-950/40',     iconColor: 'text-[#D92D20] dark:text-red-400',    hoverBg: 'hover:bg-[#FEE2E2] dark:hover:bg-red-950/60'   },
+  { icon: FolderKanban,   label: 'New Project',  href: '/projects',       bg: 'bg-[#EFF6FF] dark:bg-blue-950/40',    iconColor: 'text-[#2563EB] dark:text-[#60A5FA]',  hoverBg: 'hover:bg-[#DBEAFE] dark:hover:bg-blue-950/60'  },
+  { icon: Clock,          label: 'Log Time',     href: '/time',           bg: 'bg-[#FFF1F2] dark:bg-rose-950/30',    iconColor: 'text-[#E11D48] dark:text-rose-400',   hoverBg: 'hover:bg-[#FFE4E6] dark:hover:bg-rose-950/50'  },
 ]
 
 export default function QuickActionsWidget() {
@@ -41,10 +41,10 @@ export default function QuickActionsWidget() {
         ))}
         <button
           onClick={() => setScheduleOpen(true)}
-          className={cn('flex flex-col items-center gap-2.5 py-4 rounded-xl transition-all group bg-[#F0FDF4] dark:bg-emerald-950/30 hover:bg-[#DCFCE7] dark:hover:bg-emerald-950/50')}
+          className="flex flex-col items-center gap-2.5 py-4 rounded-xl transition-all group bg-[#ECFEFF] dark:bg-cyan-950/30 hover:bg-[#CFFAFE] dark:hover:bg-cyan-950/50"
         >
           <div className="w-10 h-10 rounded-xl bg-white/70 dark:bg-[#21222D] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-            <Video size={18} className="text-[#16A34A] dark:text-[#34D399]" strokeWidth={2} />
+            <Video size={18} className="text-[#0284C7] dark:text-cyan-400" strokeWidth={2} />
           </div>
           <span className="text-[12px] font-semibold text-[#344054] dark:text-[#C2C8D8]">Schedule Call</span>
         </button>

@@ -25,8 +25,8 @@ export default function RevenueChartWidget() {
           <h2 className="text-[14px] font-bold text-[#101828] dark:text-[#ECEEF3]">Revenue Trend</h2>
           <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-0.5">Last 6 months · paid invoices only</p>
         </div>
-        <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] dark:bg-[#1E2040] flex items-center justify-center">
-          <TrendingUp size={14} className="text-[#6366F1]" strokeWidth={2} />
+        <div className="w-8 h-8 rounded-xl bg-[#F3EAFB] dark:bg-[#3B1F5C] flex items-center justify-center">
+          <TrendingUp size={14} className="text-[#5F259F] dark:text-[#D8B9F5]" strokeWidth={2} />
         </div>
       </div>
       <div className="px-4 py-5">
@@ -58,7 +58,7 @@ export default function RevenueChartWidget() {
               />
               <Bar dataKey="revenue" radius={[5, 5, 0, 0]}>
                 {(chartData ?? []).map((_, index) => (
-                  <Cell key={index} fill={index === currentMonthIndex ? '#6366F1' : isDark ? '#2D3367' : '#C7D2FE'} />
+                  <Cell key={index} fill={index === currentMonthIndex ? '#5F259F' : isDark ? '#3B1F5C' : '#DDBEF0'} />
                 ))}
               </Bar>
             </BarChart>

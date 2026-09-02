@@ -28,13 +28,13 @@
   --text-2:       #1E293B;
   --text-3:       #52627A;
   --text-4:       #7A8BA5;
-  --accent:       #2563EB;
-  --accent-hover: #1D4ED8;
-  --accent-bg:    #EFF6FF;
-  --accent-text:  #1D4ED8;
-  --btn-bg:       #0F172A;
-  --btn-hover:    #1E293B;
-  --btn-shadow:   rgba(15,23,42,0.15);
+  --accent:       #5F259F;
+  --accent-hover: #4C1D7A;
+  --accent-bg:    #F3EAFB;
+  --accent-text:  #5F259F;
+  --btn-bg:       #5F259F;
+  --btn-hover:    #4C1D7A;
+  --btn-shadow:   rgba(95,37,159,0.25);
   --scrollbar:    #E2E8F0;
   --scrollbar-h:  #CBD5E1;
 }
@@ -50,13 +50,13 @@
   --text-2:       #C2C8D8;
   --text-3:       #8B92A8;
   --text-4:       #545C74;
-  --accent:       #3B82F6;
-  --accent-hover: #2563EB;
-  --accent-bg:    #1E3A5F;
-  --accent-text:  #93C5FD;
-  --btn-bg:       #2563EB;
-  --btn-hover:    #1D4ED8;
-  --btn-shadow:   rgba(37,99,235,0.3);
+  --accent:       #B27FE0;
+  --accent-hover: #C99FEA;
+  --accent-bg:    #3B1F5C;
+  --accent-text:  #D8B9F5;
+  --btn-bg:       #8B3FD1;
+  --btn-hover:    #9D5CE0;
+  --btn-shadow:   rgba(139,63,209,0.35);
   --scrollbar:    #26283A;
   --scrollbar-h:  #333649;
 }
@@ -168,8 +168,8 @@
 
   .glass-input:focus {
     background: rgba(255, 255, 255, 0.80);
-    border-color: rgba(99, 102, 241, 0.4);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.10);
+    border-color: rgba(95, 37, 159, 0.4);
+    box-shadow: 0 0 0 3px rgba(95, 37, 159, 0.10);
     outline: none;
   }
 
@@ -180,7 +180,7 @@
 
   .dark .glass-input:focus {
     background: rgba(26, 27, 35, 0.75);
-    border-color: rgba(99, 102, 241, 0.5);
+    border-color: rgba(178, 127, 224, 0.5);
   }
 
   /* ─── Glass modal / drawer ───────────────────────────────────────────────── */
@@ -309,7 +309,7 @@
 
   .form-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 0 0 3px rgba(37,99,235,0.12);
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 0 0 3px rgba(95,37,159,0.12);
     background: var(--bg-surface);
   }
 
@@ -342,7 +342,7 @@
   }
   .btn-primary:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 4px rgba(99,102,241,0.2);
+    box-shadow: 0 0 0 4px rgba(95,37,159,0.2);
   }
   .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
 

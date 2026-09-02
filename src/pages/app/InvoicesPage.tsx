@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Plus, FileText, Search, X, LayoutGrid, List, LayoutTemplate, ChevronDown } from 'lucide-react'
 import { usePermissionRedirect } from '@/hooks/usePermissionRedirect'
 import { Permission } from '@/types/permissions'
@@ -54,8 +54,10 @@ function getStoredView(): ViewMode {
 export default function InvoicesPage() {
   usePermissionRedirect(Permission.VIEW_INVOICES)
   const navigate = useNavigate()
+  const location = useLocation()
+  const navStatusFilter = (location.state as { statusFilter?: InvoiceStatus } | null)?.statusFilter
 
-  const [statusFilter,  setStatusFilter]  = useState<InvoiceStatus | 'ALL'>('ALL')
+  const [statusFilter,  setStatusFilter]  = useState<InvoiceStatus | 'ALL'>(navStatusFilter ?? 'ALL')
   const [search,        setSearch]        = useState('')
   const [view,          setView]          = useState<ViewMode>(getStoredView)
   const [sortBy,        setSortBy]        = useState<SortField>('createdAt')

@@ -56,7 +56,11 @@ import QuickActionsWidget   from '@/features/dashboard/widgets/QuickActionsWidge
 import FollowUpsWidget      from '@/features/dashboard/widgets/FollowUpsWidget'
 import ActivityWidget       from '@/features/dashboard/widgets/ActivityWidget'
 import UpcomingCallsWidget  from '@/features/meetings/components/UpcomingCallsWidget'
+import TodayWidget          from '@/features/dashboard/widgets/TodayWidget'
+import UnbilledWidget       from '@/features/dashboard/widgets/UnbilledWidget'
+import ProjectBudgetWidget  from '@/features/dashboard/widgets/ProjectBudgetWidget'
 import PrioritiesStrip      from '@/features/dashboard/components/PrioritiesStrip'
+import HeroMetric           from '@/features/dashboard/components/HeroMetric'
 import OnboardingChecklist  from '@/features/dashboard/components/OnboardingChecklist'
 import DashboardSkeleton, { DashboardHeaderSkeleton } from '@/features/dashboard/components/DashboardSkeleton'
 import { useCelebrateWins } from '@/features/dashboard/hooks/useCelebrateWins'
@@ -79,6 +83,9 @@ function WidgetContent({ id }: { id: string }) {
     case 'upcoming_calls': return <UpcomingCallsWidget />
     case 'revenue_chart':  return <RevenueChartWidget />
     case 'activity':       return <ActivityWidget />
+    case 'today':          return <TodayWidget />
+    case 'unbilled':       return <UnbilledWidget />
+    case 'project_budgets':return <ProjectBudgetWidget />
     default:               return null
   }
 }
@@ -179,7 +186,7 @@ function SortableWidget({
             {canResize && (
               <button
                 onClick={handleResize}
-                className="absolute bottom-2 right-2 z-20 w-7 h-7 rounded-lg bg-white/90 dark:bg-[#1A1B23]/90 shadow-sm border border-[#EAECF0] dark:border-[#3D4258] flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:text-[#6366F1] hover:bg-[#EEF2FF] dark:hover:bg-[#1E2040] hover:border-[#C7D2FE] transition-colors"
+                className="absolute bottom-2 right-2 z-20 w-7 h-7 rounded-lg bg-white/90 dark:bg-[#1A1B23]/90 shadow-sm border border-[#EAECF0] dark:border-[#3D4258] flex items-center justify-center text-[#667085] dark:text-[#8B92A8] hover:text-[#5F259F] dark:hover:text-[#D8B9F5] hover:bg-[#F3EAFB] dark:hover:bg-[#3B1F5C] hover:border-[#DDBEF0] transition-colors"
                 title={isExpanded ? 'Shrink widget' : 'Expand widget'}
               >
                 {isExpanded
@@ -234,8 +241,8 @@ function AddWidgetPanel({
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {hiddenMeta.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-12 h-12 rounded-2xl bg-[#ECFDF3] flex items-center justify-center mb-3">
-                <Check size={20} className="text-[#027A48]" strokeWidth={2.5} />
+              <div className="w-12 h-12 rounded-2xl bg-[#ECFDF3] dark:bg-emerald-950/40 flex items-center justify-center mb-3">
+                <Check size={20} className="text-[#027A48] dark:text-[#34D399]" strokeWidth={2.5} />
               </div>
               <p className="text-[14px] font-semibold text-[#344054] dark:text-[#C2C8D8]">All widgets are visible</p>
               <p className="text-[12px] text-[#98A2B3] dark:text-[#545C74] mt-1">Remove a widget first to add it back here</p>
@@ -244,10 +251,10 @@ function AddWidgetPanel({
             <button
               key={widget.id}
               onClick={() => onAdd(widget.id)}
-              className="w-full flex items-start gap-3 p-3.5 rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#1A1B23] hover:border-[#C7D2FE] dark:hover:border-[#6366F1]/40 hover:bg-[#F5F3FF] dark:hover:bg-[#1E2040] transition-all text-left group"
+              className="w-full flex items-start gap-3 p-3.5 rounded-xl border border-[#EAECF0] dark:border-[#26283A] bg-white dark:bg-[#1A1B23] hover:border-[#DDBEF0] dark:hover:border-[#B27FE0]/40 hover:bg-[#F3EAFB] dark:hover:bg-[#3B1F5C]/60 transition-all text-left group"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-[#6366F1] transition-colors">
-                <Plus size={14} className="text-[#6366F1] group-hover:text-white transition-colors" strokeWidth={2.5} />
+              <div className="w-8 h-8 rounded-lg bg-[#F3EAFB] dark:bg-[#3B1F5C] flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-[#5F259F] transition-colors">
+                <Plus size={14} className="text-[#5F259F] dark:text-[#D8B9F5] group-hover:text-white transition-colors" strokeWidth={2.5} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-semibold text-[#344054] dark:text-[#C2C8D8]">{widget.name}</p>
@@ -397,7 +404,7 @@ export default function DashboardPage() {
             {editMode && hidden.length > 0 && (
               <button
                 onClick={() => setShowAddPanel(true)}
-                className="flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold text-[#6366F1] bg-[#EEF2FF] border border-[#C7D2FE] rounded-lg hover:bg-[#E0E7FF] transition-colors"
+                className="flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold text-[#5F259F] dark:text-[#D8B9F5] bg-[#F3EAFB] dark:bg-[#3B1F5C] border border-[#DDBEF0] dark:border-[#5F259F]/40 rounded-lg hover:bg-[#EAD6F7] dark:hover:bg-[#3B1F5C]/80 transition-colors"
               >
                 <Plus size={13} strokeWidth={2.5} />
                 Add
@@ -408,7 +415,7 @@ export default function DashboardPage() {
               className={cn(
                 'flex items-center gap-1.5 h-8 px-3 text-[12.5px] font-semibold rounded-lg transition-colors border',
                 editMode
-                  ? 'text-white bg-[#0D1117] dark:bg-[#6366F1] border-[#0D1117] dark:border-[#6366F1] hover:bg-[#1a1d2e]'
+                  ? 'text-white bg-[#5F259F] dark:bg-[#8B3FD1] border-[#5F259F] dark:border-[#8B3FD1] hover:bg-[#4C1D7A] dark:hover:bg-[#9D5CE0]'
                   : 'text-[#667085] dark:text-[#8B92A8] bg-white dark:bg-[#21222D] border-[#EAECF0] dark:border-[#3D4258] hover:bg-[#F4F5F8] shadow-sm',
               )}
             >
@@ -426,11 +433,14 @@ export default function DashboardPage() {
         <DashboardSkeleton visibleOrder={visibleOrder} sizes={sizes} />
       ) : (
       <>
+      {/* ── Hero: the one number that answers "am I okay?" ── */}
+      <HeroMetric />
+
+      {/* ── Needs attention: what requires a decision right now ── */}
+      <PrioritiesStrip />
+
       {/* ── Getting started checklist — hidden once the workspace has real activity ── */}
       <OnboardingChecklist />
-
-      {/* ── Priorities strip ── */}
-      <PrioritiesStrip />
 
       {/* ── Edit mode hint ── */}
       {editMode && (
@@ -444,6 +454,9 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* ── Everything else ── */}
+      <p className="text-[11px] font-bold text-[#7A8BA5] uppercase tracking-[0.06em] px-0.5">Overview</p>
+
       {/* ── Widget grid ── */}
       <DndContext
         sensors={sensors}
@@ -452,7 +465,7 @@ export default function DashboardPage() {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={visibleOrder} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 grid-flow-row-dense">
             {visibleOrder.map(id => {
               const meta = getWidgetMeta(id)
               if (!meta) return null

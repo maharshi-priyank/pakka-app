@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, FileText, CalendarDays, ArrowRight, MessageSquare } from 'lucide-react'
+import { AlertCircle, FileText, FileSignature, CalendarDays, ArrowRight, MessageSquare } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { useDashboardStats } from '../hooks/useDashboard'
 import { useUpcomingMeetings } from '@/features/meetings/hooks/useMeetings'
+import { useContracts } from '@/features/contracts/hooks/useContracts'
 
 interface ActionCardProps {
   icon:        React.ElementType
@@ -43,6 +44,7 @@ export default function PrioritiesStrip() {
   const navigate = useNavigate()
   const { data: stats }    = useDashboardStats()
   const { data: meetings = [] } = useUpcomingMeetings()
+  const { data: sentContracts } = useContracts({ status: 'SENT', limit: 50 })
 
   const today = new Date().toDateString()
   const todayMeetings = meetings.filter(m => new Date(m.scheduledAt).toDateString() === today)
@@ -51,8 +53,9 @@ export default function PrioritiesStrip() {
   const hasProposals = (stats?.openProposals ?? 0) > 0
   const hasMeetings  = todayMeetings.length > 0
   const hasUnread    = (stats?.unreadClientMessages ?? 0) > 0
+  const hasContracts = (sentContracts?.total ?? 0) > 0
 
-  if (!hasOverdue && !hasProposals && !hasMeetings && !hasUnread) return null
+  if (!hasOverdue && !hasProposals && !hasMeetings && !hasUnread && !hasContracts) return null
 
   return (
     <div className="flex flex-wrap gap-3">
@@ -90,6 +93,18 @@ export default function PrioritiesStrip() {
           sub="Sent or viewed by client"
           ctaLabel="Follow up"
           onClick={() => navigate('/proposals')}
+        />
+      )}
+      {hasContracts && (
+        <ActionCard
+          icon={FileSignature}
+          iconBg="bg-[#F3EAFB] dark:bg-[#3B1F5C]"
+          iconColor="text-[#5F259F] dark:text-[#D8B9F5]"
+          borderColor="border-[#DDBEF0] dark:border-[#5F259F]/40"
+          title={`${sentContracts!.total} contract${sentContracts!.total !== 1 ? 's' : ''} awaiting signature`}
+          sub="Sent to client, not yet signed"
+          ctaLabel="Follow up"
+          onClick={() => navigate('/contracts')}
         />
       )}
       {hasMeetings && (
